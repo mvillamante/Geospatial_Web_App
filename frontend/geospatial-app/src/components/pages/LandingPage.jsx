@@ -1,14 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaUser, FaChartBar, FaUniversity } from "react-icons/fa";
+import AuthModal from "./AuthModal";
 import "../styles/landingpage.css";
 
 const LandingPage = () => {
+  const [modalType, setModalType] = useState(null);
+
+  const closeModal = () => setModalType(null);
+  const switchModal = (type) => setModalType(type);
+
   return (
-    <div className="landing-page">
-      <div className="bg-animation">
-        <div className="orb orb1"></div>
-        <div className="orb orb2"></div>
-      </div>
+    <div id="home" className="landing-page">
+      <div className={`landing-page ${modalType ? "modal-open" : ""}`}></div>
+      
+      {modalType && (
+        <AuthModal type={modalType} onClose={closeModal} switchModal={switchModal} />
+      )}
+
       {/* navigation */}
       <div className="content">
         <nav className="nav">
@@ -23,12 +31,12 @@ const LandingPage = () => {
             <a href="#contact">Contact</a>
           </div>
           <div className="nav-buttons">
-            <button className="btn btn-outline" onClick={() => alert("Login functionality")}>Login</button>
-            <button className="btn btn-outline" onClick={() => alert("Sign up functionality")}>Sign Up</button>
+            <button className="btn btn-outline" onClick={() => setModalType("login")}>Login</button>
+            <button className="btn btn-outline" onClick={() => setModalType("signup")}>Sign Up</button>
           </div>
         </nav>
-      
-      {/* hero */}
+
+        {/* hero */}
         <section className="hero">
           <h1>Mapping Community <span className="highlight-red">Resilience</span><br />for a <span className="highlight-blue">Safer</span> Future</h1>
           <p>
@@ -44,8 +52,8 @@ const LandingPage = () => {
               <div class="dashboard-title">Live Hazard Map</div>
             </div>
           </div>
-      
-      {/* about */}
+
+          {/* about */}
         </section>
         <section id="about">
           <div className="section-header">
@@ -70,7 +78,7 @@ const LandingPage = () => {
           </div>
         </section>
 
-      {/* how it works */}
+        {/* how it works */}
         <section id="howitworks"
           style={{
             background: "linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(239, 68, 68, 0.03))",
@@ -82,46 +90,46 @@ const LandingPage = () => {
             </h2>
             <p>See how each community member contributes to safety and preparedness</p>
           </div>
-            <div className="features-grid">
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <FaUser size={28} />
-                </div>
-                <h3>As a Citizen</h3>
-                <p>
-                  Submit hazard reports with photos and GPS location directly from your phone. Receive
-                  real-time alerts about dangers in your area, locate nearby evacuation centers, and
-                  access safety checklists. Track the status of your reports and stay informed about
-                  community safety.
-                </p>
+          <div className="features-grid">
+            <div className="feature-card">
+              <div className="feature-icon">
+                <FaUser size={28} />
               </div>
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <FaChartBar size={28} />
-                </div>
-                <h3>As a Researcher/Analyst</h3>
-                <p>
-                  Access comprehensive analytics dashboards with exploratory data analysis tools.
-                  Monitor predictive model performance, download datasets for research, and view
-                  time-series predictions. Analyze trends, patterns, and correlations to improve
-                  disaster response strategies.
-                </p>
-              </div>
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <FaUniversity size={28} />
-                </div>
-                <h3>As an LGU/Decision Maker</h3>
-                <p>
-                  Monitor real-time hazard conditions through interactive maps, oversee the validation of community reports, and maintain evacuation center data. With built-in analytics tools, LGU administrators can make informed decisions that enhance public safety and strengthen coordinated disaster response efforts.
-                </p>
-              </div>
+              <h3>As a Citizen</h3>
+              <p>
+                Submit hazard reports with photos and GPS location directly from your phone. Receive
+                real-time alerts about dangers in your area, locate nearby evacuation centers, and
+                access safety checklists. Track the status of your reports and stay informed about
+                community safety.
+              </p>
             </div>
+            <div className="feature-card">
+              <div className="feature-icon">
+                <FaChartBar size={28} />
+              </div>
+              <h3>As a Researcher/Analyst</h3>
+              <p>
+                Access comprehensive analytics dashboards with exploratory data analysis tools.
+                Monitor predictive model performance, download datasets for research, and view
+                time-series predictions. Analyze trends, patterns, and correlations to improve
+                disaster response strategies.
+              </p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon">
+                <FaUniversity size={28} />
+              </div>
+              <h3>As an LGU/Decision Maker</h3>
+              <p>
+                Monitor real-time hazard conditions through interactive maps, oversee the validation of community reports, and maintain evacuation center data. With built-in analytics tools, LGU administrators can make informed decisions that enhance public safety and strengthen coordinated disaster response efforts.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* Footer */}
-        <footer class="footer">
-          <div class="footer-bottom">
+        <footer className="footer">
+          <div className="footer-bottom">
             © Copyright 2024. All Rights Reserved by HazSpot
           </div>
         </footer>

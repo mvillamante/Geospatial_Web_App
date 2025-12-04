@@ -111,11 +111,19 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                             <div className="form-row">
                                 <div className="form-group">
                                     <label>Phone Number</label>
-                                    <input type="text" placeholder="Enter phone number" />
+                                    <input 
+                                        type="text" 
+                                        value={signupPhone}
+                                        onChange={(e) => setSignupPhone(e.target.value)}
+                                        placeholder="Enter phone number" />
                                 </div>
                                 <div className="form-group">
                                     <label>Email Address</label>
-                                    <input type="email" placeholder="Enter email" />
+                                    <input 
+                                        type="email" 
+                                        value={signupEmail}
+                                        onChange={(e) => setSignupEmail(e.target.value)}
+                                        placeholder="Enter email" />
                                 </div>
                             </div>
 

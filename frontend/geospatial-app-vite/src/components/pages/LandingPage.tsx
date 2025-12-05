@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { FaUser, FaChartBar, FaUniversity } from "react-icons/fa";
-import AuthModal from "./AuthModal";
 import "../styles/landingpage.css";
-import LeafletMap from "./leafletMap";
+import { AuthModal, LeafletMap } from ".";
+
 
 const LandingPage = () => {
   const [modalType, setModalType] = useState(null);
@@ -52,7 +52,7 @@ const LandingPage = () => {
             <div className="dashboard-header">
               <div class="dashboard-title">Live Hazard Map</div>
             </div>
-            
+
             {/* Map container */}
             <div className="dashboard-map-container"><LeafletMap /></div>
           </div>

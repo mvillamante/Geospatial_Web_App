@@ -1,0 +1,31 @@
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.main-layout-header {
+  height: 64px; /* same as Tailwind h-16 */
+  background-color: #e5e7eb;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.main-layout-body {
+  display: flex;
+  flex: 1;
+}
+
+.main-layout-sidebar {
+  width: 15%;
+  background-color: #f3f4f6;
+  padding: 16px;
+}
+
+.main-layout-content {
+  width: 85%;
+  padding: 24px;
+  overflow-y: auto;
+}

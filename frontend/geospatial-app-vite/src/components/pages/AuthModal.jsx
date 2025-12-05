@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { AiOutlineClose } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
 import "../styles/auth.css";
 
 const AuthModal = ({ type = "login", onClose, switchModal }) => {
+    const navigate = useNavigate();
     const [loginPhone, setLoginPhone] = useState("");
     const [loginPassword, setLoginPassword] = useState("");
     const [signupFirstName, setSignupFirstName] = useState("");
@@ -25,6 +27,9 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
         if (!loginPhone || !loginPassword) return alert("Please fill in all fields");
         alert("Login successful!");
         onClose();
+
+        {/* Redirect to Dashboard after Successful Login */}
+        navigate("/mainlayout");
     }
 
     const handleSignup = () => {

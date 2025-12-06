@@ -6,25 +6,18 @@ import "../styles/mainlayout.css";
 const MainLayout: React.FC = () => {
   return (
     <div className="main-layout">
-      {/* Header */}
-      <header className="main-layout-header">
-        Header Area
-      </header>
+      {/* Navigation / Header column */}
+      <div className="main-layout-sidebar">
+        <NavigationMenu />
+      </div>
 
-      {/* Body */}
-      <div className="main-layout-body">
-        {/* Navigation Sidebar */}
-        <aside className="main-layout-sidebar">
-          <NavigationMenu />
-        </aside>
-
-        {/* Main Dashboard Content */}
-        <main className="main-layout-content">
-          <DashboardPage />
-        </main>
+      {/* Map */}
+      <div className="main-layout-map">
+        <DashboardPage />
       </div>
     </div>
   );
 };
 
 export default MainLayout;
+

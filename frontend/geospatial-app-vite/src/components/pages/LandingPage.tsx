@@ -50,11 +50,11 @@ const LandingPage = () => {
 
           <div className="dashboard-preview">
             <div className="dashboard-header">
-              <div class="dashboard-title">Live Hazard Map</div>
+              <div className="dashboard-title">Live Hazard Map</div>
             </div>
 
             {/* Map container */}
-            <div className="dashboard-map-container"><LeafletMap /></div>
+            <div className="dashboard-map-container"><LeafletMap height="600px" /></div>
           </div>
 
           {/* about */}

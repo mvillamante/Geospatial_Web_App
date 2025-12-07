@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaUser, FaChartBar, FaUniversity } from "react-icons/fa";
-import "../styles/landingpage.css";
-import { AuthModal, LeafletMap } from ".";
+import "./LandingPage.css";
+import AuthModal from "../ui/AuthModal";
+import LeafletMap from "../ui/LeafletMap";
 
-
-const LandingPage = () => {
+const LandingPage: React.FC = () => {
+  const navigate = useNavigate();
   const [modalType, setModalType] = useState(null);
 
   const closeModal = () => setModalType(null);
@@ -45,7 +47,7 @@ const LandingPage = () => {
           </p>
           <div className="cta-group">
             <button className="btn btn-primary" onClick={() => alert("Get started functionality")}>Get Started</button>
-            <button className="btn btn-secondary" onClick={() => alert("Explore the Map")}>Explore the Map</button>
+            <button className="btn btn-secondary" onClick={() => navigate("/main/guest/alerts-map", { replace: true })}>Explore the Map</button>
           </div>
 
           <div className="dashboard-preview">

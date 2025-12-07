@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
-import "../styles/auth.css";
+import "./AuthModal.css";
 
 const AuthModal = ({ type = "login", onClose, switchModal }) => {
+    const userRole = "Citizen"; // !!! manual user role for testing muna
+
     const navigate = useNavigate();
     const [loginPhone, setLoginPhone] = useState("");
     const [loginPassword, setLoginPassword] = useState("");
@@ -28,8 +30,20 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
         alert("Login successful!");
         onClose();
 
-        {/* Redirect to Dashboard after Successful Login */}
-        navigate("/mainlayout");
+        {/* Redirect to Main Layout after Successful Login */}
+        switch(userRole) {
+            case "Admin":
+                navigate("/main/admin/dashboard", { replace: true });
+                break;
+            case "Officer":
+                navigate("/main/officer/dashboard-map", { replace: true });
+                break;
+            case "Citizen":
+                navigate("/main/citizen/alerts-map", { replace: true });
+                break;
+            default:
+                navigate("/main/guest/alerts-map", { replace: true });
+    }
     }
 
     const handleSignup = () => {

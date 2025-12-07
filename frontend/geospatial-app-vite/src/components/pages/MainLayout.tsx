@@ -1,7 +1,8 @@
 // Main Layout for all Users (navigations, tabs, map...etc)
 import React from "react";
-import { DashboardPage, NavigationMenu } from ".";
-import "../styles/mainlayout.css";
+import { Outlet } from 'react-router-dom';
+import { NavigationMenu } from "..";
+import "./MainLayout.css";
 
 const MainLayout: React.FC = () => {
   return (
@@ -11,10 +12,8 @@ const MainLayout: React.FC = () => {
         <NavigationMenu />
       </div>
 
-      {/* Map */}
-      <div className="main-layout-map">
-        <DashboardPage />
-      </div>
+      {/* Main */}
+      <Outlet />
     </div>
   );
 };

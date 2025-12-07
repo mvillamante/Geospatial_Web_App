@@ -1,3 +1,9 @@
+/* Map column */
+.main-layout-map {
+  flex: 1;
+  background-color: #e5e7eb;
+}
+
 .dashboard-container {
     display: flex;
     height: 100%;

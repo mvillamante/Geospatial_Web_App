@@ -13,9 +13,3 @@
   flex-direction: column;
   gap: 16px;
 }
-
-/* Map column */
-.main-layout-map {
-  flex: 1;
-  background-color: #e5e7eb;
-}

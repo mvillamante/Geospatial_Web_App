@@ -1,14 +1,15 @@
-// Main Dashboard shareable by all users after login
+// Current Alerts and Map Page (Citizen & Guest)
 import React, { useState } from "react";
-import "../styles/dashboardpage.css";
-import { LeafletMap } from ".";
+import "./AlertsMapPage.css";
+import LeafletMap from "../../ui/LeafletMap";
+
 
 interface Alert {
   id: number;
   message: string;
 }
 
-const DashboardPage: React.FC = () => {
+const AlertsMapPage: React.FC = () => {
     const alerts: Alert[] = [
         { id: 1, message: "Flash flood reported near residential area" },
         { id: 2, message: "Road blockage due to landslide" },
@@ -18,7 +19,7 @@ const DashboardPage: React.FC = () => {
     const [mapLayer, setMapLayer] = useState("default");
 
   return (
-    <>
+    <div className="main-layout-map">
       <div className="dashboard-container">
         {/* Alerts Panel */}
         <aside className="dashboard-alerts">
@@ -54,8 +55,8 @@ const DashboardPage: React.FC = () => {
             </ul>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
-export default DashboardPage;
+export default AlertsMapPage;

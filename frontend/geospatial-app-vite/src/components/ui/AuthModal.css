@@ -10,6 +10,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 1rem;
 }
 
 .modal.active {
@@ -58,8 +59,8 @@
 
 .modal-close {
     position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
+    top: 1.25rem;
+    right: 1.25rem;
     background: transparent;
     border: none;
     font-size: 1.5rem;
@@ -96,6 +97,12 @@
     font-size: 0.95rem;
 }
 
+.modal-form .form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
 .modal-form .form-group {
     margin-bottom: 1rem;
 }
@@ -119,8 +126,7 @@
     transition: all 0.3s;
 }
 
-.modal-form input:focus,
-.modal-form select:focus {
+.modal-form input:focus {
     outline: none;
     border-color: #3b82f6;
     background: white;
@@ -147,30 +153,6 @@
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
-.modal-divider {
-    text-align: center;
-    margin: 1.5rem 0;
-    position: relative;
-}
-
-.modal-divider::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: #e2e8f0;
-}
-
-.modal-divider span {
-    background: white;
-    padding: 0 1rem;
-    color: #94a3b8;
-    font-size: 0.85rem;
-    position: relative;
-}
-
 .modal-footer {
     text-align: center;
     margin-top: 1.5rem;
@@ -178,17 +160,57 @@
     font-size: 0.9rem;
 }
 
-.modal-footer a {
-    color: #64748b;
-    text-decoration: none;
-    transition: color 0.3s;
-}
-
 .modal-footer span {
     color: #2563eb;
     font-weight: 600;
+    cursor: pointer;
 }
 
 .modal-footer span:hover {
     text-decoration: underline;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    } to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        padding: 1.75rem;
+        border-radius: 15px;
+    }
+
+    .modal-content.modal-signup {
+        padding: 1.75rem;
+    }
+    .modal-header h2 {
+        font-size: 1.5rem;
+    }
+    .modal-form .form-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        max-width: 90%;
+        padding: 2rem;
+    }
+
+    .modal-content.modal-signup {
+        padding: 2rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .modal-content {
+        padding: 2rem 1.5rem;
+    }
 }

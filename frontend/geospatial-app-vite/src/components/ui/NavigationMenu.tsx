@@ -1,25 +1,26 @@
 // NavigationMenu
 //import { useUserRole, ROLES } from '../UserRoleContext';
 import "./NavigationMenu.css";
-{/*import HazspotLogo from '../../assets/?.png';*/}
-import { NavLink } from 'react-router-dom';
+{/*import HazspotLogo from '../../assets/?.png';*/ }
+import { useNavigate, NavLink } from 'react-router-dom';
 import type { IconType } from "react-icons";
-import { FaUser } from "react-icons/fa";
-import { } from "react-icons/fa6";
+import { FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt } from "react-icons/fa";
+import { MdReport, MdPlace, MdLogout } from "react-icons/md";
 
 interface NavItem {
-  label: string;
-  path: string;
-  icon?: IconType;
+    label: string;
+    path: string;
+    icon?: IconType;
 }
 
 const NavigationMenu: React.FC = () => {
     //const { userRole } = userRole();
+    const navigate = useNavigate();
 
-    const userRole = "Citizen"; // !!! manual user role for testing muna
+    const userRole = "Officer"; // !!! manual user role for testing muna
     console.log("Navigation:", userRole);
 
-    const navigationList = {
+    const navigationList: Record<string, NavItem[]> = {
         // User Role: Admin
         Admin: [
             { label: 'Dashboard', path: 'admin/dashboard', icon: "" },
@@ -30,9 +31,9 @@ const NavigationMenu: React.FC = () => {
         ],
         // User Role: LGU Officer
         Officer: [
-            { label: 'Dashboard & Map', path: 'officer/dashboard-map', icon: "" },
-            { label: 'Report Verification', path: 'officer/report-verify', icon: "" },
-            { label: 'Evacuation Centers', path: 'officer/evac-center', icon: "" },
+            { label: 'Dashboard & Map', path: 'officer/dashboard-map', icon: FaMapMarkedAlt },
+            { label: 'Report Verification', path: 'officer/report-verify', icon: MdReport },
+            { label: 'Evacuation Centers', path: 'officer/evac-center', icon: MdPlace },
         ],
         // User Role: Researcher
         Researcher: [
@@ -40,45 +41,54 @@ const NavigationMenu: React.FC = () => {
         ],
         // User Role: Citizen
         Citizen: [
-            { label: 'Current Alerts & Map', path: 'citizen/alerts-map', icon: "" },
-            { label: 'Report Hazard', path: 'citizen/report-hazard', icon: "" },
-            { label: 'Evacuation Centers', path: 'citizen/evac-center', icon: "" },
-            { label: 'Preparedness Guide', path: 'citizen/prep-guide', icon: "" },
+            { label: 'Current Alerts & Map', path: 'citizen/alerts-map', icon: FaBullhorn },
+            { label: 'Report Hazard', path: 'citizen/report-hazard', icon: MdReport },
+            { label: 'Evacuation Centers', path: 'citizen/evac-center', icon: MdPlace },
+            { label: 'Preparedness Guide', path: 'citizen/prep-guide', icon: FaShieldAlt },
             { label: 'My Profile', path: 'citizen/profile', icon: FaUser },
         ],
         // User Role: Guest
         Guest: [
-            { label: 'Current Alerts & Map', path: 'guest/alerts-map', icon: "" },
-            { label: 'Evacuation Centers', path: 'guest/evac-center', icon: "" },
-            { label: 'Preparedness Guide', path: 'guest/prep-guide', icon: "" },
+            { label: 'Current Alerts & Map', path: 'guest/alerts-map', icon: FaBullhorn },
+            { label: 'Evacuation Centers', path: 'guest/evac-center', icon: MdPlace },
+            { label: 'Preparedness Guide', path: 'guest/prep-guide', icon: FaShieldAlt },
         ],
     };
 
     const navItems: NavItem[] = navigationList[userRole] || [];
 
+    const handleLogout = () => {
+        console.log("Logging out...");
+        navigate("/");
+    }
+
     return (
         <div className="navigation">
             <div className="header-logo">
                 {navItems.length > 0 && (
-                <a href={`/main/${navItems[0].path}`}>
-                    {/* Papalit nalang po ng Logo */}
-                    {/*<img src={HazspotLogo} alt="HazSpotLogo" />*/}
-                </a>
+                    <a href={`/main/${navItems[0].path}`}>
+                        {/* Papalit nalang po ng Logo */}
+                        {/*<img src={HazspotLogo} alt="HazSpotLogo" />*/}
+                    </a>
                 )}
             </div>
             <nav>
                 {navItems.map(({ label, path, icon: Icon }, index) => (
-                <div className="nav-item" key={index}>
-                    <NavLink
-                    to={`/main/${path}`}
-                    className={({ isActive }) => (isActive ? 'active' : '')}
-                    >
-                    {Icon && <Icon className="nav-icon" />}
-                    <span className="nav-label">{label}</span>
-                    </NavLink>
-                </div>
+                    <div className="nav-item" key={index}>
+                        <NavLink
+                            to={`/main/${path}`}
+                            className={({ isActive }) => (isActive ? 'active' : '')}
+                        >
+                            {Icon && <Icon className="nav-icon" />}
+                            <span className="nav-label">{label}</span>
+                        </NavLink>
+                    </div>
                 ))}
             </nav>
+
+            <button className="logout-btn" onClick={handleLogout}>
+                <MdLogout className="logout-icon" />
+            </button>
         </div>
     );
 

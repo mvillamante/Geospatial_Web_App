@@ -1,18 +1,48 @@
+.navigation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
 .navigation .nav-item {
   position: relative;
-  display: inline-block;
-  margin: 10px;
+  justify-content: center;
+}
+
+.navigation .nav-item a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 55px;
+  height: 55px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  transition: 0.25s ease;
 }
 
 .navigation .nav-icon {
-  font-size: 24px;
-  color: #222222;
+  font-size: 22px;
+  color: #222;
+  transition: scale(1.1);
+}
+
+.navigation .nav-item:hover a{
+  background: #E9F0FF;
+}
+
+.navigation .active {
+  background: #E9F0FF;
+}
+
+.navigation .nav-item:hover .nav-icon {
+  transform: scale(1.1);
 }
 
 .navigation .nav-label {
   display: none;
   position: absolute;
-  left: 110%;
+  left: 120%;
   top: 50%;
   transform: translateY(-50%);
   background: #fff;
@@ -20,9 +50,26 @@
   border-radius: 4px;
   white-space: nowrap;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  z-index: 10;
 }
 
 .navigation .nav-item:hover .nav-label {
   display: inline-block;
+}
+
+.logout-btn {
+  position: absolute;
+  bottom: 20px;
+  width: 55px;
+  height: 55px;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: 0.25s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logout-icon {
+  font-size: 22px;
 }

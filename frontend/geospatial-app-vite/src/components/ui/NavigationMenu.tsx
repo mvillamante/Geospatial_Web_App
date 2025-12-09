@@ -17,7 +17,7 @@ const NavigationMenu: React.FC = () => {
     //const { userRole } = userRole();
     const navigate = useNavigate();
 
-    const userRole = "Citizen"; // !!! manual user role for testing muna
+    const userRole = "Admin"; // !!! manual user role for testing muna
     console.log("Navigation:", userRole);
 
     const navigationList: Record<string, NavItem[]> = {
@@ -63,7 +63,7 @@ const NavigationMenu: React.FC = () => {
     }
 
     return (
-        <div className="navigation">
+        <div className={`navigation ${userRole === "Admin" ? "admin-nav" : ""}`}>
             <div className="header-logo">
                 {navItems.length > 0 && (
                     <a href={`/main/${navItems[0].path}`}>
@@ -74,7 +74,10 @@ const NavigationMenu: React.FC = () => {
             </div>
             <nav>
                 {navItems.map(({ label, path, icon: Icon }, index) => (
-                    <div className="nav-item" key={index}>
+                    <div
+                        className={`nav-item ${userRole === "Admin" ? "admin-layout" : ""}`}
+                        key={index}
+                    >
                         <NavLink
                             to={`/main/${path}`}
                             className={({ isActive }) => (isActive ? 'active' : '')}

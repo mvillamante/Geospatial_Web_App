@@ -7,10 +7,8 @@ import "./MainLayout.css";
 const MainLayout: React.FC = () => {
   return (
     <div className="main-layout">
-      {/* Navigation / Header column */}
-      <div className="main-layout-sidebar">
-        <NavigationMenu />
-      </div>
+      {/* Navigation */}
+      <NavigationMenu />
 
       {/* Main */}
       <Outlet />

@@ -17,7 +17,7 @@ const NavigationMenu: React.FC = () => {
     //const { userRole } = userRole();
     const navigate = useNavigate();
 
-    const userRole = "Officer"; // !!! manual user role for testing muna
+    const userRole = "Citizen"; // !!! manual user role for testing muna
     console.log("Navigation:", userRole);
 
     const navigationList: Record<string, NavItem[]> = {
@@ -33,7 +33,7 @@ const NavigationMenu: React.FC = () => {
         Officer: [
             { label: 'Dashboard & Map', path: 'officer/dashboard-map', icon: FaMapMarkedAlt },
             { label: 'Report Verification', path: 'officer/report-verify', icon: MdReport },
-            { label: 'Evacuation Centers', path: 'officer/evac-center', icon: MdPlace },
+            { label: 'Evacuation Center', path: 'officer/evac-center', icon: MdPlace },
         ],
         // User Role: Researcher
         Researcher: [
@@ -43,7 +43,7 @@ const NavigationMenu: React.FC = () => {
         Citizen: [
             { label: 'Current Alerts & Map', path: 'citizen/alerts-map', icon: FaBullhorn },
             { label: 'Report Hazard', path: 'citizen/report-hazard', icon: MdReport },
-            { label: 'Evacuation Centers', path: 'citizen/evac-center', icon: MdPlace },
+            { label: 'Evacuation Center', path: 'citizen/evac-center', icon: MdPlace },
             { label: 'Preparedness Guide', path: 'citizen/prep-guide', icon: FaShieldAlt },
             { label: 'My Profile', path: 'citizen/profile', icon: FaUser },
         ],

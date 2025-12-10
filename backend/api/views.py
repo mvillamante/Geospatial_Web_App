@@ -1,6 +1,6 @@
 from django.http import JsonResponse
-from . import satellite
+from .views.satellite import fetch_copernicus
 
 def copernicus_test(request):
-    data = satellite.fetch_copernicus()
+    data = fetch_copernicus()
     return JsonResponse(data, safe=False)

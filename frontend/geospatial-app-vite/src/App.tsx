@@ -29,10 +29,12 @@ const App: React.FC = () => {
           <Route path="officer/dashboard-map" element={<DashboardMapPage />} />
           <Route path="officer/report-verify" element={<ReportVerifyPage />} />
           <Route path="officer/evac-center" element={<EvacCenterPage />} />
+          <Route path="officer/profile" element={<ProfilePage />} />
 
           {/* Researcher Route */}
           <Route path="researcher" element={<Navigate to="researcher/dashboard-map" replace />} />
           <Route path="researcher/dashboard-map" element={<DashboardMapPage />} />
+          <Route path="researcher/profile" element={<ProfilePage />} />
 
           {/* Citizen Route */}
           <Route path="citizen" element={<Navigate to="citizen/alerts-map" replace />} />

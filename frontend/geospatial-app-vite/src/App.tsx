@@ -4,7 +4,7 @@ import {
   MainLayout, LandingPage,
   EvacCenterPage, PrepGuidePage,
   CmsPage, DashboardPage, ReportsMgmtPage, SysMonitoringPage, UserMgmtPage,
-  AlertsMapPage, ProfilePage, ReportHazardPage, 
+  AlertsMapPage, ProfilePage, 
   DashboardMapPage, ReportVerifyPage
  } from "./components";
 
@@ -39,7 +39,6 @@ const App: React.FC = () => {
           {/* Citizen Route */}
           <Route path="citizen" element={<Navigate to="citizen/alerts-map" replace />} />
           <Route path="citizen/alerts-map" element={<AlertsMapPage />} />
-          <Route path="citizen/report-hazard" element={<ReportHazardPage />} />
           <Route path="citizen/evac-center" element={<EvacCenterPage />} />
           <Route path="citizen/prep-guide" element={<PrepGuidePage />} />
           <Route path="citizen/profile" element={<ProfilePage />} />

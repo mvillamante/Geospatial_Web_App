@@ -4,7 +4,10 @@ import { useNavigate } from "react-router-dom";
 import "./AuthModal.css";
 
 const AuthModal = ({ type = "login", onClose, switchModal }) => {
-    const userRole = "Admin"; // !!! manual user role for testing muna
+    const userRole = "Citizen"; // !!! manual user role for testing muna
+
+    // For debugging
+    console.log("Navigation Role (AuthModal):", userRole);
 
     const navigate = useNavigate();
     const [loginPhone, setLoginPhone] = useState("");

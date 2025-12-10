@@ -20,6 +20,100 @@
 }
 
 /*--------------------------------------*/
+/* Default Navigation */
+
+.navigation .nav-item a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 55px;
+  height: 55px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  transition: 0.25s ease;
+}
+
+.navigation a {
+  text-decoration: none;
+}
+
+.navigation .nav-icon {
+  font-size: 22px;
+  color: #222;
+  transition: scale(1.1);
+}
+
+.navigation .nav-item:hover a {
+  background: #E9F0FF;
+}
+
+.navigation .active {
+  background: #E9F0FF;
+}
+
+.navigation .nav-item:hover .nav-icon {
+  transform: scale(1.1);
+}
+
+.navigation .nav-label {
+  display: none;
+  position: absolute;
+  left: 120%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.navigation .nav-item:hover .nav-label {
+  display: inline-block;
+}
+
+.user-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto; /* pushes profile to bottom */
+  width: 100%;
+  padding-bottom: 16px;
+}
+
+.user-profile .profile-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.user-profile .logout-btn {
+  width: 55px;
+  height: 55px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 0.25s ease;
+}
+
+.logout-icon {
+  font-size: 22px;
+}
+
+
+/*--------------------------------------*/
+
 /* Admin Layout (Navigation)*/
 
 .nav-item.admin-layout {
@@ -76,75 +170,54 @@
   display: inline;
 }
 
-/*--------------------------------------*/
-/* Default Navigation */
-
-.navigation .nav-item a {
+/* Admin Profile: horizontal layout */
+.admin-profile {
   display: flex;
-  justify-content: center;
+  flex-direction: column; /* vertical stack */
+  gap: 10px;
+  width: 100%;
+  margin-top: auto; /* pushes profile to bottom */
+  padding: 0 16px 16px 16px; /* optional bottom padding */
+}
+
+.admin-profile .profile-row {
+  display: flex;
   align-items: center;
-  width: 55px;
-  height: 55px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  transition: 0.25s ease;
+  gap: 10px;
 }
 
-.navigation a {
-  text-decoration: none;
+.admin-profile .profile-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
 }
 
-.navigation .nav-icon {
-  font-size: 22px;
-  color: #222;
-  transition: scale(1.1);
+.admin-profile .profile-name {
+  font-weight: 600;
 }
 
-.navigation .nav-item:hover a {
-  background: #E9F0FF;
+.admin-profile .logout-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.navigation .active {
-  background: #E9F0FF;
-}
-
-.navigation .nav-item:hover .nav-icon {
-  transform: scale(1.1);
-}
-
-.navigation .nav-label {
-  display: none;
-  position: absolute;
-  left: 120%;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #fff;
-  padding: 4px 8px;
-  border-radius: 4px;
-  white-space: nowrap;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
-
-.navigation .nav-item:hover .nav-label {
-  display: inline-block;
-}
-
-/*--------------------------------------*/
 /* Logout button */
-.logout-btn {
-  position: absolute;
-  bottom: 20px;
+.admin-profile .logout-btn {
   width: 55px;
   height: 55px;
   border: none;
-  cursor: pointer;
   border-radius: 10px;
-  transition: 0.25s ease;
+  cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.logout-icon {
-  font-size: 22px;
+  transition: 0.25s ease;
 }

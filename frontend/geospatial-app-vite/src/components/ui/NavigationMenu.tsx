@@ -1,6 +1,6 @@
 // NavigationMenu
-//import { useUserRole, ROLES } from '../UserRoleContext';
 import "./NavigationMenu.css";
+import { useAuth } from "../../utils/AuthContext";
 {/*import HazspotLogo from '../../assets/?.png';*/ }
 import { useNavigate, NavLink } from 'react-router-dom';
 import type { IconType } from "react-icons";
@@ -14,11 +14,14 @@ interface NavItem {
 }
 
 const NavigationMenu: React.FC = () => {
-    //const { userRole } = userRole();
     const navigate = useNavigate();
 
-    const userRole = "Admin"; // !!! manual user role for testing muna
-    console.log("Navigation:", userRole);
+    // Get user role from AuthContext
+    const { user } = useAuth();
+    const userRole = user?.role || "Citizen"; // !!! manual na pagpalit nalang muna
+
+    // For debugging
+    console.log("Navigation Role (NavMenu):", userRole);
 
     const navigationList: Record<string, NavItem[]> = {
         // User Role: Admin
@@ -42,10 +45,8 @@ const NavigationMenu: React.FC = () => {
         // User Role: Citizen
         Citizen: [
             { label: 'Current Alerts & Map', path: 'citizen/alerts-map', icon: FaBullhorn },
-            { label: 'Report Hazard', path: 'citizen/report-hazard', icon: MdReport },
             { label: 'Evacuation Center', path: 'citizen/evac-center', icon: MdPlace },
             { label: 'Preparedness Guide', path: 'citizen/prep-guide', icon: FaShieldAlt },
-            { label: 'My Profile', path: 'citizen/profile', icon: FaUser },
         ],
         // User Role: Guest
         Guest: [
@@ -89,9 +90,39 @@ const NavigationMenu: React.FC = () => {
                 ))}
             </nav>
 
-            <button className="logout-btn" onClick={handleLogout}>
-                <MdLogout className="logout-icon" />
-            </button>
+            {/* Profile Section */}
+            <div className={`user-profile-section ${userRole === "Admin" ? "admin-profile" : "user-profile"}`}>
+            
+            {userRole === "Admin" ? (
+                <>
+                {/* Admin: vertical stacked rows */}
+                <div className="profile-row">
+                    <div className="profile-circle">
+                    {user?.name?.charAt(0).toUpperCase() || userRole.charAt(0)}
+                    </div>
+                    <div className="profile-name">{user?.name || userRole}</div>
+                </div>
+                <div className="logout-row">
+                    <button className="logout-btn" onClick={handleLogout}>
+                    <MdLogout className="logout-icon" />
+                    </button>
+                    <span className="logout-label">Logout</span>
+                </div>
+                </>
+            ) : (
+                <>
+                {/* Default user: simple stacked */}
+                <div className="profile-circle">
+                    {user?.name?.charAt(0).toUpperCase() || userRole.charAt(0)}
+                </div>
+                <button className="logout-btn" onClick={handleLogout}>
+                    <MdLogout className="logout-icon" />
+                </button>
+                </>
+            )}
+
+            </div>
+
         </div>
     );
 

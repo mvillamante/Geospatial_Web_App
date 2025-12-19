@@ -1,24 +1,8 @@
-.cms-page {
-  width: 100%;
-  min-height: 100%;
-  background: #f8fafc;
-}
-
-
-.cms-container {
-    padding: 2.5rem;
-}
-
 .cms-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
-}
-
-.cms-header h1 {
-    font-size: 1.8rem;
-    color: #0f172a;
 }
 
 .cms-actions {
@@ -52,67 +36,9 @@
     transform: translateY(-1px);
 }
 
-/* Card */
-.cms-page .card {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-}
 
-.cms-page table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.cms-page th {
-    background: #f1f5f9;
-    padding: 1rem;
-    text-align: left;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    color: #475569;
-}
-
-.cms-page td {
-    padding: 1rem;
-    border-top: 1px solid #e5e7eb;
-}
-
-.cms-page tr:hover {
-    background: #f8fafc;
-}
-
-/* Badges */
-.cms-page .badge {
-    padding: 0.25rem 0.6rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
-}
-
-.cms-page .badge.Published {
-    background: #22c55e;
-    color: white;
-}
-
-.cms-page .badge.Draft {
-    background: #e5e7eb;
-    color: #374151;
-}
-
-/* Actions */
-.cms-page .table-actions {
-    display: flex;
-    gap: 0.4rem;
-}
-
-.cms-page .icon-btn {
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    padding: 0.3rem;
-}
-
-.cms-page .icon-btn.danger {
+.cms-page .icon-btn.danger,
+.reports-page .icon-btn.delete {
     color: #dc2626;
 }
 

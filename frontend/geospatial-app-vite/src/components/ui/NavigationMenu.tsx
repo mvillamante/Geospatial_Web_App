@@ -18,7 +18,7 @@ const NavigationMenu: React.FC = () => {
 
     // Get user role from AuthContext
     const { user } = useAuth();
-    const userRole = user?.role || "Citizen"; // !!! manual na pagpalit nalang muna
+    const userRole = user?.role || "Officer"; // !!! manual na pagpalit nalang muna
 
     // For debugging
     console.log("Navigation Role (NavMenu):", userRole);

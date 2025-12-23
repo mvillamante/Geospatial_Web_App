@@ -31,7 +31,7 @@ const AlertsMapPage: React.FC = () => {
           </ul>
         </aside>
         {/* Map Component */}
-        <div className="dashboard-map">
+        <div className="alerts-map">
           <LeafletMap height="100vh" />
         </div>
 
@@ -49,9 +49,10 @@ const AlertsMapPage: React.FC = () => {
         <div className="map-legend-box">
             <h4>Severity Level</h4>
             <ul>
-              <li>High Risk</li>
-              <li>Medium Risk</li>
-              <li>Low Risk</li>
+              <li className="low">Low Risk</li>
+              <li className="moderate">Moderate Risk</li>
+              <li className="high">High Risk</li>
+              <li className="critical">Critical Risk</li>
             </ul>
         </div>
       </div>

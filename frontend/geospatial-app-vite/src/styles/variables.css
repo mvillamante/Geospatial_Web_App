@@ -1,0 +1,9 @@
+/*Variables for Colors*/
+:root {
+  --verylowrisk-color: #00FF00;
+  --lowrisk-color: #00A86B;
+  --moderaterisk-color: #FFD700;
+  --highrisk-color: #FFA500;
+  --veryhighrisk-color: #FF4500;
+  --criticalrisk-color: #FF0000;
+}

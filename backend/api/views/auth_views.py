@@ -1,20 +1,28 @@
-#For Login, Logout, and Registration APIs
-
+# auth_views.py
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from api.models import CustomUser
+import jwt
 
-def role_required(roles=[]):
-    def decorator(view_func):
-        def _wrapped_view(request, *args, **kwargs):
-            if not request.user.is_authenticated:
-                return JsonResponse({"error": "Unauthorized"}, status=401)
-            if request.user.role not in roles:
-                return JsonResponse({"error": "Forbidden"}, status=403)
-            return view_func(request, *args, **kwargs)
-        return _wrapped_view
-    return decorator
+def get_current_user(request):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        return JsonResponse({"error": "No Authorization header"}, status=401)
 
-@login_required
-@role_required(roles=['Admin'])
-def admin_dashboard(request):
-    return JsonResponse({"message": "Welcome Admin!"})
+    try:
+        token = auth_header.split(" ")[1]  # Expect: "Bearer <token>"
+        payload = jwt.decode(token, settings.SUPABASE_JWT_SECRET, algorithms=["HS256"])
+        supabase_uid = payload["sub"]
+        user = CustomUser.objects.get(supabase_uid=supabase_uid)
+
+        return JsonResponse({
+            "id": user.id,
+            "email": user.email,
+            "role": user.role
+        })
+    except jwt.ExpiredSignatureError:
+        return JsonResponse({"error": "Token expired"}, status=401)
+    except jwt.InvalidTokenError:
+        return JsonResponse({"error": "Invalid token"}, status=401)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=404)

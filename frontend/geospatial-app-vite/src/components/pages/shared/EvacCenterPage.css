@@ -36,7 +36,7 @@
 }
 
 .evac-card-name {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 600;
     margin: 0;
     display: flex;
@@ -62,7 +62,7 @@
     background: #f3f4f6;
     padding: 2px 8px;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -77,7 +77,7 @@
 }
 
 .evac-card-name {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 600;
     margin: 0;
 }
@@ -114,7 +114,7 @@
     border: none;
     border-radius: 10px;
     color: white;
-    font-size: 1rem;
+    font-size: 0.9rem;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -148,7 +148,7 @@
 
 
 .evac-reminders-list {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     color: #8b5e00;
     padding-left: 1.25rem;
     display: flex;
@@ -168,7 +168,7 @@
     padding: 0.75rem 2.5rem 0.75rem 1rem;
     border-radius: 12px;
     border: 1px solid #d1d5db;
-    font-size: 1rem;
+    font-size: 0.9rem;
     transition: all 0.25s ease;
 }
 
@@ -185,7 +185,7 @@
     transform: translateY(-50%);
     color: #6b7280;
     pointer-events: none;
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 
 @media (max-width: 1024px) {

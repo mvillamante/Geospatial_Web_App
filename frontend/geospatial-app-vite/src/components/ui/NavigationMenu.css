@@ -2,36 +2,32 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 18px;
   width: 80px;
+  height: 100vh;
   background-color: #ffffff;
   padding: 16px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 20px;
   border-right: 1px solid #e5e7eb;
   overflow: visible;
 }
 
 .navigation .nav-item {
   position: relative;
+  width: 100%;
+  display: flex;
   justify-content: center;
 }
-
-/*--------------------------------------*/
-/* Default Navigation */
 
 .navigation .nav-item a {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 55px;
-  height: 55px;
-  border-radius: 10px;
-  margin-bottom: 10px;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
   transition: 0.25s ease;
+  margin-bottom: 10px;
+  color: #1f2937;
 }
 
 .navigation a {
@@ -40,38 +36,35 @@
 
 .navigation .nav-icon {
   font-size: 22px;
-  color: #222;
-  transition: scale(1.1);
+  transition: transform 0.25s ease;
 }
 
 .navigation .nav-item:hover a {
-  background: #E9F0FF;
-}
-
-.navigation .active {
-  background: #E9F0FF;
+  background: #eef4ff;
 }
 
 .navigation .nav-item:hover .nav-icon {
-  transform: scale(1.1);
+  transform: scale(1.15);
+}
+
+.navigation .active {
+  background: #e0ebff;
 }
 
 .navigation .nav-label {
   display: none;
   position: absolute;
-  left: 120%;
+  left: 115%;
+  color: #222;
   top: 50%;
   transform: translateY(-50%);
-  
-  background: black;
-  color: white;
+  background: #ffffff;
   font-size: 0.875rem;
   font-weight: 500;
   padding: 6px 10px;
   border-radius: 6px;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   z-index: 9999;
   pointer-events: none;
 }
@@ -81,12 +74,11 @@
 }
 
 .user-profile {
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  margin-top: auto;
-  width: 100%;
+  gap: 12px;
   padding-bottom: 16px;
 }
 
@@ -94,13 +86,12 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  font-size: 1rem;
+  font-weight:700;
 }
 
 .user-profile .logout-btn {

@@ -98,7 +98,7 @@ const CmsPage: React.FC = () => {
           <tbody>
             {guides.map(guide => (
               <tr key={guide.id}>
-                <td>{guide.title}</td>
+                <td className="table-title">{guide.title}</td>
                 <td>{guide.category}</td>
                 <td>
                   <span className={`badge ${guide.status}`}>

@@ -163,7 +163,7 @@ function PrepGuidePage() {
   };
 
   return (
-    <div className="pg-wrapper">
+    <div className="pg-page">
       <div className="pg-container">
         <div className="pg-header">
           <AlertCircle className="header-icon" />

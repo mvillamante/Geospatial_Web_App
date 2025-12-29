@@ -79,7 +79,7 @@ function EvacCenterPage() {
   });
 
   return (
-    <div className="evac-wrapper">
+    <div className="evac-page">
       <div className="evac-header">
         <div className="evac-header-title">
           <MapPin className="evac-title-icon" />

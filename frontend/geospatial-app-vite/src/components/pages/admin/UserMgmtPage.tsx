@@ -1,8 +1,206 @@
-import React from "react";
+import { useState } from "react";
+import { Plus, Edit, Trash2, Power, PowerOff, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import './UserMgmtPage.css';
+
+type Role = 'Citizen' | 'Researcher' | 'Admin';
+type Status = 'Active' | 'Inactive';
+type RequestStatus = 'Pending' | 'Approved' | 'Rejected';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  role: Role;
+  status: Status;
+  reports: number;
+}
+
+interface ResearcherRequest {
+  id: number;
+  userId: number;
+  userName: string;
+  date: string;
+  status: RequestStatus;
+}
+
+const mockUsers: User[] = [
+  { id: 1, name: 'Juan Cruz', email: 'juan@example.com', phone: '09987654321', role: 'Citizen', status: 'Active', reports: 5 },
+  { id: 2, name: 'Dr. Maria Santos', email: 'maria@example.com', phone: '09111222333', role: 'Researcher', status: 'Active', reports: 0 },
+  { id: 3, name: 'Pedro Reyes', email: 'pedro@example.com', phone: '09876543210', role: 'Citizen', status: 'Inactive', reports: 2 },
+];
+
+const mockRequests: ResearcherRequest[] = [
+  {
+    id: 1,
+    userId: 1,
+    userName: 'Juan Cruz',
+    date: '2025-10-25',
+    status: 'Pending',
+  },
+];
+
+
 
 const UserMgmtPage: React.FC = () => {
+  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [requests, setRequests] = useState<ResearcherRequest[]>(mockRequests);
+  const [tab, setTab] = useState<'users' | 'requests'>('users');
+
+  const reportIncident = (id: number) => {
+    setUsers(users.map(u =>
+      u.id === id ? { ...u, reports: u.reports + 1 } : u
+    ));
+  };
+
+  const toggleStatus = (id: number) => {
+    setUsers(users.map(u =>
+      u.id === id
+        ? { ...u, status: u.status === 'Active' ? 'Inactive' : 'Active' }
+        : u
+    ));
+  };
+
+  const requestResearcher = (user: User) => {
+    setRequests([
+      ...requests,
+      {
+        id: requests.length + 1,
+        userId: user.id,
+        userName: user.name,
+        date: new Date().toISOString().split('T')[0],
+        status: 'Pending',
+      },
+    ]);
+  };
+
+  const approveRequest = (id: number) => {
+    const req = requests.find(r => r.id === id);
+    if (!req) return;
+
+    setUsers(users.map(u =>
+      u.id === req.userId ? { ...u, role: 'Researcher' } : u
+    ));
+
+    setRequests(requests.map(r =>
+      r.id === id ? { ...r, status: 'Approved' } : r
+    ));
+  };
+
+  const rejectRequest = (id: number) => {
+    setRequests(requests.map(r =>
+      r.id === id ? { ...r, status: 'Rejected' } : r
+    ));
+  };
+
   return (
-    <div> User Management Page for Admin </div>
+    <div className="user-page">
+      <h1>User Management</h1>
+
+      {/* Tabs */}
+      <div className="user-tabs">
+        <button className={tab === 'users' ? 'tab active' : 'tab'} onClick={() => setTab('users')}>
+          Users
+        </button>
+        <button className={tab === 'requests' ? 'tab active' : 'tab'} onClick={() => setTab('requests')}>
+          Researcher Requests
+          {requests.filter(r => r.status === 'Pending').length > 0 && (
+            <span className="request-count">
+              {requests.filter(r => r.status === 'Pending').length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Users Tab */}
+      {tab === 'users' && (
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th className="reports-title">Reports</th>
+              <th className="right">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {users.map(user => {
+              const alreadyRequested = requests.some(
+                r => r.userId === user.id && r.status === 'Pending'
+              );
+
+              return (
+                <tr key={user.id}>
+                  <td>
+                    <strong>{user.name}</strong>
+                    <div className="muted">{user.email}</div>
+                    <div className="muted">{user.phone}</div>
+                  </td>
+                  <td><span className={`badge ${user.role}`}>{user.role}</span></td>
+                  <td><span className={`badge ${user.status}`}>{user.status}</span></td>
+                  <td className="center">{user.reports}</td>
+
+                  <td className="right actions">
+                    {user.role === 'Citizen' && (
+                      <button className="report-btn" onClick={() => reportIncident(user.id)}>
+                        <AlertTriangle size={16} /> Report
+                      </button>
+                    )}
+
+                    {alreadyRequested && (
+                      <span className="muted">Pending request</span>
+                    )}
+
+                    <button onClick={() => toggleStatus(user.id)}>
+                      {user.status === 'Active' ? <PowerOff size={16} /> : <Power size={16} />}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+
+      {/* Requests Tab */}
+      {tab === 'requests' && (
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th className="right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {requests.map((req => (
+              <tr key={req.id}>
+                <td>{req.userName}</td>
+                <td>{req.date}</td>
+                <td>
+                  <span className={`badge ${req.status}`}>{req.status}</span>
+                </td>
+                <td className="right actions">
+                  {req.status === 'Pending' && (
+                    <>
+                      <button className="approve" onClick={() => approveRequest(req.id)}>
+                        <CheckCircle size={16} /> Approve
+                      </button>
+                      <button className="reject" onClick={() => rejectRequest(req.id)}>
+                        <XCircle size={16} /> Reject
+                      </button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            )))}
+          </tbody>
+        </table>
+      )}
+    </div>
   );
 };
 

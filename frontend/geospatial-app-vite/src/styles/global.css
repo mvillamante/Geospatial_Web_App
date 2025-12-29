@@ -11,15 +11,22 @@ body {
     overflow-x: hidden;
 }
 
+.pg-page,
+.cms-page,
+.evac-page,
+.user-page,
 .cms-page,
 .reports-page {
-  width: 100%;
-  min-height: 100%;
-  background: #f8fafc;
-  padding: 2.5rem;
+    width: 100%;
+    min-height: 100%;
+    background: #f8fafc;
+    padding: 2.5rem;
+    overflow-y: auto;
+    min-height: 100vh;
 }
 
-.dashboard-page h1, 
+.user-page h1,
+.dashboard-page h1,
 .user-page h1,
 .cms-page h1,
 .reports-page h1 {
@@ -33,6 +40,7 @@ body {
     border-collapse: collapse;
 }
 
+.user-page table th,
 .cms-page th,
 .reports-page th {
     background: #f1f5f9;
@@ -53,6 +61,11 @@ body {
 .cms-page tr:hover,
 .reports-page tr:hover {
     background: #f8fafc;
+}
+
+.cms-page .table-title,
+.reports-page .table-id {
+    font-weight: 500;
 }
 
 /* Badges */

@@ -71,7 +71,7 @@ const ReportsMgmtPage: React.FC = () => {
           <tbody>
             {reports.map(report => (
               <tr key={report.id}>
-                <td>#{report.id}</td>
+                <td className="table-id">#{report.id}</td>
                 <td>{report.user}</td>
                 <td>{report.type}</td>
                 <td>{report.location}</td>

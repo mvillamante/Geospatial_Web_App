@@ -10,6 +10,7 @@ interface Report {
   user: string;
   type: string;
   location: string;
+  date: string;
   time: string;
   status: 'Pending' | 'Verified' | 'Rejected';
   description: string;
@@ -21,6 +22,7 @@ const mockReports: Report[] = [
     user: 'Juan Cruz',
     type: 'Flood',
     location: 'Barangay Banay-Banay',
+    date: 'December 1, 2026',
     time: '2 hours ago',
     status: 'Pending',
     description: 'Heavy flooding observed near residential area.'
@@ -29,7 +31,8 @@ const mockReports: Report[] = [
     id: 2,
     user: 'Maria Santos',
     type: 'Landslide',
-    location: 'Pulong Sagingan',
+    location: 'Barangay San Isidro',
+    date: 'December 1, 2026',
     time: '4 hours ago',
     status: 'Verified',
     description: 'Road blockage due to landslide after heavy rain.'
@@ -62,6 +65,7 @@ const ReportsMgmtPage: React.FC = () => {
               <th>User</th>
               <th>Type</th>
               <th>Location</th>
+              <th>Date</th>
               <th>Time</th>
               <th>Status</th>
               <th>Actions</th>
@@ -75,6 +79,7 @@ const ReportsMgmtPage: React.FC = () => {
                 <td>{report.user}</td>
                 <td>{report.type}</td>
                 <td>{report.location}</td>
+                <td>{report.date}</td>
                 <td>{report.time}</td>
                 <td><span className={`badge ${report.status}`}>{report.status}</span></td>
                 <td>
@@ -84,7 +89,7 @@ const ReportsMgmtPage: React.FC = () => {
                     </button>
 
                     {report.status === 'Pending' && (
-                      <> 
+                      <>
                         <button className="icon-btn verify" onClick={() => verify(report.id)}>
                           <Check size={16} />
                         </button>

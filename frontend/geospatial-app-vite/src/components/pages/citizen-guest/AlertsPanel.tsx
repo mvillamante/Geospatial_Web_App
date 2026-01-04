@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Search } from 'lucide-react';
 
 const barangays = {
     Poblacion: ["Uno", "Dos", "Tres"],
@@ -29,7 +30,7 @@ const mockReports: Report[] = [
         title: "Residential Fire",
         category: "Fire",
         risk: "high",
-        location: "Barangay San Juan",
+        location: "Barangay San Isidro",
         time: "2025-12-29T08:00:00Z",
     },
     {
@@ -56,7 +57,7 @@ export default function AlertsPanel({ onReport, onSelectReport }: AlertsPanelPro
     const [sortNewest, setSortNewest] = useState<boolean>(true);
 
     const filteredReports = mockReports
-        .filter(r =>selectedCategory === "" || r.category === selectedCategory)
+        .filter(r => selectedCategory === "" || r.category === selectedCategory)
         .filter(r => selectedBarangay === "" || r.location.toLowerCase().includes(selectedBarangay.toLowerCase())
         );
 
@@ -67,25 +68,26 @@ export default function AlertsPanel({ onReport, onSelectReport }: AlertsPanelPro
 
     return (
         <aside className="dashboard-alerts">
-            <button className="report-btn" onClick={onReport}>
-                + Report Incident
-            </button>
+            {/* SEARCH */}
+            <div className="alerts-search-wrapper">
+                <div className="search-box">
+                    <input
+                        type="text"
+                        placeholder="Search barangay..."
+                        value={selectedBarangay}
+                        onChange={(e) => setSelectedBarangay(e.target.value)}
+                    />
+                </div>
+                <Search className="alerts-search-icon" />
+            </div>
 
-            <label>Search Barangay...</label>
-            <select value={selectedBarangay} onChange={e => setSelectedBarangay(e.target.value)}>
-                <option value="">All Barangays</option>
-                {Object.entries(barangays).map(([group, names]) => (
-                    <optgroup label={group} key={group}>
-                        {names.map(name => (
-                            <option key={name} value={name}>{name}</option>
-                        ))}
-                    </optgroup>
-                ))}
-            </select>
-
-            <div className="filters">
-                <label>Category Filter</label>
-                <select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
+            {/* FILTERS ROW */}
+            <div className="filter-row">
+                <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                >
+                    <option value="" disabled>Category</option>
                     <option value="">All</option>
                     <option value="Fire">Fire</option>
                     <option value="Flood">Flood</option>
@@ -93,12 +95,19 @@ export default function AlertsPanel({ onReport, onSelectReport }: AlertsPanelPro
                     <option value="Accident">Accident</option>
                 </select>
 
-                <label>Sort by Time</label>
-                <select value={sortNewest ? "newest" : "oldest"} onChange={e => setSortNewest(e.target.value === "newest")}>
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
+                <select
+                    value={sortNewest ? "newest" : "oldest"}
+                    onChange={(e) => setSortNewest(e.target.value === "newest")}
+                >
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
                 </select>
             </div>
+
+            {/* CTA */}
+            <button className="report-btn" onClick={onReport}>
+                + Report Incident
+            </button>
 
             <h3>Verified Reports</h3>
             <ul className="report-list">
@@ -107,13 +116,14 @@ export default function AlertsPanel({ onReport, onSelectReport }: AlertsPanelPro
                         key={report.id}
                         className={`report-card ${report.risk}`}
                         onClick={() => onSelectReport(report)}
-                        style={{ cursor: "pointer" }}
                     >
                         <div className="report-header">
                             <span className="report-title">{report.title}</span>
                             <span className={`risk-badge ${report.risk}`}>{report.risk.toUpperCase()}</span>
                         </div>
+
                         <span className="report-location">{report.location}</span>
+
                         <div className="report-footer">
                             <span>{new Date(report.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>

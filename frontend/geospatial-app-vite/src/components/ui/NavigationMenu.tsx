@@ -2,7 +2,7 @@
 import "./NavigationMenu.css";
 import { useAuth } from "../../utils/AuthContext";
 {/*import HazspotLogo from '../../assets/?.png';*/ }
-import { useNavigate, NavLink } from 'react-router-dom';
+import { useNavigate, NavLink, Link } from 'react-router-dom';
 import type { IconType } from "react-icons";
 import { FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt } from "react-icons/fa";
 import { MdReport, MdPlace, MdLogout } from "react-icons/md";
@@ -18,7 +18,8 @@ const NavigationMenu: React.FC = () => {
 
     // Get user role from AuthContext
     const { user } = useAuth();
-    const userRole = user?.role || "Officer"; // !!! manual na pagpalit nalang muna
+    const userRole = user?.role || "Citizen"; // !!! manual na pagpalit nalang muna
+    const profilePath = `/main/${userRole.toLocaleLowerCase()}/profile`;
 
     // For debugging
     console.log("Navigation Role (NavMenu):", userRole);
@@ -92,34 +93,45 @@ const NavigationMenu: React.FC = () => {
 
             {/* Profile Section */}
             <div className={`user-profile-section ${userRole === "Admin" ? "admin-profile" : "user-profile"}`}>
-            
-            {userRole === "Admin" ? (
-                <>
-                {/* Admin: vertical stacked rows */}
-                <div className="profile-row">
-                    <div className="profile-circle">
-                    {user?.name?.charAt(0).toUpperCase() || userRole.charAt(0)}
-                    </div>
-                    <div className="profile-name">{user?.name || userRole}</div>
-                </div>
-                <div className="logout-row">
-                    <button className="logout-btn" onClick={handleLogout}>
-                    <MdLogout className="logout-icon" />
-                    </button>
-                    <span className="logout-label">Logout</span>
-                </div>
-                </>
-            ) : (
-                <>
-                {/* Default user: simple stacked */}
-                <div className="profile-circle">
-                    {user?.name?.charAt(0).toUpperCase() || userRole.charAt(0)}
-                </div>
-                <button className="logout-btn" onClick={handleLogout}>
-                    <MdLogout className="logout-icon" />
-                </button>
-                </>
-            )}
+
+                {userRole === "Admin" ? (
+                    <>
+                        {/* Admin: vertical stacked rows */}
+                        <div className="profile-row">
+                            <div
+                                className="profile-circle"
+                                onClick={() => navigate(profilePath)}
+                                style={{ cursor: "pointer" }}
+                                title="View Profile"
+                            >
+                                {user?.name?.charAt(0).toUpperCase() || userRole.charAt(0)}
+                            </div>
+
+                            <div className="profile-name">{user?.name || userRole}</div>
+                        </div>
+                        <div className="logout-row">
+                            <button className="logout-btn" onClick={handleLogout}>
+                                <MdLogout className="logout-icon" />
+                            </button>
+                            <span className="logout-label">Logout</span>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        {/* Default user: simple stacked */}
+                        <div
+                            className="profile-circle"
+                            onClick={() => navigate(profilePath)}
+                            style={{ cursor: "pointer" }}
+                            title="View Profile"
+                        >
+                            {user?.name?.charAt(0).toUpperCase() || userRole.charAt(0)}
+                        </div>
+                        <button className="logout-btn" onClick={handleLogout}>
+                            <MdLogout className="logout-icon" />
+                        </button>
+                    </>
+                )}
 
             </div>
 

@@ -16,6 +16,8 @@ const App: React.FC = () => {
 
         {/* Main Layout */}
         <Route path="/main" element={<MainLayout />}>
+        <Route path="/main/:role/profile" element={<ProfilePage />} />
+
           {/* Admin Route */}
           <Route path="admin" element={<Navigate to="admin/dashboard" replace />} />
           <Route path="admin/dashboard" element={<DashboardPage />} />

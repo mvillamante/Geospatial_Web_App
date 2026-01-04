@@ -16,7 +16,8 @@ body {
 .evac-page,
 .user-page,
 .cms-page,
-.reports-page {
+.reports-page,
+.sys-page {
     width: 100%;
     min-height: 100%;
     background: #f8fafc;
@@ -29,11 +30,14 @@ body {
 .dashboard-page h1,
 .user-page h1,
 .cms-page h1,
-.reports-page h1 {
+.reports-page h1,
+.sys-page h1 {
     font-size: 1.8rem;
     color: #0f172a;
 }
 
+
+/* Tables */
 .cms-page table,
 .reports-page table {
     width: 100%;
@@ -42,7 +46,8 @@ body {
 
 .user-page table th,
 .cms-page th,
-.reports-page th {
+.reports-page th,
+.sys-page th {
     background: #f1f5f9;
     padding: 1rem;
     text-align: left;
@@ -52,20 +57,28 @@ body {
 }
 
 .cms-page td,
-.reports-page td {
+.reports-page td,
+.sys-page td {
     padding: 0.75rem;
     font-size: 0.8rem;
     border-top: 1px solid #e5e7eb;
 }
 
 .cms-page tr:hover,
-.reports-page tr:hover {
+.reports-page tr:hover,
+.sys-page tr:hover {
     background: #f8fafc;
 }
 
 .cms-page .table-title,
 .reports-page .table-id {
     font-weight: 500;
+}
+
+.table-w-icon {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* Badges */
@@ -98,7 +111,7 @@ body {
 
 /* Card */
 .cms-page .card,
-.reports-page .card {
+.reports-page .card, {
     background: white;
     border-radius: 16px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);

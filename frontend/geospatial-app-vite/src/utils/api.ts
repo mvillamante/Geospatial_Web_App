@@ -1,4 +1,6 @@
 export async function getCurrentUser() {
+    if (import.meta.env.DEV) return null;
+
     try {
         const response = await fetch("/api/current_user/", {
             method: "GET",

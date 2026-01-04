@@ -8,17 +8,21 @@ import LeafletMap from "../ui/LeafletMap";
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth(); // Get current user from context
-  const userRole = user?.role || "Guest";
+  const { user, refreshUser } = useAuth(); // Get current user from context
+  //const userRole = user?.role || "Guest";
 
-  // For debugging
-    console.log("Navigation Role (Landing):", userRole);
+  const [loading, setLoading] = useState(true);
 
   const [modalType, setModalType] = useState<"login" | "signup" | null>(null);
   const [activeSection, setActiveSection] = useState("home");
 
   const closeModal = () => setModalType(null);
   const switchModal = (type: "login" | "signup") => setModalType(type);
+
+  // Fetch user info on mount
+  useEffect(() => {
+    refreshUser().finally(() => setLoading(false));
+  }, [refreshUser]);
 
   // Track scrolling for active nav links
   useEffect(() => {
@@ -35,15 +39,23 @@ const LandingPage: React.FC = () => {
           }
         }
       }
-
       setActiveSection(current);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Show loading until auth is fetched
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
+
+  const userRole = user?.role || "Guest";
+
+  // For debugging
+  console.log("Navigation Role (Landing):", userRole);
 
   return (
     <div id="home" className={`landing-page ${modalType ? "modal-open" : ""}`}>

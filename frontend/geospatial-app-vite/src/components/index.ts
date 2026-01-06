@@ -17,7 +17,7 @@ export { default as UserMgmtPage } from "./pages/admin/UserMgmtPage";
 
 // citizen and guest
 export { default as AlertsMapPage } from "./pages/citizen-guest/AlertsMapPage";
-export { default as ProfilePage } from "./pages/citizen-guest/ProfilePage";
+export { default as ProfilePage } from "./pages/citizen-guest/ProfileComponents/ProfilePage";
 
 // lgu officer and researcher
 export { default as DashboardMapPage } from "./pages/officer-researcher/DashboardMapPage";

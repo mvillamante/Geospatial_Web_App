@@ -36,7 +36,7 @@ const mockDataItem: DataItem[] = [
     item: 'Hazard Risk Data', lastTime: '2 hours ago'
   },
   {
-    item: 'Sustainability Index', lastTime: '1 day ago'
+    item: 'Green Index', lastTime: '1 day ago'
   },
   {
     item: 'Forecast Model', lastTime: '3 days ago'

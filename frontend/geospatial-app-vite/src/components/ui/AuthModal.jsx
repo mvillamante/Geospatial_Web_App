@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
-import { login, signup } from "../../lib/auth";
-import { fetchCurrentUser } from "../../lib/fetchCurrentUser";
+import { useAuth } from "../../context/AuthContext";
+import { saveUserSession } from "../../lib/auth";
+import { normalizeRole, roleToBasePath } from "../../utils/roles";
 import "./AuthModal.css";
 
 const AuthModal = ({ type = "login", onClose, switchModal }) => {
-    //const userRole = "Admin"; // !!! manual user role for testing muna
-
-    // For debugging
-    //console.log("Navigation Role (AuthModal):", userRole);
-
     const navigate = useNavigate();
+    const { user, refreshUser } = useAuth();
+
     const [loginInput, setLoginInput] = useState("");  // Either email or phone
     const [loginPassword, setLoginPassword] = useState("");
     const [signupFirstName, setSignupFirstName] = useState("");
@@ -21,8 +19,6 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
     const [signupPassword, setSignupPassword] = useState("");
     const [signupConfirm, setSignupConfirm] = useState("");
 
-    const [userRole, setUserRole] = useState("");
-
     useEffect(() => {
         document.body.style.overflow = "hidden";
 
@@ -31,33 +27,15 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
         };
     }, []);
 
-    const navigateByRole = (role) => {
-        switch (role) {
-            case "Admin":
-                navigate("/main/admin/dashboard", { replace: true });
-                break;
-            case "Officer":
-                navigate("/main/officer/dashboard-map", { replace: true });
-                break;
-            case "Researcher":
-                navigate("/main/researcher/alerts-map", { replace: true });
-                break;
-            case "Citizen":
-                navigate("/main/citizen/alerts-map", { replace: true });
-                break;
-            default:
-                navigate("/main/guest/alerts-map", { replace: true });
-        }
+    const navigateByUser = (user) => {
+        const role = normalizeRole(user?.role);
+        navigate(roleToBasePath(role), { replace: true });
     };
+
 
     // ===== LOGIN =====
     const handleLogin = async () => {
         if (!loginInput || !loginPassword) return alert("Please fill in all fields");
-
-        const data = {
-            username_or_phone: loginInput,  // Either email or phone number
-            password: loginPassword,
-        };
 
         try {
             const response = await fetch("http://localhost:8000/api/login_user/", {
@@ -65,22 +43,28 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(data),
+                body: JSON.stringify({
+                    username_or_phone: loginInput,
+                    password: loginPassword,
+                }),
             });
 
             const result = await response.json();
-            if (response.ok) {
-                alert("Login successful!");
-                setUserRole(result.role);
-
-                localStorage.setItem("access_token", result.access_token);
-                onClose();
-                
-                // Redirect to user dashboard or page based on their role
-                navigateByRole(result.role);
-            } else {
+            if (!response.ok) {
                 alert(result.error);
+                return;
             }
+            console.log("the user --> ", result.role);
+            // Save user session
+            saveUserSession(result.user, result.access_token); //only save user role/s
+
+            await refreshUser();
+            onClose();
+
+            // for getting user role
+            const role = normalizeRole(result.user.role);
+            navigate(roleToBasePath(role), { replace: true });
+
         } catch (error) {
             alert("Login failed: " + error.message);
         }
@@ -111,10 +95,6 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                 role: "citizen",
             };
 
-            //@here
-            console.log("Signup password in authmodal:", signupPassword);
-            console.log("Confirm password in authmodal:", signupConfirm);
-
             const response = await fetch('http://localhost:8000/api/sign_up/', {
                 method: 'POST',
                 headers: {
@@ -124,16 +104,20 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
             });
 
             const data = await response.json();
-
             if (response.ok) {
-                console.log(data.user); 
+                console.log(data.user); // @here
                 alert(data.message); 
 
-                localStorage.setItem("access_token", data.access_token);
-                onClose();
+                // Save user session
+                saveUserSession(data.user, data.access_token);
 
-                // Redirect to user dashboard or page based on their role
-                navigateByRole(result.role);
+                await refreshUser();
+                onClose();
+                
+                // for getting user role
+                const role = normalizeRole(data.user.role);
+                navigate(roleToBasePath(role), { replace: true });
+
             } else {
                 console.error("Signup error response:", data);
                 alert(data.error || "Signup failed.");

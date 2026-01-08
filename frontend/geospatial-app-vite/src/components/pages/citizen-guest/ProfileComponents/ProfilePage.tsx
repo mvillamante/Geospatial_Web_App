@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import ReportCard from './ReportCard';
 import "./ProfilePage.css";
+import { getUserRoleAndDisplayName } from "../../../../lib/auth";
 
 const mockReports = [
   {
@@ -28,6 +29,7 @@ const mockReports = [
 
 const ProfilePage: React.FC = () => {
   const [isRequested, setIsRequested] = useState(false);
+  const { displayName, userRole, profilePath } = getUserRoleAndDisplayName();
 
   return (
     <div className="profile-page">
@@ -39,8 +41,8 @@ const ProfilePage: React.FC = () => {
              <div className="online-indicator" />
           </div>
           <div className="profile-info">
-            <h2>Juan Dela Cruz</h2>
-            <p className="role-tag">Citizen</p>
+            <h2>{displayName}</h2>
+            <p className="role-tag">{userRole}</p>
             <button 
               className={`research-btn ${isRequested ? 'requested' : ''}`}
               onClick={() => setIsRequested(true)}

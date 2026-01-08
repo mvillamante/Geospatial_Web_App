@@ -3,16 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { FaUser, FaChartBar, FaUniversity } from "react-icons/fa";
 import "./LandingPage.css";
 import { useAuth } from "../../context/AuthContext";
+import { getUserRoleAndDisplayName } from "../../lib/auth";
 import AuthModal from "../ui/AuthModal";
 import LeafletMap from "../ui/LeafletMap";
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, refreshUser } = useAuth(); // Get current user from context
-  //const userRole = user?.role || "Guest";
 
   const [loading, setLoading] = useState(true);
-
   const [modalType, setModalType] = useState<"login" | "signup" | null>(null);
   const [activeSection, setActiveSection] = useState("home");
 
@@ -52,10 +51,12 @@ const LandingPage: React.FC = () => {
     return <div className="loading">Loading...</div>;
   }
 
-  const userRole = user?.role || "Guest";
+  // ===== Get user role and display name from localStorage =====
+  const { userRole, userRole2 } = getUserRoleAndDisplayName();
 
   // For debugging
-  console.log("Navigation Role (Landing):", userRole);
+  console.log("landing nav role (primary):", userRole);
+  console.log("landing nav role (secondary):", userRole2);
 
   return (
     <div id="home" className={`landing-page ${modalType ? "modal-open" : ""}`}>

@@ -2,7 +2,10 @@
 import "./NavigationMenu.css";
 import { useAuth } from "../../context/AuthContext";
 {/*import HazspotLogo from '../../assets/?.png';*/ }
-import { useNavigate, NavLink, Link } from 'react-router-dom';
+import { useNavigate, NavLink } from 'react-router-dom';
+import { getUserRoleAndDisplayName, clearUserSession } from "../../lib/auth";
+
+
 import type { IconType } from "react-icons";
 import { FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt, FaMapMarked } from "react-icons/fa";
 import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdOutlineMonitorHeart } from "react-icons/md";
@@ -10,25 +13,27 @@ import { PiUsersBold } from "react-icons/pi";
 import { TbFileReport } from "react-icons/tb";
 import { FiEdit } from "react-icons/fi";
 
+
 interface NavItem {
     label: string;
     path: string;
     icon?: IconType;
 }
 
+interface StoredUserRoles {
+  primaryRole: string;
+  secondaryRoles: string[];
+}
+
 const NavigationMenu: React.FC = () => {
     const navigate = useNavigate();
-
-    // Get user role from AuthContext
     const { user } = useAuth();
 
-    // For debugging
-    console.log("Navigation Role (NavMenu):", user?.roles[0]);
+    // ===== Get user roles from localStorage =====
+    const { userRole, displayName, profilePath } = getUserRoleAndDisplayName();
 
-    const rolePriority = ["Admin", "Officer", "Researcher", "Citizen", "Guest"];
-    const userRole = user?.roles?.find(r => rolePriority.includes(r)) || "Guest";
-    const displayName = user ? `${user.first_name} ${user.last_name}`.trim() : userRole;
-    const profilePath = `/main/${userRole.toLowerCase()}/profile`;
+    console.log("Navigation Role (NavMenu):", userRole);
+    console.log("Display Name (NavMenu):", displayName);
 
     const navigationList: Record<string, NavItem[]> = {
         // User Role: Admin
@@ -67,6 +72,7 @@ const NavigationMenu: React.FC = () => {
 
     const handleLogout = () => {
         console.log("Logging out...");
+        clearUserSession();
         navigate("/");
     }
 
@@ -113,7 +119,7 @@ const NavigationMenu: React.FC = () => {
                                 {displayName.charAt(0).toUpperCase()}
                             </div>
 
-                            <div className="profile-name">{user?.name || userRole}</div>
+                            <div className="profile-name">{user?.username || userRole}</div>
                         </div>
                         <div className="logout-row">
                             <button className="logout-btn" onClick={handleLogout}>
@@ -131,7 +137,7 @@ const NavigationMenu: React.FC = () => {
                             style={{ cursor: "pointer" }}
                             title="View Profile"
                         >
-                            {user?.name?.charAt(0).toUpperCase() || userRole.charAt(0)}
+                            {user?.username?.charAt(0).toUpperCase() || userRole.charAt(0)}
                         </div>
                         <button className="logout-btn" onClick={handleLogout}>
                             <MdLogout className="logout-icon" />

@@ -114,19 +114,41 @@ export default function LeafletMap({ height = "600px", mapView = "interactive" }
       choroplethLayerRef.current = null;
     }
 
+    // Helper fetch function with timeout and error handling
+    const fetchData = async (query, onSuccess) => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
+      try {
+        const res = await fetch("https://overpass-api.de/api/interpreter", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: query,
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeout);
+
+        if (!res.ok) {
+          throw new Error(`Overpass API error: ${res.status} ${res.statusText}`);
+        }
+
+        const data = await res.json();
+        onSuccess(data);
+      } catch (err) {
+        console.error("Overpass fetch failed:", err);
+      }
+    };
+
     if (mapView === "interactive") {
-      // Interactive markers
-      fetch("https://overpass-api.de/api/interpreter", {
-        method: "POST",
-        body: `
+      fetchData(
+        `
           [out:json];
           area["name"="Cabuyao"]["boundary"="administrative"]->.a;
           relation["admin_level"="10"](area.a);
           out center;
         `,
-      })
-        .then((res) => res.json())
-        .then((data) => {
+        (data) => {
           data.elements.forEach((el) => {
             const lat = el.center?.lat;
             const lon = el.center?.lon;
@@ -144,20 +166,17 @@ export default function LeafletMap({ height = "600px", mapView = "interactive" }
                 className: "barangay-label",
               });
           });
-        });
+        }
+      );
     } else if (mapView === "choropleth") {
-      // Choropleth
-      fetch("https://overpass-api.de/api/interpreter", {
-        method: "POST",
-        body: `
+      fetchData(
+        `
           [out:json];
           area["name"="Cabuyao"]["boundary"="administrative"]->.a;
           relation["admin_level"="10"](area.a);
           out geom;
         `,
-      })
-        .then((res) => res.json())
-        .then((data) => {
+        (data) => {
           const layerGroup = L.layerGroup().addTo(map);
           choroplethLayerRef.current = layerGroup;
 
@@ -180,7 +199,8 @@ export default function LeafletMap({ height = "600px", mapView = "interactive" }
 
             polygon.bindTooltip(`<b>${name}</b><br>Risk: ${value}`, { permanent: false, direction: "top" });
           });
-        });
+        }
+      );
     }
   }, [mapView]);
 
@@ -192,7 +212,7 @@ export default function LeafletMap({ height = "600px", mapView = "interactive" }
         {`
           .barangay-label {
             background: rgba(255, 255, 255, 0.9);
-            padding: 2px 6px;	
+            padding: 2px 6px;  
             border-radius: 4px;
             font-size: 12px;
             font-weight: bold;

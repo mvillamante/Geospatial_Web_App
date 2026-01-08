@@ -61,10 +61,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
 
       const currentUser = await fetchCurrentUser(session.access_token);
-      setUser(currentUser);
+        setUser(currentUser);
     } catch (error) {
       console.log("Error refreshing user:", error);
-      setUser(null);
+        setUser(null);
+    } finally {
+        setLoading(false);
     }
   };
 

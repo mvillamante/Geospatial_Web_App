@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Plus, Edit, Trash2, Power, PowerOff, AlertTriangle, CheckCircle, XCircle, CircleChevronDown, Menu } from 'lucide-react';
 import './UserMgmtPage.css';
 
-type Role = 'Citizen' | 'Researcher' | 'Admin';
+type Role = 'Citizen' | 'Researcher' | 'Officer' | 'Admin';
 type Status = 'Active' | 'Inactive';
 type RequestStatus = 'Pending' | 'Approved' | 'Rejected';
 

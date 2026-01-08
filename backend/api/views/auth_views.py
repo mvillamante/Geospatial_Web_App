@@ -75,8 +75,13 @@ def login_user(request):
             return JsonResponse({
                 "message": "Login successful",
                 "access_token": str(refresh.access_token),
-                "user_id": user.id,
-                "role": user.role
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "role": user.role,
+                    "extra_roles": user.extra_roles or [],        
+                }
             }, status=200)
         else:
             return JsonResponse({"error": "Invalid credentials"}, status=401)
@@ -96,8 +101,6 @@ def sign_up(request):
     email = data.get('email', "").strip()
     phone = data.get('phone', "").strip()
     password = data.get('password')
-    
-    print("REQUEST DATA in views @here:", request.data)
 
     if not all([first_name, last_name, email, phone, password]):
         return JsonResponse({"error": "All fields are required"}, status=400)

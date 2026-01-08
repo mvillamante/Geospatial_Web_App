@@ -48,9 +48,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         last_name = validated_data['last_name']
         username = validated_data.get('username') or f"{first_name.capitalize()}.{last_name.capitalize()}"
         password = validated_data['password']
-        
-        # ⚠️ DEBUG ONLY @here
-        print("RAW PASSWORD RECEIVED in ser:", password)
 
         user = CustomUser.objects.create(
             username=username,
@@ -64,11 +61,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
 
         user.set_password(password)
-        
-        # ⚠️ DEBUG ONLY @here   
-        print("HASHED PASSWORD in ser:", user.password)
-
-        
         user.save()
 
         # Profile will be created automatically via post_save

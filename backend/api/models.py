@@ -13,6 +13,7 @@ ROLE_CHOICES = [
 class CustomUser(AbstractUser):
     # Custom fields
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=True)
+    extra_roles = models.JSONField(default=list, blank=True)
     phone = models.CharField(max_length=20, unique=True, null=True, blank=True)
     supabase_uid = models.CharField(max_length=255, null=True, blank=True)
 

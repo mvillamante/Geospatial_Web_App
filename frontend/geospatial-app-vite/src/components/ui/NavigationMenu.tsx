@@ -1,11 +1,14 @@
 // NavigationMenu
 import "./NavigationMenu.css";
-import { useAuth } from "../../utils/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 {/*import HazspotLogo from '../../assets/?.png';*/ }
 import { useNavigate, NavLink, Link } from 'react-router-dom';
 import type { IconType } from "react-icons";
-import { FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt } from "react-icons/fa";
-import { MdReport, MdPlace, MdLogout } from "react-icons/md";
+import { FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt, FaMapMarked } from "react-icons/fa";
+import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdOutlineMonitorHeart } from "react-icons/md";
+import { PiUsersBold } from "react-icons/pi";
+import { TbFileReport } from "react-icons/tb";
+import { FiEdit } from "react-icons/fi";
 
 interface NavItem {
     label: string;
@@ -18,22 +21,23 @@ const NavigationMenu: React.FC = () => {
 
     // Get user role from AuthContext
     const { user } = useAuth();
-    const userRole = user?.role || "Admin"; // !!! manual na pagpalit nalang muna
-
-    const profilePath = `/main/${userRole.toLowerCase()}/profile`;
-
 
     // For debugging
-    console.log("Navigation Role (NavMenu):", userRole);
+    console.log("Navigation Role (NavMenu):", user?.roles[0]);
+
+    const rolePriority = ["Admin", "Officer", "Researcher", "Citizen", "Guest"];
+    const userRole = user?.roles?.find(r => rolePriority.includes(r)) || "Guest";
+    const displayName = user ? `${user.first_name} ${user.last_name}`.trim() : userRole;
+    const profilePath = `/main/${userRole.toLowerCase()}/profile`;
 
     const navigationList: Record<string, NavItem[]> = {
         // User Role: Admin
         Admin: [
-            { label: 'Dashboard', path: 'admin/dashboard', icon: "" },
-            { label: 'User Management', path: 'admin/manage-user', icon: "" },
-            { label: 'Reports Management', path: 'admin/manage-reports', icon: "" },
-            { label: 'System Monitoring', path: 'admin/system-monitoring', icon: "" },
-            { label: 'Content Management System', path: 'admin/cms', icon: "" },
+            { label: 'Dashboard', path: 'admin/dashboard', icon: MdOutlineDashboard  },
+            { label: 'User Management', path: 'admin/manage-user', icon: PiUsersBold },
+            { label: 'Reports Management', path: 'admin/manage-reports', icon: TbFileReport },
+            { label: 'System Monitoring', path: 'admin/system-monitoring', icon: MdOutlineMonitorHeart  },
+            { label: 'Content Management System', path: 'admin/cms', icon: FiEdit },
         ],
         // User Role: LGU Officer
         Officer: [
@@ -43,7 +47,7 @@ const NavigationMenu: React.FC = () => {
         ],
         // User Role: Researcher
         Researcher: [
-            { label: 'Dashboard & Map', path: 'researcher/dashboard-map', icon: "" },
+            { label: 'Dashboard & Map', path: 'researcher/dashboard-map', icon: FaMapMarked  },
         ],
         // User Role: Citizen
         Citizen: [
@@ -104,9 +108,9 @@ const NavigationMenu: React.FC = () => {
                                 className="profile-circle"
                                 onClick={() => navigate(profilePath)}
                                 style={{ cursor: "pointer" }}
-                                title="View Profile"
+                                title={displayName}
                             >
-                                {user?.name?.charAt(0).toUpperCase() || userRole.charAt(0)}
+                                {displayName.charAt(0).toUpperCase()}
                             </div>
 
                             <div className="profile-name">{user?.name || userRole}</div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Edit, Trash2, Power, PowerOff, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Power, PowerOff, AlertTriangle, CheckCircle, XCircle, CircleChevronDown, Menu } from 'lucide-react';
 import './UserMgmtPage.css';
 
 type Role = 'Citizen' | 'Researcher' | 'Admin';
@@ -26,8 +26,8 @@ interface ResearcherRequest {
 
 const mockUsers: User[] = [
   { id: 1, name: 'Juan Cruz', email: 'juan@example.com', phone: '09987654321', role: 'Citizen', status: 'Active', reports: 5 },
-  { id: 2, name: 'Dr. Maria Santos', email: 'maria@example.com', phone: '09111222333', role: 'Researcher', status: 'Active', reports: 0 },
-  { id: 3, name: 'Pedro Reyes', email: 'pedro@example.com', phone: '09876543210', role: 'Citizen', status: 'Inactive', reports: 2 },
+  { id: 2, name: 'Dr. Maria Santos', email: 'maria@example.com', phone: '09111222333', role: 'Citizen', status: 'Active', reports: 0 },
+  { id: 3, name: 'Pedro Reyes', email: 'pedro@example.com', phone: '09876543210', role: 'Citizen', status: 'Active', reports: 2 },
 ];
 
 const mockRequests: ResearcherRequest[] = [
@@ -46,6 +46,7 @@ const UserMgmtPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [requests, setRequests] = useState<ResearcherRequest[]>(mockRequests);
   const [tab, setTab] = useState<'users' | 'requests'>('users');
+  const [openMenu, setOpenMenu] = useState<number | null>(null);
 
   const reportIncident = (id: number) => {
     setUsers(users.map(u =>
@@ -72,6 +73,10 @@ const UserMgmtPage: React.FC = () => {
         status: 'Pending',
       },
     ]);
+  };
+
+  const updateRole = (id: number, newRole: Role) => {
+    setUsers(users.map(u => u.id === id ? { ...u, role: newRole } : u));
   };
 
   const approveRequest = (id: number) => {
@@ -138,24 +143,58 @@ const UserMgmtPage: React.FC = () => {
                     <div className="muted">{user.email}</div>
                     <div className="muted">{user.phone}</div>
                   </td>
-                  <td><span className={`badge ${user.role}`}>{user.role}</span></td>
+                  <td>
+                    <div className="role-field">
+                      <select
+                        className={`role-select ${user.role}`}
+                        value={user.role}
+                        onChange={(e) => updateRole(user.id, e.target.value as Role)}
+                        aria-label={`Change role for ${user.name}`}
+                      >
+                        <option value="Citizen">Citizen</option>
+                        <option value="Researcher">Researcher</option>
+                        <option value="Admin">Admin</option>
+                      </select>
+                      <CircleChevronDown size={13} className="chev" />
+                    </div>
+                  </td>
                   <td><span className={`badge ${user.status}`}>{user.status}</span></td>
                   <td className="center">{user.reports}</td>
 
                   <td className="right actions">
-                    {user.role === 'Citizen' && (
-                      <button className="report-btn" onClick={() => reportIncident(user.id)}>
-                        <AlertTriangle size={16} /> Report
+                    <div className="action-menu">
+                      <button
+                        className="menu-button"
+                        onClick={() => setOpenMenu(openMenu === user.id ? null : user.id)}
+                        aria-label={`Open actions for ${user.name}`}
+                      >
+                        <Menu size={16} />
                       </button>
-                    )}
 
-                    {alreadyRequested && (
-                      <span className="muted">Pending request</span>
-                    )}
+                      {openMenu === user.id && (
+                        <div className="menu-dropdown">
+                          {user.role === 'Citizen' && (
+                            <button
+                              className="menu-item report"
+                              onClick={() => { reportIncident(user.id); setOpenMenu(null); }}
+                            >
+                              <AlertTriangle size={14} /> Report
+                            </button>
+                          )}
 
-                    <button onClick={() => toggleStatus(user.id)}>
-                      {user.status === 'Active' ? <PowerOff size={16} /> : <Power size={16} />}
-                    </button>
+                          {alreadyRequested && (
+                            <div className="menu-item disabled">Pending request</div>
+                          )}
+
+                          <button
+                            className="menu-item"
+                            onClick={() => { toggleStatus(user.id); setOpenMenu(null); }}
+                          >
+                            {user.status === 'Active' ? <PowerOff size={14} /> : <Power size={14} />} {user.status === 'Active' ? 'Deactivate' : 'Activate'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );

@@ -1,0 +1,218 @@
+.profile-page {
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f8fafc, #eef2f7);
+    padding: 3rem 10%;
+    overflow-y: auto;
+}
+
+/* ---------------- PROFILE CARD ---------------- */
+.profile-page .profile-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border-radius: 24px;
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+}
+
+
+.profile-page .avatar {
+    width: 110px;
+    height: 110px;
+    background: linear-gradient(135deg, #cfd9df, #e2ebf0);
+    border-radius: 50%;
+}
+
+.profile-page .profile-info h2 {
+    margin: 0;
+    font-size: 1.6rem;
+}
+
+.profile-page .profile-info p {
+    color: #64748b;
+}
+
+.profile-page .research-btn {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: none;
+    background: #e2e8f0;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.profile-page .research-btn:hover {
+    background: #cbd5f5;
+}
+
+/* ---------------- STATS ---------------- */
+
+.profile-page .stats {
+    display: flex;
+    gap: 3.5rem;
+}
+
+.profile-page .stats h1 {
+    margin: 0;
+    font-size: 40px;
+    color: #0f172a;
+}
+
+.profile-page .stats span {
+    color: #64748b;
+}
+
+/* ---------------- REPORT CARD ---------------- */
+.profile-page .section-title {
+    margin-bottom: 1rem;
+}
+
+.profile-page .profile-left {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+}
+
+
+.profile-page .report-card {
+    background: white;
+    border-radius: 18px;
+    padding: 1.8rem;
+    margin-bottom: 1.4rem;
+    display: grid;
+    grid-template-columns: 1.2fr 2.5fr auto;
+    gap: 1.5rem;
+    box-shadow: 0 12px 25px rgba(0,0,0,0.04);
+    transition: transform 0.2s;
+}
+
+.profile-page .report-card:hover {
+    transform: translateY(-2px);
+}
+
+.profile-page .muted {
+    color: #64748b;
+}
+
+/* ---------------- PROGRESS BAR ---------------- */
+
+.profile-page .progress-bar {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 8px;
+}
+
+.profile-page .progress-bar::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 8px;
+    right: 8px;
+    height: 4px;
+    background: #e5e7eb;
+    transform: translateY(-50%);
+    border-radius: 999px;
+}
+
+.profile-page .progress-bar::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 8px;
+    height: 4px;
+    background: linear-gradient(90deg, #4caf50, #22c55e);
+    transform: translateY(-50%);
+    border-radius: 999px;
+    width: calc(var(--progress) * 100%);
+}
+
+.profile-page .step {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    flex: 1;
+}
+
+.profile-page .step span {
+    width: 16px;
+    height: 16px;
+    background: #e5e7eb;
+    border-radius: 50%;
+    display: inline-block;
+    border: 3px solid white;
+    transition: 0.3s;
+}
+
+.profile-page .step.active span {
+    background: #22c55e;
+}
+
+.profile-page .step p {
+    font-size: 12px;
+    margin-top: 6px;
+    color: #64748b;
+}
+
+.profile-page .step.active p {
+    color: #0f172a;
+    font-weight: 500;
+}
+
+/* ---------------- ACTIONS ---------------- */
+
+.profile-page .report-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.profile-page .status-pill {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    background: #e5e7eb;
+}
+
+.profile-page .status-pill.resolved {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.profile-page .dots-btn {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+/* ---------------- MODAL ---------------- */
+
+.profile-page .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(6px);
+}
+
+.profile-page .modal {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    width: 420px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+}
+
+.profile-page .modal img {
+    width: 100%;
+    border-radius: 14px;
+    margin-top: 14px;
+}

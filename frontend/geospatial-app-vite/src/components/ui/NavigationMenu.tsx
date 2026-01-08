@@ -20,6 +20,9 @@ const NavigationMenu: React.FC = () => {
     const { user } = useAuth();
     const userRole = user?.role || "Admin"; // !!! manual na pagpalit nalang muna
 
+    const profilePath = `/main/${userRole.toLowerCase()}/profile`;
+
+
     // For debugging
     console.log("Navigation Role (NavMenu):", userRole);
 

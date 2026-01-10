@@ -21,7 +21,8 @@ interface Report {
 
 interface AlertsPanelProps {
     onReport: () => void;
-    onSelectReport: (report: Report) => void;
+    onSelectReport?: (report: Report) => void;
+    onBarangaySearch?: (barangay: string, severity: string | null) => void;
 }
 
 const mockReports: Report[] = [
@@ -51,10 +52,40 @@ const mockReports: Report[] = [
     },
 ];
 
-export default function AlertsPanel({ onReport, onSelectReport }: AlertsPanelProps) {
+export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch }: AlertsPanelProps) {
     const [selectedCategory, setSelectedCategory] = useState<string>("");
     const [selectedBarangay, setSelectedBarangay] = useState("");
     const [sortNewest, setSortNewest] = useState<boolean>(true);
+
+    // Severity priority for finding highest risk
+    const severityPriority: Record<string, number> = {
+        critical: 4,
+        high: 3,
+        moderate: 2,
+        low: 1
+    };
+
+    // Handle barangay search with callback to parent
+    const handleBarangaySearch = (value: string) => {
+        setSelectedBarangay(value);
+        if (onBarangaySearch) {
+            // Find the highest severity report for the searched barangay
+            const matchingReports = mockReports.filter(r => 
+                r.location.toLowerCase().includes(value.toLowerCase())
+            );
+            
+            // Get the highest severity from matching reports
+            let highestSeverity: string | null = null;
+            if (matchingReports.length > 0) {
+                const sorted = matchingReports.sort((a, b) => 
+                    severityPriority[b.risk] - severityPriority[a.risk]
+                );
+                highestSeverity = sorted[0].risk;
+            }
+            
+            onBarangaySearch(value, highestSeverity);
+        }
+    };
 
     const filteredReports = mockReports
         .filter(r => selectedCategory === "" || r.category === selectedCategory)
@@ -75,7 +106,7 @@ export default function AlertsPanel({ onReport, onSelectReport }: AlertsPanelPro
                         type="text"
                         placeholder="Search barangay..."
                         value={selectedBarangay}
-                        onChange={(e) => setSelectedBarangay(e.target.value)}
+                        onChange={(e) => handleBarangaySearch(e.target.value)}
                     />
                 </div>
                 <Search className="alerts-search-icon" />
@@ -115,7 +146,7 @@ export default function AlertsPanel({ onReport, onSelectReport }: AlertsPanelPro
                     <li
                         key={report.id}
                         className={`report-card ${report.risk}`}
-                        onClick={() => onSelectReport(report)}
+                        onClick={() => onSelectReport?.(report)}
                     >
                         <div className="report-header">
                             <span className="report-title">{report.title}</span>

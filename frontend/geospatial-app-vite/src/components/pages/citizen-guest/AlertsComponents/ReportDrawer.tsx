@@ -5,8 +5,58 @@ interface ReportDrawerProps {
   onClose: () => void;
 }
 
+type ReverseGeocodeResponse = {
+  success?: boolean;
+  location?: string;
+  street?: string;
+  district?: string;
+  barangay?: string;
+  city?: string;
+  address?: Record<string, unknown>;
+  error?: string;
+};
+
+function formatStreetBarangayCity(data: ReverseGeocodeResponse): string {
+  const parts: string[] = [];
+
+  if (typeof data.street === 'string' && data.street.trim()) {
+    parts.push(data.street.trim());
+  } else {
+    const address = data.address as any;
+    const road =
+      address?.road || address?.street || address?.pedestrian || address?.path || address?.footway;
+    const houseNumber = address?.house_number;
+    if (typeof road === 'string' && road.trim()) {
+      const street = (typeof houseNumber === 'string' && houseNumber.trim())
+        ? `${houseNumber.trim()} ${road.trim()}`
+        : road.trim();
+      parts.push(street);
+    }
+  }
+
+  const barangayRaw =
+    (typeof data.barangay === 'string' && data.barangay.trim()) ? data.barangay.trim() : '';
+  if (barangayRaw) {
+    const barangayLower = barangayRaw.toLowerCase();
+    parts.push(
+      barangayLower.includes('barangay') || barangayLower.includes('brgy')
+        ? barangayRaw
+        : `Barangay ${barangayRaw}`
+    );
+  }
+
+  const cityRaw = (typeof data.city === 'string' && data.city.trim()) ? data.city.trim() : '';
+  if (cityRaw) parts.push(cityRaw);
+
+  if (parts.length === 0 && typeof data.location === 'string' && data.location.trim()) {
+    return data.location.trim();
+  }
+
+  return parts.join(', ');
+}
+
 export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
-  const [photo, setPhoto] = useState<File | null>(null);
+  const [, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [location, setLocation] = useState<string>("Detecting location...");
   const [error, setError] = useState<string | null>(null);
@@ -19,17 +69,48 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
       return;
     }
 
+    const controller = new AbortController();
+    let cancelled = false;
+
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const { latitude, longitude } = pos.coords;
-        setLocation(`Lat: ${latitude.toFixed(5)}, Lng: ${longitude.toFixed(5)}`);
-        setError(null);
+
+        try {
+          setLocation("Getting location...");
+          const response = await fetch(
+            `/api/geocoding/reverse/?lat=${latitude}&lon=${longitude}`,
+            { signal: controller.signal }
+          );
+
+          const data: ReverseGeocodeResponse = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to reverse geocode');
+          }
+
+          const formatted = formatStreetBarangayCity(data);
+          if (cancelled) return;
+
+          setLocation(formatted || 'Location not available');
+          setError(formatted ? null : 'Unable to determine location');
+        } catch (err: any) {
+          if (cancelled) return;
+          if (err?.name === 'AbortError') return;
+          setLocation('Location not available');
+          setError('Unable to determine location');
+        }
       },
       () => {
         setError("Unable to access location. Please enable location access.");
         setLocation("Location not available");
       }
     );
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [open]);
 
   if (!open) return null;

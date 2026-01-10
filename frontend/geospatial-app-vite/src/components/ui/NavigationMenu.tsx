@@ -8,7 +8,7 @@ import { getUserRoleAndDisplayName, clearUserSession } from "../../libr/auth";
 
 
 import type { IconType } from "react-icons";
-import { FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt, FaMapMarked } from "react-icons/fa";
+import { FaMapMarkedAlt, FaBullhorn, FaShieldAlt, FaMapMarked } from "react-icons/fa";
 import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdOutlineMonitorHeart, MdKeyboardArrowUp } from "react-icons/md";
 import { PiUsersBold } from "react-icons/pi";
 import { TbFileReport } from "react-icons/tb";

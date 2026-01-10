@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Search, MapPin, Phone, Navigation, Users } from 'lucide-react';
+import { GrLocationPin } from "react-icons/gr";
+import { getUserRoleAndDisplayName } from "../../../libr/auth";
 import './EvacCenterPage.css';
 
 interface EvacuationCenter {
@@ -63,6 +65,9 @@ const evacuationCenters: EvacuationCenter[] = [
 function EvacCenterPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  //get user role
+  const { userRole, displayName, profilePath } = getUserRoleAndDisplayName();
+
   const handleGetDirections = (coordinates: string) => {
     const [lat, lng] = coordinates.split(', ');
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
@@ -85,11 +90,38 @@ function EvacCenterPage() {
           <MapPin className="evac-title-icon" />
           <h1>Evacuation Centers</h1>
         </div>
+        
         <p className="evac-header-desc">
-          Find the nearest evacuation center in your barangay
+          {userRole === "Officer"
+            ? "Manage evacuation center locations across Cabuyao"
+            : userRole === "Researcher"
+            ? "Find the nearest evacuation center in your barangay"
+            : null}
         </p>
       </div>
 
+      {userRole === "Officer" && (
+        <div className="evac-grid">
+          <div className="evac-card evac-stat-card">
+            <div className="evac-stat-text">
+              <h3>Total Centers</h3>
+              <p className="evac-card-value">7</p>
+            </div>
+            <MapPin className="evac-card-icon" />
+          </div>
+
+          <div className="evac-card evac-stat-card">
+            <div className="evac-stat-text">
+              <h3>Barangays Covered</h3>
+              <p className="evac-card-value">7</p>
+              </div>
+            <Users className="evac-card-icon" />
+          </div>
+        </div>
+      )}  
+
+
+      {/* Search Evacuation Container */}
       <div className="evac-search-wrapper">
         <input
           type="text"
@@ -101,43 +133,74 @@ function EvacCenterPage() {
         <Search className="evac-search-icon" />
       </div>
 
-
-
-
       <div className="evac-grid">
-        {filteredCenters.map(center => (
-          <div key={center.id} className="evac-card">
-            <h2 className="evac-card-name">
-              {center.name}
-              <span className="evac-capacity">
-                <Users className="evac-capacity-icon" />
-                {center.capacity}
-              </span>
-            </h2>
+        {userRole === "Citizen" ? (
+          filteredCenters.map(center => (
+            <div key={center.id} className="evac-card">
+              <h2 className="evac-card-name">
+                {center.name}
+                <span className="evac-capacity">
+                  <Users className="evac-capacity-icon" />
+                  {center.capacity}
+                </span>
+              </h2>
 
-            <p className="evac-barangay">{center.barangay}</p>
+              <p className="evac-barangay">{center.barangay}</p>
 
-            <div className="evac-info">
-              <div className="evac-info-row">
-                <MapPin className="evac-info-icon" />
-                <span>{center.address}</span>
+              <div className="evac-info">
+                <div className="evac-info-row">
+                  <MapPin className="evac-info-icon" />
+                  <span>{center.address}</span>
+                </div>
+
+                <div className="evac-info-row">
+                  <Phone className="evac-info-icon" />
+                  <span>{center.contact}</span>
+                </div>
               </div>
 
-              <div className="evac-info-row">
-                <Phone className="evac-info-icon" />
-                <span>{center.contact}</span>
+              <button
+                className="evac-btn"
+                onClick={() => handleGetDirections(center.coordinates)}
+              >
+                <Navigation className="evac-btn-icon" />
+                Get Directions
+              </button>
+            </div>
+          ))
+        ) : userRole === "Officer" ? (
+          filteredCenters.map(center => (
+            <div key={center.id} className="evac-card officer">
+              <h2 className="evac-card-name">
+                {center.name}
+                <span className="evac-tag">Barangay Hall</span>
+              </h2>
+
+              <p className="evac-barangay">{center.barangay}</p>
+
+              <div className="evac-info">
+                <div className="evac-info-row">
+                  <MapPin className="evac-info-icon" />
+                  <span>{center.address}</span>
+                </div>
+                <div className="evac-info-row">
+                  <GrLocationPin className="evac-info-icon" />
+                  <span>{center.coordinates}</span>
+                </div>
+              </div>
+              <br />
+              <hr />
+              <div className="evac-actions">
+                <button className="evac-edit-btn">
+                  Edit
+                </button>
+                <button className="evac-delete-btn">
+                  Delete
+                </button>
               </div>
             </div>
-
-            <button
-              className="evac-btn"
-              onClick={() => handleGetDirections(center.coordinates)}
-            >
-              <Navigation className="evac-btn-icon" />
-              Get Directions
-            </button>
-          </div>
-        ))}
+          ))
+        ) : null}
       </div>
 
       <div className="evac-reminders">

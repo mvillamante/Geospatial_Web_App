@@ -3,7 +3,7 @@ import "./NavigationMenu.css";
 import { useAuth } from "../../context/AuthContext";
 {/*import HazspotLogo from '../../assets/?.png';*/ }
 import { useNavigate, NavLink } from 'react-router-dom';
-import { getUserRoleAndDisplayName, clearUserSession } from "../../lib/auth";
+import { getUserRoleAndDisplayName, clearUserSession } from "../../libr/auth";
 
 
 import type { IconType } from "react-icons";

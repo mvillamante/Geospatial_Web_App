@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import ReportCard from './ReportCard';
 import "./ProfilePage.css";
-import { getUserRoleAndDisplayName } from "../../../../lib/auth";
+import { getUserRoleAndDisplayName } from "../../../../libr/auth";
 
 const mockReports = [
   {

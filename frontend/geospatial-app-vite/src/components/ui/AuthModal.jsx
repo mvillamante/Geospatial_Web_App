@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { saveUserSession } from "../../lib/auth";
+import { saveUserSession } from "../../libr/auth";
 import { normalizeRole, roleToBasePath } from "../../utils/roles";
 import "./AuthModal.css";
 
@@ -54,7 +54,7 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                 alert(result.error);
                 return;
             }
-            console.log("the user --> ", result.role);
+            console.log("the user --> ", result.user);
             // Save user session
             saveUserSession(result.user, result.access_token); //only save user role/s
 

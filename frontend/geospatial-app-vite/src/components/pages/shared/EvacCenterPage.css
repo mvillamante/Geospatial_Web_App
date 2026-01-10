@@ -53,6 +53,14 @@
     transition: all 0.25s ease;
 }
 
+.evac-card.officer {
+    border: 1px solid #cbd5e1;
+    padding: 1.75rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: all 0.25s ease;
+}
+
 .evac-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
@@ -95,9 +103,17 @@
     color: #4b5563;
 }
 
+.evac-card.officer .evac-info {
+    color: #374151;
+}
+
 .evac-info-row {
     display: flex;
     gap: 8px;
+}
+
+.evac-card.officer .evac-info-row span {
+    font-weight: 500;
 }
 
 .evac-info-icon {
@@ -186,6 +202,90 @@
     color: #6b7280;
     pointer-events: none;
     font-size: 0.95rem;
+}
+
+
+/* Officer action buttons --------------------- */
+
+.evac-stat-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.evac-stat-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.evac-stat-text h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #374151;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+
+.evac-card-value {
+    margin-top: 0.5rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.evac-card-icon {
+    width: 36px;
+    height: 36px;
+    color: #2563eb;
+    flex-shrink: 0;
+}
+
+.evac-tag {
+    background: #2563eb;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.evac-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.evac-edit-btn,
+.evac-delete-btn {
+    background-color: white;
+    color: black;
+    padding: 0.6rem 0;
+    border: 1px solid rgb(223, 220, 220);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.evac-edit-btn {
+    width: 80%;
+}
+
+.evac-edit-btn:hover {
+    transform: translateY(-2px);
+}
+
+.evac-delete-btn {
+    width: 20%;
+}
+
+.evac-delete-btn:hover {
+    transform: translateY(-2px);
 }
 
 @media (max-width: 1024px) {

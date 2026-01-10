@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode, useContext } from "react";
-import { fetchCurrentUser, User } from "../lib/fetchCurrentUser";
-import { supabase } from "../lib/supabaseClient";
+import { fetchCurrentUser, User } from "../libr/fetchCurrentUser";
+import { supabase } from "../libr/supabaseClient";
 
 // AuthContextType definition
 interface AuthContextType {

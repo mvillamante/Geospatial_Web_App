@@ -78,6 +78,8 @@ def login_user(request):
                 "user": {
                     "id": user.id,
                     "username": user.username,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
                     "email": user.email,
                     "role": user.role,
                     "extra_roles": user.extra_roles or [],        

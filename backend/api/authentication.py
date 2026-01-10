@@ -23,7 +23,7 @@ class SupabaseJWTAuthentication(BaseAuthentication):
                 email = payload.get("email", "")
                 first_name = payload.get("user_metadata", {}).get("first_name", "Citizen")
                 last_name = payload.get("user_metadata", {}).get("last_name", "")
-                username = f"{first_name.capitalize()}.{last_name.capitalize()}" if last_name else first_name.capitalize()
+                username = f"{first_name.capitalize()}{last_name.capitalize()}" if last_name else first_name.capitalize()
 
                 user = CustomUser.objects.create(
                     username=username,

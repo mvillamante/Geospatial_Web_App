@@ -1,5 +1,6 @@
 // NavigationMenu
 import "./NavigationMenu.css";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 {/*import HazspotLogo from '../../assets/?.png';*/ }
 import { useNavigate, NavLink } from 'react-router-dom';
@@ -8,7 +9,7 @@ import { getUserRoleAndDisplayName, clearUserSession } from "../../libr/auth";
 
 import type { IconType } from "react-icons";
 import { FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt, FaMapMarked } from "react-icons/fa";
-import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdOutlineMonitorHeart } from "react-icons/md";
+import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdOutlineMonitorHeart, MdKeyboardArrowUp } from "react-icons/md";
 import { PiUsersBold } from "react-icons/pi";
 import { TbFileReport } from "react-icons/tb";
 import { FiEdit } from "react-icons/fi";
@@ -28,12 +29,26 @@ interface StoredUserRoles {
 const NavigationMenu: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     // ===== Get user roles from localStorage =====
     const { userRole, displayName, profilePath } = getUserRoleAndDisplayName();
 
     console.log("Navigation Role (NavMenu):", userRole);
     console.log("Display Name (NavMenu):", displayName);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const navigationList: Record<string, NavItem[]> = {
         // User Role: Admin
@@ -103,48 +118,47 @@ const NavigationMenu: React.FC = () => {
                 ))}
             </nav>
 
-            {/* Profile Section */}
-            <div className={`user-profile-section ${userRole === "Admin" ? "admin-profile" : "user-profile"}`}>
+            {/* Profile Section with Dropdown */}
+            <div 
+                className={`user-profile-section ${userRole === "Admin" ? "admin-profile" : "user-profile"}`}
+                ref={dropdownRef}
+            >
+                {/* Profile Dropdown Trigger */}
+                <div 
+                    className="profile-dropdown-trigger"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                >
+                    <div className="profile-circle">
+                        {user?.username?.charAt(0).toUpperCase() || displayName.charAt(0).toUpperCase()}
+                    </div>
+                    <MdKeyboardArrowUp className={`dropdown-arrow ${isDropdownOpen ? 'open' : ''}`} />
+                </div>
 
-                {userRole === "Admin" ? (
-                    <>
-                        {/* Admin: vertical stacked rows */}
-                        <div className="profile-row">
-                            <div
-                                className="profile-circle"
-                                onClick={() => navigate(profilePath)}
-                                style={{ cursor: "pointer" }}
-                                title={displayName}
-                            >
-                                {displayName.charAt(0).toUpperCase()}
-                            </div>
-
-                            <div className="profile-name">{user?.username || userRole}</div>
-                        </div>
-                        <div className="logout-row">
-                            <button className="logout-btn" onClick={handleLogout}>
-                                <MdLogout className="logout-icon" />
-                            </button>
-                            <span className="logout-label">Logout</span>
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        {/* Default user: simple stacked */}
-                        <div
-                            className="profile-circle"
-                            onClick={() => navigate(profilePath)}
-                            style={{ cursor: "pointer" }}
-                            title="View Profile"
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                    <div className="profile-dropdown-menu">
+                        <div 
+                            className="dropdown-profile-info"
+                            onClick={() => {
+                                navigate(profilePath);
+                                setIsDropdownOpen(false);
+                            }}
                         >
-                            {user?.username?.charAt(0).toUpperCase() || userRole.charAt(0)}
+                            <div className="dropdown-avatar">
+                                {user?.username?.charAt(0).toUpperCase() || displayName.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="dropdown-user-details">
+                                <span className="dropdown-username">{user?.username || displayName}</span>
+                                <span className="dropdown-role">{userRole}</span>
+                            </div>
                         </div>
-                        <button className="logout-btn" onClick={handleLogout}>
-                            <MdLogout className="logout-icon" />
+                        <div className="dropdown-divider"></div>
+                        <button className="dropdown-logout-btn" onClick={handleLogout}>
+                            <MdLogout className="dropdown-logout-icon" />
+                            <span>Logout</span>
                         </button>
-                    </>
+                    </div>
                 )}
-
             </div>
 
         </div>

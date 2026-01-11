@@ -3,6 +3,8 @@ import "./DashboardMapPage.css";
 import LeafletMap from "../../ui/LeafletMap";
 import { FiDownload } from "react-icons/fi";
 import { HiOutlineDocumentReport, HiOutlineChartBar } from "react-icons/hi";
+import floodZoneIcon from "../../../assets/icons/floodzone.png";
+import landslideIcon from "../../../assets/icons/landslide.png";
 
 type ReportItem = [string, string]; // [title, meta]
 type ChartItem = string;
@@ -28,7 +30,7 @@ const DashboardMapPage: React.FC = () => {
     { value: "population", label: "Population Density" },
   ];
 
-  const handleSelect = (value) => {
+  const handleSelect = (value: string) => {
     setSelected(value);
     setOpen(false);
   };
@@ -40,7 +42,7 @@ const DashboardMapPage: React.FC = () => {
   const minYear = currentYear - 20;
   const maxYear = currentYear + 20;
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setYear(Number(e.target.value));
   };
 
@@ -105,10 +107,21 @@ const DashboardMapPage: React.FC = () => {
   ];
 
 
-  const handleDownload = (item: ReportItem | ChartItem, sectionTitle: string) => {
+  const handleDownload = (item: ExportItem, sectionTitle: string) => {
     if (sectionTitle === "Recent Downloads") return;
 
-    const name = Array.isArray(item) ? item[0] : item;
+    // Handle different item types
+    let name: string;
+    if (Array.isArray(item)) {
+      // ReportItem: [title, meta]
+      name = item[0];
+    } else if (typeof item === "string") {
+      // ChartItem: string
+      name = item;
+    } else {
+      // DownloadItem: { name, type }
+      name = item.name;
+    }
 
     const downloadedItem: DownloadItem = {
       name,
@@ -252,12 +265,173 @@ const DashboardMapPage: React.FC = () => {
         {mapView === "interactive" ? (
           <div className="dashboardview-map">
             {/* Interactive Map Component */}
-            <LeafletMap height="100vh" mapView="interactive" />
+            <LeafletMap height="100vh" mapView="interactive" mapType={mapType} activeLayers={activeLayers} />
 
             {/* Time Slider Floating Island */}
             <div className="timeslider-floating-tab">
                 <span>Projection: {year}</span>
             </div>
+
+            {/* Flood Zone Legend - appears when Flood Zones layer is active */}
+            {activeLayers.includes("Flood Zones") && (
+              <div className="flood-zone-legend">
+                <h4><img src={floodZoneIcon} alt="Flood Zone" className="flood-legend-icon" /> Flood Zone Legend</h4>
+                <div className="flood-legend-subtitle">Cabuyao, Laguna</div>
+                <ul>
+                  <li className="high">
+                    <span className="legend-color"></span>
+                    <span className="legend-text">High Risk Zone</span>
+                  </li>
+                  <li className="moderate">
+                    <span className="legend-color"></span>
+                    <span className="legend-text">Moderate Risk Zone</span>
+                  </li>
+                  <li className="low">
+                    <span className="legend-color"></span>
+                    <span className="legend-text">Low Risk Zone</span>
+                  </li>
+                </ul>
+                <div className="flood-legend-note">
+                  <span>💡</span>
+                  <span>Click on zones for details</span>
+                </div>
+              </div>
+            )}
+
+            {/* Landslide Risk Legend - appears when Landslide Risk layer is active */}
+            {activeLayers.includes("Landslide Risk") && (
+              <div className="landslide-risk-legend">
+                <h4><img src={landslideIcon} alt="Landslide" className="landslide-legend-icon" /> Landslide Risk Legend</h4>
+                <div className="landslide-legend-subtitle">Cabuyao, Laguna</div>
+                <ul>
+                  <li className="high">
+                    <span className="legend-color"></span>
+                    <span className="legend-text">High Risk Zone</span>
+                  </li>
+                  <li className="moderate">
+                    <span className="legend-color"></span>
+                    <span className="legend-text">Moderate Risk Zone</span>
+                  </li>
+                  <li className="low">
+                    <span className="legend-color"></span>
+                    <span className="legend-text">Low Risk Zone</span>
+                  </li>
+                </ul>
+                <div className="landslide-legend-info">
+                  <div className="legend-info-item">
+                    <span>📐</span>
+                    <span>Slope gradient analysis</span>
+                  </div>
+                  <div className="legend-info-item">
+                    <span>🌧️</span>
+                    <span>Rainfall triggered susceptibility</span>
+                  </div>
+                </div>
+                <div className="landslide-legend-note">
+                  <span>💡</span>
+                  <span>Click on zones for details</span>
+                </div>
+              </div>
+            )}
+
+            {/* Evacuation Centers Legend - appears when Evacuation Centers layer is active */}
+            {activeLayers.includes("Evacuation Centers") && (
+              <div className="evac-centers-legend">
+                <h4>🆘 Evacuation Centers</h4>
+                <div className="evac-legend-subtitle">Cabuyao, Laguna</div>
+                <ul>
+                  <li className="school">
+                    <span className="legend-icon">🏫</span>
+                    <span className="legend-text">School</span>
+                  </li>
+                  <li className="covered-court">
+                    <span className="legend-icon">🏀</span>
+                    <span className="legend-text">Covered Court</span>
+                  </li>
+                  <li className="multi-purpose">
+                    <span className="legend-icon">🏛️</span>
+                    <span className="legend-text">Multi-Purpose Hall</span>
+                  </li>
+                  <li className="gymnasium">
+                    <span className="legend-icon">🏟️</span>
+                    <span className="legend-text">Gymnasium</span>
+                  </li>
+                </ul>
+                <div className="evac-legend-stats">
+                  <div className="stat-item">
+                    <span className="stat-number">18</span>
+                    <span className="stat-label">Sites</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-number">6.5K+</span>
+                    <span className="stat-label">Total Capacity</span>
+                  </div>
+                </div>
+                <div className="evac-legend-note">
+                  <span>💡</span>
+                  <span>Click markers for details</span>
+                </div>
+              </div>
+            )}
+
+            {/* Roads Legend - appears when Roads layer is active */}
+            {activeLayers.includes("Roads") && (
+              <div className="roads-legend">
+                <h4>🛣️ Roads & Bridges</h4>
+                <div className="roads-legend-subtitle">Cabuyao, Laguna</div>
+                
+                <div className="roads-legend-section">
+                  <span className="section-title">Road Types</span>
+                  <ul>
+                    <li className="major-road">
+                      <span className="legend-line"></span>
+                      <span className="legend-text">Major Road</span>
+                    </li>
+                    <li className="secondary-road">
+                      <span className="legend-line"></span>
+                      <span className="legend-text">Secondary Road</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="roads-legend-section">
+                  <span className="section-title">Infrastructure</span>
+                  <ul>
+                    <li className="bridge">
+                      <span className="legend-icon">🌉</span>
+                      <span className="legend-text">Bridge</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="roads-legend-section status-section">
+                  <span className="section-title">Status</span>
+                  <ul>
+                    <li className="open-status">
+                      <span className="status-badge open">✓ OPEN</span>
+                      <span className="legend-text">Passable</span>
+                    </li>
+                    <li className="closed-status">
+                      <span className="status-badge closed">⛔ CLOSED</span>
+                      <span className="legend-text">Not Passable</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="roads-legend-alert">
+                  <span className="alert-icon">🚧</span>
+                  <div className="alert-content">
+                    <span className="alert-title">Road Closures</span>
+                    <span className="alert-count">2 roads currently closed</span>
+                  </div>
+                </div>
+
+                <div className="roads-legend-note">
+                  <span>💡</span>
+                  <span>Click on roads for details</span>
+                </div>
+              </div>
+            )}
           </div>
         ) : mapView === "choropleth" ? (
           <div className="choroplethview-map">
@@ -270,7 +444,7 @@ const DashboardMapPage: React.FC = () => {
             </div>
 
             {/* Map Visual*/}
-            <LeafletMap height="75vh" mapView="choropleth" /> 
+            <LeafletMap height="75vh" mapView="choropleth" mapType={mapType} /> 
 
             {/* Legends */}
             <div className="choropleth-legend-box">
@@ -374,7 +548,7 @@ const DashboardMapPage: React.FC = () => {
                 <div className="columnpanel-card">
                   <div className="panel-card">Flood Risk: Increased by 25% over 5-year period (2020-2025).</div>
                   <div className="panel-card">Green Index: Current trajectory shows 29% improvement trend toward 2030 targets.</div>
-                  <div className="panel-card">Landslide: Eastern barangays show 40% higher susceptibility based on terrain analysis.</div>
+                  <div className="panel-card">Landslide: Western upland/foothill areas show higher susceptibility, especially during prolonged heavy rainfall.</div>
                 </div>
               </div>
 

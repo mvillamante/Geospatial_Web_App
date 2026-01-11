@@ -1,5 +1,8 @@
 /* LeafletMap Component Styles */
 
+/* Import layer-specific styles */
+@import "./mapLayers/styles.css";
+
 /* =============================================
    Map Container
    ============================================= */

@@ -1,8 +1,17 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./LeafletMap.css";
 import type { Report } from "../pages/citizen-guest/AlertsComponents/AlertsPanel";
+
+// Import layer creation functions from organized modules
+import {
+  createFaultLinesLayer,
+  createFloodZonesLayer,
+  createLandslideRiskLayer,
+  createEvacuationCentersLayer,
+  createRoadsLayer,
+} from "./mapLayers";
 
 // Fake risk levels
 const barangayRisk: Record<string, "High" | "Medium" | "Low"> = {
@@ -81,22 +90,42 @@ interface OverpassResponse {
   elements: OverpassElement[];
 }
 
+// Tile layer configurations for different map types
+const tileLayerConfigs = {
+  basic: {
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: "© OpenStreetMap contributors",
+  },
+  satellite: {
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    attribution: "Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+  },
+  terrain: {
+    url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+    attribution: "Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)",
+  },
+};
+
 interface LeafletMapProps {
   height?: string;
   mapView?: "interactive" | "choropleth";
+  mapType?: "basic" | "satellite" | "terrain";
   searchedBarangay?: string;
   searchedSeverity?: string | null;
   selectedReport?: Report | null;
   reportClickTimestamp?: number | null;
+  activeLayers?: string[];
 }
 
 export default function LeafletMap({ 
   height = "600px", 
   mapView = "interactive", 
+  mapType = "basic",
   searchedBarangay = "", 
   searchedSeverity = null, 
   selectedReport = null, 
-  reportClickTimestamp = null 
+  reportClickTimestamp = null,
+  activeLayers = []
 }: LeafletMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -105,6 +134,14 @@ export default function LeafletMap({
   const searchMarkerRef = useRef<L.Marker | null>(null);
   const reportMarkerRef = useRef<L.Marker | null>(null);
   const barangayDataRef = useRef<BarangayData[]>([]);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
+  
+  // Layer refs for toggle functionality
+  const faultLinesLayerRef = useRef<L.LayerGroup | null>(null);
+  const floodZonesLayerRef = useRef<L.LayerGroup | null>(null);
+  const landslideRiskLayerRef = useRef<L.LayerGroup | null>(null);
+  const evacuationCentersLayerRef = useRef<L.LayerGroup | null>(null);
+  const roadsLayerRef = useRef<L.LayerGroup | null>(null);
 
   // Initialize map
   useEffect(() => {
@@ -112,13 +149,39 @@ export default function LeafletMap({
       const map = L.map("map").setView([14.2349, 121.1211], 13);
       mapRef.current = map;
 
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap contributors",
+      // Add initial tile layer
+      const config = tileLayerConfigs[mapType];
+      tileLayerRef.current = L.tileLayer(config.url, {
+        attribution: config.attribution,
+        maxZoom: 19,
       }).addTo(map);
     }
   }, []);
 
+  // Handle map type (tile layer) switching
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    // Remove existing tile layer
+    if (tileLayerRef.current) {
+      tileLayerRef.current.remove();
+    }
+
+    // Add new tile layer based on mapType
+    const config = tileLayerConfigs[mapType];
+    tileLayerRef.current = L.tileLayer(config.url, {
+      attribution: config.attribution,
+      maxZoom: 19,
+    }).addTo(map);
+
+    // Move tile layer to bottom so markers/polygons stay on top
+    tileLayerRef.current.bringToBack();
+  }, [mapType]);
+
   // User location (only for interactive)
+  const hasInitialCenteredRef = useRef(false);
+  
   useEffect(() => {
     const map = mapRef.current;
     if (!map || mapView !== "interactive") return;
@@ -141,7 +204,11 @@ export default function LeafletMap({
           circleRef.current.setLatLng(latlng).setRadius(circleRadius);
         }
 
-        map.setView(latlng);
+        // Only center on user location once during initial load
+        if (!hasInitialCenteredRef.current) {
+          map.setView(latlng);
+          hasInitialCenteredRef.current = true;
+        }
       },
       (err) => {
         if (err.code === 1) alert("Please allow geolocation access");
@@ -411,6 +478,101 @@ export default function LeafletMap({
     }, 1100);
     
   }, [selectedReport, reportClickTimestamp]);
+
+  // Handle Fault Lines layer toggle
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const showFaultLines = activeLayers.includes("Fault Lines");
+
+    // Remove existing fault lines layer if it exists
+    if (faultLinesLayerRef.current) {
+      faultLinesLayerRef.current.remove();
+      faultLinesLayerRef.current = null;
+    }
+
+    // Add fault lines if layer is active
+    if (showFaultLines) {
+      faultLinesLayerRef.current = createFaultLinesLayer(map);
+    }
+  }, [activeLayers]);
+
+  // Handle Flood Zones layer toggle
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const showFloodZones = activeLayers.includes("Flood Zones");
+
+    // Remove existing flood zones layer if it exists
+    if (floodZonesLayerRef.current) {
+      floodZonesLayerRef.current.remove();
+      floodZonesLayerRef.current = null;
+    }
+
+    // Add flood zones if layer is active
+    if (showFloodZones) {
+      floodZonesLayerRef.current = createFloodZonesLayer(map);
+    }
+  }, [activeLayers]);
+
+  // Handle Landslide Risk layer toggle
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const showLandslideRisk = activeLayers.includes("Landslide Risk");
+
+    // Remove existing landslide risk layer if it exists
+    if (landslideRiskLayerRef.current) {
+      landslideRiskLayerRef.current.remove();
+      landslideRiskLayerRef.current = null;
+    }
+
+    // Add landslide risk zones if layer is active
+    if (showLandslideRisk) {
+      landslideRiskLayerRef.current = createLandslideRiskLayer(map);
+    }
+  }, [activeLayers]);
+
+  // Handle Evacuation Centers layer toggle
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const showEvacuationCenters = activeLayers.includes("Evacuation Centers");
+
+    // Remove existing evacuation centers layer if it exists
+    if (evacuationCentersLayerRef.current) {
+      evacuationCentersLayerRef.current.remove();
+      evacuationCentersLayerRef.current = null;
+    }
+
+    // Add evacuation centers if layer is active
+    if (showEvacuationCenters) {
+      evacuationCentersLayerRef.current = createEvacuationCentersLayer(map);
+    }
+  }, [activeLayers]);
+
+  // Handle Roads layer toggle
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const showRoads = activeLayers.includes("Roads");
+
+    // Remove existing roads layer if it exists
+    if (roadsLayerRef.current) {
+      roadsLayerRef.current.remove();
+      roadsLayerRef.current = null;
+    }
+
+    // Add roads if layer is active
+    if (showRoads) {
+      roadsLayerRef.current = createRoadsLayer(map);
+    }
+  }, [activeLayers]);
 
   return (
     <div id="map" style={{ height: height, width: "100%" }}></div>

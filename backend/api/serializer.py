@@ -67,4 +67,29 @@ class RegisterSerializer(serializers.ModelSerializer):
         #user.profile.full_name = f"{first_name} {last_name}"
         #user.profile.save()
 
+class AdminUserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = [
+            'id',
+            'username',
+            'email',
+            'phone',
+            'role',
+            'is_active',
+            'date_joined',
+            'last_login'
+        ]
+     
+class AssignUserRoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('role',)
+
+    def validate_role(self, value):
+        valid_roles = ['admin', 'researcher', 'officer', 'citizen']
+        if value not in valid_roles:
+            raise serializers.ValidationError("Invalid role.")
+        return value
+
         return user

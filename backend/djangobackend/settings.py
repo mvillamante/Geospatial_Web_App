@@ -135,7 +135,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # REST FRAMEWORK
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "api.authentication.SupabaseJWTAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        # "api.authentication.SupabaseJWTAuthentication",
         
     ],
 }

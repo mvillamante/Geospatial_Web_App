@@ -1,24 +1,45 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./DashboardMapPage.css";
 import LeafletMap from "../../ui/LeafletMap";
+import { getUserRoleAndDisplayName } from "../../../libr/auth";
+import { FaCheck, FaChartLine, FaArrowUp, FaExclamationTriangle, FaLeaf, FaMountain } from "react-icons/fa";
 import { FiDownload } from "react-icons/fi";
 import { HiOutlineDocumentReport, HiOutlineChartBar } from "react-icons/hi";
+import { PiWarningBold } from "react-icons/pi";
 import floodZoneIcon from "../../../assets/icons/floodzone.png";
 import landslideIcon from "../../../assets/icons/landslide.png";
 
+type DatasetsItem = [string, string, string]
 type ReportItem = [string, string]; // [title, meta]
 type ChartItem = string;
 type DownloadItem = { name: string; type: "report" | "chart" };
 
 type ExportItem = ReportItem | ChartItem | DownloadItem;
 
+type StatItem = {
+  label: string;
+  value: number;
+  change: number;
+};
+
+type HealthItem = {
+  label: string;
+  value: string;
+  status: "good" | "warning";
+};
 
 const DashboardMapPage: React.FC = () => {
+  //get user role
+  const { userRole, displayName, profilePath } = getUserRoleAndDisplayName();
+  
+  // Show Modal Popup
+  const [showEdaModal, setShowEdaModal] = useState(false);
 
   /*----------map layers----------*/
   const [mapView, setMapView] = useState<"interactive" | "choropleth">("interactive");
   const [mapType, setMapType] = useState<"basic" | "satellite" | "terrain">("basic");
   const [rightNav, setRightNav] = useState<"charts" | "analytics" | "export">("charts");
+  const [edaSect, setEdaSect] = useState<"edastats" | "modelperf">("edastats");
 
   /* data layer - custom select-option */
   const [selected, setSelected] = useState("hazard");
@@ -77,9 +98,81 @@ const DashboardMapPage: React.FC = () => {
     setIsRightPanelOpen((prev) => !prev);
   };
 
+  useEffect(() => { /*automatic closes*/ 
+    const handleResize = () => {
+      if (window.innerWidth <= 1056) {
+        setIsRightPanelOpen(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  /* Analytics Section */
+  const colors = ["violet", "teal", "orange", "green"]
+  const keyInsights = [
+    {
+      label: "Flood Risk",
+      description: "Increased by 25% over 5-year period (2020–2025).",
+    },
+    {
+      label: "Green Index",
+      description: "Current trajectory shows 29% improvement trend toward 2030 targets.",
+    },
+    {
+      label: "Landslide Risk",
+      description:
+        "Western upland and foothill areas show higher susceptibility, especially during prolonged heavy rainfall.",
+    },
+  ];
+
+  const insightIcons = [
+    <FaChartLine />,
+    <FaLeaf />,
+    <FaMountain />,
+  ];
+
   /* -----Export Section---- */
   const [recentDownloads, setRecentDownloads] = useState<DownloadItem[]>([]);
 
+  const downloadDatasets = [
+    {
+      title: "Datasets",
+      items: [
+        ["Hazard Index by Barangay", "2.4 MB", "18"],
+        ["Green Index Scores", "1.8 MB", "18"],
+        ["Earthquake Historical Data", "5.2 MB", "156"],
+        ["Typhoon Tracking Data", "8.7 MB", "89"],
+        ["Flood Zone Mapping", "12.3 MB", "45"],
+        ["Landslide Risk Assessment", "6.1 MB", "32"],
+      ] as DatasetsItem[],
+    },
+  ]
+
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const toggleSelection = (name: string) => {
+    setSelectedItems(prev =>
+      prev.includes(name) ? prev.filter(i => i !== name) : [...prev, name]
+    );
+  };
+  const selectAllDataset = () => {
+    const allNames = downloadDatasets[0].items.map(item => item[0]);
+    setSelectedItems(allNames);
+  };
+  const downloadDataset = (item: DatasetsItem) => {
+    alert(`Downloading: ${item[0]} (${item[1]})`);
+  };
+  const handleExport = (items: string[]) => {
+    if (items.length === 0) {
+      alert("No datasets selected!");
+      return;
+    }
+    alert(`Exporting: \n${items.join("\n")}`);
+  };
+
+  /* Reports, Charts, Recent Downloads */
   const exportSections = [
     {
       title: "Reports",
@@ -137,6 +230,42 @@ const DashboardMapPage: React.FC = () => {
       return [downloadedItem, ...prev].slice(0, 5);
     });
   };
+
+  /* EDA Modal Content */
+  const statisticalSummaryItems: StatItem[] = [
+    { label: "Mean Hazard Index", value: 7.23, change: 12.4 },
+    { label: "Std Deviation", value: 1.84, change: 8.2 },
+    { label: "Median Green Index", value: 3.95, change: -5.1 },
+    { label: "Skewness (Hazard)", value: 0.42, change: 2.3 },
+    { label: "Kurtosis (Green)", value: 0.18, change: -1.7 },
+  ];
+
+  const keyFindings = [
+    {
+      label: "Strong Correlation",
+      description: "Population density shows 0.82 correlation with hazard risk.",
+      type: "correlation",
+    },
+    {
+      label: "Positive Skew",
+      description: "Hazard index distribution is right-skewed, indicating more high-risk areas.",
+      type: "positive",
+    },
+    {
+      label: "Outliers Detected",
+      description: "3 barangays identified as statistical outliers requiring attention.",
+      type: "warning",
+    },
+  ];
+
+
+  const modelHealthItems: HealthItem[] = [
+    { label: "Data Quality", value: "Excellent", status: "good" },
+    { label: "Prediction Latency", value: "32ms avg", status: "good" },
+    { label: "Training Staleness", value: "45 days", status: "warning" },
+    { label: "API Uptime", value: "99.8%", status: "good" },
+  ];
+
 
 
   return (
@@ -500,18 +629,33 @@ const DashboardMapPage: React.FC = () => {
               </div>
               <div className="panel-card">
                 <span className="panel-card-title">Disaster Vulnerability Index</span>
+                <div className="chart-placeholder">
+                  Chart goes here
+                </div>
               </div>
               <div className="panel-card">
                 <span className="panel-card-title">Green Index Scores</span>
+                <div className="chart-placeholder">
+                  Chart goes here
+                </div>
               </div>
               <div className="panel-card">
                 <span className="panel-card-title">Calamity Risk Likelihood</span>
+                <div className="chart-placeholder">
+                  Chart goes here
+                </div>
               </div>
               <div className="panel-card">
                 <span className="panel-card-title">Earthquake Frequency</span>
+                <div className="chart-placeholder">
+                  Chart goes here
+                </div>
               </div>
               <div className="panel-card">
                 <span className="panel-card-title">Typhoon Frequency & Intensity</span>
+                <div className="chart-placeholder">
+                  Chart goes here
+                </div>
               </div>
             </div>
           ) : ( rightNav === "analytics" ? (
@@ -536,28 +680,139 @@ const DashboardMapPage: React.FC = () => {
               </div>
               <div className="panel-card">
                 <span className="panel-card-title">Risk Likelihood ({currentYear}-{maxYear})</span>
+                <div className="chart-placeholder">
+                  Chart goes here
+                </div>
               </div>
               <div className="panel-card">
                 <span className="panel-card-title">Green Index Projection</span>
-              </div>
-              <div className="panel-card">
-                <span className="panel-card-title">Calamity Risk Likelihood</span>
+                <div className="chart-placeholder">
+                  Chart goes here
+                </div>
               </div>
               <div className="panel-card">
                 <span className="panel-card-title">Key Insights</span>
+
                 <div className="columnpanel-card">
-                  <div className="panel-card">Flood Risk: Increased by 25% over 5-year period (2020-2025).</div>
-                  <div className="panel-card">Green Index: Current trajectory shows 29% improvement trend toward 2030 targets.</div>
-                  <div className="panel-card">Landslide: Western upland/foothill areas show higher susceptibility, especially during prolonged heavy rainfall.</div>
+                  {keyInsights.map((item, index) => (
+                    <div className={`panel-card insight-card ${colors[index % colors.length]}`}>
+                      <span className="insight-icon">{insightIcons[index % insightIcons.length]}</span>
+                      <div className="insight-text">
+                        <strong>{item.label}:</strong> {item.description}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
+
+
+              {userRole === "Researcher" && (
+                <div
+                  className="panel-card researcher"
+                  onClick={() => setShowEdaModal(true)}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <span className="panel-card-eda">
+                    View EDA & Model Performance
+                  </span>
+                </div>
+              )}
             </div>
           ) : ( rightNav === "export" ? (
             <div className="right-panel-content">
               <h4>Export Section</h4>
-              <h5>Download LGU planning materials</h5>
+              {userRole === "Officer" ? (
+                <h5>Download LGU planning materials</h5>
+              ) : userRole === "Researcher" ? (
+                <h5>Export datasets and reports</h5>
+              ) : null}
 
+              {/* CONFIGURATION -------------------- */}
+              {userRole === "Researcher" && (
+                <div className="panel-card">
+                  <div className="panel-card-header">
+                    <span className="rightpanel-title">Configuration</span>
+                  </div>
+
+                  <div className="panel-card-body">
+                    {/* Format Dropdown */}
+                    <div className="config-row">
+                      <label htmlFor="format-select">Format</label>
+                      <select id="format-select">
+                        <option value="csv">CSV</option>
+                        <option value="json">JSON</option>
+                        <option value="xlsx">XLSX</option>
+                        <option value="geojson">GeoJSON</option>
+                      </select>
+                    </div>
+
+                    {/* Date Range Dropdown */}
+                    <div className="config-row">
+                      <label htmlFor="date-range-select">Date Range</label>
+                      <select id="date-range-select">
+                        <option value="all-time">All Time</option>
+                        <option value="ytd">Year to Date</option>
+                        <option value="last-year">Last Year</option>
+                        <option value="last-5-years">Last 5 Years</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* DATASETS -------------------- */}
+              {userRole === "Researcher" && (
+                <div className="panel-card datasets-ul">
+                  <div className="panel-card-header">
+                    <span className="rightpanel-title">Datasets</span>
+                    <span className="selected-count">{selectedItems.length} selected</span>
+                  </div>
+                  <ul>
+                    {downloadDatasets[0].items.map((item, i) => {
+                      const isSelected = selectedItems.includes(item[0]);
+                      return (
+                        <li
+                          key={i}
+                          className={`export-content ${isSelected ? "selected" : ""}`}
+                        >
+                          {/* Checkbox */}
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleSelection(item[0])}
+                          />
+
+                          {/* Dataset Text */}
+                          <div
+                            className="export-text"
+                            onClick={() => toggleSelection(item[0])}
+                            style={{ cursor: "pointer" }}
+                          >
+                            <span className="export-title">{item[0]}</span>
+                            <span className="export-meta">{item[1]} • {item[2]} records</span>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+
+                  <div className="dataset-controls">
+                    <button onClick={selectAllDataset}>Select All</button>
+                    <button onClick={() => setSelectedItems([])}>Clear</button>
+                    <button
+                      className="datasets-export"
+                      disabled={selectedItems.length === 0}
+                      onClick={() => handleExport(selectedItems)}
+                    >
+                      <FiDownload /> Export ({selectedItems.length})
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* REPORTS, CHARTS, RECENT DLS -------------------- */}
               {exportSections.map((section, index) => {
                 const itemsToRender: ExportItem[] =
                   section.title === "Recent Downloads"
@@ -567,12 +822,11 @@ const DashboardMapPage: React.FC = () => {
                 return (
                   <div className="panel-card" key={index}>
                     <span className="rightpanel-title">{section.title}</span>
-
                     <ul>
                       {itemsToRender.map((item, i) => (
                         <li className="export-content" key={i}>
-                          {/* section icon */}
-                          <span
+                          {/* Export Icon */}
+                          <span 
                             className={`export-left-icon ${
                               section.title === "Reports"
                                 ? "report"
@@ -605,7 +859,7 @@ const DashboardMapPage: React.FC = () => {
                             )}
                           </div>
 
-                          {/* download icon */}
+                          {/* Download Icon */}
                           {section.title !== "Recent Downloads" && (
                             <FiDownload
                               className="export-download-icon"
@@ -622,6 +876,204 @@ const DashboardMapPage: React.FC = () => {
 
           ) : null ))}
 
+          {showEdaModal && (
+            <div className="eda-modal-overlay" onClick={() => setShowEdaModal(false)}>
+              <div className="eda-modal" onClick={(e) => e.stopPropagation()}>
+                
+                {/* Header */}
+                <div className="eda-modal-header">
+                  <h2>Exploratory Data Analysis & Model Performance</h2>
+                  <button
+                    className="eda-modal-close"
+                    onClick={() => setShowEdaModal(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Tabs */}
+                <div className="segmented-control slide four">
+                  <span className={`slider ${edaSect}`} />
+
+                  <button className={edaSect === "edastats" ? "active" : ""} onClick={() => setEdaSect("edastats")}>
+                    EDA & Statistics
+                  </button>
+
+                  <button className={edaSect === "modelperf" ? "active" : ""} onClick={() => setEdaSect("modelperf")}>
+                    Model Performance
+                  </button>
+                </div>
+
+                {edaSect === "edastats" ? (
+                  <div className="eda-modal-content">
+                    <h3>Exploratory Data Analysis</h3>
+                    <p className="eda-modal-subtitle">
+                      Statistical insights and distributions
+                    </p>
+
+                    {/* Statistical Summary */}
+                    <div className="eda-card">
+                      <h4>Statistical Summary</h4>
+
+                      {statisticalSummaryItems.map((item, index) => (
+                        <div key={index} className="eda-stat-row">
+                          <span>{item.label}</span>
+
+                          <span className="eda-stat-value">
+                            {item.value.toFixed(2)}
+                            <span
+                              className={`eda-badge ${
+                                item.change >= 0 ? "red" : "green"
+                              }`}
+                            >
+                              {item.change > 0 ? "+" : ""}
+                              {item.change}%
+                            </span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Correlation with Risk Indices Section (placeholder) */}
+                    <div className="eda-card">
+                      <h4>Correlation with Risk Indices</h4>
+                      <div className="chart-placeholder">
+                        Chart goes here
+                      </div>
+                    </div>
+
+                    {/* Index Distribution Section (placeholder) */}
+                    <div className="eda-card">
+                      <h4>Index Distribution</h4>
+                      <div className="chart-placeholder">
+                        Chart goes here
+                      </div>
+                    </div>
+
+                    {/* Outlier Detection (Hazard vs Green) Section (placeholder) */}
+                    <div className="eda-card">
+                      <h4>Outlier Detection (Hazard vs Green)</h4>
+                      <div className="chart-placeholder">
+                        Chart goes here
+                      </div>
+                    </div>
+
+                    {/* Key Statistical Findings Section (placeholder) */}
+                    <div className="eda-card">
+                      <h4>Key Statistical Findings</h4>
+
+                      <div className="eda-findings">
+                        {keyFindings.map((item, index) => (
+                          <div key={index} className={`eda-finding ${item.type}`}>
+                            <span className="eda-finding-icon">
+                              {item.type === "correlation" && <FaChartLine />}
+                              {item.type === "positive" && <FaArrowUp />}
+                              {item.type === "warning" && <FaExclamationTriangle />}
+                            </span>
+                            <div className="eda-finding-text">
+                              <strong>{item.label}:</strong> {item.description}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                  </div>
+                ) : edaSect === "modelperf" ? (
+                  <div className="eda-modal-content">
+                    <h3>Model Performance Monitoring</h3>
+                    <p className="eda-modal-subtitle">
+                      ML model metrics and validation
+                    </p>
+                    {/* Accuracy and F1 Score (placeholder)*/}
+                    <div className="eda-card-row">
+                      <div className="eda-card">
+                        <h4>Accuracy</h4>
+                      </div>
+                      <div className="eda-card">
+                        <h4>F1 Score</h4>
+                      </div>
+                    </div>
+
+                    {/* Performance Metrics Trend (placeholder)*/}
+                    <div className="eda-card">
+                      <h4>Performance Metrics Trend</h4>
+                      <div className="chart-placeholder">
+                        Chart goes here
+                      </div>
+                    </div>
+
+                    {/* Confusion Matrix Trend (placeholder)*/}
+                    <div className="eda-card">
+                      <h4>Confusion Matrix (Last 30 Days)</h4>
+                      <div className="chart-placeholder">
+                        Chart goes here
+                      </div>
+                    </div>
+
+                    {/* Performance by Risk Class (placeholder)*/}
+                    <div className="eda-card">
+                      <h4>Confusion Matrix (Last 30 Days)</h4>
+                      <div className="chart-placeholder">
+                        Chart goes here
+                      </div>
+                    </div>
+
+                    {/* Feature Importance (placeholder)*/}
+                    <div className="eda-card">
+                      <h4>Confusion Matrix (Last 30 Days)</h4>
+                      <div className="chart-placeholder">
+                        Chart goes here
+                      </div>
+                    </div>
+
+                    {/* Model Drift Detection */}
+                    <div className="eda-card">
+                      <h4>Model Drift Detection</h4>
+                      <div className="chart-placeholder">
+                        Chart goes here
+                      </div>
+
+                      <div className="eda-warning">
+                        <PiWarningBold /> <strong>Moderate Drift:</strong> Model drift increasing.
+                        Consider retraining within 2 weeks.
+                      </div>
+                    </div>
+
+                    {/* Model Health Status */}
+                    <div className="eda-card">
+                      <h4>Model Health Status</h4>
+
+                      {modelHealthItems.map((item, index) => (
+                        <div
+                          key={index}
+                          className={`eda-health-row ${item.status === "good" ? "good" : "warning"}`}
+                        >
+                          <span className="eda-health-label">
+                            {item.status === "good" ? (
+                              <FaCheck color="#137333" />
+                            ) : (
+                              <PiWarningBold color="#ff9800" />
+                            )}{" "}
+                            {item.label}
+                          </span>
+
+                          <span
+                            className={`eda-health-badge ${item.status === "good" ? "green" : "orange"}`}
+                          >
+                            {item.value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                  </div>
+                ) : null }
+
+                
+              </div>
+            </div>
+          )}
         </aside>
       </div>
     </div>

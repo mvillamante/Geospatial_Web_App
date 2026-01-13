@@ -192,7 +192,7 @@ export default function LeafletMap({
         const latlng: [number, number] = [latitude, longitude];
 
         if (!markerRef.current) {
-          markerRef.current = L.marker(latlng).addTo(map);
+          markerRef.current = L.marker(latlng, { title: "Your Location" }).addTo(map);
         } else {
           markerRef.current.setLatLng(latlng);
         }
@@ -205,10 +205,10 @@ export default function LeafletMap({
         }
 
         // Only center on user location once during initial load
-        if (!hasInitialCenteredRef.current) {
-          map.setView(latlng);
-          hasInitialCenteredRef.current = true;
-        }
+        //if (!hasInitialCenteredRef.current) {
+        //  map.setView(latlng);
+        //  hasInitialCenteredRef.current = true;
+        //}
       },
       (err) => {
         if (err.code === 1) alert("Please allow geolocation access");
@@ -218,6 +218,48 @@ export default function LeafletMap({
 
     return () => navigator.geolocation.clearWatch(watcher);
   }, [mapView]);
+
+  // "Go to My Location" button
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || mapView !== "interactive") return;
+
+    const locateControl = L.control({ position: "topleft" });
+
+    locateControl.onAdd = function () {
+      const div = L.DomUtil.create("div", "leaflet-bar leaflet-control leaflet-control-custom");
+      div.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <path d="M12 8a4 4 0 100 8 4 4 0 000-8zm0-5a1 1 0 011 1v2.07a8.002 8.002 0 015.905 5.905H21a1 1 0 110 2h-2.07a8.002 8.002 0 01-5.905 5.905V21a1 1 0 11-2 0v-2.07a8.002 8.002 0 01-5.905-5.905H3a1 1 0 110-2h2.07a8.002 8.002 0 015.905-5.905V4a1 1 0 011-1z"/>
+        </svg>
+      `;
+      div.title = "Go to My Location";
+
+      div.style.cursor = "pointer";
+      div.style.fontSize = "20px";
+      div.style.padding = "4px 8px";
+      div.style.background = "white";
+      div.style.border = "1px solid #ccc";
+      div.style.borderRadius = "4px";
+      div.style.textAlign = "center";
+
+      div.onclick = () => {
+        if (markerRef.current) {
+          map.flyTo(markerRef.current.getLatLng(), 15, { duration: 1 });
+          markerRef.current.openPopup?.();
+        } else {
+          alert("User location not available yet.");
+        }
+      };
+
+      return div;
+    };
+
+    locateControl.addTo(map);
+
+    return () => locateControl.remove();
+  }, [mapView]);
+
 
   // Load data
   useEffect(() => {

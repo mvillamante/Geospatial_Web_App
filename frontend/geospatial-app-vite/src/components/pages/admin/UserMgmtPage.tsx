@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Edit, Trash2, Power, PowerOff, AlertTriangle, CheckCircle, XCircle, CircleChevronDown, Menu } from 'lucide-react';
 import './UserMgmtPage.css';
+
+// const currentUserRole: Role = 'Admin';
+const currentUserRole = localStorage.getItem("role") as Role;
+
 
 type Role = 'Citizen' | 'Researcher' | 'Officer' | 'Admin';
 type Status = 'Active' | 'Inactive';
@@ -24,30 +28,69 @@ interface ResearcherRequest {
   status: RequestStatus;
 }
 
-const mockUsers: User[] = [
-  { id: 1, name: 'Juan Cruz', email: 'juan@example.com', phone: '09987654321', role: 'Citizen', status: 'Active', reports: 5 },
-  { id: 2, name: 'Dr. Maria Santos', email: 'maria@example.com', phone: '09111222333', role: 'Citizen', status: 'Active', reports: 0 },
-  { id: 3, name: 'Pedro Reyes', email: 'pedro@example.com', phone: '09876543210', role: 'Citizen', status: 'Active', reports: 2 },
-];
+// const mockUsers: User[] = [
+//   { id: 1, name: 'Juan Cruz', email: 'juan@example.com', phone: '09987654321', role: 'Citizen', status: 'Active', reports: 5 },
+//   { id: 2, name: 'Dr. Maria Santos', email: 'maria@example.com', phone: '09111222333', role: 'Citizen', status: 'Active', reports: 0 },
+//   { id: 3, name: 'Pedro Reyes', email: 'pedro@example.com', phone: '09876543210', role: 'Citizen', status: 'Active', reports: 2 },
+// ];
 
-const mockRequests: ResearcherRequest[] = [
-  {
-    id: 1,
-    userId: 1,
-    userName: 'Juan Cruz',
-    date: '2025-10-25',
-    status: 'Pending',
-  },
-];
+// const mockRequests: ResearcherRequest[] = [
+//   {
+//     id: 1,
+//     userId: 1,
+//     userName: 'Juan Cruz',
+//     date: '2025-10-25',
+//     status: 'Pending',
+//   },
+// ];
 
 
 
 const UserMgmtPage: React.FC = () => {
-  const [users, setUsers] = useState<User[]>(mockUsers);
-  const [requests, setRequests] = useState<ResearcherRequest[]>(mockRequests);
+  const [users, setUsers] = useState<User[]>([]);
+  const [requests, setRequests] = useState<ResearcherRequest[]>([]);
   const [tab, setTab] = useState<'users' | 'requests'>('users');
   const [openMenu, setOpenMenu] = useState<number | null>(null);
 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+
+        const res = await fetch("http://127.0.0.1:8000/api/admin/users/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!res.ok) {
+          console.error("Failed to fetch users");
+          return;
+        }
+
+        const data = await res.json();
+
+        
+        const mappedUsers = data.map((u: any) => ({
+          id: u.id,
+          name: `${u.username}`,
+          email: u.email,
+          phone: u.phone,
+          role: u.role,
+          status: u.is_active ? "Active" : "Inactive",
+          reports: u.reports_count ?? 0,
+        }));
+
+        setUsers(mappedUsers);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+  
   const reportIncident = (id: number) => {
     setUsers(users.map(u =>
       u.id === id ? { ...u, reports: u.reports + 1 } : u
@@ -75,8 +118,36 @@ const UserMgmtPage: React.FC = () => {
     ]);
   };
 
-  const updateRole = (id: number, newRole: Role) => {
-    setUsers(users.map(u => u.id === id ? { ...u, role: newRole } : u));
+  // const updateRole = (id: number, newRole: Role) => {
+  //   setUsers(users.map(u => u.id === id ? { ...u, role: newRole } : u));
+  // };
+  const updateRole = async (id: number, newRole: Role) => {
+    try {
+      const token = localStorage.getItem("access_token");
+
+      const res = await fetch(
+        `http://127.0.0.1:8000/api/admin/users/${id}/role/`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ role: newRole }),
+        }
+      );
+
+      if (!res.ok) {
+        alert("You are not allowed to change roles");
+        return;
+      }
+
+      setUsers(users.map(u =>
+        u.id === id ? { ...u, role: newRole } : u
+      ));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const approveRequest = (id: number) => {
@@ -145,16 +216,21 @@ const UserMgmtPage: React.FC = () => {
                   </td>
                   <td>
                     <div className="role-field">
-                      <select
-                        className={`role-select ${user.role}`}
-                        value={user.role}
-                        onChange={(e) => updateRole(user.id, e.target.value as Role)}
-                        aria-label={`Change role for ${user.name}`}
-                      >
-                        <option value="Citizen">Citizen</option>
-                        <option value="Researcher">Researcher</option>
-                        <option value="Admin">Admin</option>
-                      </select>
+                    <select
+                      className={`role-select ${user.role}`}
+                      value={user.role}
+                      onChange={(e) => updateRole(user.id, e.target.value as Role)}
+                      aria-label={`Change role for ${user.name}`}
+                      disabled={currentUserRole !== 'Admin'} // Only Admin can change
+                    >
+                      <option value="Citizen">Citizen</option>
+                      <option value="Researcher">Researcher</option>
+                      <option value="Officer">Officer</option>
+                      <option value="Admin">Admin</option>
+                    </select>
+                    {currentUserRole !== 'Admin' && (
+                      <small className="muted">Only Admin can change roles</small>
+                    )}
                       <CircleChevronDown size={13} className="chev" />
                     </div>
                   </td>

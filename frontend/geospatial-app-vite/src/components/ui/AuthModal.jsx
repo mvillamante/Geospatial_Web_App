@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { saveUserSession } from "../../libr/auth";
+import { normalizeRole, roleToBasePath } from "../../utils/roles";
 import "./AuthModal.css";
 
 const AuthModal = ({ type = "login", onClose, switchModal }) => {
-    const userRole = "Citizen"; // !!! manual user role for testing muna
-
-    // For debugging
-    console.log("Navigation Role (AuthModal):", userRole);
-
     const navigate = useNavigate();
-    const [loginPhone, setLoginPhone] = useState("");
+    const { user, refreshUser } = useAuth();
+
+    const [loginInput, setLoginInput] = useState("");  // Either email or phone
     const [loginPassword, setLoginPassword] = useState("");
     const [signupFirstName, setSignupFirstName] = useState("");
     const [signupLastName, setSignupLastName] = useState("");
@@ -37,11 +37,11 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
         };
     }, []);
 
+    const navigateByUser = (user) => {
+        const role = normalizeRole(user?.role);
+        navigate(roleToBasePath(role), { replace: true });
+    };
 
-    const handleLogin = () => {
-        if (!loginPhone || !loginPassword) return alert("Please fill in all fields");
-        alert("Login successful!");
-        onClose();
 
         switch (userRole) {
             case "Admin":
@@ -61,15 +61,99 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                 navigate("/main/guest/alerts-map", { replace: true });
         }
     }
+    // ===== LOGIN =====
+    const handleLogin = async () => {
+        if (!loginInput || !loginPassword) return alert("Please fill in all fields");
 
-    const handleSignup = () => {
-        if (!signupFirstName || !signupLastName || !signupPhone || !signupEmail || !signupPassword || !signupConfirm)
-            return alert("Please fill in all fields");
+        try {
+            const response = await fetch("http://localhost:8000/api/login_user/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    username_or_phone: loginInput,
+                    password: loginPassword,
+                }),
+            });
 
-        if (signupPassword !== signupConfirm) return alert("Passwords do not match");
+            const result = await response.json();
+            if (!response.ok) {
+                alert(result.error);
+                return;
+            }
+            console.log("the user --> ", result.user);
+            // Save user session
+            saveUserSession(result.user, result.access_token); //only save user role/s
 
-        alert("Account created successfully!");
-        onClose();
+            await refreshUser();
+            onClose();
+
+            // for getting user role
+            const role = normalizeRole(result.user.role);
+            navigate(roleToBasePath(role), { replace: true });
+
+        } catch (error) {
+            alert("Login failed: " + error.message);
+        }
+    };
+
+    const formatName = (firstName, lastName) =>
+    `${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}.${
+        lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase()
+    }`;
+
+    // ===== SIGNUP =====
+    const handleSignup = async () => {
+        if (!signupFirstName || !signupLastName || !signupPhone || !signupEmail || !signupPassword || !signupConfirm) {
+            return alert("Please fill in all required fields.");
+        }
+        if (signupPassword !== signupConfirm) {
+            return alert("Passwords do not match.");
+        }
+
+        try {
+            const userData = {
+                username: formatName(signupFirstName, signupLastName),
+                first_name: signupFirstName,
+                last_name: signupLastName,
+                phone: signupPhone,
+                email: signupEmail,
+                password: signupPassword,
+                role: "citizen",
+            };
+
+            const response = await fetch('http://localhost:8000/api/sign_up/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                console.log(data.user); // @here
+                alert(data.message); 
+
+                // Save user session
+                saveUserSession(data.user, data.access_token);
+
+                await refreshUser();
+                onClose();
+                
+                // for getting user role
+                const role = normalizeRole(data.user.role);
+                navigate(roleToBasePath(role), { replace: true });
+
+            } else {
+                console.error("Signup error response:", data);
+                alert(data.error || "Signup failed.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Signup failed: " + error.message);
+        }
     };
 
     return (
@@ -91,12 +175,12 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                         </div>
                         <div className="modal-form">
                             <div className="form-group">
-                                <label>Phone Number</label>
+                                <label>Phone Number or Email</label>
                                 <input
                                     type="text"
-                                    value={loginPhone}
-                                    onChange={(e) => setLoginPhone(e.target.value)}
-                                    placeholder="Enter phone number"
+                                    value={loginInput}
+                                    onChange={(e) => setLoginInput(e.target.value)}
+                                    placeholder="Enter phone number or email"
                                 />
                             </div>
                             <div className="form-group">

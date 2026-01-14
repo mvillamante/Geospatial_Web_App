@@ -36,6 +36,201 @@
   width: 25%;
   margin-left: auto;
   margin-bottom: 1.5rem;
+    color: #6b7280;
+}
+
+.evac-container {
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 2rem;
+    justify-content: flex-start;
+    flex-direction: row;
+}
+
+.evac-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); /*430px*/
+    align-items: stretch;
+    padding: 0 60px;
+}
+
+.evac-stat-container {
+    display: flex;
+    flex-direction: row;
+    /*justify-content: center;*/
+    align-items: stretch;
+    flex: 1;
+    gap: 1rem;
+}
+
+.evac-card-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.evac-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.75rem;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.25s ease;
+}
+
+.evac-card.officer {
+  border: 1px solid #cbd5e1;
+  padding: 1.75rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s ease;
+}
+
+.evac-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.evac-capacity {
+    background: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid #d1d5db;
+    width: auto;
+    white-space: nowrap
+}
+
+.evac-capacity-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.evac-card-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.evac-barangay {
+    margin: 0.25rem 0 1rem;
+    color: #2563eb;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.evac-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    color: #4b5563;
+}
+
+.evac-card.officer .evac-info {
+    color: #374151;
+}
+
+.evac-info-row {
+    display: flex;
+    gap: 8px;
+}
+
+.evac-card .evac-info-row span {
+    font-weight: 400;
+    font-size: 12.5px;
+    color: gray;
+}
+
+.evac-info-icon {
+    width: 18px;
+    height: 18px;
+    color: #6b7280;
+}
+
+.map-pin {
+  color: red;
+}
+
+.location-pin {
+  color: #f59e0b;
+}
+
+.evac-btn {
+    width: 100%;
+    margin-top: 1.2rem;
+    padding: 0.5rem;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+.evac-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+
+.evac-reminders {
+    margin-top: 2rem;
+    background: #fff7d6;
+    border: 1px solid #ffe8a3;
+    padding: 1.5rem;
+    border-radius: 12px;
+}
+
+
+.evac-reminders-title {
+    display: flex;
+    gap: 8px;
+    color: #b45309;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+
+.evac-reminders-list {
+    font-size: 0.85rem;
+    color: #8b5e00;
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.evac-search-add-container {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.evac-search-wrapper {
+    position: relative;
+    width: 30%; 
+    margin-left: auto;
+    margin-bottom: 1.5rem;
+}
+
+.evac-search-wrapper.officer {
+    margin-top: 2rem;
 }
 
 .evac-search {
@@ -194,6 +389,197 @@
 /* =========================
    Responsive
 ========================= */
+.evac-add-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background-color: #4776ce;
+    color: #e7f1fa;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.evac-add-btn:hover {
+    background-color: #2e61c0;
+    transform: scale(1.01);
+    box-shadow: 0 8px 20px rgba(71, 118, 206, 0.35);
+}
+.evac-add-icon {
+    font-size: 1.2rem;
+}
+
+/* Officer action buttons --------------------- */
+
+.evac-stat-card {
+    width: 30%;
+    border-radius: 16px;
+    padding: 1.75rem;
+    border: none;
+    transition: all 0.25s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.evac-stat-primary {
+  background: linear-gradient(
+    135deg,
+    #6d5a8c 0%,
+    #7a69a3 50%,
+    #8a7bb8 100%
+  );
+  box-shadow: 0 14px 30px rgba(109, 90, 140, 0.38);
+}
+
+.evac-stat-secondary {
+  background: linear-gradient(
+    135deg,
+    #4bb878 0%,
+    #7fd4a5 55%,
+    #a0e8c7 100%
+  );
+  box-shadow: 0 12px 26px rgba(75, 184, 120, 0.35);
+}
+
+.evac-stat-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.evac-stat-text h3 {
+    margin: 0;
+    color: #1f1f1f;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.evac-card-value {
+    margin-top: 0.5rem;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #111111;
+}
+
+.evac-card-icon {
+    width: 44px;
+    height: 44px;
+    color: #333333;
+    opacity: 0.95;
+}
+
+/*different colors*/
+.evac-stat-primary .evac-stat-text h3 {
+    color: #dcd0f2;
+}
+
+.evac-stat-primary .evac-card-value {
+    color: #ede6fb;
+}
+
+.evac-stat-primary .evac-card-icon {
+    color: #cbbef6;
+}
+
+.evac-stat-secondary .evac-stat-text h3 {
+    color: #296e4e;
+}
+
+.evac-stat-secondary .evac-card-value {
+    color: #2a7955;
+}
+
+.evac-stat-secondary .evac-card-icon {
+    color: #2fa16a;
+}
+
+
+/**/
+
+.evac-tag {
+    background: #fff7ed;
+    color: #f97316;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+}
+
+.evac-hr-divider {
+  margin: 1rem 0 ;
+  border: none;
+  border-top: 1px solid #d1d5db;
+  opacity: 0.5;
+}
+
+.evac-vr-divider {
+  width: 1.5px;
+  background-color: #d1d5db;
+  margin: 0 0 0 1rem;
+}
+
+
+.evac-actions {
+    margin-top: .5rem;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.evac-edit-btn,
+.evac-delete-btn {
+    background-color: white;
+    color: black;
+    padding: 0.6rem 0;
+    border: 1px solid rgb(223, 220, 220);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.evac-edit-btn {
+    width: 80%;
+}
+
+.evac-edit-btn:hover {
+    transform: translateY(-2px);
+    background-color: rgb(229, 231, 235);
+    border-color: rgb(156, 163, 175); 
+}
+
+.evac-delete-btn {
+    padding: 0.5rem 0;
+    width: 20%;
+    background-color: rgb(254, 202, 202);
+    border-color: rgb(248, 113, 113);
+    color: rgb(220, 38, 38);
+}
+
+.evac-delete-btn:hover {
+    transform: translateY(-2px);
+    background-color: rgb(231, 79, 79);
+    border-color: rgb(252, 165, 165);
+    color: white;
+}
+
+.evac-edit-btn svg,
+.evac-delete-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
 @media (max-width: 1024px) {
   .evac-search-wrapper {
     width: 35%;
@@ -276,4 +662,206 @@
     width: 100%;
     margin-left: 0;
   }
+
+.evac-card.editing {
+  border: 2px solid #2563eb;
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.2);
+}
+
+.inline-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: #f9fafb;
+  border-radius: 12px;
+}
+
+.inline-input {
+  font-size: 0.9em;
+  font-weight: inherit;
+  color: inherit;
+  border: 1px solid #d1d5db;
+  background-color: #f3f4f6;
+  width: 100%;
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin: 0;
+}
+
+.inline-input:focus {
+  outline: 1px solid #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  background-color: #ffffff;
+}
+
+.inline-input.name-input {
+  width: 15rem;
+}
+
+.inline-input.tag-input {
+  width: 6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 12px;
+}
+
+.inline-input.capacity-input {
+  width: 50px;
+}
+
+.inline-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.inline-icon-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.inline-icon-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.inline-icon-btn.save-btn {
+  background-color: #44c764;
+  color: white;
+}
+
+.inline-icon-btn.save-btn:hover {
+  background-color: #3baf58;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+
+.inline-icon-btn.cancel-btn {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.inline-icon-btn.cancel-btn:hover {
+  background-color: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+/* Modal overlay ------------------------------------------*/
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  padding: 2rem 2.5rem;
+  border-radius: 16px;
+  width: 500px;
+  max-width: 95%;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.modal h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  color: #111827;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.modal input,
+.modal select {
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 0.95rem;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modal input:focus,
+.modal select:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79,70,229,0.2);
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row .form-group.small {
+  flex: 1;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.modal-actions button[type="submit"] {
+  background: linear-gradient(135deg, #4f46e5, #818cf8);
+  color: #fff;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-actions button[type="submit"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(79,70,229,0.25);
+}
+
+.modal-actions button[type="button"] {
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-actions button[type="button"]:hover {
+  background-color: #e5e7eb;
+  border-color: #d1d5db;
 }

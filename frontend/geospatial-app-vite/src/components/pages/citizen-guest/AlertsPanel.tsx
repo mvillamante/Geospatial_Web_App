@@ -10,15 +10,13 @@ const barangays = {
     ]
 };
 
-export interface Report {
+interface Report {
     id: number;
     title: string;
     category: "Fire" | "Flood" | "Landslide" | "Accident";
     risk: "low" | "moderate" | "high" | "critical";
     location: string;
     time: string;
-    lat: number;
-    lng: number;
 }
 
 interface AlertsPanelProps {
@@ -35,8 +33,6 @@ const mockReports: Report[] = [
         risk: "high",
         location: "Barangay San Isidro",
         time: "2025-12-29T08:00:00Z",
-        lat: 14.2715,
-        lng: 121.1240,
     },
     {
         id: 2,
@@ -45,8 +41,6 @@ const mockReports: Report[] = [
         risk: "moderate",
         location: "Barangay Banay-Banay",
         time: "2025-12-29T07:45:00Z",
-        lat: 14.2456,
-        lng: 121.1158,
     },
     {
         id: 3,
@@ -55,8 +49,6 @@ const mockReports: Report[] = [
         risk: "critical",
         location: "Barangay Pulo",
         time: "2025-12-29T07:30:00Z",
-        lat: 14.2280,
-        lng: 121.1320,
     },
 ];
 
@@ -107,9 +99,6 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
 
     return (
         <aside className="dashboard-alerts">
-            <div className="sheet-handle" />
-
-
             {/* SEARCH */}
             <div className="alerts-search-wrapper">
                 <div className="search-box">

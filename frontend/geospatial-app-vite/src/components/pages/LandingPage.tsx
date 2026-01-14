@@ -2,11 +2,16 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaChartBar, FaUniversity } from "react-icons/fa";
 import "./LandingPage.css";
+import { useAuth } from "../../context/AuthContext";
+import { getUserRoleAndDisplayName } from "../../libr/auth";
 import AuthModal from "../ui/AuthModal";
 import LeafletMap from "../ui/LeafletMap";
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user, refreshUser } = useAuth(); // Get current user from context
+
+  const [loading, setLoading] = useState(true);
   const [modalType, setModalType] = useState<"login" | "signup" | null>(null);
 
   const closeModal = () => setModalType(null);
@@ -36,6 +41,14 @@ const LandingPage: React.FC = () => {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Show loading until auth is fetched
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
+
+  // ===== Get user role and display name from localStorage =====
+  const { userRole, userRole2 } = getUserRoleAndDisplayName();
 
   return (
     <div

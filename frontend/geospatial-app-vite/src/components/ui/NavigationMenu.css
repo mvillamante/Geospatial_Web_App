@@ -80,6 +80,7 @@
   align-items: center;
   gap: 12px;
   padding-bottom: 16px;
+  position: relative;
 }
 
 .user-profile .profile-circle {
@@ -91,19 +92,135 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight:700;
+  font-weight: 700;
+  font-size: 1rem;
 }
 
-.user-profile .logout-btn {
-  width: 55px;
-  height: 55px;
-  border: none;
+/* Profile Dropdown Trigger */
+.profile-dropdown-trigger {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 12px;
+  transition: background 0.2s ease;
+}
+
+.profile-dropdown-trigger:hover {
+  background: #f3f4f6;
+}
+
+.dropdown-arrow {
+  font-size: 16px;
+  color: #6b7280;
+  transition: transform 0.25s ease;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Dropdown Menu */
+.profile-dropdown-menu {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 8px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  padding: 12px;
+  z-index: 9999;
+  animation: dropdownSlideIn 0.2s ease;
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-profile-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
   border-radius: 10px;
   cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.dropdown-profile-info:hover {
+  background: #f3f4f6;
+}
+
+.dropdown-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
   display: flex;
-  justify-content: center;
   align-items: center;
-  transition: 0.25s ease;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.dropdown-user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dropdown-username {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1f2937;
+}
+
+.dropdown-role {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 8px 0;
+}
+
+.dropdown-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #dc2626;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.dropdown-logout-btn:hover {
+  background: #fef2f2;
+}
+
+.dropdown-logout-icon {
+  font-size: 18px;
 }
 
 .logout-icon {
@@ -202,27 +319,39 @@
   display: inline;
 }
 
-/* Admin Profile: horizontal layout */
+/* Admin Profile: with dropdown */
 .admin-profile {
   display: flex;
-  flex-direction: column; /* vertical stack */
+  flex-direction: column;
   gap: 10px;
   width: 100%;
-  margin-top: auto; /* pushes profile to bottom */
-  padding: 0 16px 16px 16px; /* optional bottom padding */
+  margin-top: auto;
+  padding: 0 16px 16px 16px;
+  position: relative;
 }
 
-.admin-profile .profile-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.admin-profile .profile-dropdown-trigger {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.admin-profile .profile-dropdown-trigger:hover {
+  background: #f3f4f6;
+}
+
+.admin-profile .dropdown-arrow {
+  margin-left: auto;
 }
 
 .admin-profile .profile-circle {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: #fff;
   display: flex;
   align-items: center;
@@ -231,25 +360,22 @@
   font-size: 1rem;
 }
 
-.admin-profile .profile-name {
-  font-weight: 600;
+.admin-profile .profile-dropdown-menu {
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 8px;
+  transform: none;
+  min-width: 190px;
+  animation: dropdownSlideInAdmin 0.2s ease;
 }
 
-.admin-profile .logout-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Logout button */
-.admin-profile .logout-btn {
-  width: 55px;
-  height: 55px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: 0.25s ease;
+@keyframes dropdownSlideInAdmin {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

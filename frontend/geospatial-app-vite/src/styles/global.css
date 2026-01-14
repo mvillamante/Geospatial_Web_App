@@ -17,6 +17,7 @@ body {
 .user-page,
 .cms-page,
 .reports-page,
+.reportverify-page,
 .sys-page {
     width: 100%;
     min-height: 100%;

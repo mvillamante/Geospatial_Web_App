@@ -48,6 +48,7 @@ function formatStreetBarangayCity(data: ReverseGeocodeResponse): string {
   const cityRaw = (typeof data.city === 'string' && data.city.trim()) ? data.city.trim() : '';
   if (cityRaw) parts.push(cityRaw);
 
+  // Backward compatible fallback if street/barangay/city weren't present
   if (parts.length === 0 && typeof data.location === 'string' && data.location.trim()) {
     return data.location.trim();
   }
@@ -72,6 +73,9 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
     const controller = new AbortController();
     let cancelled = false;
 
+    setLocation("Detecting location...");
+    setError(null);
+
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
@@ -86,19 +90,19 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
           const data: ReverseGeocodeResponse = await response.json();
 
           if (!response.ok) {
-            throw new Error(data.error || 'Failed to reverse geocode');
+            throw new Error(data.error || "Failed to reverse geocode");
           }
 
           const formatted = formatStreetBarangayCity(data);
           if (cancelled) return;
 
-          setLocation(formatted || 'Location not available');
-          setError(formatted ? null : 'Unable to determine location');
+          setLocation(formatted || "Location not available");
+          setError(formatted ? null : "Unable to determine location");
         } catch (err: any) {
           if (cancelled) return;
-          if (err?.name === 'AbortError') return;
-          setLocation('Location not available');
-          setError('Unable to determine location');
+          if (err?.name === "AbortError") return;
+          setLocation("Location not available");
+          setError("Unable to determine location");
         }
       },
       () => {
@@ -124,8 +128,8 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
   }
 
   return (
-    <div className="drawer-overlay" onClick={onClose}>
-      <div className="drawer" onClick={(e) => e.stopPropagation()}>
+    <div className="drawer-overlay">
+      <div className="drawer">
 
         <div className="drawer-header">
           <h3>Report an Incident</h3>

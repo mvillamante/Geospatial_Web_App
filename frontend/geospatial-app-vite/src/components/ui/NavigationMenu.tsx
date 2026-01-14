@@ -1,16 +1,28 @@
 import React, { useEffect, useState } from "react";
 import "./NavigationMenu.css";
-import { useAuth } from "../../utils/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 {/*import HazspotLogo from '../../assets/?.png';*/ }
 import { useNavigate, NavLink, useLocation, Link } from 'react-router-dom';
+import { getUserRoleAndDisplayName, clearUserSession } from "../../libr/auth";
+
+
 import type { IconType } from "react-icons";
-import { FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt } from "react-icons/fa";
-import { MdReport, MdPlace, MdLogout } from "react-icons/md";
+import { FaMapMarkedAlt, FaBullhorn, FaShieldAlt, FaMapMarked } from "react-icons/fa";
+import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdOutlineMonitorHeart, MdKeyboardArrowUp } from "react-icons/md";
+import { PiUsersBold } from "react-icons/pi";
+import { TbFileReport } from "react-icons/tb";
+import { FiEdit } from "react-icons/fi";
+
 
 interface NavItem {
     label: string;
     path: string;
     icon?: IconType;
+}
+
+interface StoredUserRoles {
+  primaryRole: string;
+  secondaryRoles: string[];
 }
 
 const NavigationMenu: React.FC = () => {
@@ -31,12 +43,26 @@ const NavigationMenu: React.FC = () => {
 
     const { user } = useAuth();
     const userRole = user?.role || "Citizen"; // !!! manual na pagpalit nalang muna
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
-    const profilePath = `/main/${userRole.toLowerCase()}/profile`;
+    // ===== Get user roles from localStorage =====
+    const { userRole, displayName, profilePath } = getUserRoleAndDisplayName();
 
-
-    // For debugging
     console.log("Navigation Role (NavMenu):", userRole);
+    console.log("Display Name (NavMenu):", displayName);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     if (userRole === "Citizen" && isMobile) {
         return (
@@ -67,11 +93,11 @@ const NavigationMenu: React.FC = () => {
     const navigationList: Record<string, NavItem[]> = {
         // User Role: Admin
         Admin: [
-            { label: 'Dashboard', path: 'admin/dashboard', icon: "" },
-            { label: 'User Management', path: 'admin/manage-user', icon: "" },
-            { label: 'Reports Management', path: 'admin/manage-reports', icon: "" },
-            { label: 'System Monitoring', path: 'admin/system-monitoring', icon: "" },
-            { label: 'Content Management System', path: 'admin/cms', icon: "" },
+            { label: 'Dashboard', path: 'admin/dashboard', icon: MdOutlineDashboard  },
+            { label: 'User Management', path: 'admin/manage-user', icon: PiUsersBold },
+            { label: 'Reports Management', path: 'admin/manage-reports', icon: TbFileReport },
+            { label: 'System Monitoring', path: 'admin/system-monitoring', icon: MdOutlineMonitorHeart  },
+            { label: 'Content Management System', path: 'admin/cms', icon: FiEdit },
         ],
         // User Role: LGU Officer
         Officer: [
@@ -81,7 +107,7 @@ const NavigationMenu: React.FC = () => {
         ],
         // User Role: Researcher
         Researcher: [
-            { label: 'Dashboard & Map', path: 'researcher/dashboard-map', icon: "" },
+            { label: 'Dashboard & Map', path: 'researcher/dashboard-map', icon: FaMapMarked  },
         ],
         // User Role: Citizen
         Citizen: [
@@ -101,6 +127,7 @@ const NavigationMenu: React.FC = () => {
 
     const handleLogout = () => {
         console.log("Logging out...");
+        clearUserSession();
         navigate("/");
     }
 
@@ -131,48 +158,47 @@ const NavigationMenu: React.FC = () => {
                 ))}
             </nav>
 
-            {/* Profile Section */}
-            <div className={`user-profile-section ${userRole === "Admin" ? "admin-profile" : "user-profile"}`}>
+            {/* Profile Section with Dropdown */}
+            <div 
+                className={`user-profile-section ${userRole === "Admin" ? "admin-profile" : "user-profile"}`}
+                ref={dropdownRef}
+            >
+                {/* Profile Dropdown Trigger */}
+                <div 
+                    className="profile-dropdown-trigger"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                >
+                    <div className="profile-circle">
+                        {user?.username?.charAt(0).toUpperCase() || displayName.charAt(0).toUpperCase()}
+                    </div>
+                    <MdKeyboardArrowUp className={`dropdown-arrow ${isDropdownOpen ? 'open' : ''}`} />
+                </div>
 
-                {userRole === "Admin" ? (
-                    <>
-                        {/* Admin: vertical stacked rows */}
-                        <div className="profile-row">
-                            <div
-                                className="profile-circle"
-                                onClick={() => navigate(profilePath)}
-                                style={{ cursor: "pointer" }}
-                                title="View Profile"
-                            >
-                                {user?.name?.charAt(0).toUpperCase() || userRole.charAt(0)}
-                            </div>
-
-                            <div className="profile-name">{user?.name || userRole}</div>
-                        </div>
-                        <div className="logout-row">
-                            <button className="logout-btn" onClick={handleLogout}>
-                                <MdLogout className="logout-icon" />
-                            </button>
-                            <span className="logout-label">Logout</span>
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        {/* Default user: simple stacked */}
-                        <div
-                            className="profile-circle"
-                            onClick={() => navigate(profilePath)}
-                            style={{ cursor: "pointer" }}
-                            title="View Profile"
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                    <div className="profile-dropdown-menu">
+                        <div 
+                            className="dropdown-profile-info"
+                            onClick={() => {
+                                navigate(profilePath);
+                                setIsDropdownOpen(false);
+                            }}
                         >
-                            {user?.name?.charAt(0).toUpperCase() || userRole.charAt(0)}
+                            <div className="dropdown-avatar">
+                                {user?.username?.charAt(0).toUpperCase() || displayName.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="dropdown-user-details">
+                                <span className="dropdown-username">{user?.username || displayName}</span>
+                                <span className="dropdown-role">{userRole}</span>
+                            </div>
                         </div>
-                        <button className="logout-btn" onClick={handleLogout}>
-                            <MdLogout className="logout-icon" />
+                        <div className="dropdown-divider"></div>
+                        <button className="dropdown-logout-btn" onClick={handleLogout}>
+                            <MdLogout className="dropdown-logout-icon" />
+                            <span>Logout</span>
                         </button>
-                    </>
+                    </div>
                 )}
-
             </div>
 
         </div>

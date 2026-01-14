@@ -1,0 +1,26 @@
+/* =============================================
+   Fault Line Styles
+   ============================================= */
+.fault-line-tooltip {
+  background: rgba(220, 38, 38, 0.95);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.fault-line-tooltip::before {
+  border-top-color: rgba(220, 38, 38, 0.95) !important;
+}
+
+.leaflet-tooltip.fault-line-tooltip {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  border: 2px solid #991b1b;
+}
+
+.leaflet-tooltip-top.fault-line-tooltip::before {
+  border-top-color: #b91c1c;
+}

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { GraduationCap } from "lucide-react";
 import ReportCard from './ReportCard';
 import "./ProfilePage.css";
+import { getUserRoleAndDisplayName } from "../../../../libr/auth";
 
 const mockReports = [
   {
@@ -28,8 +29,7 @@ const mockReports = [
 
 const ProfilePage: React.FC = () => {
   const [isRequested, setIsRequested] = useState(false);
-  const [contactOpen, setContactOpen] = useState(false);
-
+  const { displayName, userRole, profilePath } = getUserRoleAndDisplayName();
 
   return (
     <div className="profile-page">
@@ -41,10 +41,10 @@ const ProfilePage: React.FC = () => {
             <div className="online-indicator" />
           </div>
           <div className="profile-info">
-            <h2>Juan Dela Cruz</h2>
-            <p className="role-tag">Citizen</p>
-            <button
-              className={`research-btn ${isRequested ? "requested" : ""}`}
+            <h2>{displayName}</h2>
+            <p className="role-tag">{userRole}</p>
+            <button 
+              className={`research-btn ${isRequested ? 'requested' : ''}`}
               onClick={() => setIsRequested(true)}
             >
               <GraduationCap size={16} className="cap-icon" />

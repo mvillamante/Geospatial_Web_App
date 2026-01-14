@@ -8,8 +8,6 @@ import {
   DashboardMapPage, ReportVerifyPage,
   PwaLandingPage, PwaAuthPage
  } from "./components";
-  DashboardMapPage, ReportVerifyPage
-} from "./components";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 const App: React.FC = () => {

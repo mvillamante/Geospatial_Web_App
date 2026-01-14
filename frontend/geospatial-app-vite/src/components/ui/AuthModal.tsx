@@ -8,9 +8,9 @@ import "./AuthModal.css";
 
 const AuthModal = ({ type = "login", onClose, switchModal }) => {
     const navigate = useNavigate();
-    const { user, refreshUser } = useAuth();
+    const { refreshUser } = useAuth();
 
-    const [loginInput, setLoginInput] = useState("");  // Either email or phone
+    const [loginInput, setLoginInput] = useState("");
     const [loginPassword, setLoginPassword] = useState("");
     const [signupFirstName, setSignupFirstName] = useState("");
     const [signupLastName, setSignupLastName] = useState("");
@@ -21,29 +21,20 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
-
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
     useEffect(() => {
         document.body.style.overflow = "hidden";
-
-        return () => {
-            document.body.style.overflow = "auto";
-        };
+        return () => { document.body.style.overflow = "auto"; };
     }, []);
 
-    const navigateByUser = (user) => {
+    const handleNavigation = (user) => {
         const role = normalizeRole(user?.role);
-        navigate(roleToBasePath(role), { replace: true });
-    };
-
-
-        switch (userRole) {
+        
+        switch (role) {
             case "Admin":
                 navigate("/main/admin/dashboard", { replace: true });
                 break;
@@ -58,19 +49,17 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                 }
                 break;
             default:
-                navigate("/main/guest/alerts-map", { replace: true });
+                navigate(roleToBasePath(role), { replace: true });
         }
-    }
-    // ===== LOGIN =====
+    };
+
     const handleLogin = async () => {
         if (!loginInput || !loginPassword) return alert("Please fill in all fields");
 
         try {
             const response = await fetch("http://localhost:8000/api/login_user/", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     username_or_phone: loginInput,
                     password: loginPassword,
@@ -82,16 +71,11 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                 alert(result.error);
                 return;
             }
-            console.log("the user --> ", result.user);
-            // Save user session
-            saveUserSession(result.user, result.access_token); //only save user role/s
 
+            saveUserSession(result.user, result.access_token);
             await refreshUser();
             onClose();
-
-            // for getting user role
-            const role = normalizeRole(result.user.role);
-            navigate(roleToBasePath(role), { replace: true });
+            handleNavigation(result.user);
 
         } catch (error) {
             alert("Login failed: " + error.message);
@@ -99,11 +83,10 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
     };
 
     const formatName = (firstName, lastName) =>
-    `${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}.${
-        lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase()
-    }`;
+        `${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}.${
+            lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase()
+        }`;
 
-    // ===== SIGNUP =====
     const handleSignup = async () => {
         if (!signupFirstName || !signupLastName || !signupPhone || !signupEmail || !signupPassword || !signupConfirm) {
             return alert("Please fill in all required fields.");
@@ -125,47 +108,31 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
 
             const response = await fetch('http://localhost:8000/api/sign_up/', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData),
             });
 
             const data = await response.json();
             if (response.ok) {
-                console.log(data.user); // @here
                 alert(data.message); 
-
-                // Save user session
                 saveUserSession(data.user, data.access_token);
-
                 await refreshUser();
                 onClose();
-                
-                // for getting user role
-                const role = normalizeRole(data.user.role);
-                navigate(roleToBasePath(role), { replace: true });
-
+                handleNavigation(data.user);
             } else {
-                console.error("Signup error response:", data);
                 alert(data.error || "Signup failed.");
             }
         } catch (error) {
-            console.error(error);
             alert("Signup failed: " + error.message);
         }
     };
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div
-                className={`modal-content ${type === "signup" ? "modal-signup" : ""}`}
-                onClick={(e) => e.stopPropagation()}
-            >
+            <div className={`modal-content ${type === "signup" ? "modal-signup" : ""}`} onClick={(e) => e.stopPropagation()}>
                 <button className="modal-close" onClick={onClose}>
                     <AiOutlineClose size={24} />
                 </button>
-
 
                 {type === "login" ? (
                     <>
@@ -176,30 +143,19 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                         <div className="modal-form">
                             <div className="form-group">
                                 <label>Phone Number or Email</label>
-                                <input
-                                    type="text"
-                                    value={loginInput}
-                                    onChange={(e) => setLoginInput(e.target.value)}
-                                    placeholder="Enter phone number or email"
-                                />
+                                <input type="text" value={loginInput} onChange={(e) => setLoginInput(e.target.value)} placeholder="Enter phone number or email" />
                             </div>
                             <div className="form-group">
                                 <label>Password</label>
-                                <input
-                                    type="password"
-                                    value={loginPassword}
-                                    onChange={(e) => setLoginPassword(e.target.value)}
-                                    placeholder="Enter password"
-                                />
+                                <input type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="Enter password" />
                             </div>
                             <button className="btn-submit" onClick={handleLogin}>Login</button>
                         </div>
                         <div className="modal-footer">
-                            <a>Dont have an account? <span className="link" onClick={() => switchModal("signup")}>Sign Up</span></a>
+                            <p>Don't have an account? <span className="link" onClick={() => switchModal("signup")}>Sign Up</span></p>
                         </div>
                     </>
                 ) : (
-                    // Signup
                     <>
                         <div className="modal-header">
                             <h2>Sign Up</h2>
@@ -209,66 +165,35 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                             <div className="form-row">
                                 <div className="form-group">
                                     <label>First Name</label>
-                                    <input
-                                        type="text"
-                                        value={signupFirstName}
-                                        onChange={(e) => setSignupFirstName(e.target.value)}
-                                        placeholder="Enter first name"
-                                    />
+                                    <input type="text" value={signupFirstName} onChange={(e) => setSignupFirstName(e.target.value)} placeholder="First Name" />
                                 </div>
                                 <div className="form-group">
                                     <label>Last Name</label>
-                                    <input
-                                        type="text"
-                                        value={signupLastName}
-                                        onChange={(e) => setSignupLastName(e.target.value)}
-                                        placeholder="Enter last name"
-                                    />
+                                    <input type="text" value={signupLastName} onChange={(e) => setSignupLastName(e.target.value)} placeholder="Last Name" />
                                 </div>
                             </div>
-
                             <div className="form-row">
                                 <div className="form-group">
                                     <label>Phone Number</label>
-                                    <input
-                                        type="text"
-                                        value={signupPhone}
-                                        onChange={(e) => setSignupPhone(e.target.value)}
-                                        placeholder="Enter phone number" />
+                                    <input type="text" value={signupPhone} onChange={(e) => setSignupPhone(e.target.value)} placeholder="Phone Number" />
                                 </div>
                                 <div className="form-group">
                                     <label>Email Address</label>
-                                    <input
-                                        type="email"
-                                        value={signupEmail}
-                                        onChange={(e) => setSignupEmail(e.target.value)}
-                                        placeholder="Enter email" />
+                                    <input type="email" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} placeholder="Email" />
                                 </div>
                             </div>
-
-
                             <div className="form-group">
                                 <label>Password</label>
-                                <input
-                                    type="password"
-                                    value={signupPassword}
-                                    onChange={(e) => setSignupPassword(e.target.value)}
-                                    placeholder="Enter password"
-                                />
+                                <input type="password" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} placeholder="Password" />
                             </div>
                             <div className="form-group">
                                 <label>Confirm Password</label>
-                                <input
-                                    type="password"
-                                    value={signupConfirm}
-                                    onChange={(e) => setSignupConfirm(e.target.value)}
-                                    placeholder="Confirm password"
-                                />
+                                <input type="password" value={signupConfirm} onChange={(e) => setSignupConfirm(e.target.value)} placeholder="Confirm Password" />
                             </div>
                             <button className="btn-submit" onClick={handleSignup}>Create Account</button>
                         </div>
                         <div className="modal-footer">
-                            <a>Already have an account? <span className="link" onClick={() => switchModal("login")}>Sign in</span></a>
+                            <p>Already have an account? <span className="link" onClick={() => switchModal("login")}>Sign in</span></p>
                         </div>
                     </>
                 )}

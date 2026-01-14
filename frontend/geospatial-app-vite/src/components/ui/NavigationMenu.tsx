@@ -1,8 +1,8 @@
-// NavigationMenu
+import React, { useEffect, useState } from "react";
 import "./NavigationMenu.css";
 import { useAuth } from "../../utils/AuthContext";
 {/*import HazspotLogo from '../../assets/?.png';*/ }
-import { useNavigate, NavLink, Link } from 'react-router-dom';
+import { useNavigate, NavLink, useLocation, Link } from 'react-router-dom';
 import type { IconType } from "react-icons";
 import { FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt } from "react-icons/fa";
 import { MdReport, MdPlace, MdLogout } from "react-icons/md";
@@ -15,16 +15,54 @@ interface NavItem {
 
 const NavigationMenu: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const hideNavOn = ["/", "/login", "/signup", "/main/citizen-pwa/login"];
 
-    // Get user role from AuthContext
+    if (hideNavOn.includes(location.pathname)) {
+        return null;
+    }
+
+    useEffect(() => {
+        const onResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, []);
+
     const { user } = useAuth();
-    const userRole = user?.role || "Admin"; // !!! manual na pagpalit nalang muna
+    const userRole = user?.role || "Citizen"; // !!! manual na pagpalit nalang muna
 
     const profilePath = `/main/${userRole.toLowerCase()}/profile`;
 
 
     // For debugging
     console.log("Navigation Role (NavMenu):", userRole);
+
+    if (userRole === "Citizen" && isMobile) {
+        return (
+            <div className="pwa-bottom-nav">
+                <NavLink to="/main/citizen/alerts-map" className="pwa-nav-item">
+                    <FaBullhorn size={22} />
+                    <span>Alerts</span>
+                </NavLink>
+
+                <NavLink to="/main/citizen/prep-guide" className="pwa-nav-item">
+                    <FaShieldAlt size={22} />
+                    <span>Guides</span>
+                </NavLink>
+
+                <NavLink to="/main/citizen/evac-center" className="pwa-nav-item">
+                    <MdPlace size={22} />
+                    <span>Centers</span>
+                </NavLink>
+
+                <NavLink to={profilePath} className="pwa-nav-item">
+                    <FaUser size={22} />
+                    <span>Profile</span>
+                </NavLink>
+            </div>
+        );
+    }
 
     const navigationList: Record<string, NavItem[]> = {
         // User Role: Admin

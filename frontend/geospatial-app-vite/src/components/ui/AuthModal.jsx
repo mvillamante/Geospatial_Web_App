@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./AuthModal.css";
 
 const AuthModal = ({ type = "login", onClose, switchModal }) => {
-    const userRole = "Admin"; // !!! manual user role for testing muna
+    const userRole = "Citizen"; // !!! manual user role for testing muna
 
     // For debugging
     console.log("Navigation Role (AuthModal):", userRole);
@@ -18,6 +18,16 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
     const [signupEmail, setSignupEmail] = useState("");
     const [signupPassword, setSignupPassword] = useState("");
     const [signupConfirm, setSignupConfirm] = useState("");
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     useEffect(() => {
         document.body.style.overflow = "hidden";
@@ -33,8 +43,7 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
         alert("Login successful!");
         onClose();
 
-        {/* Redirect to Main Layout after Successful Login */}
-        switch(userRole) {
+        switch (userRole) {
             case "Admin":
                 navigate("/main/admin/dashboard", { replace: true });
                 break;
@@ -42,11 +51,15 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                 navigate("/main/officer/dashboard-map", { replace: true });
                 break;
             case "Citizen":
-                navigate("/main/citizen/alerts-map", { replace: true });
+                if (isMobile) {
+                    navigate("/main/citizen-pwa/landing-page", { replace: true });
+                } else {
+                    navigate("/main/citizen/alerts-map", { replace: true });
+                }
                 break;
             default:
                 navigate("/main/guest/alerts-map", { replace: true });
-    }
+        }
     }
 
     const handleSignup = () => {
@@ -133,16 +146,16 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                             <div className="form-row">
                                 <div className="form-group">
                                     <label>Phone Number</label>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         value={signupPhone}
                                         onChange={(e) => setSignupPhone(e.target.value)}
                                         placeholder="Enter phone number" />
                                 </div>
                                 <div className="form-group">
                                     <label>Email Address</label>
-                                    <input 
-                                        type="email" 
+                                    <input
+                                        type="email"
                                         value={signupEmail}
                                         onChange={(e) => setSignupEmail(e.target.value)}
                                         placeholder="Enter email" />

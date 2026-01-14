@@ -22,7 +22,7 @@ export default function ProgressBar({ status }: ProgressBarProps) {
   const progress = activeIndex / (steps.length - 1);
 
   return (
-    
+
     <div className="progress-bar" style={{ "--progress": progress } as React.CSSProperties}>
       {steps.map((step, index) => (
         <div
@@ -30,7 +30,7 @@ export default function ProgressBar({ status }: ProgressBarProps) {
           className={`step ${index <= activeIndex ? "active" : ""}`}
         >
           <span />
-          <p>{step}</p>
+          <p className="step-label">{step}</p>
         </div>
       ))}
     </div>

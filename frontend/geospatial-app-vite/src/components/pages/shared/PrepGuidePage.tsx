@@ -219,13 +219,28 @@ function PrepGuidePage() {
 
         <div className="hotlines">
           <h3>Emergency Hotlines</h3>
-          <div className="hotline-grid">
-            <p>National Emergency: <strong>911</strong></p>
-            <p>NDRRMC: <strong>(02) 911-1406</strong></p>
-            <p>Red Cross: <strong>143</strong></p>
-            <p>Coast Guard: <strong>(02) 527-8481</strong></p>
+
+          <div className="hotline-item">
+            <span>National Emergency</span>
+            <strong>911</strong>
+          </div>
+
+          <div className="hotline-item">
+            <span>NDRRMC</span>
+            <strong>(02) 911-1406</strong>
+          </div>
+
+          <div className="hotline-item">
+            <span>Red Cross</span>
+            <strong>143</strong>
+          </div>
+
+          <div className="hotline-item">
+            <span>Coast Guard</span>
+            <strong>(02) 527-8481</strong>
           </div>
         </div>
+
       </div>
     </div>
   );

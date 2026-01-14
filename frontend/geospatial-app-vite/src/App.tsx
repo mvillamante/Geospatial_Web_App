@@ -5,14 +5,17 @@ import {
   EvacCenterPage, PrepGuidePage,
   CmsPage, DashboardPage, ReportsMgmtPage, SysMonitoringPage, UserMgmtPage,
   AlertsMapPage, ProfilePage, 
-  DashboardMapPage, ReportVerifyPage
+  DashboardMapPage, ReportVerifyPage,
+  PwaLandingPage, PwaAuthPage
  } from "./components";
 
 const App: React.FC = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LandingPage />} />  
+        <Route path="/" element={<LandingPage />} /> 
+        {/* PWA Routes  */}
+        {/* <Route path="/" element={<PwaLandingPage />} /> */}
 
         {/* Main Layout */}
         <Route path="/main" element={<MainLayout />}>
@@ -44,6 +47,8 @@ const App: React.FC = () => {
           <Route path="citizen/evac-center" element={<EvacCenterPage />} />
           <Route path="citizen/prep-guide" element={<PrepGuidePage />} />
           <Route path="citizen/profile" element={<ProfilePage />} />
+
+          <Route path="citizen-pwa/login" element={<PwaAuthPage />} />
 
           {/* Guest Route */}
           <Route path="guest" element={<Navigate to="guest/alerts-map" replace />} />

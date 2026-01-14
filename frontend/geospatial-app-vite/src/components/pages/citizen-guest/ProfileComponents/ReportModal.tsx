@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import type { Report } from "../../../../types/report";
 
 interface ReportModalProps {
@@ -9,19 +10,29 @@ export default function ReportModal({ report, onClose }: ReportModalProps) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-handle" />
+        
         <h2>{report.title}</h2>
 
-        <p><strong>Status:</strong> {report.status}</p>
-        <p><strong>Location:</strong> {report.location}</p>
-        <p><strong>Date:</strong> {report.date}</p>
+        <div className="modal-meta">
+          <div className="modal-row">
+            <strong>Status:</strong> <span>{report.status}</span>
+          </div>
+          <div className="modal-row">
+            <strong>Location:</strong> <span>{report.location}</span>
+          </div>
+          <div className="modal-row">
+            <strong>Date:</strong> <span>{report.date}</span>
+          </div>
+        </div>
 
-        <p>{report.description}</p>
+        <p className="modal-desc">{report.description}</p>
 
         {report.photo && (
           <img src={report.photo} alt="report" />
         )}
 
-        <button onClick={onClose}>Close</button>
+        <button className="modal-close-btn" onClick={onClose}>Close</button>
       </div>
     </div>
   );

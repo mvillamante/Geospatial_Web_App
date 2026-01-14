@@ -1,5 +1,5 @@
-
 import React, { useState } from "react";
+import { GraduationCap } from "lucide-react";
 import ReportCard from './ReportCard';
 import "./ProfilePage.css";
 
@@ -10,9 +10,9 @@ const mockReports = [
     description: "Fire reported near residential area. Firefighters on site.",
     location: "Brgy. San Isidro",
     date: "Jan 8, 2025",
-    status: "Under Review", // Options: "Pending", "Under Review", "Resolved"
-    progress: 0.5, // 50%
-    photo: "https://images.unsplash.com/photo-1542345812-d9620567158a?auto=format&fit=crop&q=80&w=300"
+    status: "Under Review",
+    progress: 0.5,
+    photo: "https://i.pinimg.com/736x/d9/cc/08/d9cc08adf42d5f64e2883b0d2e66448b.jpg"
   },
   {
     id: 2,
@@ -21,13 +21,15 @@ const mockReports = [
     location: "Brgy. San Isidro",
     date: "Jan 7, 2025",
     status: "Resolved",
-    progress: 1, // 100%
-    photo: "https://images.unsplash.com/photo-1599413410222-09252c797441?auto=format&fit=crop&q=80&w=300"
+    progress: 1,
+    photo: "https://i.pinimg.com/736x/c2/4e/bc/c24ebcb2058f189d3e7dba4e49414956.jpg"
   }
 ];
 
 const ProfilePage: React.FC = () => {
   const [isRequested, setIsRequested] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+
 
   return (
     <div className="profile-page">
@@ -35,18 +37,20 @@ const ProfilePage: React.FC = () => {
       <div className="profile-card">
         <div className="profile-left">
           <div className="avatar-wrapper">
-             <div className="avatar" />
-             <div className="online-indicator" />
+            <div className="avatar" />
+            <div className="online-indicator" />
           </div>
           <div className="profile-info">
             <h2>Juan Dela Cruz</h2>
             <p className="role-tag">Citizen</p>
-            <button 
-              className={`research-btn ${isRequested ? 'requested' : ''}`}
+            <button
+              className={`research-btn ${isRequested ? "requested" : ""}`}
               onClick={() => setIsRequested(true)}
             >
+              <GraduationCap size={16} className="cap-icon" />
               {isRequested ? "Request Sent" : "Request Researcher Access"}
             </button>
+
           </div>
         </div>
 
@@ -62,6 +66,8 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      
 
       <div className="section-header">
         <h3 className="section-title">Report History</h3>

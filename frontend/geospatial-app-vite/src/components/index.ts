@@ -16,8 +16,10 @@ export { default as SysMonitoringPage } from "./pages/admin/SysMonitoringPage";
 export { default as UserMgmtPage } from "./pages/admin/UserMgmtPage";
 
 // citizen and guest
-export { default as AlertsMapPage } from "./pages/citizen-guest/AlertsMapPage";
+export { default as AlertsMapPage } from "./pages/citizen-guest/AlertsComponents/AlertsMapPage";
 export { default as ProfilePage } from "./pages/citizen-guest/ProfileComponents/ProfilePage";
+export { default as PwaLandingPage } from "./pages/citizen-pwa/LandingPage";
+export { default as PwaAuthPage } from "./pages/citizen-pwa/AuthPage";
 
 // lgu officer and researcher
 export { default as DashboardMapPage } from "./pages/officer-researcher/DashboardMapPage";

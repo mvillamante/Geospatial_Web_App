@@ -68,6 +68,9 @@ export default function AlertsPanel({ onReport, onSelectReport }: AlertsPanelPro
 
     return (
         <aside className="dashboard-alerts">
+            <div className="sheet-handle" />
+
+
             {/* SEARCH */}
             <div className="alerts-search-wrapper">
                 <div className="search-box">

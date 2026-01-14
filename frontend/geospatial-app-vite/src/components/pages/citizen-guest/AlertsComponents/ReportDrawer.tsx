@@ -43,8 +43,8 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
   }
 
   return (
-    <div className="drawer-overlay">
-      <div className="drawer">
+    <div className="drawer-overlay" onClick={onClose}>
+      <div className="drawer" onClick={(e) => e.stopPropagation()}>
 
         <div className="drawer-header">
           <h3>Report an Incident</h3>

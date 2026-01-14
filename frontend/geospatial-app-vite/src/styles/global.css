@@ -57,6 +57,7 @@ body {
 .cms-page td,
 .reports-page td,
 .sys-page td {
+    background: #ffffff;
     padding: 0.75rem;
     font-size: 0.8rem;
     border-top: 1px solid #e5e7eb;
@@ -109,7 +110,7 @@ body {
 
 /* Card */
 .cms-page .card,
-.reports-page .card, {
+.reports-page .card {
     background: white;
     border-radius: 16px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);

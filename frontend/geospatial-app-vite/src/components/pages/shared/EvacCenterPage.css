@@ -1,208 +1,279 @@
-/* .evac-wrapper {
-    width: 100%;
-    padding: 2rem;
-    min-height: 100vh;
-    background: #ffffff;
-    overflow-y: auto;
-} */
+/* =========================
+   Base Layout
+========================= */
+.evac-page {
+  width: 100%;
+  min-height: 100vh;
+}
 
-.evac-header,
-.pg-header {
-    margin-bottom: 20px;
+.evac-header {
+  margin-bottom: 20px;
 }
 
 .evac-header-title {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .evac-title-icon {
-    width: 36px;
-    height: 36px;
-    color: #2563eb;
+  width: 36px;
+  height: 36px;
+  color: #2563eb;
 }
 
 .evac-header-desc {
-    color: #6b7280;
+  color: #6b7280;
 }
 
-.evac-grid {
-    display: grid;
-    gap: 2rem;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-    align-items: stretch;
-}
-
-.evac-card-name {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.evac-card {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 1.75rem;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transition: all 0.25s ease;
-}
-
-.evac-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-}
-
-.evac-capacity {
-    background: #f3f4f6;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    border: 1px solid #d1d5db;
-    width: auto;
-    white-space: nowrap
-}
-
-.evac-capacity-icon {
-    width: 14px;
-    height: 14px;
-}
-
-.evac-card-name {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 0;
-}
-
-.evac-barangay {
-    margin: 0.25rem 0 1rem;
-    color: #2563eb;
-    font-weight: 500;
-}
-
-.evac-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    color: #4b5563;
-}
-
-.evac-info-row {
-    display: flex;
-    gap: 8px;
-}
-
-.evac-info-icon {
-    width: 18px;
-    height: 18px;
-    color: #6b7280;
-}
-
-.evac-btn {
-    width: 100%;
-    margin-top: 1.2rem;
-    padding: 0.75rem;
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    border: none;
-    border-radius: 10px;
-    color: white;
-    font-size: 0.9rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: 0.25s ease;
-}
-
-.evac-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-}
-
-
-.evac-reminders {
-    margin-top: 2rem;
-    background: #fff7d6;
-    border: 1px solid #ffe8a3;
-    padding: 1.5rem;
-    border-radius: 12px;
-}
-
-
-.evac-reminders-title {
-    display: flex;
-    gap: 8px;
-    color: #b45309;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-
-.evac-reminders-list {
-    font-size: 0.85rem;
-    color: #8b5e00;
-    padding-left: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
+/* =========================
+   Search
+========================= */
 .evac-search-wrapper {
-    position: relative;
-    width: 25%;
-    margin-left: auto;
-    margin-bottom: 1.5rem;
+  position: relative;
+  width: 25%;
+  margin-left: auto;
+  margin-bottom: 1.5rem;
 }
 
 .evac-search {
-    width: 100%;
-    padding: 0.75rem 2.5rem 0.75rem 1rem;
-    border-radius: 12px;
-    border: 1px solid #d1d5db;
-    font-size: 0.9rem;
-    transition: all 0.25s ease;
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  font-size: 0.9rem;
+  transition: all 0.25s ease;
 }
 
 .evac-search:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
 .evac-search-icon {
-    position: absolute;
-    right: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #6b7280;
-    pointer-events: none;
-    font-size: 0.95rem;
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  pointer-events: none;
+  font-size: 0.95rem;
 }
 
+/* =========================
+   Grid & Cards
+========================= */
+.evac-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  align-items: stretch;
+}
+
+.evac-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.75rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease;
+}
+
+.evac-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.evac-card-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.evac-capacity {
+  background: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #d1d5db;
+  white-space: nowrap;
+}
+
+.evac-capacity-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.evac-barangay {
+  margin: 0.25rem 0 1rem;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.evac-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: #4b5563;
+}
+
+.evac-info-row {
+  display: flex;
+  gap: 8px;
+}
+
+.evac-info-icon {
+  width: 18px;
+  height: 18px;
+  color: #6b7280;
+}
+
+.evac-btn {
+  width: 100%;
+  margin-top: 1.2rem;
+  padding: 0.75rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.evac-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+/* =========================
+   Reminders
+========================= */
+.evac-reminders {
+  margin-top: 2rem;
+  background: #fff7d6;
+  border: 1px solid #ffe8a3;
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+.evac-reminders-title {
+  display: flex;
+  gap: 8px;
+  color: #b45309;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.evac-reminders-list {
+  font-size: 0.85rem;
+  color: #8b5e00;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* =========================
+   Responsive
+========================= */
 @media (max-width: 1024px) {
-    .evac-search-wrapper {
-        width: 35%;
-    }
+  .evac-search-wrapper {
+    width: 35%;
+  }
 }
 
 @media (max-width: 768px) {
-    .evac-search-wrapper {
-        width: 50%;
-    }
+  .evac-page {
+    background: #f3f4f6;
+    min-height: 100vh;
+    padding-bottom: 90px; 
+  }
+
+  .evac-page > * {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .evac-search-wrapper {
+    width: 100%;
+    margin-left: 0;
+    margin-bottom: 1rem;
+  }
+
+  .evac-search {
+    padding: 0.8rem 2.5rem 0.8rem 1rem;
+    border-radius: 14px;
+    font-size: 0.95rem;
+  }
+
+  .evac-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .evac-card {
+    padding: 1.2rem;
+    border-radius: 14px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+  }
+
+  .evac-card-name {
+    font-size: 1rem;
+  }
+
+  .evac-barangay {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .evac-info-row {
+    font-size: 0.85rem;
+  }
+
+  .evac-btn {
+    border-radius: 999px;
+    padding: 0.7rem;
+    font-size: 0.9rem;
+  }
+
+  .evac-reminders {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 14px;
+  }
+
+  .evac-reminders-title {
+    font-size: 0.95rem;
+  }
+
+  .evac-reminders-list {
+    font-size: 0.85rem;
+    gap: 4px;
+  }
 }
 
 @media (max-width: 480px) {
-    .evac-search-wrapper {
-        width: 100%;
-        margin-left: 0;
-    }
+  .evac-search-wrapper {
+    width: 100%;
+    margin-left: 0;
+  }
 }

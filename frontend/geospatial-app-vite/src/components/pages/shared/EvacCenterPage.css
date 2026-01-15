@@ -140,11 +140,13 @@
   width: 100%;
   margin-top: 1.2rem;
   padding: 0.75rem;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  border: none;
-  border-radius: 10px;
+  background: var(--primary-color);
   color: white;
-  font-size: 0.9rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -199,8 +201,8 @@
   .evac-page {
     background: #f3f4f6;
     min-height: 100vh;
-    padding: 12px;
-    padding-bottom: 90px; /* space for bottom nav */
+    padding: 2rem;
+    padding-bottom: 90px; 
   }
 
   .evac-search-wrapper {

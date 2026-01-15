@@ -60,8 +60,8 @@ const DashboardMapPage: React.FC = () => {
   const currentYear = new Date().getFullYear(); // today’s year
   const [year, setYear] = useState(currentYear);
 
-  const minYear = currentYear - 20;
-  const maxYear = currentYear + 20;
+  const minYear = currentYear - 6;
+  const maxYear = currentYear + 4;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setYear(Number(e.target.value));
@@ -177,7 +177,6 @@ const DashboardMapPage: React.FC = () => {
     {
       title: "Reports",
       items: [
-        ["Monthly Expense Report", "Nov 2025"],
         ["Category Summary", "Q4 2025"],
         ["Yearly Overview", "2024"]
       ] as ReportItem[],
@@ -627,12 +626,12 @@ const DashboardMapPage: React.FC = () => {
                   <span className="panel-card-sub-title">Green Index</span>
                 </div>
               </div>
-              <div className="panel-card">
+              {/* <div className="panel-card">
                 <span className="panel-card-title">Disaster Vulnerability Index</span>
                 <div className="chart-placeholder">
                   Chart goes here
                 </div>
-              </div>
+              </div> */}
               <div className="panel-card">
                 <span className="panel-card-title">Green Index Scores</span>
                 <div className="chart-placeholder">

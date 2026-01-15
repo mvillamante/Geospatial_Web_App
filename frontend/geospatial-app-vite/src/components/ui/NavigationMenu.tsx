@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from "react";
 import "./NavigationMenu.css";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate, NavLink, useLocation } from "react-router-dom";
+import { getUserRoleAndDisplayName, clearUserSession } from "../../libr/auth";
+
 import type { IconType } from "react-icons";
-import { FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt } from "react-icons/fa";
-import { MdReport, MdPlace, MdLogout } from "react-icons/md";
+import { FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt, FaMapMarked } from "react-icons/fa";
+import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdOutlineMonitorHeart, MdKeyboardArrowUp } from "react-icons/md";
+import { PiUsersBold } from "react-icons/pi";
+import { TbFileReport } from "react-icons/tb";
+import { FiEdit } from "react-icons/fi";
 
 interface NavItem {
   label: string;
@@ -17,35 +22,67 @@ const NavigationMenu: React.FC = () => {
   const location = useLocation();
   const { user } = useAuth();
 
-  const userRole = user?.role || "Citizen";
-  const profilePath = `/main/${userRole.toLowerCase()}/profile`;
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+
+  const { userRole, displayName, profilePath } = getUserRoleAndDisplayName();
+
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  if (userRole === "Citizen" && isMobile) {
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const hideNavOn = ["/", "/login", "/signup", "/main/citizen-pwa/login"];
+  if (hideNavOn.includes(location.pathname)) return null;
+
+  const isGuestRoute = location.pathname.startsWith("/main/guest");
+  if (!userRole && !isGuestRoute) return null;
+
+  const isCitizenRoute = location.pathname.startsWith("/main/citizen");
+  if (userRole === "Citizen" && isMobile && isCitizenRoute) {
     return (
       <div className="pwa-bottom-nav">
-        <NavLink to="/main/citizen/alerts-map" className="pwa-nav-item">
+        <NavLink
+          to="/main/citizen/alerts-map"
+          className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
+        >
           <FaBullhorn size={22} />
           <span>Alerts</span>
         </NavLink>
 
-        <NavLink to="/main/citizen/prep-guide" className="pwa-nav-item">
+        <NavLink
+          to="/main/citizen/prep-guide"
+          className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
+        >
           <FaShieldAlt size={22} />
           <span>Guides</span>
         </NavLink>
 
-        <NavLink to="/main/citizen/evac-center" className="pwa-nav-item">
+        <NavLink
+          to="/main/citizen/evac-center"
+          className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
+        >
           <MdPlace size={22} />
           <span>Centers</span>
         </NavLink>
 
-        <NavLink to={profilePath} className="pwa-nav-item">
+        <NavLink
+          to={profilePath}
+          className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
+        >
           <FaUser size={22} />
           <span>Profile</span>
         </NavLink>
@@ -55,18 +92,18 @@ const NavigationMenu: React.FC = () => {
 
   const navigationList: Record<string, NavItem[]> = {
     Admin: [
-      { label: "Dashboard", path: "admin/dashboard", icon: undefined },
-      { label: "User Management", path: "admin/manage-user", icon: undefined },
-      { label: "Reports Management", path: "admin/manage-reports", icon: undefined },
-      { label: "System Monitoring", path: "admin/system-monitoring", icon: undefined },
-      { label: "Content Management System", path: "admin/cms", icon: undefined },
+      { label: "Dashboard", path: "admin/dashboard", icon: MdOutlineDashboard },
+      { label: "User Management", path: "admin/manage-user", icon: PiUsersBold },
+      { label: "Reports Management", path: "admin/manage-reports", icon: TbFileReport },
+      { label: "System Monitoring", path: "admin/system-monitoring", icon: MdOutlineMonitorHeart },
+      { label: "Content Management System", path: "admin/cms", icon: FiEdit },
     ],
     Officer: [
       { label: "Dashboard & Map", path: "officer/dashboard-map", icon: FaMapMarkedAlt },
       { label: "Report Verification", path: "officer/report-verify", icon: MdReport },
       { label: "Evacuation Center", path: "officer/evac-center", icon: MdPlace },
     ],
-    Researcher: [{ label: "Dashboard & Map", path: "researcher/dashboard-map", icon: undefined }],
+    Researcher: [{ label: "Dashboard & Map", path: "researcher/dashboard-map", icon: FaMapMarked }],
     Citizen: [
       { label: "Current Alerts & Map", path: "citizen/alerts-map", icon: FaBullhorn },
       { label: "Evacuation Center", path: "citizen/evac-center", icon: MdPlace },
@@ -82,16 +119,12 @@ const NavigationMenu: React.FC = () => {
   const navItems: NavItem[] = navigationList[userRole] || [];
 
   const handleLogout = () => {
-    console.log("Logging out...");
+    clearUserSession();
     navigate("/");
   };
 
   return (
     <div className={`navigation ${userRole === "Admin" ? "admin-nav" : ""}`}>
-      <div className="header-logo">
-        {navItems.length > 0 && <a href={`/main/${navItems[0].path}`}>{/* logo */}</a>}
-      </div>
-
       <nav>
         {navItems.map(({ label, path, icon: Icon }, index) => (
           <div className={`nav-item ${userRole === "Admin" ? "admin-layout" : ""}`} key={index}>
@@ -103,43 +136,41 @@ const NavigationMenu: React.FC = () => {
         ))}
       </nav>
 
-      <div className={`user-profile-section ${userRole === "Admin" ? "admin-profile" : "user-profile"}`}>
-        {userRole === "Admin" ? (
-          <>
-            <div className="profile-row">
-              <div
-                className="profile-circle"
-                onClick={() => navigate(profilePath)}
-                style={{ cursor: "pointer" }}
-                title="View Profile"
-              >
-                {user?.name?.charAt(0).toUpperCase() || userRole.charAt(0)}
-              </div>
-              <div className="profile-name">{user?.name || userRole}</div>
-            </div>
+      <div
+        className={`user-profile-section ${userRole === "Admin" ? "admin-profile" : "user-profile"}`}
+        ref={dropdownRef}
+      >
+        <div className="profile-dropdown-trigger" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+          <div className="profile-circle">
+            {(user?.username || displayName)?.charAt(0).toUpperCase()}
+          </div>
+          <MdKeyboardArrowUp className={`dropdown-arrow ${isDropdownOpen ? "open" : ""}`} />
+        </div>
 
-            <div className="logout-row">
-              <button className="logout-btn" onClick={handleLogout}>
-                <MdLogout className="logout-icon" />
-              </button>
-              <span className="logout-label">Logout</span>
-            </div>
-          </>
-        ) : (
-          <>
+        {isDropdownOpen && (
+          <div className="profile-dropdown-menu">
             <div
-              className="profile-circle"
-              onClick={() => navigate(profilePath)}
-              style={{ cursor: "pointer" }}
-              title="View Profile"
+              className="dropdown-profile-info"
+              onClick={() => {
+                navigate(profilePath);
+                setIsDropdownOpen(false);
+              }}
             >
-              {user?.name?.charAt(0).toUpperCase() || userRole.charAt(0)}
+              <div className="dropdown-avatar">
+                {(user?.username || displayName)?.charAt(0).toUpperCase()}
+              </div>
+              <div className="dropdown-user-details">
+                <span className="dropdown-username">{user?.username || displayName}</span>
+                <span className="dropdown-role">{userRole}</span>
+              </div>
             </div>
 
-            <button className="logout-btn" onClick={handleLogout}>
-              <MdLogout className="logout-icon" />
+            <div className="dropdown-divider" />
+            <button className="dropdown-logout-btn" onClick={handleLogout}>
+              <MdLogout className="dropdown-logout-icon" />
+              <span>Logout</span>
             </button>
-          </>
+          </div>
         )}
       </div>
     </div>

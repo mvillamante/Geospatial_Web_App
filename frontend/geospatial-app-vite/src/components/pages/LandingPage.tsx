@@ -13,10 +13,15 @@ const LandingPage: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [modalType, setModalType] = useState<"login" | "signup" | null>(null);
+  const [activeSection, setActiveSection] = useState("home");
 
   const closeModal = () => setModalType(null);
   const switchModal = (type: "login" | "signup") => setModalType(type);
-  const [activeSection, setActiveSection] = useState("home");
+
+  // Fetch user info on mount
+  useEffect(() => {
+    refreshUser().finally(() => setLoading(false));
+  }, [refreshUser]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,13 +37,10 @@ const LandingPage: React.FC = () => {
           }
         }
       }
-
       setActiveSection(current);
     };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 

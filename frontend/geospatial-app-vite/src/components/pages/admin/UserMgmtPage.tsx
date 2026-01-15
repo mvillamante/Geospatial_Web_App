@@ -211,8 +211,8 @@ const UserMgmtPage: React.FC = () => {
                 <tr key={user.id}>
                   <td>
                     <strong>{user.name}</strong>
-                    <div className="muted">{user.email}</div>
-                    <div className="muted">{user.phone}</div>
+                    {/* <div className="muted">{user.email}</div>
+                    <div className="muted">{user.phone}</div> */}
                   </td>
                   <td>
                     <div className="role-field">

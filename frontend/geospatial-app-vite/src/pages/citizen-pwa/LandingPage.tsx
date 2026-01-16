@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from "react-router-dom";
-import "../../../styles/citizen-pwa/landing.css";
+import "../../styles/citizen-pwa/landing.css";
 
 export default function LandingPage() {
     const navigate = useNavigate();

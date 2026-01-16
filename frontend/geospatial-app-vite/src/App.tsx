@@ -7,7 +7,7 @@ import {
   AlertsMapPage, ProfilePage, 
   DashboardMapPage, ReportVerifyPage,
   PwaLandingPage, PwaAuthPage
- } from "./components";
+ } from "./pages";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 const App: React.FC = () => {

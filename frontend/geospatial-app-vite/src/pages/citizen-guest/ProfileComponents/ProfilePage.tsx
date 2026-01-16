@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { GraduationCap } from "lucide-react";
 import ReportCard from './ReportCard';
 import "./ProfilePage.css";
-import { getUserRoleAndDisplayName } from "../../../../libr/auth";
+import { getUserRoleAndDisplayName } from "../../../libr/auth";
 
 const mockReports = [
   {

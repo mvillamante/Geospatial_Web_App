@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../../../styles/citizen-pwa/loginSignup.css';
+import '../../styles/citizen-pwa/loginSignup.css';
 
 export default function AuthPage() {
   const navigate = useNavigate();

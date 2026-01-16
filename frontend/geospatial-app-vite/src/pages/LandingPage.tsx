@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaChartBar, FaUniversity } from "react-icons/fa";
 import "./LandingPage.css";
-import { useAuth } from "../../context/AuthContext";
-import { getUserRoleAndDisplayName } from "../../libr/auth";
-import AuthModal from "../ui/AuthModal";
-import LeafletMap from "../ui/LeafletMap";
+import { useAuth } from "../context/AuthContext";
+import { getUserRoleAndDisplayName } from "../libr/auth";
+import AuthModal from "../components/ui/AuthModal";
+import LeafletMap from "../components/ui/LeafletMap";
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();

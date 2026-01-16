@@ -1,7 +1,7 @@
 // Current Alerts and Map Page (Citizen & Guest)
 import React, { useState } from "react";
 import "./AlertsMapPage.css";
-import LeafletMap from "../../../ui/LeafletMap";
+import LeafletMap from "../../../components/ui/LeafletMap";
 import AlertsPanel from "./AlertsPanel";
 import type { Report } from "./AlertsPanel";
 import ReportDrawer from "./ReportDrawer";

@@ -25,11 +25,13 @@ export function ReportsTable() {
                 <div className="reports-table-wrapper">
                     <table className="reports-table">
                         <thead>
-                            <th>ID</th>
-                            <th>Hazard Type</th>
-                            <th>Location</th>
-                            <th>Status</th>
-                            <th>Date</th>
+                            <tr>
+                                <th>ID</th>
+                                <th>Hazard Type</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
                         </thead>
                         <tbody>
                             {mockReports.map((report) => (

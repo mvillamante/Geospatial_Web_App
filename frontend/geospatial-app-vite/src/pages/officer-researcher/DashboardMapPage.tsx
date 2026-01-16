@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import "./DashboardMapPage.css";
-import LeafletMap from "../../ui/LeafletMap";
-import { getUserRoleAndDisplayName } from "../../../libr/auth";
+import LeafletMap from "../../components/ui/LeafletMap";
+import { getUserRoleAndDisplayName } from "../../libr/auth";
 import { FaCheck, FaChartLine, FaArrowUp, FaExclamationTriangle, FaLeaf, FaMountain } from "react-icons/fa";
 import { FiDownload } from "react-icons/fi";
 import { HiOutlineDocumentReport, HiOutlineChartBar } from "react-icons/hi";
 import { PiWarningBold } from "react-icons/pi";
-import floodZoneIcon from "../../../assets/icons/floodzone.png";
-import landslideIcon from "../../../assets/icons/landslide.png";
+import floodZoneIcon from "../../assets/icons/floodzone.png";
+import landslideIcon from "../../assets/icons/landslide.png";
 
 type DatasetsItem = [string, string, string]
 type ReportItem = [string, string]; // [title, meta]

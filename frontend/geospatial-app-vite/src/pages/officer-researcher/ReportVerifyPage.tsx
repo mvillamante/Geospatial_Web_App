@@ -1,7 +1,7 @@
 import React from "react";
 import './ReportVerifyPage.css';
 import { MapPin, Users } from "lucide-react";
-import { getUserRoleAndDisplayName } from "../../../libr/auth";
+import { getUserRoleAndDisplayName } from "../../libr/auth";
 
 const ReportVerifyPage: React.FC = () => {
   const { userRole, displayName, profilePath } = getUserRoleAndDisplayName();

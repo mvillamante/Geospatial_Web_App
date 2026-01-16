@@ -3,7 +3,7 @@ import { Search, MapPin, Phone, Navigation, Users } from 'lucide-react';
 import { GrLocationPin } from "react-icons/gr";
 import { MdOutlineModeEdit, MdAdd, MdCheck, MdClose } from "react-icons/md";
 import { RiDeleteBinFill } from "react-icons/ri";
-import { getUserRoleAndDisplayName } from "../../../libr/auth";
+import { getUserRoleAndDisplayName } from "../../libr/auth";
 import './EvacCenterPage.css';
 
 interface EvacuationCenter {

@@ -1,7 +1,7 @@
 // Main Layout for all Users (navigations, tabs, map...etc)
 import React from "react";
 import { Outlet } from 'react-router-dom';
-import { NavigationMenu } from "..";
+import { NavigationMenu } from "../components";
 import "./MainLayout.css";
 
 const MainLayout: React.FC = () => {

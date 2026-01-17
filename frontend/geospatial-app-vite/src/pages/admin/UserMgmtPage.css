@@ -78,15 +78,20 @@
 }
 
 .user-page td {
-  padding: 1rem;
+  padding: 0.85rem 1rem;
   border-top: 1px solid #e5e7eb;
   vertical-align: middle;
 }
 
-.user-page tr:hover {
-  background: #fafafa;
+.user-page th:first-child,
+.user-page td:first-child {
+  text-align: center;
+  vertical-align: middle;
 }
 
+.user-page tbody tr:hover {
+  background: #f9fafb;
+}
 
 .user-page .muted {
   font-size: 0.8rem;
@@ -98,7 +103,7 @@
   padding: 0.25rem 0.65rem;
   font-size: 0.75rem;
   border-radius: 999px;
-  font-weight: 500;
+  font-weight: 600;
 }
 .search-input {
   padding: 8px 10px;
@@ -107,41 +112,97 @@
   min-width: 220px;
 }
 
-.filters {
+.user-page .filters {
   display: flex;
   gap: 12px;
   margin-bottom: 12px;
 }
 
-.filters select {
+.user-page .filters select {
   padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid #ccc;
 }
-.role-select {
-  padding: 0.25rem 0.6rem;
+
+.user-page .sort-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.user-page .sort-header svg {
+  width: 18px;
+  height: 18px;
+  color: #6b7280;
+}
+
+.cell-number {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 22px;
+  height: 22px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  color: #434453;
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.role-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.user-table-body .role-field {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.user-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.role-field .role-select {
+  padding: 0.35rem 1.6rem 0.35rem 0.75rem;
   font-size: 0.75rem;
   border-radius: 999px;
   border: 1px solid #e5e7eb;
-  background: transparent;
+  background-color: transparent;
   cursor: pointer;
-  -webkit-appearance: none;
-  -moz-appearance: none;
   appearance: none;
 }
 
-.role-field {
-  position: relative;
-  display: inline-block;
-}
-
-.role-field .chev {
+.user-table-body .role-field .chev {
   position: absolute;
   right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
   pointer-events: none;
-  color: inherit;
+  color: #6b7280;
+}
+
+.role-hint {
+  font-size: 0.65rem;
+  color: #9ca3af;
+  line-height: 1;
+}
+
+.role-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .role-select { padding-right: 1.5rem; }
@@ -212,7 +273,7 @@
 
 .user-page .actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   gap: 0.5rem;
 }

@@ -51,6 +51,22 @@ const UserMgmtPage: React.FC = () => {
   const [requests, setRequests] = useState<ResearcherRequest[]>([]);
   const [tab, setTab] = useState<'users' | 'requests'>('users');
   const [openMenu, setOpenMenu] = useState<number | null>(null);
+  const [roleFilter, setRoleFilter] = useState<Role | 'All'>('All');
+  const [statusFilter, setStatusFilter] = useState<Status | 'All'>('All');
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredUsers = users.filter(user => {
+    const roleMatch =
+      roleFilter === 'All' || user.role === roleFilter;
+
+    const statusMatch =
+      statusFilter === 'All' || user.status === statusFilter;
+
+    const searchMatch =
+      user.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+    return roleMatch && statusMatch && searchMatch;
+  });
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -138,17 +154,20 @@ const UserMgmtPage: React.FC = () => {
       );
 
       if (!res.ok) {
-        alert("You are not allowed to change roles");
+        const err = await res.json();
+        alert(err.detail || "You are not allowed to change roles");
         return;
       }
 
+      // update UI after success
       setUsers(users.map(u =>
         u.id === id ? { ...u, role: newRole } : u
       ));
     } catch (err) {
-      console.error(err);
+      console.error("Role update failed:", err);
     }
   };
+
 
   const approveRequest = (id: number) => {
     const req = requests.find(r => r.id === id);
@@ -172,6 +191,38 @@ const UserMgmtPage: React.FC = () => {
   return (
     <div className="user-page">
       <h1>User Management</h1>
+      <div className="filters">
+        {/* Search by Name */}
+        <input
+          type="text"
+          placeholder="Search by name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
+        />
+
+        {/* Role Filter */}
+        <select
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value as Role | 'All')}
+        >
+          <option value="All">All Roles</option>
+          <option value="Citizen">Citizen</option>
+          <option value="Researcher">Researcher</option>
+          <option value="Officer">Officer</option>
+          <option value="Admin">Admin</option>
+        </select>
+
+        {/* Status Filter */}
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as Status | 'All')}
+        >
+          <option value="All">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
 
       {/* Tabs */}
       <div className="user-tabs">
@@ -202,7 +253,7 @@ const UserMgmtPage: React.FC = () => {
           </thead>
 
           <tbody>
-            {users.map(user => {
+            {filteredUsers.map(user => {
               const alreadyRequested = requests.some(
                 r => r.userId === user.id && r.status === 'Pending'
               );

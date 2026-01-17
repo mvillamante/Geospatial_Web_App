@@ -100,7 +100,24 @@
   border-radius: 999px;
   font-weight: 500;
 }
+.search-input {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  min-width: 220px;
+}
 
+.filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.filters select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
 .role-select {
   padding: 0.25rem 0.6rem;
   font-size: 0.75rem;

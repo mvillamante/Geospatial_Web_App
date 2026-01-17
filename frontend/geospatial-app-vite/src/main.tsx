@@ -4,6 +4,7 @@ import { AuthProvider } from "./context/AuthContext";
 import './styles/global.css'
 import './styles/variables.css'
 import App from './App'
+import "leaflet/dist/leaflet.css";
 
 createRoot(document.getElementById('root')!).render(
   <AuthProvider>

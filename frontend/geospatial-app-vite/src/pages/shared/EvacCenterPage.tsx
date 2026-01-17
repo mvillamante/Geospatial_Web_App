@@ -1,10 +1,112 @@
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import * as L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { Search, MapPin, Phone, Navigation, Users } from 'lucide-react';
 import { GrLocationPin } from "react-icons/gr";
 import { MdOutlineModeEdit, MdAdd, MdCheck, MdClose } from "react-icons/md";
 import { RiDeleteBinFill } from "react-icons/ri";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
 import './EvacCenterPage.css';
+
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+
+
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
+type LatLng = { lat: number; lng: number };
+
+function ClickToPick({
+  value,
+  onChange,
+}: {
+  value: LatLng | null;
+  onChange: (v: LatLng) => void;
+}) {
+  useMapEvents({
+    click(e) {
+      onChange({ lat: e.latlng.lat, lng: e.latlng.lng });
+    },
+  });
+
+  return value ? <Marker position={[value.lat, value.lng]} /> : null;
+}
+
+function MapPickerModal({
+  open,
+  initial,
+  onClose,
+  onConfirm,
+}: {
+  open: boolean;
+  initial: LatLng | null;
+  onClose: () => void;
+  onConfirm: (picked: LatLng) => void;
+}) {
+  const [picked, setPicked] = useState<LatLng | null>(initial);
+
+  useEffect(() => {
+    setPicked(initial);
+  }, [initial, open]);
+
+  if (!open) return null;
+
+  const center: [number, number] = picked
+    ? [picked.lat, picked.lng]
+    : [14.2752, 121.1245];
+
+  return (
+    <div className="map-modal-overlay">
+      <div className="map-modal">
+        <div className="map-modal-header">
+          <h3>Pick Location</h3>
+          <button type="button" className='map-x' onClick={onClose}>
+            ✕
+          </button>
+        </div>
+
+        <p className='map-hint'>Click on the map to set the coordinates.</p>
+
+        <div className="map-wrap">
+          <MapContainer center={center} zoom={13} className='leaflet-map'>
+            <TileLayer
+              attribution='&copy; OpenStreetMap contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <ClickToPick value={picked} onChange={setPicked} />
+          </MapContainer>
+        </div>
+
+        <div className="map-picked">
+          <strong>Selected:</strong>{" "}
+          {picked ? `${picked.lat.toFixed(6)}, ${picked.lng.toFixed(6)}` : "None"}
+        </div>
+
+        <div className="map-modal-actions">
+          <button type="button" className='btn-secondary' onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            className='btn-primary'
+            disabled={!picked}
+            onClick={() => picked && onConfirm(picked)}
+          >
+            Use this location
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
+}
 
 interface EvacuationCenter {
   id: number;
@@ -75,6 +177,9 @@ function EvacCenterPage() {
   const [centers, setCenters] = useState<EvacuationCenter[]>(evacuationCenters);
   const [editingCenter, setEditingCenter] = useState<EvacuationCenter | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [mapOpen, setMapOpen] = useState(false);
+  const [mapTarget, setMapTarget] = useState<"add" | "edit">("add");
+  const [newCoords, setNewCoords] = useState("");
 
   //get user role
   const { userRole, displayName, profilePath } = getUserRoleAndDisplayName();
@@ -85,12 +190,23 @@ function EvacCenterPage() {
     window.open(url, '_blank');
   };
 
+  // Helper to open map picker
+  const openMapPickerForAdd = () => {
+    setMapTarget("add");
+    setMapOpen(true);
+  }
+
+  const openMapPickerForEdit = () => {
+    setMapTarget("edit");
+    setMapOpen(true);
+  }
+
   // Evac Center Tag Colors
   const centerColors = {
-    school: { bg: "#d6e4f5", text: "#445fb8" },
-    gymnasium: { bg: "#93f1cc", text: "#1e6e58" },
-    "barangay hall": { bg: "#ffdbb4", text: "#c25733" },
-    default: { bg: "#d1d5db", text: "#748197" },
+    school: { bg: "#E8F0FE", text: "#1E40AF" },
+    gymnasium: { bg: "#ECFDF5", text: "#047857" },
+    "barangay hall": { bg: "#FFF7ED", text: "#9A3412" },
+    default: { bg: "#F3F4F6", text: "#4B5563" },
   } as const;
 
 
@@ -99,6 +215,9 @@ function EvacCenterPage() {
     const key = type.toLowerCase() as CenterColorKeys;
     return centerColors[key] || centerColors.default;
   };
+
+  const totalCenters = centers.length;
+  const barangaysCovered = new Set(centers.map(c => c.barangay.trim().toLowerCase())).size;
 
   // Filter evacuation centers based on search query
   const filteredCenters = centers.filter(center => {
@@ -111,8 +230,9 @@ function EvacCenterPage() {
 
   // Manage Evacuation Center Cards ----------------------------------------
   const handleAddCenterClick = () => {
-  setEditingCenter(null);
-  setShowAddModal(true);
+    setEditingCenter(null);
+    setNewCoords("");
+    setShowAddModal(true);
   };
   const handleEditCenter = (center: EvacuationCenter) => {
     setEditingCenter(center);
@@ -132,6 +252,7 @@ function EvacCenterPage() {
     }
   };
 
+
   return (
     <div className="evac-page">
       <div className="evac-header">
@@ -139,13 +260,13 @@ function EvacCenterPage() {
           <MapPin className="evac-title-icon" />
           <h1>Evacuation Centers</h1>
         </div>
-        
+
         <p className="evac-header-desc">
           {userRole === "Officer"
             ? "Manage evacuation center locations across Cabuyao"
             : userRole === "Citizen"
-            ? "Find the nearest evacuation center in your barangay"
-            : null}
+              ? "Find the nearest evacuation center in your barangay"
+              : null}
         </p>
       </div>
 
@@ -154,7 +275,7 @@ function EvacCenterPage() {
           <div className="evac-stat-card evac-stat-primary">
             <div className="evac-stat-text">
               <h3>Total Centers</h3>
-              <p className="evac-card-value">7</p>
+              <p className="evac-card-value">{totalCenters}</p>
             </div>
             <MapPin className="evac-card-icon" />
           </div>
@@ -162,12 +283,12 @@ function EvacCenterPage() {
           <div className="evac-stat-card evac-stat-secondary">
             <div className="evac-stat-text">
               <h3>Barangays Covered</h3>
-              <p className="evac-card-value">7</p>
-              </div>
+              <p className="evac-card-value">{barangaysCovered}</p>
+            </div>
             <Users className="evac-card-icon" />
           </div>
         </div>
-      )} 
+      )}
 
       <div className="evac-search-add-container">
         <div className="evac-search-wrapper officer">
@@ -226,124 +347,170 @@ function EvacCenterPage() {
             </div>
           ))
         ) : userRole === "Officer" ? (
-          filteredCenters.map(center => (
-            <div
-            key={center.id}
-            className={`evac-card officer ${editingCenter?.id === center.id ? 'editing' : ''}`}
-          >
-            {/* Card Header: Name + Type Tag */}
-            <h2 className="evac-card-name">
-              {editingCenter?.id === center.id ? (
-                <input className="inline-input name-input" name="name" value={editingCenter.name} onChange={(e) => setEditingCenter({ ...editingCenter, name: e.target.value }) }/>
-              ) : (
-                center.name
-              )}
+          filteredCenters.map((center) => {
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {/* Evacuation Type Tag */}
-                <span className="evac-tag" style={{ background: getTagColors(center.type).bg, color: getTagColors(center.type).text }}>
-                  {editingCenter?.id === center.id ? (
-                    <input className="inline-input tag-input" name="type" value={editingCenter.type} onChange={(e) =>  setEditingCenter({ ...editingCenter, type: e.target.value })}/>
+            const isEditing = editingCenter?.id === center.id;
+            const typeForColors = isEditing ? editingCenter!.type : center.type;
+
+            return (
+              <div
+                key={center.id}
+                className={`evac-card officer ${isEditing ? "editing" : ""}`}
+              >
+                <h2 className="evac-card-name">
+                  {isEditing ? (
+                    <input
+                      className="inline-input name-input"
+                      value={editingCenter!.name}
+                      onChange={(e) =>
+                        setEditingCenter({ ...editingCenter!, name: e.target.value })
+                      }
+                    />
                   ) : (
-                    center.type.charAt(0).toUpperCase() + center.type.slice(1)
+                    center.name
                   )}
-                </span>
-                {/* Capacity */}
-                <div className="evac-capacity">
-                  <Users className="evac-capacity-icon" />
-                  {editingCenter?.id === center.id ? (
-                    <input className="inline-input capacity-input" type="number" name="capacity" value={editingCenter.capacity}
-                      onChange={(e) => setEditingCenter({ ...editingCenter, capacity: Number(e.target.value) })}/>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    {/* Type Tag */}
+                    <span
+                      className="evac-tag"
+                      style={{
+                        background: getTagColors(typeForColors).bg,
+                        color: getTagColors(typeForColors).text,
+                      }}
+                    >
+                      {isEditing ? (
+                        <select
+                          className="inline-input tag-input"
+                          value={editingCenter!.type}
+                          onChange={(e) =>
+                            setEditingCenter({ ...editingCenter!, type: e.target.value })
+                          }
+                        >
+                          <option value="school">School</option>
+                          <option value="gymnasium">Gymnasium</option>
+                          <option value="barangay hall">Barangay Hall</option>
+                        </select>
+                      ) : (
+                        center.type.charAt(0).toUpperCase() + center.type.slice(1)
+                      )}
+                    </span>
+
+                    {/* Capacity */}
+                    <div className="evac-capacity">
+                      <Users className="evac-capacity-icon" />
+                      {isEditing ? (
+                        <input
+                          className="inline-input capacity-input"
+                          type="number"
+                          value={editingCenter!.capacity}
+                          onChange={(e) =>
+                            setEditingCenter({
+                              ...editingCenter!,
+                              capacity: Number(e.target.value),
+                            })
+                          }
+                        />
+                      ) : (
+                        center.capacity
+                      )}
+                    </div>
+                  </div>
+                </h2>
+
+                {/* Barangay */}
+                <p className="evac-barangay">
+                  {isEditing ? (
+                    <input
+                      className="inline-input"
+                      value={editingCenter!.barangay}
+                      onChange={(e) =>
+                        setEditingCenter({ ...editingCenter!, barangay: e.target.value })
+                      }
+                    />
                   ) : (
-                    center.capacity
+                    center.barangay
+                  )}
+                </p>
+
+                {/* Info */}
+                <div className="evac-info">
+                  <div className="evac-info-row">
+                    <GrLocationPin className="evac-info-icon location-pin" />
+                    {isEditing ? (
+                      <div className="coord-row inline">
+                        <input className="inline-input" readOnly value={editingCenter!.coordinates} />
+                        <button
+                          type="button"
+                          className="pick-map-btn small"
+                          onClick={() => {
+                            setMapTarget("edit");
+                            setMapOpen(true);
+                          }}
+                        >
+                          Pick
+                        </button>
+                      </div>
+                    ) : (
+                      center.coordinates
+                    )}
+                  </div>
+
+
+                  <div className="evac-info-row">
+                    <Phone className="evac-info-icon" />
+                    {isEditing ? (
+                      <input
+                        className="inline-input"
+                        value={editingCenter!.contact}
+                        onChange={(e) =>
+                          setEditingCenter({ ...editingCenter!, contact: e.target.value })
+                        }
+                      />
+                    ) : (
+                      center.contact
+                    )}
+                  </div>
+                </div>
+
+                <hr className="evac-hr-divider" />
+
+                {/* Actions */}
+                <div className="evac-actions">
+                  {isEditing ? (
+                    <div className="inline-edit-actions">
+                      <button
+                        type="button"
+                        className="inline-icon-btn save-btn"
+                        onClick={() => handleSaveEdit(editingCenter!)}
+                      >
+                        <MdCheck />
+                      </button>
+                      <button
+                        type="button"
+                        className="inline-icon-btn cancel-btn"
+                        onClick={() => setEditingCenter(null)}
+                      >
+                        <MdClose />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <button className="evac-edit-btn" onClick={() => handleEditCenter(center)}>
+                        <MdOutlineModeEdit /> Edit
+                      </button>
+                      <button className="evac-delete-btn" onClick={() => handleDeleteCenter(center.id)}>
+                        <RiDeleteBinFill />
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
-            </h2>
+            );
+          })
 
-            {/* Barangay */}
-            <p className="evac-barangay">
-              {editingCenter?.id === center.id ? (
-                <input className="inline-input" name="barangay" value={editingCenter.barangay} onChange={(e) => setEditingCenter({ ...editingCenter, barangay: e.target.value })}/>
-              ) : (
-                center.barangay
-              )}
-            </p>
-
-            {/* Card Info */}
-            <div className="evac-info">
-              <div className="evac-info-row">
-                <MapPin className="evac-info-icon map-pin" />
-                {editingCenter?.id === center.id ? (
-                  <input className="inline-input" name="address" value={editingCenter.address} onChange={(e) => setEditingCenter({ ...editingCenter, address: e.target.value })}/>
-                ) : (
-                  center.address
-                )}
-              </div>
-
-              <div className="evac-info-row">
-                <GrLocationPin className="evac-info-icon location-pin" />
-                {editingCenter?.id === center.id ? (
-                  <input className="inline-input" name="coordinates" value={editingCenter.coordinates} onChange={(e) => setEditingCenter({ ...editingCenter, coordinates: e.target.value })}/>
-                ) : (
-                  center.coordinates
-                )}
-              </div>
-
-              <div className="evac-info-row">
-                <Phone className="evac-info-icon" />
-                {editingCenter?.id === center.id ? (
-                  <input className="inline-input" name="contact" value={editingCenter.contact} onChange={(e) => setEditingCenter({ ...editingCenter, contact: e.target.value })}/>
-                ) : (
-                  center.contact
-                )}
-              </div>
-            </div>
-
-            <hr className="evac-hr-divider" />
-
-            {/* Actions */}
-            <div className="evac-actions">
-              {editingCenter?.id === center.id ? (
-                <>
-                  <div className="inline-edit-actions">
-                    <button
-                      type="button"
-                      className="inline-icon-btn save-btn"
-                      onClick={() => handleSaveEdit(editingCenter!)}
-                    >
-                      <MdCheck />
-                    </button>
-                    <button
-                      type="button"
-                      className="inline-icon-btn cancel-btn"
-                      onClick={() => setEditingCenter(null)}
-                    >
-                      <MdClose />
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <button
-                    className="evac-edit-btn"
-                    onClick={() => handleEditCenter(center)}
-                  >
-                    <MdOutlineModeEdit /> Edit
-                  </button>
-                  <button
-                    className="evac-delete-btn"
-                    onClick={() => handleDeleteCenter(center.id)}
-                  >
-                    <RiDeleteBinFill />
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-          ))
         ) : null}
-      </div> 
+      </div>
 
       {/* Officer Add/Edit Modal */}
       {showAddModal && (
@@ -384,9 +551,9 @@ function EvacCenterPage() {
                   <label htmlFor="type">Type</label>
                   <select name="type" id="type" required>
                     <option value="">Select Type</option>
-                    <option value="Temporary">School</option>
-                    <option value="Permanent">Gymnasium</option>
-                    <option value="School">Barangay Hall</option>
+                    <option value="school">School</option>
+                    <option value="gymnasium">Gymnasium</option>
+                    <option value="barangay hall">Barangay Hall</option>
                   </select>
                 </div>
               </div>
@@ -411,7 +578,22 @@ function EvacCenterPage() {
                 </div>
                 <div className="form-group small">
                   <label htmlFor="coordinates">Coordinates</label>
-                  <input name="coordinates" id="coordinates" placeholder="Lat, Long" required />
+                  <div className="coord-row">
+                    <input
+                      name="coordinates"
+                      id="coordinates"
+                      placeholder="Lat, Long"
+                      readOnly
+                      value={newCoords}
+                    />
+                    <button
+                      type="button"
+                      className="pick-map-btn"
+                      onClick={openMapPickerForAdd}
+                    >
+                      Pick on Map
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -424,6 +606,34 @@ function EvacCenterPage() {
           </div>
         </div>
       )}
+
+      <MapPickerModal
+        open={mapOpen}
+        initial={
+          mapTarget === "edit" && editingCenter?.coordinates
+            ? (() => {
+              const [lat, lng] = editingCenter.coordinates.split(",").map(s => Number(s.trim()));
+              return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+            })()
+            : mapTarget === "add" && newCoords
+              ? (() => {
+                const [lat, lng] = newCoords.split(",").map(s => Number(s.trim()));
+                return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+              })()
+              : null
+        }
+        onClose={() => setMapOpen(false)}
+        onConfirm={(picked) => {
+          const formatted = `${picked.lat.toFixed(6)}, ${picked.lng.toFixed(6)}`;
+
+          if (mapTarget === "edit" && editingCenter) {
+            setEditingCenter({ ...editingCenter, coordinates: formatted });
+          } else {
+            setNewCoords(formatted);
+          }
+          setMapOpen(false);
+        }}
+      />
 
       <div className="evac-reminders">
         <h3 className="evac-reminders-title">

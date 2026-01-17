@@ -1,5 +1,8 @@
+from pytz import timezone
 from api.models import CustomUser
+from django.utils.timesince import timesince
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.models import update_last_login
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -19,7 +22,17 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['email'] = user.email
         token['full_name'] = f"{user.first_name} {user.last_name}"  
         token['role'] = user.role
+        
+        user.last_login = timezone.now()
+        user.save(update_fields=['last_login'])
+        
         return token
+    
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        update_last_login(None, self.user)
+        
+        return data
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -68,6 +81,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         #user.profile.save()
 
 class AdminUserListSerializer(serializers.ModelSerializer):
+    date_joined = serializers.SerializerMethodField()
+    last_login = serializers.SerializerMethodField()
+    
     class Meta:
         model = CustomUser
         fields = [
@@ -80,6 +96,15 @@ class AdminUserListSerializer(serializers.ModelSerializer):
             'date_joined',
             'last_login'
         ]
+        
+    def get_date_joined(self, obj):
+        return obj.date_joined.strftime("%b %d, %Y")
+
+    def get_last_login(self, obj):
+        if obj.last_login:
+            return f"{timesince(obj.last_login)} ago" # e.g., "2 hours ago"
+        return "Never"
+
      
 class AssignUserRoleSerializer(serializers.ModelSerializer):
     class Meta:

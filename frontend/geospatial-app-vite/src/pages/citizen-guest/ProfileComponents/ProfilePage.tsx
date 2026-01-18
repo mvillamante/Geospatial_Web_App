@@ -28,8 +28,35 @@ const mockReports = [
 ];
 
 const ProfilePage: React.FC = () => {
+  const { displayName, userRole, userRole2, profilePath } = getUserRoleAndDisplayName();
+
   const [isRequested, setIsRequested] = useState(false);
-  const { displayName, userRole, profilePath } = getUserRoleAndDisplayName();
+
+  const sendResearcherRequest = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+
+      const res = await fetch("http://127.0.0.1:8000/api/researcher/request/", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.detail || "Failed to send request");
+        return;
+      }
+
+      // Success
+      setIsRequested(true);
+      alert("Researcher request sent!");
+    } catch (err) {
+      console.error("Request failed:", err);
+    }
+  };
 
   return (
     <div className="profile-page">
@@ -42,14 +69,20 @@ const ProfilePage: React.FC = () => {
           </div>
           <div className="profile-info">
             <h2>{displayName}</h2>
-            <p className="role-tag">{userRole}</p>
-            <button 
-              className={`research-btn ${isRequested ? 'requested' : ''}`}
-              onClick={() => setIsRequested(true)}
-            >
-              <GraduationCap size={16} className="cap-icon" />
-              {isRequested ? "Request Sent" : "Request Researcher Access"}
-            </button>
+            <p className="role-tag">
+              {userRole}
+              {userRole2 && userRole2.length > 0 ? ` & ${userRole2[0]}` : ""}
+            </p>
+            {(!userRole2 || userRole2.length === 0) && userRole !== "Researcher" && (
+              <button 
+                className={`research-btn ${isRequested ? 'requested' : ''}`}
+                onClick={sendResearcherRequest}
+                disabled={isRequested}
+              >
+                <GraduationCap size={16} className="cap-icon" />
+                {isRequested ? "Request Sent" : "Request Researcher Access"}
+              </button>
+            )}
 
           </div>
         </div>

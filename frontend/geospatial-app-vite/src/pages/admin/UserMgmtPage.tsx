@@ -19,7 +19,6 @@ interface User {
   phone: string;
   role: Role;
   status: Status;
-  reports: number;
   dateJoined: string;
   lastLogin: string;
 }
@@ -31,24 +30,6 @@ interface ResearcherRequest {
   date: string;
   status: RequestStatus;
 }
-
-// const mockUsers: User[] = [
-//   { id: 1, name: 'Juan Cruz', email: 'juan@example.com', phone: '09987654321', role: 'Citizen', status: 'Active', reports: 5 },
-//   { id: 2, name: 'Dr. Maria Santos', email: 'maria@example.com', phone: '09111222333', role: 'Citizen', status: 'Active', reports: 0 },
-//   { id: 3, name: 'Pedro Reyes', email: 'pedro@example.com', phone: '09876543210', role: 'Citizen', status: 'Active', reports: 2 },
-// ];
-
-// const mockRequests: ResearcherRequest[] = [
-//   {
-//     id: 1,
-//     userId: 1,
-//     userName: 'Juan Cruz',
-//     date: '2025-10-25',
-//     status: 'Pending',
-//   },
-// ];
-
-
 
 const UserMgmtPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -112,7 +93,43 @@ const UserMgmtPage: React.FC = () => {
       }
     };
 
+    const fetchRequests = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        const res = await fetch("http://127.0.0.1:8000/api/admin/researcher_requests/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!res.ok) {
+          console.error("Failed to fetch requests");
+          return;
+        }
+
+        const data = await res.json();
+        console.log("Fetched requests:", data);
+
+        // Map backend data to frontend interface
+        const mappedRequests = data.map((r: any) => ({
+          id: r.id,
+          userId: r.user,
+          userName: r.username,
+          date: r.requested_at.split('T')[0],
+          status: r.status as RequestStatus,
+        }));
+
+        console.log("Mapped requests:", mappedRequests);
+
+        setRequests(mappedRequests);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
     fetchUsers();
+    fetchRequests();
   }, []);
   
   const reportIncident = (id: number) => {
@@ -129,22 +146,6 @@ const UserMgmtPage: React.FC = () => {
     ));
   };
 
-  const requestResearcher = (user: User) => {
-    setRequests([
-      ...requests,
-      {
-        id: requests.length + 1,
-        userId: user.id,
-        userName: user.name,
-        date: new Date().toISOString().split('T')[0],
-        status: 'Pending',
-      },
-    ]);
-  };
-
-  // const updateRole = (id: number, newRole: Role) => {
-  //   setUsers(users.map(u => u.id === id ? { ...u, role: newRole } : u));
-  // };
   const updateRole = async (id: number, newRole: Role) => {
     try {
       const token = localStorage.getItem("access_token");
@@ -176,24 +177,62 @@ const UserMgmtPage: React.FC = () => {
     }
   };
 
+  const approveRequest = async (id: number) => {
+    try {
+      const token = localStorage.getItem("access_token");
 
-  const approveRequest = (id: number) => {
-    const req = requests.find(r => r.id === id);
-    if (!req) return;
+      const res = await fetch(`http://127.0.0.1:8000/api/researcher/request/${id}/`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action: "approve" }),
+      });
 
-    setUsers(users.map(u =>
-      u.id === req.userId ? { ...u, role: 'Researcher' } : u
-    ));
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.detail || "Failed to approve request");
+        return;
+      }
 
-    setRequests(requests.map(r =>
-      r.id === id ? { ...r, status: 'Approved' } : r
-    ));
+      const updatedReq = await res.json();
+
+      setRequests(requests.map(r => r.id === id ? { ...r, status: updatedReq.status } : r));
+
+      setUsers(users.map(u =>
+        u.id === updatedReq.user.id ? { ...u, role: "Researcher" } : u
+      ));
+    } catch (err) {
+      console.error("Approve request failed:", err);
+    }
   };
 
-  const rejectRequest = (id: number) => {
-    setRequests(requests.map(r =>
-      r.id === id ? { ...r, status: 'Rejected' } : r
-    ));
+  const rejectRequest = async (id: number) => {
+    try {
+      const token = localStorage.getItem("access_token");
+
+      const res = await fetch(`http://127.0.0.1:8000/api/researcher/request/${id}/`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action: "reject" }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.detail || "Failed to reject request");
+        return;
+      }
+
+      const updatedReq = await res.json();
+
+      setRequests(requests.map(r => r.id === id ? { ...r, status: updatedReq.status } : r));
+    } catch (err) {
+      console.error("Reject request failed:", err);
+    }
   };
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
@@ -236,7 +275,6 @@ const UserMgmtPage: React.FC = () => {
           onChange={(e) => setRoleFilter(e.target.value as Role | 'All')}
         >
           <option value="All">All Roles</option>
-          <option value="Citizen">Citizen</option>
           <option value="Researcher">Researcher</option>
           <option value="Officer">Officer</option>
           <option value="Admin">Admin</option>
@@ -277,7 +315,6 @@ const UserMgmtPage: React.FC = () => {
               <th >User</th>
               <th className="center">Role</th>
               <th className="center">Status</th>
-              <th className="reports-title">Reports</th>
               <th className="center">
                 <span className="sort-header" onClick={() => handleSortClick("dateJoined")}>
                   Date Joined
@@ -342,7 +379,6 @@ const UserMgmtPage: React.FC = () => {
                     </div>
                   </td>
                   <td className="center"><span className={`badge ${user.status}`}>{user.status}</span></td>
-                  <td className="center">{user.reports}</td>
                   <td className="center muted">{user.dateJoined}</td>
                   <td className="center muted">{user.lastLogin}</td>
                   <td className="right actions">
@@ -392,21 +428,23 @@ const UserMgmtPage: React.FC = () => {
         <table>
           <thead>
             <tr>
+              <th></th>
               <th>User</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th className="right">Actions</th>
+              <th className="center">Date</th>
+              <th className="center">Status</th>
+              <th className="center">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {requests.map((req => (
+            {requests.map((req, index) => (
               <tr key={req.id}>
-                <td>{req.userName}</td>
-                <td>{req.date}</td>
-                <td>
+                <td className="cell-number">{index+1}</td>
+                <td className="user-name">{req.userName}</td>
+                <td className="center muted">{req.date}</td>
+                <td className="center">
                   <span className={`badge ${req.status}`}>{req.status}</span>
                 </td>
-                <td className="right actions">
+                <td className="center actions">
                   {req.status === 'Pending' && (
                     <>
                       <button className="approve" onClick={() => approveRequest(req.id)}>
@@ -419,7 +457,7 @@ const UserMgmtPage: React.FC = () => {
                   )}
                 </td>
               </tr>
-            )))}
+            ))}
           </tbody>
         </table>
       )}

@@ -1,6 +1,7 @@
 import os
 import uuid
 
+from django.utils import timezone
 from django.http import JsonResponse
 from django.db import IntegrityError
 from django.conf import settings
@@ -75,6 +76,12 @@ def login_user(request):
             user = CustomUser.objects.get(phone=username_or_phone)
 
         if user.check_password(password):
+            try:
+                user.last_login = timezone.now()
+                user.save(update_fields=['last_login'])
+            except Exception as e:
+                print("Failed to update last_login:", e)
+            
             refresh = RefreshToken.for_user(user)
             return JsonResponse({
                 "message": "Login successful",
@@ -110,6 +117,10 @@ def sign_up(request):
 
     if not all([first_name, last_name, email, phone, password]):
         return JsonResponse({"error": "All fields are required"}, status=400)
+    if CustomUser.objects.filter(email=email).exists():
+        return JsonResponse({"error": "Email already exists"}, status=400)
+    if CustomUser.objects.filter(phone=phone).exists():
+        return JsonResponse({"error": "Phone already exists"}, status=400)
 
     username = f"{first_name.capitalize()}.{last_name.capitalize()}"
 

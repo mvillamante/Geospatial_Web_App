@@ -1,0 +1,210 @@
+/* LeafletMap Component Styles */
+
+/* Import layer-specific styles */
+@import "./mapLayers/styles.css";
+
+/* =============================================
+   Map Container
+   ============================================= */
+#map {
+  width: 100%;
+}
+
+/* =============================================
+   Barangay Labels
+   ============================================= */
+.barangay-label {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  border: 1px solid #888;
+  color: #222;
+  white-space: nowrap;
+}
+
+/* =============================================
+   Risk Icon Markers
+   ============================================= */
+.risk-icon-high {
+  width: 20px;
+  height: 20px;
+  background: red;
+  border-radius: 50%;
+  border: 2px solid #880000;
+}
+
+.risk-icon-medium {
+  width: 20px;
+  height: 20px;
+  background: orange;
+  border-radius: 50%;
+  border: 2px solid #a65e00;
+}
+
+.risk-icon-low {
+  width: 20px;
+  height: 20px;
+  background: yellow;
+  border-radius: 50%;
+  border: 2px solid #999900;
+}
+
+/* =============================================
+   Search Marker Styles
+   ============================================= */
+.search-marker-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.search-marker-container {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.search-marker-pin {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  transform: translateX(-50%) rotate(-45deg);
+  border: 3px solid white;
+}
+
+.search-marker-pin::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: white;
+  border-radius: 50%;
+}
+
+.search-marker-pulse {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  animation: searchPulse 1.5s ease-out infinite;
+}
+
+@keyframes searchPulse {
+  0% {
+    transform: translateX(-50%) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) scale(2);
+    opacity: 0;
+  }
+}
+
+/* =============================================
+   Report Marker Styles
+   ============================================= */
+.report-marker-wrapper {
+  background: transparent !important;
+  border: none !important;
+}
+
+.report-marker-container {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+
+.report-marker-pin {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 50% 50% 50% 0;
+  transform: translateX(-50%) rotate(-45deg);
+  border: 3px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.report-marker-icon {
+  transform: rotate(45deg);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.report-marker-pulse {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  animation: reportPulse 1.5s ease-out infinite;
+}
+
+@keyframes reportPulse {
+  0% {
+    transform: translateX(-50%) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* =============================================
+   Popup Styles
+   ============================================= */
+.leaflet-popup-content {
+  margin: 12px 16px;
+}
+
+.popup-container {
+  text-align: center;
+}
+
+.popup-title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+}
+
+.popup-location {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #555;
+}
+
+.popup-subtitle {
+  margin: 8px 0 0 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.popup-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.popup-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  color: white;
+  font-weight: bold;
+  font-size: 11px;
+  text-transform: uppercase;
+}

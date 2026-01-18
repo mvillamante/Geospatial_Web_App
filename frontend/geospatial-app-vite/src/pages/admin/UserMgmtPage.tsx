@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { Plus, Edit, Trash2, Power, PowerOff, AlertTriangle, CheckCircle, XCircle, CircleChevronDown, Menu } from 'lucide-react';
+import { Plus, Edit, Trash2, Power, PowerOff, AlertTriangle, CheckCircle, XCircle, CircleChevronDown } from 'lucide-react';
+import { LuEllipsis } from "react-icons/lu";
+import { HiChevronUpDown, HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import './UserMgmtPage.css';
 
 // const currentUserRole: Role = 'Admin';
@@ -18,6 +20,8 @@ interface User {
   role: Role;
   status: Status;
   reports: number;
+  dateJoined: string;
+  lastLogin: string;
 }
 
 interface ResearcherRequest {
@@ -51,6 +55,24 @@ const UserMgmtPage: React.FC = () => {
   const [requests, setRequests] = useState<ResearcherRequest[]>([]);
   const [tab, setTab] = useState<'users' | 'requests'>('users');
   const [openMenu, setOpenMenu] = useState<number | null>(null);
+  const [roleFilter, setRoleFilter] = useState<Role | 'All'>('All');
+  const [statusFilter, setStatusFilter] = useState<Status | 'All'>('All');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortField, setSortField] = useState<"dateJoined" | "lastLogin" | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
+
+  const filteredUsers = users.filter(user => {
+    const roleMatch =
+      roleFilter === 'All' || user.role === roleFilter;
+
+    const statusMatch =
+      statusFilter === 'All' || user.status === statusFilter;
+
+    const searchMatch =
+      user.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+    return roleMatch && statusMatch && searchMatch;
+  });
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -80,6 +102,8 @@ const UserMgmtPage: React.FC = () => {
           role: u.role,
           status: u.is_active ? "Active" : "Inactive",
           reports: u.reports_count ?? 0,
+          dateJoined: u.date_joined,
+          lastLogin: u.last_login ?? "Never",
         }));
 
         setUsers(mappedUsers);
@@ -138,17 +162,20 @@ const UserMgmtPage: React.FC = () => {
       );
 
       if (!res.ok) {
-        alert("You are not allowed to change roles");
+        const err = await res.json();
+        alert(err.detail || "You are not allowed to change roles");
         return;
       }
 
+      // update UI after success
       setUsers(users.map(u =>
         u.id === id ? { ...u, role: newRole } : u
       ));
     } catch (err) {
-      console.error(err);
+      console.error("Role update failed:", err);
     }
   };
+
 
   const approveRequest = (id: number) => {
     const req = requests.find(r => r.id === id);
@@ -169,9 +196,62 @@ const UserMgmtPage: React.FC = () => {
     ));
   };
 
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    if (!sortField || !sortOrder) return 0;
+
+    const aVal = new Date(a[sortField]);
+    const bVal = new Date(b[sortField]);
+
+    return sortOrder === "asc" ? aVal.getTime() - bVal.getTime() : bVal.getTime() - aVal.getTime();
+  });
+
+
+  const handleSortClick = (field: "dateJoined" | "lastLogin") => {
+    if (sortField !== field) {
+      setSortField(field);
+      setSortOrder("asc");
+    } else {
+      if (sortOrder === "asc") setSortOrder("desc");
+      else if (sortOrder === "desc") setSortOrder(null);
+      else setSortOrder("asc");
+    }
+  };
+
   return (
     <div className="user-page">
       <h1>User Management</h1>
+      <div className="filters">
+        {/* Search by Name */}
+        <input
+          type="text"
+          placeholder="Search by name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
+        />
+
+        {/* Role Filter */}
+        <select
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value as Role | 'All')}
+        >
+          <option value="All">All Roles</option>
+          <option value="Citizen">Citizen</option>
+          <option value="Researcher">Researcher</option>
+          <option value="Officer">Officer</option>
+          <option value="Admin">Admin</option>
+        </select>
+
+        {/* Status Filter */}
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as Status | 'All')}
+        >
+          <option value="All">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
 
       {/* Tabs */}
       <div className="user-tabs">
@@ -193,50 +273,78 @@ const UserMgmtPage: React.FC = () => {
         <table>
           <thead>
             <tr>
-              <th>User</th>
-              <th>Role</th>
-              <th>Status</th>
+              <th></th>
+              <th >User</th>
+              <th className="center">Role</th>
+              <th className="center">Status</th>
               <th className="reports-title">Reports</th>
-              <th className="right">Actions</th>
+              <th className="center">
+                <span className="sort-header" onClick={() => handleSortClick("dateJoined")}>
+                  Date Joined
+                  {sortField === "dateJoined" ? 
+                    (sortOrder === "asc" ? <HiChevronUp /> :
+                    sortOrder === "desc" ? <HiChevronDown /> :
+                    <HiChevronUpDown />) : <HiChevronUpDown />
+                  }
+                </span>
+              </th>
+              <th className="center">
+                <span className="sort-header" onClick={() => handleSortClick("lastLogin")}>
+                  Last Login
+                  {sortField === "lastLogin" ? 
+                    (sortOrder === "asc" ? <HiChevronUp /> :
+                    sortOrder === "desc" ? <HiChevronDown /> :
+                    <HiChevronUpDown />) : <HiChevronUpDown />
+                  }
+                </span>
+              </th>
+              <th className="center">Actions</th>
             </tr>
           </thead>
 
-          <tbody>
-            {users.map(user => {
+          <tbody className="user-table-body">
+            {sortedUsers.map((user, index) => {
               const alreadyRequested = requests.some(
                 r => r.userId === user.id && r.status === 'Pending'
               );
 
               return (
                 <tr key={user.id}>
+                  <td className="cell-number">{index+1}</td>
                   <td>
-                    <strong>{user.name}</strong>
+                    <div className={`user-details role-${user.role.toLowerCase()}`}>
+                      <strong className="user-name">{user.name}</strong>
+                    </div>
                     {/* <div className="muted">{user.email}</div>
                     <div className="muted">{user.phone}</div> */}
                   </td>
-                  <td>
-                    <div className="role-field">
-                    <select
-                      className={`role-select ${user.role}`}
-                      value={user.role}
-                      onChange={(e) => updateRole(user.id, e.target.value as Role)}
-                      aria-label={`Change role for ${user.name}`}
-                      disabled={currentUserRole !== 'Admin'} // Only Admin can change
-                    >
-                      <option value="Citizen">Citizen</option>
-                      <option value="Researcher">Researcher</option>
-                      <option value="Officer">Officer</option>
-                      <option value="Admin">Admin</option>
-                    </select>
-                    {currentUserRole !== 'Admin' && (
-                      <small className="muted">Only Admin can change roles</small>
-                    )}
-                      <CircleChevronDown size={13} className="chev" />
+                  <td className="center">
+                    <div className="role-cell">
+                      <div className="role-field">
+                        <select
+                          className={`role-select ${user.role}`}
+                          value={user.role}
+                          onChange={(e) => updateRole(user.id, e.target.value as Role)}
+                          aria-label={`Change role for ${user.name}`}
+                          disabled={currentUserRole !== 'Admin'}
+                        >
+                          <option value="Citizen">Citizen</option>
+                          <option value="Researcher">Researcher</option>
+                          <option value="Officer">Officer</option>
+                          <option value="Admin">Admin</option>
+                        </select>
+                        <CircleChevronDown size={13} className="chev" />
+                      </div>
+
+                      {currentUserRole !== 'Admin' && (
+                        <span className="role-hint">Admin only</span>
+                      )}
                     </div>
                   </td>
-                  <td><span className={`badge ${user.status}`}>{user.status}</span></td>
+                  <td className="center"><span className={`badge ${user.status}`}>{user.status}</span></td>
                   <td className="center">{user.reports}</td>
-
+                  <td className="center muted">{user.dateJoined}</td>
+                  <td className="center muted">{user.lastLogin}</td>
                   <td className="right actions">
                     <div className="action-menu">
                       <button
@@ -244,7 +352,7 @@ const UserMgmtPage: React.FC = () => {
                         onClick={() => setOpenMenu(openMenu === user.id ? null : user.id)}
                         aria-label={`Open actions for ${user.name}`}
                       >
-                        <Menu size={16} />
+                        <LuEllipsis size={20} />
                       </button>
 
                       {openMenu === user.id && (

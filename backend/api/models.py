@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.db import models
 from django.dispatch import receiver
+from django.conf import settings
 
 ROLE_CHOICES = [
     ('researcher', 'Researcher'),
@@ -36,3 +37,30 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return f"{self.username} ({self.role})" if self.role else f"{self.username} (No role)"
     
+class IncidentReport(models.Model):
+    CATEGORY_CHOICES = [
+        ("fire", "Fire"),
+        ("flood", "Flood"),
+        ("landslide", "Landslide"),
+        ("accident", "Accident"),
+        ("others", "Others"),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="incident_reports",
+    )
+
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    description = models.TextField()
+
+    latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    accuracy_m = models.FloatField(null=True, blank=True)
+
+    location_display = models.TextField(blank=True, default="")
+    geocode_raw = models.JSONField(null=True, blank=True)
+
+    photo_path = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)

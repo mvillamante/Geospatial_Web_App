@@ -1,4 +1,6 @@
 from api.models import CustomUser
+from api.models import IncidentReport
+from api.supabase_storage import upload_private_photo
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
@@ -62,6 +64,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         user.set_password(password)
         user.save()
+        return user
 
         # Profile will be created automatically via post_save
         #user.profile.full_name = f"{first_name} {last_name}"
@@ -91,5 +94,34 @@ class AssignUserRoleSerializer(serializers.ModelSerializer):
         if value not in valid_roles:
             raise serializers.ValidationError("Invalid role.")
         return value
+    
+class IncidentReportCreateSerializer(serializers.ModelSerializer):
+    photo = serializers.ImageField(required=False, allow_null=True, write_only=True)
 
-        return user
+    class Meta:
+        model = IncidentReport
+        fields = [
+            "category",
+            "description",
+            "latitude",
+            "longitude",
+            "accuracy_m",
+            "location_display",
+            "geocode_raw",
+            "photo",
+        ]
+    
+    def create(self, validated_data):
+        request = self.context["request"]
+        photo = validated_data.pop("photo", None)
+
+        photo_path = None
+        if photo:
+            photo_path = upload_private_photo(photo)
+
+        report = IncidentReport.objects.create(
+            user=request.user,
+            photo_path=photo_path,
+            **validated_data,
+        )
+        return report

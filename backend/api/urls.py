@@ -1,8 +1,8 @@
 from django.urls import path
 from .backend_views.auth_views import get_current_user, sign_up, login_user
-from .backend_views.views import MyTokenObtainPairView, RegisterView, testEndPoint, testEndPoint, getRoutes
+from .backend_views.views import MyTokenObtainPairView, RegisterView, testEndPoint, getRoutes
 from .backend_views.geocoding import reverse_geocode
-from .backend_views.views import AssignUserRoleView
+from .backend_views.views import AssignUserRoleView, IncidentReportCreateView, IncidentReportPhotoSignedUrlView
 from .backend_views.admin_views import UserListView
 
 from rest_framework_simplejwt.views import (
@@ -24,4 +24,6 @@ urlpatterns = [
     path('admin/users/<int:pk>/role/', AssignUserRoleView.as_view()),
     path('admin/users/', UserListView.as_view(), name='admin-users'),
 
+    path("reports/", IncidentReportCreateView.as_view(), name="incident-create"),
+    path("reports/<int:report_id>/photo-url/", IncidentReportPhotoSignedUrlView.as_view(), name="incident-photo-url"),
 ]

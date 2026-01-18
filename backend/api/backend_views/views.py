@@ -12,21 +12,22 @@ from api.models import CustomUser
 
 from api.serializer import MyTokenObtainPairSerializer, RegisterSerializer
 
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.exceptions import PermissionDenied, NotFound
 
-from rest_framework.exceptions import PermissionDenied
 from api.admin_permissions import IsAdminRole
-from api.serializer import AssignUserRoleSerializer
+from api.serializer import AssignUserRoleSerializer, IncidentReportCreateSerializer
 
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
+from api.models import IncidentReport
+from api.supabase_storage import create_signed_url
+
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
@@ -46,6 +47,41 @@ class AssignUserRoleView(generics.UpdateAPIView):
         if self.request.user.id == self.get_object().id:
             raise PermissionDenied("Admins cannot change their own role.")
         serializer.save()
+
+class IncidentReportCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def post(self, request):
+        serializer = IncidentReportCreateSerializer(
+            data=request.data,
+            context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        report = serializer.save()
+        return Response(
+            {"success": True, "id": report.id},
+            status=status.HTTP_201_CREATED
+        )
+
+class IncidentReportPhotoSignedUrlView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, report_id: int):
+        qs = IncidentReport.objects.filter(id=report_id)
+
+        if request.user.role == "citizen":
+            qs = qs.filter(user=request.user)
+
+        report = qs.first()
+        if not report:
+            raise NotFound("Report not found")
+
+        if not report.photo_path:
+            return Response({"photo_url": None})
+
+        signed_url = create_signed_url(report.photo_path, expires_in_seconds=3600)
+        return Response({"photo_url": signed_url})
 
 # Get All Routes
 
@@ -79,7 +115,7 @@ def change_user_role(request, user_id):
         return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
     
     new_role = request.data.get('role')
-    user = CustomUser.objects.get(id=user_id)
+    user = CustomUser.objects.get(supabase_uid=user_id)
     user.role = new_role
     user.save()
     return Response({"detail": "Role updated"}, status=status.HTTP_200_OK)

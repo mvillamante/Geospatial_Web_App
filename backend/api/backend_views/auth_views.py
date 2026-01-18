@@ -1,3 +1,6 @@
+import os
+import uuid
+
 from django.http import JsonResponse
 from django.db import IntegrityError
 from django.conf import settings
@@ -9,12 +12,13 @@ from supabase import create_client, Client
 import jwt
 
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework import status
 
-
+from api.serializer import IncidentReportCreateSerializer
 
 # Supabase client initialization
 url = settings.SUPABASE_URL
@@ -144,3 +148,4 @@ def sign_up(request):
         return JsonResponse({"error": "Email or phone already exists"}, status=400)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+    

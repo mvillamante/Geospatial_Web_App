@@ -2,7 +2,7 @@ from django.urls import path
 from .backend_views.auth_views import get_current_user, sign_up, login_user
 from .backend_views.views import MyTokenObtainPairView, RegisterView, testEndPoint, getRoutes
 from .backend_views.geocoding import reverse_geocode
-from .backend_views.views import AssignUserRoleView, IncidentReportCreateView, IncidentReportPhotoSignedUrlView,
+from .backend_views.views import AssignUserRoleView, IncidentReportCreateView, IncidentReportPhotoSignedUrlView
 MyTokenObtainPairView, RegisterView, testEndPoint, testEndPoint, getRoutes
 from .backend_views.geocoding import reverse_geocode
 from .backend_views.admin_views import UserListView

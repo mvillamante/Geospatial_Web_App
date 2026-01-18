@@ -1,5 +1,5 @@
 from pytz import timezone
-from api.models import CustomUser
+from api.models import CustomUser, ResearcherRequest
 from api.models import IncidentReport
 from api.supabase_storage import upload_private_photo
 from django.utils.timesince import timesince
@@ -35,7 +35,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         update_last_login(None, self.user)
         
         return data
-
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -108,7 +107,6 @@ class AdminUserListSerializer(serializers.ModelSerializer):
             return f"{timesince(obj.last_login)} ago" # e.g., "2 hours ago"
         return "Never"
 
-     
 class AssignUserRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
@@ -150,3 +148,12 @@ class IncidentReportCreateSerializer(serializers.ModelSerializer):
             **validated_data,
         )
         return report
+    
+class ResearcherRequestSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.CharField(source='user.email', read_only=True)
+
+    class Meta:
+        model = ResearcherRequest
+        fields = ['id', 'user', 'username', 'email', 'status', 'requested_at']
+        read_only_fields = ['id', 'user', 'username', 'email', 'requested_at']

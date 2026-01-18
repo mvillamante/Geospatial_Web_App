@@ -11,6 +11,7 @@ ROLE_CHOICES = [
     ('citizen', 'Citizen'),
 ]
 
+# Custom User model ------------------------------------------------------------------
 class CustomUser(AbstractUser):
     # Custom fields
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=True)
@@ -37,6 +38,34 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return f"{self.username} ({self.role})" if self.role else f"{self.username} (No role)"
     
+    
+    
+    
+    
+# Researcher Request model -----------------------------------------------------------
+class ResearcherRequest(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='researcher_requests'
+    )
+    requested_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.status}"
+
+
+
+
+
+# Incident Report model ------------------------------------------------------------------
 class IncidentReport(models.Model):
     CATEGORY_CHOICES = [
         ("fire", "Fire"),

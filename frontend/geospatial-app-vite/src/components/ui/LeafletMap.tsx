@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./LeafletMap.css";
-import type { Report } from "../pages/citizen-guest/AlertsComponents/AlertsPanel";
+import type { Report } from "../../pages/citizen-guest/AlertsComponents/AlertsPanel";
 
 // Import layer creation functions from organized modules
 import {
@@ -194,8 +194,6 @@ export default function LeafletMap({
   }, [mapType]);
 
   // User location (only for interactive)
-  const hasInitialCenteredRef = useRef(false);
-  
   useEffect(() => {
     const map = mapRef.current;
     if (!map || mapView !== "interactive") return;
@@ -238,9 +236,9 @@ export default function LeafletMap({
     const map = mapRef.current;
     if (!map || mapView !== "interactive") return;
 
-    const locateControl = L.control({ position: "topleft" });
+    const locateControl = new L.Control({ position: "topleft" });
 
-    locateControl.onAdd = function () {
+    locateControl.onAdd = function (_map: L.Map) {
       const div = L.DomUtil.create("div", "leaflet-bar leaflet-control leaflet-control-custom");
       div.innerHTML = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -271,7 +269,9 @@ export default function LeafletMap({
 
     locateControl.addTo(map);
 
-    return () => locateControl.remove();
+    return () => {
+      locateControl.remove();
+    };
   }, [mapView]);
 
 
@@ -480,7 +480,7 @@ export default function LeafletMap({
     }
     
     // Get severity colors
-    const colors = severityColors[risk] || severityColors.low;
+    const colors = severityColors[risk] ?? severityColors.low;
     
     // Category icons
     const categoryIcons: Record<string, string> = {

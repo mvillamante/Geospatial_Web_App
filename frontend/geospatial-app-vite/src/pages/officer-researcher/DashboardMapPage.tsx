@@ -30,7 +30,7 @@ type HealthItem = {
 
 const DashboardMapPage: React.FC = () => {
   //get user role
-  const { userRole, userRole2, displayName, profilePath } = getUserRoleAndDisplayName();
+  const { userRole, userRole2 } = getUserRoleAndDisplayName();
   
   // Show Modal Popup
   const [showEdaModal, setShowEdaModal] = useState(false);
@@ -176,9 +176,6 @@ const DashboardMapPage: React.FC = () => {
   const selectAllDataset = () => {
     const allNames = downloadDatasets[0].items.map(item => item[0]);
     setSelectedItems(allNames);
-  };
-  const downloadDataset = (item: DatasetsItem) => {
-    alert(`Downloading: ${item[0]} (${item[1]})`);
   };
   const handleExport = (items: string[]) => {
     if (items.length === 0) {

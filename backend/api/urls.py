@@ -1,9 +1,8 @@
 from django.urls import path
-from .backend_views.auth_views import get_current_user, sign_up, login_user
-from .backend_views.views import MyTokenObtainPairView, RegisterView, testEndPoint, testEndPoint, getRoutes
-from .backend_views.geocoding import reverse_geocode
-from .backend_views.views import AssignUserRoleView
-from .backend_views.admin_views import UserListView
+from .backend_views.auth_views import get_current_user, sign_up, login_user, MyTokenObtainPairView, RegisterView
+from .backend_views.misc_views import testEndPoint, getRoutes
+from .backend_views.geocoding_views import reverse_geocode
+from .backend_views.admin_views import UserListView, AssignUserRoleView, ToggleUserStatusView
 
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
@@ -26,8 +25,4 @@ urlpatterns = [
     
     # Geocoding Views
     path("geocoding/reverse/", reverse_geocode, name="reverse_geocode"),
-
-    path('admin/users/<int:pk>/role/', AssignUserRoleView.as_view()),
-    path('admin/users/', UserListView.as_view(), name='admin-users'),
-
 ]

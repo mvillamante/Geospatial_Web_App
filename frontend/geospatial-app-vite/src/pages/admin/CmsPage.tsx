@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Plus, Edit, Eye, Trash2, Send } from 'lucide-react';
 import './CmsPage.css';
 
@@ -11,59 +11,107 @@ interface Guide {
   lastUpdated: string;
 }
 
-const mockGuides: Guide[] = [
-  {
-    id: 1,
-    title: 'Flood Safety Guidelines',
-    category: 'Safety',
-    status: 'Published',
-    views: 1248,
-    lastUpdated: '2 days ago',
-  },
-  {
-    id: 2,
-    title: 'Earthquake Preparedness',
-    category: 'Safety',
-    status: 'Published',
-    views: 892,
-    lastUpdated: '1 week ago',
-  },
-  {
-    id: 3,
-    title: 'Evacuation Procedures',
-    category: 'Protocol',
-    status: 'Published',
-    views: 654,
-    lastUpdated: '3 days ago',
-  },
-  {
-    id: 4,
-    title: 'Typhoon Safety Tips',
-    category: 'Safety',
-    status: 'Draft',
-    views: 0,
-    lastUpdated: '5 hours ago',
-  },
-];
 
 const CmsPage: React.FC = () => {
-  const [guides, setGuides] = useState<Guide[]>(mockGuides);
+  const [guides, setGuides] = useState<Guide[]>([]);
+  const [newGuide, setNewGuide] = useState({
+    title: "",
+    category: "Safety",
+    content: "",
+  });
   const [showGuideDialog, setShowGuideDialog] = useState(false);
   const [showNotificationDialog, setShowNotificationDialog] = useState(false);
   const [notification, setNotification] = useState({ type: 'alert', message: '' });
 
-  const togglePublish = (id: number) => {
+  useEffect(() => {
+    fetch("/api/cms/guides/", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    })
+      .then(res => res.json())
+      .then(data => {
+        const mapped = data.map((g: any) => ({
+          id: g.id,
+          title: g.title,
+          category: g.category,
+          status: g.status === "published" ? "Published" : "Draft",
+          views: g.views,
+          lastUpdated: new Date(g.updated_at).toLocaleDateString(),
+        }));
+
+        setGuides(mapped);
+      });
+  }, []);
+
+  const togglePublish = async (id: number) => {
+    await fetch(`http://127.0.0.1:8000/api/cms/guides/${id}/publish/`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
+
+
     setGuides(g =>
       g.map(item =>
         item.id === id
-          ? { ...item, status: item.status === 'Published' ? 'Draft' : 'Published' }
+          ? { ...item, status: item.status === "Published" ? "Draft" : "Published" }
           : item
       )
     );
   };
 
-  const deleteGuide = (id: number) => {
+  const deleteGuide = async (id: number) => {
+    await fetch(`http://127.0.0.1:8000/api/cms/guides/${id}/archive/`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
+
+
     setGuides(g => g.filter(item => item.id !== id));
+  };
+
+  const createGuide = async () => {
+    const res = await fetch("/api/cms/guides/create/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+      body: JSON.stringify({
+        title: newGuide.title,
+        category: newGuide.category,
+        content: newGuide.content,
+      }),
+    });
+
+
+    if (!res.ok) {
+      alert("Failed to create guide");
+      return;
+    }
+
+    const created = await res.json();
+
+    // update UI immediately
+    setGuides((prev) => [
+      {
+        id: created.id,
+        title: created.title,
+        category: created.category,
+        status: "Draft",
+        views: 0,
+        lastUpdated: new Date(created.updated_at).toLocaleDateString(),
+      },
+      ...prev,
+    ]);
+
+    // reset + close
+    setNewGuide({ title: "", category: "Safety", content: "" });
+    setShowGuideDialog(false);
   };
 
   return (
@@ -131,23 +179,49 @@ const CmsPage: React.FC = () => {
             <h2>Create New Guide</h2>
 
             <label>Title</label>
-            <input type="text" placeholder="Enter guide title" />
+            <input
+              type="text"
+              placeholder="Enter guide title"
+              value={newGuide.title}
+              onChange={(e) =>
+                setNewGuide({ ...newGuide, title: e.target.value })
+              }
+            />
+            {/* <input type="text" placeholder="Enter guide title" /> */}
 
             <label>Category</label>
-            <select>
+            {/* <select>
+              <option>Safety</option>
+              <option>Protocol</option>
+              <option>Preparedness</option>
+            </select> */}
+            <select
+              value={newGuide.category}
+              onChange={(e) =>
+                setNewGuide({ ...newGuide, category: e.target.value })
+              }
+            >
               <option>Safety</option>
               <option>Protocol</option>
               <option>Preparedness</option>
             </select>
 
+
             <label>Content</label>
-            <textarea rows={5} />
+            <textarea
+              rows={5}
+              value={newGuide.content}
+              onChange={(e) =>
+                setNewGuide({ ...newGuide, content: e.target.value })
+              }
+            />
+
 
             <div className="modal-actions">
               <button className="btn secondary" onClick={() => setShowGuideDialog(false)}>
                 Cancel
               </button>
-              <button className="btn primary" onClick={() => setShowGuideDialog(false)}>
+              <button className="btn primary" onClick={createGuide}>
                 Create
               </button>
             </div>
@@ -194,4 +268,3 @@ const CmsPage: React.FC = () => {
 };
 
 export default CmsPage;
-

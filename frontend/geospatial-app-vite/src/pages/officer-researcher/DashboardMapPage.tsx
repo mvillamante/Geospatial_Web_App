@@ -30,7 +30,7 @@ type HealthItem = {
 
 const DashboardMapPage: React.FC = () => {
   //get user role
-  const { userRole, displayName, profilePath } = getUserRoleAndDisplayName();
+  const { userRole, userRole2, displayName, profilePath } = getUserRoleAndDisplayName();
   
   // Show Modal Popup
   const [showEdaModal, setShowEdaModal] = useState(false);
@@ -759,7 +759,7 @@ const DashboardMapPage: React.FC = () => {
 
 
 
-              {userRole === "Researcher" && (
+              {userRole2[0] === "Researcher" && (
                 <div
                   className="panel-card researcher"
                   onClick={() => setShowEdaModal(true)}
@@ -777,12 +777,12 @@ const DashboardMapPage: React.FC = () => {
               <h4>Export Section</h4>
               {userRole === "Officer" ? (
                 <h5>Download LGU planning materials</h5>
-              ) : userRole === "Researcher" ? (
+              ) : userRole2[0] === "Researcher" ? (
                 <h5>Export datasets and reports</h5>
               ) : null}
 
               {/* CONFIGURATION -------------------- */}
-              {userRole === "Researcher" && (
+              {userRole2[0] === "Researcher" && (
                 <div className="panel-card">
                   <div className="panel-card-header">
                     <span className="rightpanel-title">Configuration</span>
@@ -815,7 +815,7 @@ const DashboardMapPage: React.FC = () => {
               )}
 
               {/* DATASETS -------------------- */}
-              {userRole === "Researcher" && (
+              {userRole2[0] === "Researcher" && (
                 <div className="panel-card datasets-ul">
                   <div className="panel-card-header">
                     <span className="rightpanel-title">Datasets</span>

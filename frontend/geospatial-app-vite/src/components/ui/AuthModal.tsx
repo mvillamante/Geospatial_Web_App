@@ -3,8 +3,9 @@ import { AiOutlineClose } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { saveUserSession } from "../../libr/auth";
-import { normalizeRole, roleToBasePath } from "../../utils/roles";
+import { normalizePrimaryRole, normalizeSecondaryRole, roleToBasePath } from "../../utils/roles";
 import "./AuthModal.css";
+import type { User } from "../../libr/fetchCurrentUser";
 
 const AuthModal = ({ type = "login", onClose, switchModal }) => {
     const navigate = useNavigate();
@@ -31,26 +32,17 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
         return () => { document.body.style.overflow = "auto"; };
     }, []);
 
-    const handleNavigation = (user) => {
-        const role = normalizeRole(user?.role);
-        
-        switch (role) {
-            case "Admin":
-                navigate("/main/admin/dashboard", { replace: true });
-                break;
-            case "Officer":
-                navigate("/main/officer/dashboard-map", { replace: true });
-                break;
-            case "Citizen":
-                if (isMobile) {
-                    navigate("/main/citizen-pwa/landing-page", { replace: true });
-                } else {
-                    navigate("/main/citizen/alerts-map", { replace: true });
-                }
-                break;
-            default:
-                navigate(roleToBasePath(role), { replace: true });
-        }
+    const handleNavigation = (user: User) => {
+        if (!user) return;
+
+        const primaryRole = normalizePrimaryRole(user.role);
+        const secondaryRole = normalizeSecondaryRole(primaryRole, user.extra_roles?.[0]);
+
+        // Use primary if it exists, otherwise secondary (like Researcher)
+        const roleForNavigation = primaryRole || secondaryRole ;
+        console.log("Navigating to role:", roleForNavigation); //@here
+
+        navigate(roleToBasePath(roleForNavigation), { replace: true });
     };
 
     const handleLogin = async () => {
@@ -73,6 +65,7 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
             }
 
             saveUserSession(result.user, result.access_token);
+            console.log("Login successful:", result);
             await refreshUser();
             onClose();
             handleNavigation(result.user);

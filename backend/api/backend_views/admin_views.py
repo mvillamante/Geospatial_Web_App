@@ -10,10 +10,13 @@ from api.models import CustomUser
 from api.serializer import AdminUserListSerializer, AssignUserRoleSerializer
 from api.admin_permissions import IsAdminRole
 
+from .pagination import AdminUserPagination
+
 class UserListView(ListAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = AdminUserListSerializer
     permission_classes = [IsAuthenticated, IsAdminRole]
+    pagination_class = AdminUserPagination
     
 class AssignUserRoleView(generics.UpdateAPIView):
     queryset = CustomUser.objects.all()
@@ -21,10 +24,24 @@ class AssignUserRoleView(generics.UpdateAPIView):
     permission_classes = [IsAdminRole]
 
     def perform_update(self, serializer):
-        # Prevent admin from changing their own role
         if self.request.user.id == self.get_object().id:
             raise PermissionDenied("Admins cannot change their own role.")
         serializer.save()
+        
+class ToggleUserStatusView(generics.UpdateAPIView):
+    queryset = CustomUser.objects.all()
+    permission_classes = [IsAuthenticated, IsAdminRole]
+
+    def patch(self, request, *args, **kwargs):
+        user = self.get_object()
+        if user == request.user:
+            raise PermissionDenied("Admins cannot deactivate themselves.")
+        user.is_active = not user.is_active
+        user.save()
+        return Response({
+            "id": user.id,
+            "status": "Active" if user.is_active else "Inactive"
+        })
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

@@ -11,6 +11,7 @@ import {
   createLandslideRiskLayer,
   createEvacuationCentersLayer,
   createRoadsLayer,
+  createNDVILayer,
 } from "./mapLayers";
 
 // Fake risk levels
@@ -115,17 +116,27 @@ interface LeafletMapProps {
   selectedReport?: Report | null;
   reportClickTimestamp?: number | null;
   activeLayers?: string[];
+  ndviOpacity?: number;
+  ndviYear?: number;
+  ndviFromDate?: string;
+  ndviToDate?: string;
+  ndviMaxCloud?: number;
 }
 
 export default function LeafletMap({ 
   height = "600px", 
   mapView = "interactive", 
-  mapType = "basic",
+  mapType = "basic", 
   searchedBarangay = "", 
   searchedSeverity = null, 
   selectedReport = null, 
   reportClickTimestamp = null,
-  activeLayers = []
+  activeLayers = [],
+  ndviOpacity = 0.8,
+  ndviYear,
+  ndviFromDate,
+  ndviToDate,
+  ndviMaxCloud = 15,  // Lower cloud coverage for clearer NDVI imagery
 }: LeafletMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -142,6 +153,7 @@ export default function LeafletMap({
   const landslideRiskLayerRef = useRef<L.LayerGroup | null>(null);
   const evacuationCentersLayerRef = useRef<L.LayerGroup | null>(null);
   const roadsLayerRef = useRef<L.LayerGroup | null>(null);
+  const ndviLayerRef = useRef<L.LayerGroup | null>(null);
 
   // Initialize map
   useEffect(() => {
@@ -615,6 +627,29 @@ export default function LeafletMap({
       roadsLayerRef.current = createRoadsLayer(map);
     }
   }, [activeLayers]);
+
+  // Handle NDVI (green index) layer toggle
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const showNDVI = activeLayers.includes("NDVI");
+
+    if (ndviLayerRef.current) {
+      ndviLayerRef.current.remove();
+      ndviLayerRef.current = null;
+    }
+
+    if (showNDVI) {
+      ndviLayerRef.current = createNDVILayer(map, {
+        opacity: ndviOpacity,
+        year: ndviYear,
+        fromDate: ndviFromDate,
+        toDate: ndviToDate,
+        maxCloud: ndviMaxCloud,
+      });
+    }
+  }, [activeLayers, ndviOpacity, ndviYear, ndviFromDate, ndviToDate, ndviMaxCloud]);
 
   return (
     <div id="map" style={{ height: height, width: "100%" }}></div>

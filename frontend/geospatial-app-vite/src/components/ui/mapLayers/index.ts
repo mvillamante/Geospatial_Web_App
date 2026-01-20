@@ -23,3 +23,7 @@ export type { EvacuationCenterData, EvacuationCenterType, EvacuationTypeConfig }
 // Roads Layer
 export { roadsData, roadsColors, createRoadsLayer } from "./roads";
 export type { RoadData, RoadType, RoadStatus, RoadColorConfig } from "./roads";
+
+// NDVI Layer
+export { createNDVILayer } from "./ndvi";
+export type { NDVILayerOptions } from "./ndvi";

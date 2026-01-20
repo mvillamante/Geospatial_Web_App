@@ -58,14 +58,20 @@ const DashboardMapPage: React.FC = () => {
 
   /*----------time slider----------*/
   const currentYear = new Date().getFullYear(); // today’s year
-  const [year, setYear] = useState(currentYear);
-
-  const minYear = currentYear - 6;
-  const maxYear = currentYear + 4;
+  const minYear = 2020;
+  const maxYear = 2025;
+  const initialYear = Math.min(maxYear, Math.max(minYear, currentYear));
+  const [year, setYear] = useState(initialYear);
+  const [ndviOpacity, setNdviOpacity] = useState(0.8);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setYear(Number(e.target.value));
   };
+
+  const handleNdviOpacity = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNdviOpacity(Number(e.target.value));
+  };
+
 
   /*----------toggle map layers----------*/
   const [activeLayers, setActiveLayers] = useState<string[]>([]);
@@ -73,7 +79,7 @@ const DashboardMapPage: React.FC = () => {
   const mapLayers = [
     {
       group: "Green Coverage",
-      items: ["Green Spaces"],
+      items: ["NDVI"],
     },
     {
       group: "Hazard Zones",
@@ -333,7 +339,7 @@ const DashboardMapPage: React.FC = () => {
 
           {/* Time Slider */}
           <div className="timeslider-container panel-card">
-            <h4>Historical & Projection per Year</h4>
+            <h4>NDVI Year & Projections</h4>
 
             <div className="year-display">{year}</div>
 
@@ -353,6 +359,29 @@ const DashboardMapPage: React.FC = () => {
               <span>{maxYear}</span>
             </div>
           </div>
+
+          {/* NDVI Controls */}
+          {activeLayers.includes("NDVI") && (
+            <div className="ndvi-controls panel-card">
+              <h4>NDVI Layer Controls</h4>
+              <div className="ndvi-control-row">
+                <span className="ndvi-label">Opacity</span>
+                <span className="ndvi-value">{Math.round(ndviOpacity * 100)}%</span>
+              </div>
+              <input
+                type="range"
+                min={0.2}
+                max={1}
+                step={0.05}
+                value={ndviOpacity}
+                className="ndvi-opacity-slider"
+                onChange={handleNdviOpacity}
+              />
+              <div className="ndvi-date-range">
+                Date range: Jan–Dec {year}
+              </div>
+            </div>
+          )}
 
           {/* Map Layer */}
           <div className="maplayer-container panel-card">
@@ -393,7 +422,14 @@ const DashboardMapPage: React.FC = () => {
         {mapView === "interactive" ? (
           <div className="dashboardview-map">
             {/* Interactive Map Component */}
-            <LeafletMap height="100vh" mapView="interactive" mapType={mapType} activeLayers={activeLayers} />
+            <LeafletMap
+              height="100vh"
+              mapView="interactive"
+              mapType={mapType}
+              activeLayers={activeLayers}
+              ndviOpacity={ndviOpacity}
+              ndviYear={year}
+            />
 
             {/* Time Slider Floating Island */}
             <div className="timeslider-floating-tab">
@@ -557,6 +593,23 @@ const DashboardMapPage: React.FC = () => {
                 <div className="roads-legend-note">
                   <span>💡</span>
                   <span>Click on roads for details</span>
+                </div>
+              </div>
+            )}
+
+            {/* NDVI Legend - appears when NDVI layer is active */}
+            {activeLayers.includes("NDVI") && (
+              <div className="ndvi-legend">
+                <h4>NDVI Green Index</h4>
+                <div className="ndvi-legend-subtitle">Cabuyao, Laguna</div>
+                <div className="ndvi-gradient"></div>
+                <div className="ndvi-legend-labels">
+                  <span>Low</span>
+                  <span>High</span>
+                </div>
+                <div className="ndvi-legend-note">
+                  <span>💡</span>
+                  <span>Higher values indicate healthier vegetation</span>
                 </div>
               </div>
             )}

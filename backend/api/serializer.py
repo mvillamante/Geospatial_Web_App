@@ -84,8 +84,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         #user.profile.save()
 
 class AdminUserListSerializer(serializers.ModelSerializer):
-    date_joined = serializers.SerializerMethodField()
-    last_login = serializers.SerializerMethodField()
+    date_joined_display = serializers.SerializerMethodField()
+    last_login_display = serializers.SerializerMethodField()
     
     class Meta:
         model = CustomUser
@@ -95,29 +95,55 @@ class AdminUserListSerializer(serializers.ModelSerializer):
             'email',
             'phone',
             'role',
+            'extra_roles',
             'is_active',
-            'date_joined',
-            'last_login'
+            'date_joined_display',
+            'last_login',
+            'last_login_display',
         ]
         
-    def get_date_joined(self, obj):
+    def get_date_joined_display(self, obj):
         return obj.date_joined.strftime("%b %d, %Y")
-
-    def get_last_login(self, obj):
+    
+    def get_last_login_display(self, obj):
         if obj.last_login:
-            return f"{timesince(obj.last_login)} ago" # e.g., "2 hours ago"
+            return f"{timesince(obj.last_login)} ago"
         return "Never"
 
 class AssignUserRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('role',)
+        fields = ('role', 'extra_roles')  # include extra_roles for updates
 
     def validate_role(self, value):
         valid_roles = ['admin', 'researcher', 'officer', 'citizen']
         if value not in valid_roles:
             raise serializers.ValidationError("Invalid role.")
         return value
+
+    def update(self, instance, validated_data):
+        new_role = validated_data.get('role')
+
+        current_role = instance.role
+        extra_roles = instance.extra_roles or []
+
+        # Admin/Officer → Researcher
+        if current_role in ['admin', 'officer'] and new_role == 'researcher':
+            instance.role = None
+            if 'Researcher' not in extra_roles:
+                extra_roles.append('Researcher')
+            instance.extra_roles = extra_roles
+
+        # Researcher → Officer/Admin
+        elif current_role is None and 'Researcher' in extra_roles and new_role in ['admin', 'officer']:
+            instance.role = new_role
+            instance.extra_roles = []
+
+        else:
+            instance.role = new_role
+
+        instance.save()
+        return instance
     
 class IncidentReportCreateSerializer(serializers.ModelSerializer):
     photo = serializers.ImageField(required=False, allow_null=True, write_only=True)

@@ -3,6 +3,8 @@ from api.models import CustomUser, IncidentReport, ResearcherRequest, CmsGuide
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ['username', 'email', 'role', 'extra_roles', 'last_login', 'is_active']
+    list_filter = ['role', 'is_active', 'last_login']
+    search_fields = ['username', 'email', 'role']
 
 admin.site.register(CustomUser, UserAdmin)
 

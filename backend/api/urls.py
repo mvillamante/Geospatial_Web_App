@@ -1,5 +1,5 @@
 from django.urls import path
-from .backend_views.admin_views import AssignUserRoleView, UserListView
+from .backend_views.admin_views import AssignUserRoleView, ToggleUserStatusView, UserListView
 from .backend_views.auth_views import MyTokenObtainPairView, RegisterView, get_current_user, sign_up, login_user
 from .backend_views.geocoding_views import reverse_geocode
 from .backend_views.incident_views import IncidentReportCreateView, IncidentReportPhotoSignedUrlView, IncidentReportListView
@@ -16,6 +16,7 @@ urlpatterns = [
     
     # Admin Views
     path('admin/users/<int:pk>/role/', AssignUserRoleView.as_view()),
+    path('admin/users/<int:pk>/toggle-status/', ToggleUserStatusView.as_view()),
     path('admin/users/', UserListView.as_view(), name='admin-users'),
     
     # Auth Views

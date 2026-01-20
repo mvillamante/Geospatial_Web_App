@@ -1,6 +1,7 @@
 from pytz import timezone
 from api.models import CustomUser, ResearcherRequest
 from api.models import IncidentReport
+from api.models import CmsGuide
 from api.supabase_storage import upload_private_photo
 from django.utils.timesince import timesince
 from django.contrib.auth.password_validation import validate_password
@@ -174,3 +175,8 @@ class ResearcherRequestSerializer(serializers.ModelSerializer):
         model = ResearcherRequest
         fields = ['id', 'user', 'username', 'email', 'status', 'requested_at']
         read_only_fields = ['id', 'user', 'username', 'email', 'requested_at']
+
+class CmsGuideSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CmsGuide
+        fields = "__all__"

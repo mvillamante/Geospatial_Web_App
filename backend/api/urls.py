@@ -5,7 +5,7 @@ from .backend_views.geocoding_views import reverse_geocode
 from .backend_views.incident_views import IncidentReportCreateView, IncidentReportPhotoSignedUrlView, IncidentReportListView
 from .backend_views.misc_views import getRoutes, testEndPoint
 from .backend_views.researcher_views import CreateResearcherRequestView, ResearcherRequestListView, ApproveRejectResearcherRequestView
-
+from .backend_views.cms_views import *
 
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
@@ -33,6 +33,13 @@ urlpatterns = [
     path("reports/<int:report_id>/photo-url/", IncidentReportPhotoSignedUrlView.as_view(), name="incident-photo-url"),
     path("reports/list/", IncidentReportListView.as_view(), name="incident-report-list"),
     
+    #CMS Views
+    path("cms/guides/", list_guides),
+    path("cms/guides/create/", create_guide),
+    path("cms/guides/<int:pk>/", update_guide),
+    path("cms/guides/<int:pk>/publish/", toggle_publish),
+    path("cms/guides/<int:pk>/archive/", archive_guide),
+
     # Misc Views
     path('test/', testEndPoint, name='test'),
 

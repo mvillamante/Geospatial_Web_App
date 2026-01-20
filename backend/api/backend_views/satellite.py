@@ -35,7 +35,6 @@ def get_ndvi_image(request):
     Returns an NDVI (green index) image for Cabuyao using Copernicus Process API.
     Optional query params:
       - bbox=minLon,minLat,maxLon,maxLat
-      - year=YYYY
       - from=YYYY-MM-DD
       - to=YYYY-MM-DD
       - maxCloud=0-100
@@ -48,25 +47,14 @@ def get_ndvi_image(request):
             if len(bbox) != 4:
                 return JsonResponse({"error": "bbox must have 4 values"}, status=400)
         else:
-            # Cabuyao, Laguna - centered on municipality with coverage of key barangays
-            # Covers: Gulod, Baclaran, Mamatid, Sala, Banay-Banay, Marinig, Bigaa
-            # minLon, minLat, maxLon, maxLat
-            bbox = [121.06, 14.20, 121.18, 14.32]
+            # Cabuyao, Laguna (expanded to include Gulod, Baclaran, Mamatid)
+            bbox = [121.02, 14.16, 121.20, 14.34]
 
-        year_param = request.GET.get("year")
         from_date = request.GET.get("from")
         to_date = request.GET.get("to")
         end_date = datetime.utcnow().date()
 
-        if year_param and not (from_date or to_date):
-            try:
-                parsed_year = int(year_param)
-                parsed_from = datetime(parsed_year, 1, 1).date()
-                parsed_to = datetime(parsed_year, 12, 31).date()
-            except ValueError:
-                parsed_from = None
-                parsed_to = None
-        elif from_date and to_date:
+        if from_date and to_date:
             try:
                 parsed_from = datetime.strptime(from_date, "%Y-%m-%d").date()
                 parsed_to = datetime.strptime(to_date, "%Y-%m-%d").date()
@@ -88,9 +76,8 @@ def get_ndvi_image(request):
             parsed_from = parsed_to - timedelta(days=30)
 
         # Optional: expand the search window slightly to find clearer imagery
-        # Default to 10 days for yearly requests to improve chance of cloud-free mosaics
-        default_expand = "10" if year_param and not (from_date or to_date) else "5"
-        expand_days = int(request.GET.get("expandDays", default_expand))
+        # Default to 5 days for specific month requests to stay close to the target period
+        expand_days = int(request.GET.get("expandDays", "5"))
         expand_days = max(0, min(expand_days, 30))  # Cap at 30 days expansion
 
         search_from = parsed_from - timedelta(days=expand_days)
@@ -104,17 +91,11 @@ def get_ndvi_image(request):
         to_date = search_to.isoformat()
 
         # Lower default cloud coverage for clearer NDVI imagery
-        # With temporal mosaicking, we can use slightly higher threshold
-        max_cloud = int(request.GET.get("maxCloud", "15"))
+        max_cloud = int(request.GET.get("maxCloud", "5"))
         max_cloud = max(0, min(max_cloud, 100))
 
         try:
             access_token = _get_access_token()
-        except ValueError as exc:
-            return JsonResponse(
-                {"error": "Copernicus credentials not configured", "details": str(exc)},
-                status=500,
-            )
         except requests.RequestException as exc:
             details = getattr(exc.response, "text", None)
             return JsonResponse(
@@ -135,52 +116,31 @@ function setup() {
 }
 
 function evaluatePixel(sample) {
-  var scl = sample.SCL;
+  let scl = sample.SCL;
   
-  // Check if pixel is cloudy or invalid
-  // SCL: 0=No data, 1=Saturated, 3=Shadow, 8=Cloud Med, 9=Cloud High, 10=Cirrus, 11=Snow
-  var isBad = (scl === 0 || scl === 1 || scl === 3 || scl === 8 || scl === 9 || scl === 10 || scl === 11);
+  // Check if pixel is cloudy or shadowy - use a neutral color for these
+  // SCL: 3=cloud shadow, 8=cloud medium prob, 9=cloud high prob, 10=thin cirrus
+  let isCloudy = (scl === 3 || scl === 8 || scl === 9 || scl === 10);
   
-  // For bad/cloudy pixels, show light gray
-  if (isBad) {
-    return [0.9, 0.9, 0.9];
+  let ndvi = (sample.B08 - sample.B04) / (sample.B08 + sample.B04 + 0.0001);
+  
+  // For cloudy pixels, show a muted version
+  if (isCloudy) {
+    // Return a light gray to indicate cloud-affected area
+    return [0.85, 0.85, 0.85];
   }
   
-  // Calculate NDVI
-  var ndvi = (sample.B08 - sample.B04) / (sample.B08 + sample.B04 + 0.0001);
-  
-  // Enhanced NDVI color ramp for Cabuyao vegetation analysis
-  // Optimized for tropical/agricultural areas
-  // Red tones for low vegetation, transitioning to green for healthy vegetation
-  
-  if (ndvi < -0.1) {
-    // Water/bare surfaces - dark blue-gray
-    return [0.24, 0.31, 0.47];
-  } else if (ndvi < 0.1) {
-    // Very low/no vegetation - dark red
-    return [0.70, 0.18, 0.15];
-  } else if (ndvi < 0.2) {
-    // Low vegetation - red-orange
-    return [0.85, 0.35, 0.18];
-  } else if (ndvi < 0.3) {
-    // Sparse vegetation - orange
-    return [0.92, 0.55, 0.22];
-  } else if (ndvi < 0.4) {
-    // Light vegetation - yellow-orange
-    return [0.95, 0.78, 0.28];
-  } else if (ndvi < 0.5) {
-    // Moderate vegetation - yellow-green
-    return [0.75, 0.88, 0.30];
-  } else if (ndvi < 0.65) {
-    // Good vegetation - lime green
-    return [0.45, 0.82, 0.28];
-  } else if (ndvi < 0.8) {
-    // Dense vegetation - bright green
-    return [0.20, 0.72, 0.22];
-  } else {
-    // Very dense/healthy vegetation - deep emerald
-    return [0.08, 0.55, 0.15];
-  }
+  // Stretch NDVI range for clearer contrast
+  let scaled = Math.max(0.0, Math.min(1.0, (ndvi + 0.1) / 0.9));
+  // Slight gamma boost to emphasize greens
+  scaled = Math.pow(scaled, 0.8);
+
+  // Enhanced color ramp (brown -> yellow-green -> deep green)
+  if (scaled < 0.2) return [0.45, 0.25, 0.12];
+  if (scaled < 0.4) return [0.9, 0.75, 0.35];
+  if (scaled < 0.6) return [0.65, 0.85, 0.25];
+  if (scaled < 0.8) return [0.2, 0.75, 0.25];
+  return [0.05, 0.55, 0.12];
 }
 """
 
@@ -199,13 +159,14 @@ function evaluatePixel(sample) {
                                 "to": f"{to_date}T23:59:59Z",
                             },
                             "maxCloudCoverage": max_cloud,
+                            "mosaickingOrder": "leastCC",
                         },
                     }
                 ],
             },
             "output": {
-                "width": 1536,
-                "height": 1536,
+                "width": 1024,
+                "height": 1024,
                 "responses": [{"identifier": "default", "format": {"type": "image/png"}}],
             },
             "evalscript": evalscript,

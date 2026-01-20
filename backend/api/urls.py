@@ -3,6 +3,7 @@ from .backend_views.auth_views import get_current_user, sign_up, login_user, MyT
 from .backend_views.misc_views import testEndPoint, getRoutes
 from .backend_views.geocoding_views import reverse_geocode
 from .backend_views.admin_views import UserListView, AssignUserRoleView, ToggleUserStatusView
+from .backend_views.satellite import get_ndvi_image
 
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
@@ -25,4 +26,7 @@ urlpatterns = [
     
     # Geocoding Views
     path("geocoding/reverse/", reverse_geocode, name="reverse_geocode"),
+    
+    # Satellite Views
+    path("satellite/ndvi/", get_ndvi_image, name="satellite_ndvi"),
 ]

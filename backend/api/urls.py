@@ -2,7 +2,7 @@ from django.urls import path
 from .backend_views.admin_views import AssignUserRoleView, UserListView
 from .backend_views.auth_views import MyTokenObtainPairView, RegisterView, get_current_user, sign_up, login_user
 from .backend_views.geocoding_views import reverse_geocode
-from .backend_views.incident_views import IncidentReportCreateView, IncidentReportPhotoSignedUrlView
+from .backend_views.incident_views import IncidentReportCreateView, IncidentReportPhotoSignedUrlView, IncidentReportListView
 from .backend_views.misc_views import getRoutes, testEndPoint
 from .backend_views.researcher_views import CreateResearcherRequestView, ResearcherRequestListView, ApproveRejectResearcherRequestView
 
@@ -31,6 +31,7 @@ urlpatterns = [
     # Incident Views
     path("reports/", IncidentReportCreateView.as_view(), name="incident-create"),
     path("reports/<int:report_id>/photo-url/", IncidentReportPhotoSignedUrlView.as_view(), name="incident-photo-url"),
+    path("reports/list/", IncidentReportListView.as_view(), name="incident-report-list"),
     
     # Misc Views
     path('test/', testEndPoint, name='test'),

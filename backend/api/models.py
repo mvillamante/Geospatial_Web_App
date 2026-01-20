@@ -75,6 +75,13 @@ class IncidentReport(models.Model):
         ("others", "Others"),
     ]
 
+    STATUS_CHOICES = [
+        ("Pending", "Pending"),
+        ("Verified", "Verified"),
+        ("Rejected", "Rejected"),
+        ("Resolved", "Resolved"),
+    ]
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -93,3 +100,5 @@ class IncidentReport(models.Model):
 
     photo_path = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")

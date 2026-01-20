@@ -149,6 +149,23 @@ class IncidentReportCreateSerializer(serializers.ModelSerializer):
         )
         return report
     
+class IncidentReportListSerializer(serializers.ModelSerializer):
+    user_label = serializers.SerializerMethodField()
+
+    class Meta:
+        model = IncidentReport
+        fields = [
+            "id",
+            "user_label",
+            "category",
+            "location_display",
+            "status",
+            "created_at",
+        ]
+    
+    def get_user_label(self, obj):
+        return f"Citizen #{obj.user_id}"
+    
 class ResearcherRequestSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.CharField(source='user.email', read_only=True)

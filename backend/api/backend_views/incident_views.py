@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.response import Response
+from api.serializer import IncidentReportListSerializer
 
 from api.supabase_storage import create_signed_url
 
@@ -11,6 +12,7 @@ from api.serializer import IncidentReportCreateSerializer
 from api.models import IncidentReport
 
 class IncidentReportCreateView(APIView):
+
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
@@ -44,3 +46,18 @@ class IncidentReportPhotoSignedUrlView(APIView):
 
         signed_url = create_signed_url(report.photo_path, expires_in_seconds=3600)
         return Response({"photo_url": signed_url})
+
+class IncidentReportListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        qs = IncidentReport.objects.all().order_by("-created_at");
+    
+        if request.user.role == "citizen":
+            qs = qs.filter(user=request.user)
+        
+        elif request.user.role == "lgu":
+            qs = qs.filter(assigned_officer=request.user)
+
+        serializer = IncidentReportListSerializer(qs, many=True)
+        return Response(serializer.data)

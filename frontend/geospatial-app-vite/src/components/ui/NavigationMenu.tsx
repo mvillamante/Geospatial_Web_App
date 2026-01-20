@@ -27,7 +27,7 @@ const NavigationMenu: React.FC = () => {
 
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
 
-  const { userRole, displayName, profilePath } = getUserRoleAndDisplayName();
+  const { userRole, userRole2, displayName, profilePath } = getUserRoleAndDisplayName();
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -116,7 +116,10 @@ const NavigationMenu: React.FC = () => {
     ],
   };
 
-  const navItems: NavItem[] = navigationList[userRole] || [];
+  const effectiveRole = (userRole2.includes("Researcher") ? "Researcher" : "") || userRole;
+  console.log("effectiveRole:", effectiveRole); //@here
+
+  const navItems: NavItem[] = navigationList[effectiveRole] || [];
 
   const handleLogout = () => {
     clearUserSession();
@@ -124,10 +127,10 @@ const NavigationMenu: React.FC = () => {
   };
 
   return (
-    <div className={`navigation ${userRole === "Admin" ? "admin-nav" : ""}`}>
+    <div className={`navigation ${effectiveRole === "Admin" ? "admin-nav" : ""}`}>
       <nav>
         {navItems.map(({ label, path, icon: Icon }, index) => (
-          <div className={`nav-item ${userRole === "Admin" ? "admin-layout" : ""}`} key={index}>
+          <div className={`nav-item ${effectiveRole === "Admin" ? "admin-layout" : ""}`} key={index}>
             <NavLink to={`/main/${path}`} className={({ isActive }) => (isActive ? "active" : "")}>
               {Icon && <Icon className="nav-icon" />}
               <span className="nav-label">{label}</span>
@@ -137,7 +140,7 @@ const NavigationMenu: React.FC = () => {
       </nav>
 
       <div
-        className={`user-profile-section ${userRole === "Admin" ? "admin-profile" : "user-profile"}`}
+        className={`user-profile-section ${effectiveRole === "Admin" ? "admin-profile" : "user-profile"}`}
         ref={dropdownRef}
       >
         <div className="profile-dropdown-trigger" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
@@ -161,7 +164,10 @@ const NavigationMenu: React.FC = () => {
               </div>
               <div className="dropdown-user-details">
                 <span className="dropdown-username">{user?.username || displayName}</span>
-                <span className="dropdown-role">{userRole}</span>
+                <span className="dropdown-role">
+                  {userRole}
+                  {userRole2?.[0] ? ` & ${userRole2[0]}` : ""}
+                </span>
               </div>
             </div>
 

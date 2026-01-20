@@ -40,7 +40,6 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
 
         // Use primary if it exists, otherwise secondary (like Researcher)
         const roleForNavigation = primaryRole || secondaryRole ;
-        console.log("Navigating to role:", roleForNavigation); //@here
 
         navigate(roleToBasePath(roleForNavigation), { replace: true });
     };

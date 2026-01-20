@@ -232,6 +232,14 @@
   line-height: 1;
 }
 
+.user-table-body .staff-id {
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 .user-details {
   display: flex;
   flex-direction: column;
@@ -263,10 +271,22 @@
   font-size: 0.75rem;
   border-radius: 999px;
   border: 1px solid #e5e7eb;
+  font-weight: 600;
+  text-align: center;
   background-color: transparent;
   cursor: pointer;
   appearance: none;
 }
+
+
+.role-field .role-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.role-field .role-select.Researcher { background: #ede9fe; color: #7c3aed; }
+.role-field .role-select.Officer { background: #dbeafe; color: #1e40af; }
+.role-field .role-select.Admin { background: #fee2e2; color: #b91c1c; }
 
 .user-table-body .role-field .chev {
   position: absolute;
@@ -281,17 +301,7 @@
   line-height: 1;
 }
 
-.role-select:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.role-select { padding-right: 1.5rem; }
-
-.role-select.Researcher { background: #ede9fe; color: #7c3aed; }
-.role-select.Officer { background: #dbeafe; color: #1e40af; }
-.role-select.Admin { background: #fee2e2; color: #b91c1c; }
-
+/*siguro lipat sa global @here---------*/
 .Citizen {
   background: #dbeafe;
   color: #1e40af;

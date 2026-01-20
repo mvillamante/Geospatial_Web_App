@@ -15,6 +15,7 @@ type RequestStatus = 'Pending' | 'Approved' | 'Rejected';
 
 interface User {
   id: number;
+  staff_id: string;
   name: string;
   email: string;
   phone: string;
@@ -28,6 +29,7 @@ interface User {
 
 interface BackendUser {
   id: number;
+  staff_id: string;
   username: string;
   email: string;
   phone: string;
@@ -67,7 +69,7 @@ const UserMgmtPage: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
 
   /* GET CURRENT USER ROLE */
-  const { userRole } = getUserRoleAndDisplayName(); // userRole2
+  const { userRole, currentUserId } = getUserRoleAndDisplayName(); // userRole2
 
   const filteredUsers = users.filter(user => {
     const roleMatch =
@@ -77,7 +79,7 @@ const UserMgmtPage: React.FC = () => {
       statusFilter === 'All' || user.status === statusFilter;
 
     const searchMatch =
-      user.name.toLowerCase().includes(searchTerm.toLowerCase());
+      (user.name ?? "").toLowerCase().includes(searchTerm.toLowerCase());
 
     return roleMatch && statusMatch && searchMatch;
   });
@@ -104,19 +106,21 @@ const UserMgmtPage: React.FC = () => {
       const mappedUsers = data.results
         .filter((u: BackendUser) => {
           const roleLower = u.role?.toLowerCase() || "";
+          const extraRoleLower = u.extra_roles?.[0]?.toLowerCase() || "";
 
           if (!roleLower) {
-            return u.extra_roles?.[0]?.toLowerCase() === "researcher";
+            return extraRoleLower === "researcher";
           }
 
           if (roleLower === "citizen") {
-            return u.extra_roles?.some((r: string) => r.toLowerCase() === "researcher");
+            return extraRoleLower === "researcher";
           }
 
           return roleLower === "officer" || roleLower === "admin";
         })
         .map((u: BackendUser): User => ({
           id: u.id,
+          staff_id: u.staff_id,
           name: `${u.username}`,
           email: u.email,
           phone: u.phone,
@@ -326,6 +330,32 @@ const UserMgmtPage: React.FC = () => {
     }
   };
 
+  const revokeResearcher = async (id: number) => {
+    const token = localStorage.getItem("access_token");
+
+    const res = await fetch(
+      `http://127.0.0.1:8000/api/admin/users/${id}/revoke-researcher/`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.detail || "Failed to revoke researcher access");
+      return;
+    }
+
+    const updatedUser = await res.json();
+    setUsers(users.map(u => (u.id === id ? updatedUser : u)));
+
+    await fetchUsers();
+  };
+
+
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     if (!sortField || !sortOrder) return 0;
 
@@ -465,8 +495,8 @@ const UserMgmtPage: React.FC = () => {
               <thead>
                 <tr>
                   <th></th>
-                  <th className="center">User</th>
                   <th className="center">Staff ID</th>
+                  <th className="center">User</th>
                   <th className="center">Role</th>
                   <th className="center">Status</th>
                   <th className="center">
@@ -498,34 +528,26 @@ const UserMgmtPage: React.FC = () => {
                   const alreadyRequested = requests.some(
                     r => r.userId === user.id && r.status === 'Pending'
                   );
+                  
+                  const roleClass = user.extra_roles?.[0]?.toLowerCase() || user.role?.toLowerCase() || "";
 
                   return (
                     <tr key={user.id}>
                       <td className="cell-number">{index+1}</td>
+                      <td className="center staff-id">{user.staff_id}</td>
                       <td>
-                        <div className={`user-details role-${(user.extra_roles && user.extra_roles.length > 0 
-                          ? user.extra_roles[0].toLowerCase() 
-                          : user.role.toLowerCase())}`}>
+                        <div className={`user-details role-${roleClass}`}>
                           <strong className="user-name">{user.name}</strong>
                         </div>
                         {/* <div className="muted">{user.email}</div>
                         <div className="muted">{user.phone}</div> */}
                       </td>
-                      <td className="center muted"></td>
                       <td className="center">
                         <div className="role-cell">
                           <div className="role-field">
                             <select
-                              className={`role-select ${
-                                user.extra_roles && user.extra_roles.length > 0
-                                  ? user.extra_roles[0].toLowerCase()
-                                  : user.role.toLowerCase()
-                              }`}
-                              value={
-                                user.extra_roles && user.extra_roles.length > 0
-                                  ? user.extra_roles[0]
-                                  : user.role
-                              }
+                              className={`role-select ${user.extra_roles?.[0] ?? user.role ?? ""}`}
+                              value={user.extra_roles?.[0] ?? user.role ?? ""}
                               onChange={(e) => updateRole(user.id, e.target.value as Role)}
                               aria-label={`Change role for ${user.name}`}
                               disabled={
@@ -588,8 +610,9 @@ const UserMgmtPage: React.FC = () => {
 
                                     if (!confirmed) return;
 
-                                    console.log("Revoke Researcher access for user:", user.id);
-                                    window.alert("Di pa nagana hehe :D"); //Researcher access revoked.
+                                    window.alert("Researcher access revoked.");
+
+                                    revokeResearcher(user.id);
                                     setOpenMenu(null);
                                   }}
                                 >
@@ -628,7 +651,6 @@ const UserMgmtPage: React.FC = () => {
               </thead>
               <tbody>
                 {requests.map((req, index) => (
-                  console.log("reqqq", req),
                   <tr key={req.id}>
                     <td className="cell-number">{index+1}</td>
                     <td className="user-name">{req.userName}</td>

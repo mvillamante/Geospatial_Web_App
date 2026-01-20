@@ -53,13 +53,15 @@ export const getUserRoleAndDisplayName = () => {
   const storedRoles = JSON.parse(localStorage.getItem("user_roles") || '{}');
   const currentUser = JSON.parse(localStorage.getItem("current_user") || '{}');
 
+  const currentUserId = currentUser.id || null;
+
   const userRole = storedRoles.primaryRole?.trim() ? storedRoles.primaryRole : "Guest";
   const userRole2 = storedRoles.secondaryRoles ?? [];
 
   const displayName = currentUser.name || currentUser.username || (userRole || "Guest");
   const profilePath = `/main/${userRole.toLowerCase()}/profile`;
 
-  return { userRole, userRole2, displayName, profilePath };
+  return { currentUserId, userRole, userRole2, displayName, profilePath };
 };
 
 // ===== LISTEN TO AUTH CHANGES =====
@@ -77,8 +79,6 @@ export const onAuthChange = (
 // ===== SAVE USER SESSION =====
 export const saveUserSession = (user: User, accessToken: string) => {
   if (!user || !accessToken) return;
-
-  console.log("testing", user.role, user.extra_roles?.[0])
 
   const primaryRole = normalizePrimaryRole(user.role);
   const secondaryRoles = [normalizeSecondaryRole(primaryRole, user.extra_roles?.[0])];

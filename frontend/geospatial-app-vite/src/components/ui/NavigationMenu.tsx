@@ -117,7 +117,6 @@ const NavigationMenu: React.FC = () => {
   };
 
   const effectiveRole = (userRole2.includes("Researcher") ? "Researcher" : "") || userRole;
-  console.log("effectiveRole:", effectiveRole); //@here
 
   const navItems: NavItem[] = navigationList[effectiveRole] || [];
 

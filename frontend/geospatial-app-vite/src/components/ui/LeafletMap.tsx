@@ -118,6 +118,7 @@ interface LeafletMapProps {
   activeLayers?: string[];
   ndviOpacity?: number;
   ndviYear?: number;
+  ndviMonth?: number; // 1-12, for selecting clearest image of a specific month
   ndviFromDate?: string;
   ndviToDate?: string;
   ndviMaxCloud?: number;
@@ -134,9 +135,10 @@ export default function LeafletMap({
   activeLayers = [],
   ndviOpacity = 0.8,
   ndviYear,
+  ndviMonth,
   ndviFromDate,
   ndviToDate,
-  ndviMaxCloud = 15,  // Lower cloud coverage for clearer NDVI imagery
+  ndviMaxCloud,  // Let ndviLayer use smart defaults based on month selection
 }: LeafletMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -644,12 +646,13 @@ export default function LeafletMap({
       ndviLayerRef.current = createNDVILayer(map, {
         opacity: ndviOpacity,
         year: ndviYear,
+        month: ndviMonth,
         fromDate: ndviFromDate,
         toDate: ndviToDate,
-        maxCloud: ndviMaxCloud,
+        ...(ndviMaxCloud !== undefined && { maxCloud: ndviMaxCloud }),
       });
     }
-  }, [activeLayers, ndviOpacity, ndviYear, ndviFromDate, ndviToDate, ndviMaxCloud]);
+  }, [activeLayers, ndviOpacity, ndviYear, ndviMonth, ndviFromDate, ndviToDate, ndviMaxCloud]);
 
   return (
     <div id="map" style={{ height: height, width: "100%" }}></div>

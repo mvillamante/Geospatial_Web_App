@@ -4,13 +4,17 @@ export interface NDVILayerOptions {
   opacity?: number;
   bbox?: [number, number, number, number];
   year?: number;
+  month?: number; // 1-12, requires year to be set. Selects clearest image for the month.
   fromDate?: string;
   toDate?: string;
   maxCloud?: number;
+  imageWidth?: number;
+  imageHeight?: number;
 }
 
-// Cabuyao, Laguna - centered on municipality with key barangay coverage
-const DEFAULT_BBOX: [number, number, number, number] = [121.06, 14.20, 121.18, 14.32];
+// Cabuyao, Laguna (expanded to include Casile)
+const DEFAULT_BBOX: [number, number, number, number] = [120.97, 14.14, 121.22, 14.36];
+
 
 /**
  * Creates and adds an NDVI (green index) image overlay for Cabuyao.
@@ -22,21 +26,33 @@ export function createNDVILayer(map: L.Map, options: NDVILayerOptions = {}): L.L
     opacity = 0.8,
     bbox = DEFAULT_BBOX,
     year,
+    month,
     fromDate,
     toDate,
-    maxCloud = 15,  // Lower cloud coverage for clearer vegetation imagery
+    imageWidth = 1536,
+    imageHeight = 1536,
   } = options;
+  
+  // Use higher cloud threshold to ensure images are found (especially for month-specific requests)
+  // The backend uses leastCC mosaicking to still select the clearest available image
+  const maxCloud = options.maxCloud ?? (month ? 50 : 30);
 
   const controller = new AbortController();
 
   const queryParams = new URLSearchParams({
     bbox: bbox.join(","),
     maxCloud: String(maxCloud),
+    width: String(imageWidth),
+    height: String(imageHeight),
     cacheBust: String(Date.now()),
   });
 
   if (typeof year === "number") {
     queryParams.append("year", String(year));
+    // If month is specified (1-12), add it to get clearest image for that month
+    if (typeof month === "number" && month >= 1 && month <= 12) {
+      queryParams.append("month", String(month));
+    }
   } else {
     if (fromDate) queryParams.append("from", fromDate);
     if (toDate) queryParams.append("to", toDate);

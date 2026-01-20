@@ -63,6 +63,12 @@ const DashboardMapPage: React.FC = () => {
   const initialYear = Math.min(maxYear, Math.max(minYear, currentYear));
   const [year, setYear] = useState(initialYear);
   const [ndviOpacity, setNdviOpacity] = useState(0.8);
+  const [ndviMonth, setNdviMonth] = useState<number>(1); // 1-12 for month selection
+
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setYear(Number(e.target.value));
@@ -70,6 +76,10 @@ const DashboardMapPage: React.FC = () => {
 
   const handleNdviOpacity = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNdviOpacity(Number(e.target.value));
+  };
+
+  const handleNdviMonth = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNdviMonth(Number(e.target.value));
   };
 
 
@@ -364,6 +374,8 @@ const DashboardMapPage: React.FC = () => {
           {activeLayers.includes("NDVI") && (
             <div className="ndvi-controls panel-card">
               <h4>NDVI Layer Controls</h4>
+              
+              {/* Opacity Slider */}
               <div className="ndvi-control-row">
                 <span className="ndvi-label">Opacity</span>
                 <span className="ndvi-value">{Math.round(ndviOpacity * 100)}%</span>
@@ -377,8 +389,32 @@ const DashboardMapPage: React.FC = () => {
                 className="ndvi-opacity-slider"
                 onChange={handleNdviOpacity}
               />
+
+              {/* Month Slider */}
+              <div className="ndvi-control-row" style={{ marginTop: "12px" }}>
+                <span className="ndvi-label">Month</span>
+                <span className="ndvi-value">{monthNames[ndviMonth - 1]}</span>
+              </div>
+              <input
+                type="range"
+                min={1}
+                max={12}
+                step={1}
+                value={ndviMonth}
+                className="ndvi-month-slider"
+                onChange={handleNdviMonth}
+              />
+              <div className="ndvi-month-labels">
+                <span>Jan</span>
+                <span>Dec</span>
+              </div>
+
               <div className="ndvi-date-range">
-                Date range: Jan–Dec {year}
+                Showing clearest image: {monthNames[ndviMonth - 1]} {year}
+              </div>
+              <div className="ndvi-cloud-note">
+                <span>☁️</span>
+                <span>Lowest cloud coverage selected</span>
               </div>
             </div>
           )}
@@ -429,6 +465,7 @@ const DashboardMapPage: React.FC = () => {
               activeLayers={activeLayers}
               ndviOpacity={ndviOpacity}
               ndviYear={year}
+              ndviMonth={ndviMonth}
             />
 
             {/* Time Slider Floating Island */}

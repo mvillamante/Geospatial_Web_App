@@ -4,6 +4,7 @@ from .backend_views.views import MyTokenObtainPairView, RegisterView, testEndPoi
 from .backend_views.geocoding import reverse_geocode
 from .backend_views.views import AssignUserRoleView
 from .backend_views.admin_views import UserListView
+from .backend_views.satellite import get_ndvi_image
 
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
@@ -23,5 +24,6 @@ urlpatterns = [
 
     path('admin/users/<int:pk>/role/', AssignUserRoleView.as_view()),
     path('admin/users/', UserListView.as_view(), name='admin-users'),
+    path("satellite/ndvi/", get_ndvi_image, name="satellite-ndvi"),
 
 ]

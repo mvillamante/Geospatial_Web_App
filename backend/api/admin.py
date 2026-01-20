@@ -2,9 +2,10 @@ from django.contrib import admin
 from api.models import CustomUser, IncidentReport, ResearcherRequest, CmsGuide
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['username', 'email', 'role', 'extra_roles', 'last_login', 'is_active']
+    list_display = ['username', 'staff_id', 'email', 'role', 'extra_roles', 'last_login', 'is_active']
     list_filter = ['role', 'is_active', 'last_login']
     search_fields = ['username', 'email', 'role']
+    readonly_fields = ('staff_id',)
 
 admin.site.register(CustomUser, UserAdmin)
 

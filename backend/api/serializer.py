@@ -12,9 +12,10 @@ from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class UserSerializer(serializers.ModelSerializer):
+    staff_id = serializers.ReadOnlyField()
     class Meta:
         model = CustomUser
-        fields = ('id', 'username', 'email')
+        fields = ('id', 'username', 'email', 'role', 'extra_roles', 'staff_id')
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -84,6 +85,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         #user.profile.save()
 
 class AdminUserListSerializer(serializers.ModelSerializer):
+    staff_id = serializers.ReadOnlyField()
     date_joined_display = serializers.SerializerMethodField()
     last_login_display = serializers.SerializerMethodField()
     
@@ -91,6 +93,7 @@ class AdminUserListSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = [
             'id',
+            'staff_id',
             'username',
             'email',
             'phone',
@@ -101,6 +104,7 @@ class AdminUserListSerializer(serializers.ModelSerializer):
             'last_login',
             'last_login_display',
         ]
+
         
     def get_date_joined_display(self, obj):
         return obj.date_joined.strftime("%b %d, %Y")

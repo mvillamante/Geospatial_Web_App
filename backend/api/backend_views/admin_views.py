@@ -42,6 +42,31 @@ class ToggleUserStatusView(generics.UpdateAPIView):
             "id": user.id,
             "status": "Active" if user.is_active else "Inactive"
         })
+        
+class RevokeResearcherView(generics.UpdateAPIView):
+    queryset = CustomUser.objects.all()
+    permission_classes = [IsAdminRole]
+
+    def update(self, request, *args, **kwargs):
+        user = self.get_object()
+
+        if request.user.id == user.id:
+            raise PermissionDenied("You cannot modify your own roles.")
+
+        # Only applies to Citizen + Researcher
+        if user.role != 'citizen' or 'Researcher' not in (user.extra_roles or []):
+            raise ValidationError("User does not have Researcher access to revoke.")
+
+        user.extra_roles = [
+            r for r in user.extra_roles if r != 'Researcher'
+        ]
+        user.save()
+
+        return Response({
+            "id": user.id,
+            "role": user.role,
+            "extra_roles": user.extra_roles
+        })
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

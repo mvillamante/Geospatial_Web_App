@@ -19,24 +19,47 @@ class CustomUser(AbstractUser):
     phone = models.CharField(max_length=20, unique=True, null=True, blank=True)
     supabase_uid = models.CharField(max_length=255, null=True, blank=True)
 
-    # Override the default related_name for the groups and user_permissions fields
     groups = models.ManyToManyField(
         'auth.Group',
-        related_name='customuser_groups',  # Custom related name to avoid clashes
+        related_name='customuser_groups',
         blank=True,
         help_text='The groups this user belongs to.',
         related_query_name='customuser'
     )
     user_permissions = models.ManyToManyField(
         'auth.Permission',
-        related_name='customuser_permissions',  # Custom related name to avoid clashes
+        related_name='customuser_permissions',
         blank=True,
-        help_text='Specific permissions for this user.',
+        help_text='Specific permissions for this user.',    
         related_query_name='customuser'
     )
 
     def __str__(self):
         return f"{self.username} ({self.role})" if self.role else f"{self.username} (No role)"
+    
+    # ===== Staff ID property =====
+    @property
+    def staff_id(self) -> str:
+        role = (self.role or "").lower()
+        extra_roles = self.extra_roles or []
+
+        # Citizens without Researcher role do NOT get a staff ID
+        if role == "citizen" and "Researcher" not in extra_roles:
+            return ""
+
+        if not self.id:
+            return ""
+
+        # Base36 style ID
+        import string
+        chars = string.digits + string.ascii_uppercase
+        n = self.id
+        result = ""
+        while n > 0:
+            n, rem = divmod(n, 36)
+            result = chars[rem] + result
+
+        return f"STF-{result or '0'}"
     
     
     

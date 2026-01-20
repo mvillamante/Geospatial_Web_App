@@ -1,26 +1,33 @@
+import jwt
+
+from django.utils import timezone
 from django.http import JsonResponse
 from django.db import IntegrityError
 from django.conf import settings
 
-from api.models import CustomUser
-
-from supabase import create_client, Client
-
-import jwt
-
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import generics
+from rest_framework_simplejwt.views import TokenObtainPairView
 
+from api.models import CustomUser
+from api.serializer import MyTokenObtainPairSerializer, RegisterSerializer
 
+from supabase import create_client, Client
 
 # Supabase client initialization
 url = settings.SUPABASE_URL
 key = settings.SUPABASE_KEY
 supabase: Client = create_client(url, key)
 
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
+class RegisterView(generics.CreateAPIView):
+    queryset = CustomUser.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
 
 def get_current_user(request):
     """
@@ -69,8 +76,17 @@ def login_user(request):
             user = CustomUser.objects.get(email=username_or_phone)
         else:
             user = CustomUser.objects.get(phone=username_or_phone)
+            
+        if not user.is_active:
+            return JsonResponse({"error": "Account is inactive. Please contact an administrator."}, status=403)
 
         if user.check_password(password):
+            try:
+                user.last_login = timezone.now()
+                user.save(update_fields=['last_login'])
+            except Exception as e:
+                print("Failed to update last_login:", e)
+            
             refresh = RefreshToken.for_user(user)
             return JsonResponse({
                 "message": "Login successful",
@@ -91,8 +107,6 @@ def login_user(request):
     except CustomUser.DoesNotExist:
         return JsonResponse({"error": "User not found"}, status=404)
 
-
-
 # Signup User using JWT tokens
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -106,6 +120,10 @@ def sign_up(request):
 
     if not all([first_name, last_name, email, phone, password]):
         return JsonResponse({"error": "All fields are required"}, status=400)
+    if CustomUser.objects.filter(email=email).exists():
+        return JsonResponse({"error": "Email already exists"}, status=400)
+    if CustomUser.objects.filter(phone=phone).exists():
+        return JsonResponse({"error": "Phone already exists"}, status=400)
 
     username = f"{first_name.capitalize()}.{last_name.capitalize()}"
 
@@ -144,3 +162,4 @@ def sign_up(request):
         return JsonResponse({"error": "Email or phone already exists"}, status=400)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+    

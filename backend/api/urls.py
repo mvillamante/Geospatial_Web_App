@@ -4,26 +4,30 @@ from .backend_views.views import MyTokenObtainPairView, RegisterView, testEndPoi
 from .backend_views.geocoding import reverse_geocode
 from .backend_views.views import AssignUserRoleView
 from .backend_views.admin_views import UserListView
-from .backend_views.satellite import get_ndvi_image
 
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
 urlpatterns = [
-    path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('register/', RegisterView.as_view(), name='auth_register'),
-    path('test/', testEndPoint, name='test'),
-    path('', getRoutes),
     
+    # Admin Views
+    path('admin/users/<int:pk>/role/', AssignUserRoleView.as_view()),
+    path('admin/users/<int:pk>/toggle-status/', ToggleUserStatusView.as_view()),
+    path('admin/users/', UserListView.as_view(), name='admin-users'),
+    
+    # Auth Views
+    path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('register/', RegisterView.as_view(), name='auth_register'),
     path("current_user/", get_current_user, name="get_current_user"),
     path('sign_up/', sign_up, name='sign_up'),
     path("login_user/", login_user, name="login_user"),
+    
+    # Geocoding Views
     path("geocoding/reverse/", reverse_geocode, name="reverse_geocode"),
 
     path('admin/users/<int:pk>/role/', AssignUserRoleView.as_view()),
     path('admin/users/', UserListView.as_view(), name='admin-users'),
-    path("satellite/ndvi/", get_ndvi_image, name="satellite-ndvi"),
 
 ]

@@ -1,7 +1,7 @@
 import { supabase } from "./supabaseClient";
 import type { Session, AuthError } from "@supabase/supabase-js";
 import type { User } from "./fetchCurrentUser";
-import { normalizeRole } from "../utils/roles";
+import { normalizePrimaryRole, normalizeSecondaryRole } from "../utils/roles";
 
 // ===== LOGIN ======
 export const login = async (
@@ -53,13 +53,15 @@ export const getUserRoleAndDisplayName = () => {
   const storedRoles = JSON.parse(localStorage.getItem("user_roles") || '{}');
   const currentUser = JSON.parse(localStorage.getItem("current_user") || '{}');
 
-  const userRole = storedRoles.primaryRole || "Guest";
-  const userRole2 = storedRoles.secondaryRoles || [];
+  const currentUserId = currentUser.id || null;
 
-  const displayName = currentUser.name || currentUser.username || userRole;
+  const userRole = storedRoles.primaryRole?.trim() ? storedRoles.primaryRole : "Guest";
+  const userRole2 = storedRoles.secondaryRoles ?? [];
+
+  const displayName = currentUser.name || currentUser.username || (userRole || "Guest");
   const profilePath = `/main/${userRole.toLowerCase()}/profile`;
 
-  return { userRole, userRole2, displayName, profilePath };
+  return { currentUserId, userRole, userRole2, displayName, profilePath };
 };
 
 // ===== LISTEN TO AUTH CHANGES =====
@@ -78,8 +80,8 @@ export const onAuthChange = (
 export const saveUserSession = (user: User, accessToken: string) => {
   if (!user || !accessToken) return;
 
-  const primaryRole = normalizeRole(user.role);
-  const secondaryRoles = user.extra_roles?.map(normalizeRole) ?? [];
+  const primaryRole = normalizePrimaryRole(user.role);
+  const secondaryRoles = [normalizeSecondaryRole(primaryRole, user.extra_roles?.[0])];
 
   localStorage.setItem(
     "user_roles",

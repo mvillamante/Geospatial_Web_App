@@ -70,8 +70,10 @@ body {
 
 /* Tables */
 .cms-page table,
-.reports-page table {
+.reports-page table,
+.user-page table {
     width: 100%;
+    background: white;
     border-collapse: collapse;
 }
 
@@ -79,7 +81,7 @@ body {
 .cms-page th,
 .reports-page th,
 .sys-page th {
-    background: #f1f5f9;
+    background: #ebf0f5;
     padding: 1rem;
     text-align: left;
     font-size: 0.8rem;
@@ -89,7 +91,7 @@ body {
 
 .cms-page td,
 .reports-page td,
-.sys-page td {
+.sys-page td  {
     background: #ffffff;
     padding: 0.75rem;
     font-size: 0.8rem;

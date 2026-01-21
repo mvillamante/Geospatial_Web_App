@@ -149,11 +149,11 @@ const ProfilePage: React.FC = () => {
             <h2>{displayName}</h2>
             <p className="role-tag">
               {userRole}
-              {userRole2 && userRole2.length > 0 ? ` & ${userRole2[0]}` : ""}
+              {userRole2?.[0] ? ` & ${userRole2[0]}` : ""}
             </p>
 
-            {(!userRole2 || userRole2.length === 0) && userRole !== "Researcher" && (
-              <button
+            {(!userRole2?.length || userRole2[0] === "") && userRole !== "Researcher" && (
+              <button 
                 className={`research-btn ${isRequested ? 'requested' : ''}`}
                 onClick={sendResearcherRequest}
                 disabled={isRequested}

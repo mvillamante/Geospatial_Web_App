@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./LeafletMap.css";
-import type { Report } from "../pages/citizen-guest/AlertsComponents/AlertsPanel";
+import type { Report } from "../../pages/citizen-guest/AlertsComponents/AlertsPanel";
 
 // Import layer creation functions from organized modules
 import {
@@ -11,6 +11,7 @@ import {
   createLandslideRiskLayer,
   createEvacuationCentersLayer,
   createRoadsLayer,
+  createNDVILayer,
 } from "./mapLayers";
 
 // Fake risk levels
@@ -115,17 +116,29 @@ interface LeafletMapProps {
   selectedReport?: Report | null;
   reportClickTimestamp?: number | null;
   activeLayers?: string[];
+  ndviOpacity?: number;
+  ndviYear?: number;
+  ndviMonth?: number; // 1-12, for selecting clearest image of a specific month
+  ndviFromDate?: string;
+  ndviToDate?: string;
+  ndviMaxCloud?: number;
 }
 
 export default function LeafletMap({ 
   height = "600px", 
   mapView = "interactive", 
-  mapType = "basic",
+  mapType = "basic", 
   searchedBarangay = "", 
   searchedSeverity = null, 
   selectedReport = null, 
   reportClickTimestamp = null,
-  activeLayers = []
+  activeLayers = [],
+  ndviOpacity = 0.8,
+  ndviYear,
+  ndviMonth,
+  ndviFromDate,
+  ndviToDate,
+  ndviMaxCloud,  // Let ndviLayer use smart defaults based on month selection
 }: LeafletMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -142,6 +155,7 @@ export default function LeafletMap({
   const landslideRiskLayerRef = useRef<L.LayerGroup | null>(null);
   const evacuationCentersLayerRef = useRef<L.LayerGroup | null>(null);
   const roadsLayerRef = useRef<L.LayerGroup | null>(null);
+  const ndviLayerRef = useRef<L.LayerGroup | null>(null);
 
   // Initialize map
   useEffect(() => {
@@ -180,8 +194,6 @@ export default function LeafletMap({
   }, [mapType]);
 
   // User location (only for interactive)
-  const hasInitialCenteredRef = useRef(false);
-  
   useEffect(() => {
     const map = mapRef.current;
     if (!map || mapView !== "interactive") return;
@@ -224,9 +236,9 @@ export default function LeafletMap({
     const map = mapRef.current;
     if (!map || mapView !== "interactive") return;
 
-    const locateControl = L.control({ position: "topleft" });
+    const locateControl = new L.Control({ position: "topleft" });
 
-    locateControl.onAdd = function () {
+    locateControl.onAdd = function (_map: L.Map) {
       const div = L.DomUtil.create("div", "leaflet-bar leaflet-control leaflet-control-custom");
       div.innerHTML = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -257,7 +269,9 @@ export default function LeafletMap({
 
     locateControl.addTo(map);
 
-    return () => locateControl.remove();
+    return () => {
+      locateControl.remove();
+    };
   }, [mapView]);
 
 
@@ -466,7 +480,7 @@ export default function LeafletMap({
     }
     
     // Get severity colors
-    const colors = severityColors[risk] || severityColors.low;
+    const colors = severityColors[risk] ?? severityColors.low;
     
     // Category icons
     const categoryIcons: Record<string, string> = {
@@ -615,6 +629,30 @@ export default function LeafletMap({
       roadsLayerRef.current = createRoadsLayer(map);
     }
   }, [activeLayers]);
+
+  // Handle NDVI (green index) layer toggle
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const showNDVI = activeLayers.includes("NDVI");
+
+    if (ndviLayerRef.current) {
+      ndviLayerRef.current.remove();
+      ndviLayerRef.current = null;
+    }
+
+    if (showNDVI) {
+      ndviLayerRef.current = createNDVILayer(map, {
+        opacity: ndviOpacity,
+        year: ndviYear,
+        month: ndviMonth,
+        fromDate: ndviFromDate,
+        toDate: ndviToDate,
+        ...(ndviMaxCloud !== undefined && { maxCloud: ndviMaxCloud }),
+      });
+    }
+  }, [activeLayers, ndviOpacity, ndviYear, ndviMonth, ndviFromDate, ndviToDate, ndviMaxCloud]);
 
   return (
     <div id="map" style={{ height: height, width: "100%" }}></div>

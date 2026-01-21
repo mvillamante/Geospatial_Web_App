@@ -12,12 +12,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children, 
   allowedRoles 
 }) => {
-  const { userRole } = getUserRoleAndDisplayName();
+  const { userRole, userRole2 } = getUserRoleAndDisplayName();
+
+  const hasAccess = allowedRoles.includes(userRole) || userRole2.some(role => allowedRoles.includes(role));
   
   // Check if user's role is in allowed roles
-  if (!allowedRoles.includes(userRole)) {
+  if (!hasAccess) {
     // Redirect to their role's default page
-    const redirectPath = roleToBasePath(userRole as any);
+    const redirectPath = userRole ? roleToBasePath(userRole as any) : "/";
     return <Navigate to={redirectPath} replace />;
   }
   

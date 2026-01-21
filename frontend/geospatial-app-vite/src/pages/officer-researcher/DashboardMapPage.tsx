@@ -30,7 +30,7 @@ type HealthItem = {
 
 const DashboardMapPage: React.FC = () => {
   //get user role
-  const { userRole, displayName, profilePath } = getUserRoleAndDisplayName();
+  const { userRole, userRole2 } = getUserRoleAndDisplayName();
   
   // Show Modal Popup
   const [showEdaModal, setShowEdaModal] = useState(false);
@@ -58,14 +58,30 @@ const DashboardMapPage: React.FC = () => {
 
   /*----------time slider----------*/
   const currentYear = new Date().getFullYear(); // today’s year
-  const [year, setYear] = useState(currentYear);
+  const minYear = 2020;
+  const maxYear = 2025;
+  const initialYear = Math.min(maxYear, Math.max(minYear, currentYear));
+  const [year, setYear] = useState(initialYear);
+  const [ndviOpacity, setNdviOpacity] = useState(0.8);
+  const [ndviMonth, setNdviMonth] = useState<number>(1); // 1-12 for month selection
 
-  const minYear = currentYear - 6;
-  const maxYear = currentYear + 4;
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setYear(Number(e.target.value));
   };
+
+  const handleNdviOpacity = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNdviOpacity(Number(e.target.value));
+  };
+
+  const handleNdviMonth = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNdviMonth(Number(e.target.value));
+  };
+
 
   /*----------toggle map layers----------*/
   const [activeLayers, setActiveLayers] = useState<string[]>([]);
@@ -73,7 +89,7 @@ const DashboardMapPage: React.FC = () => {
   const mapLayers = [
     {
       group: "Green Coverage",
-      items: ["Green Spaces"],
+      items: ["NDVI"],
     },
     {
       group: "Hazard Zones",
@@ -160,9 +176,6 @@ const DashboardMapPage: React.FC = () => {
   const selectAllDataset = () => {
     const allNames = downloadDatasets[0].items.map(item => item[0]);
     setSelectedItems(allNames);
-  };
-  const downloadDataset = (item: DatasetsItem) => {
-    alert(`Downloading: ${item[0]} (${item[1]})`);
   };
   const handleExport = (items: string[]) => {
     if (items.length === 0) {
@@ -333,7 +346,7 @@ const DashboardMapPage: React.FC = () => {
 
           {/* Time Slider */}
           <div className="timeslider-container panel-card">
-            <h4>Historical & Projection per Year</h4>
+            <h4>NDVI Year & Projections</h4>
 
             <div className="year-display">{year}</div>
 
@@ -353,6 +366,55 @@ const DashboardMapPage: React.FC = () => {
               <span>{maxYear}</span>
             </div>
           </div>
+
+          {/* NDVI Controls */}
+          {activeLayers.includes("NDVI") && (
+            <div className="ndvi-controls panel-card">
+              <h4>NDVI Layer Controls</h4>
+              
+              {/* Opacity Slider */}
+              <div className="ndvi-control-row">
+                <span className="ndvi-label">Opacity</span>
+                <span className="ndvi-value">{Math.round(ndviOpacity * 100)}%</span>
+              </div>
+              <input
+                type="range"
+                min={0.2}
+                max={1}
+                step={0.05}
+                value={ndviOpacity}
+                className="ndvi-opacity-slider"
+                onChange={handleNdviOpacity}
+              />
+
+              {/* Month Slider */}
+              <div className="ndvi-control-row" style={{ marginTop: "12px" }}>
+                <span className="ndvi-label">Month</span>
+                <span className="ndvi-value">{monthNames[ndviMonth - 1]}</span>
+              </div>
+              <input
+                type="range"
+                min={1}
+                max={12}
+                step={1}
+                value={ndviMonth}
+                className="ndvi-month-slider"
+                onChange={handleNdviMonth}
+              />
+              <div className="ndvi-month-labels">
+                <span>Jan</span>
+                <span>Dec</span>
+              </div>
+
+              <div className="ndvi-date-range">
+                Showing clearest image: {monthNames[ndviMonth - 1]} {year}
+              </div>
+              <div className="ndvi-cloud-note">
+                <span>☁️</span>
+                <span>Lowest cloud coverage selected</span>
+              </div>
+            </div>
+          )}
 
           {/* Map Layer */}
           <div className="maplayer-container panel-card">
@@ -393,7 +455,15 @@ const DashboardMapPage: React.FC = () => {
         {mapView === "interactive" ? (
           <div className="dashboardview-map">
             {/* Interactive Map Component */}
-            <LeafletMap height="100vh" mapView="interactive" mapType={mapType} activeLayers={activeLayers} />
+            <LeafletMap
+              height="100vh"
+              mapView="interactive"
+              mapType={mapType}
+              activeLayers={activeLayers}
+              ndviOpacity={ndviOpacity}
+              ndviYear={year}
+              ndviMonth={ndviMonth}
+            />
 
             {/* Time Slider Floating Island */}
             <div className="timeslider-floating-tab">
@@ -560,6 +630,23 @@ const DashboardMapPage: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* NDVI Legend - appears when NDVI layer is active */}
+            {activeLayers.includes("NDVI") && (
+              <div className="ndvi-legend">
+                <h4>NDVI Green Index</h4>
+                <div className="ndvi-legend-subtitle">Cabuyao, Laguna</div>
+                <div className="ndvi-gradient"></div>
+                <div className="ndvi-legend-labels">
+                  <span>Low</span>
+                  <span>High</span>
+                </div>
+                <div className="ndvi-legend-note">
+                  <span>💡</span>
+                  <span>Higher values indicate healthier vegetation</span>
+                </div>
+              </div>
+            )}
           </div>
         ) : mapView === "choropleth" ? (
           <div className="choroplethview-map">
@@ -706,7 +793,7 @@ const DashboardMapPage: React.FC = () => {
 
 
 
-              {userRole === "Researcher" && (
+              {userRole2[0] === "Researcher" && (
                 <div
                   className="panel-card researcher"
                   onClick={() => setShowEdaModal(true)}
@@ -724,12 +811,12 @@ const DashboardMapPage: React.FC = () => {
               <h4>Export Section</h4>
               {userRole === "Officer" ? (
                 <h5>Download LGU planning materials</h5>
-              ) : userRole === "Researcher" ? (
+              ) : userRole2[0] === "Researcher" ? (
                 <h5>Export datasets and reports</h5>
               ) : null}
 
               {/* CONFIGURATION -------------------- */}
-              {userRole === "Researcher" && (
+              {userRole2[0] === "Researcher" && (
                 <div className="panel-card">
                   <div className="panel-card-header">
                     <span className="rightpanel-title">Configuration</span>
@@ -762,7 +849,7 @@ const DashboardMapPage: React.FC = () => {
               )}
 
               {/* DATASETS -------------------- */}
-              {userRole === "Researcher" && (
+              {userRole2[0] === "Researcher" && (
                 <div className="panel-card datasets-ul">
                   <div className="panel-card-header">
                     <span className="rightpanel-title">Datasets</span>

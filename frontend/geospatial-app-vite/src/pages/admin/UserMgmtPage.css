@@ -12,6 +12,7 @@
 ===================== */
 
 .user-page .user-tabs {
+  position: relative;
   display: flex;
   gap: 1.5rem;
   margin-bottom: 1.5rem;
@@ -25,21 +26,20 @@
   cursor: pointer;
   position: relative;
   color: #6b7280;
+  transition: color 0.3s ease;
 }
 
 .user-page .tab.active {
   color: #c62828;
 }
 
-.user-page .tab.active::after {
-  content: "";
+.user-page .tab-underline {
   position: absolute;
-  left: 0;
-  bottom: -6px;
-  width: 100%;
+  bottom: 0;
   height: 2px;
   background: #c62828;
   border-radius: 999px;
+  transition: all 0.3s ease;
 }
 
 .user-page .request-count {
@@ -56,31 +56,34 @@
 ===================== */
 
 .user-page table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 14px;
-  overflow: hidden;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 }
 
-.user-page thead {
-  background: #f3f4f6;
+.user-page .user-table-wrapper,
+.user-page .requests-table-wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow-y: auto;
+}
+
+.user-page .user-table-wrapper {
+  height: 73.3vh;
+}
+
+.user-page .requests-table-wrapper {
+  height: 78vh;
 }
 
 .user-page th {
-  text-align: left;
-  padding: 1rem;
   font-size: 0.7rem;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #6b7280;
 }
 
 .user-page td {
   padding: 0.85rem 1rem;
   border-top: 1px solid #e5e7eb;
   vertical-align: middle;
+  text-align: center;
 }
 
 .user-page th:first-child,
@@ -105,25 +108,105 @@
   border-radius: 999px;
   font-weight: 600;
 }
+
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  color: #9ca3af;
+}
+
 .search-input {
-  padding: 8px 10px;
-  border-radius: 6px;
+  padding: 6px 10px 6px 32px;
+  border-radius: 8px;
   border: 1px solid #ccc;
-  min-width: 220px;
+  font-size: 0.875rem;
+  min-width: 180px;
 }
 
 .user-page .filters {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 12px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 
-.user-page .filters select {
-  padding: 6px 10px;
-  border-radius: 6px;
+.user-page .filters-left,
+.user-page .filters-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/*Select Functions*/
+.select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.select-wrapper select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 8px 12px 8px 36px;
+  border-radius: 8px;
   border: 1px solid #ccc;
+  background-color: #fff;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  min-width: 150px;
+  color: #111827;
+  background-image: url("data:image/svg+xml,%3Csvg fill='%236b7280' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); /* dropdown arrow */
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
 }
 
+.select-wrapper select:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+  background-color: #e0e7ff;
+}
+
+.select-wrapper .select-icon {
+  position: absolute;
+  left: 10px;
+  color: #3b82f6;
+  pointer-events: none;
+}
+
+/*Create User Function*/
+.create-user-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+.create-user-btn:hover {
+  background: linear-gradient(90deg, #1d4ed8, #2563eb);
+  transform: scale(1.05);
+}
+
+/*Sort Header*/
 .user-page .sort-header {
   display: inline-flex;
   align-items: center;
@@ -139,17 +222,22 @@
 }
 
 .cell-number {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   width: 22px;
   height: 22px;
-  margin: 0 auto;
-  border-radius: 50%;
-  background-color: #e5e7eb;
-  color: #434453;
+  background-color: #f3f4f6;
+  color: #3a3c4e;
+
   font-weight: 800;
   font-size: 0.8rem;
+  line-height: 1;
+}
+
+.user-table-body .staff-id {
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .user-details {
@@ -169,6 +257,7 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
 }
 
 .user-name {
@@ -182,10 +271,22 @@
   font-size: 0.75rem;
   border-radius: 999px;
   border: 1px solid #e5e7eb;
+  font-weight: 600;
+  text-align: center;
   background-color: transparent;
   cursor: pointer;
   appearance: none;
 }
+
+
+.role-field .role-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.role-field .role-select.Researcher { background: #ede9fe; color: #7c3aed; }
+.role-field .role-select.Officer { background: #dbeafe; color: #1e40af; }
+.role-field .role-select.Admin { background: #fee2e2; color: #b91c1c; }
 
 .user-table-body .role-field .chev {
   position: absolute;
@@ -200,17 +301,7 @@
   line-height: 1;
 }
 
-.role-select:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.role-select { padding-right: 1.5rem; }
-
-.role-select.Citizen { background: #dbeafe; color: #1e40af; }
-.role-select.Researcher { background: #ede9fe; color: #7c3aed; }
-.role-select.Admin { background: #fee2e2; color: #b91c1c; }
-
+/*siguro lipat sa global @here---------*/
 .Citizen {
   background: #dbeafe;
   color: #1e40af;
@@ -362,16 +453,98 @@
 }
 
 /* =====================
+      PAGINATION
+===================== */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.pagination button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.pagination button.active {
+  background-color: #3b82f6;
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+.pagination button:hover:not(:disabled):not(.active) {
+  background-color: #e0e7ff;
+  color: #1e40af;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.pagination button:active:not(:disabled):not(.active) {
+  transform: translateY(1px); /* press down */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.pagination button:disabled {
+  background-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+
+/* =====================
    REQUEST ACTIONS
 ===================== */
 
-.approve {
-  color: #16a34a;
+td.actions .approve-btn,
+td.actions .reject-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.reject {
-  color: #dc2626;
+td.actions .approve-btn {
+  background-color: #68d38f;
+  color: #ffffff;
 }
+
+td.actions .approve-btn:hover {
+  background-color: #38bd69;
+  transform: scale(1.05);
+}
+
+td.actions .reject-btn {
+  background-color: #e04f4f;
+  color: #ffffff;
+}
+
+td.actions .reject-btn:hover {
+  background-color: #d64040;
+  transform: scale(1.05);
+}
+
 
 /* =====================
    RESPONSIVE

@@ -47,6 +47,24 @@ urlpatterns = [
     path("reports/<int:report_id>/photo-url/", IncidentReportPhotoSignedUrlView.as_view(), name="incident-photo-url"),
     path("reports/list/", IncidentReportListView.as_view(), name="incident-report-list"),
     path("reports/my/", MyIncidentReportsView.as_view(), name="incident-report-list-my"),
+    
+    # Satellite Views
+    path("satellite/ndvi/", get_ndvi_image, name="satellite_ndvi"),
+    
+    # Incident Views
+    path("reports/", IncidentReportCreateView.as_view(), name="incident-create"),
+    path("reports/<int:report_id>/photo-url/", IncidentReportPhotoSignedUrlView.as_view(), name="incident-photo-url"),
+    path("reports/list/", IncidentReportListView.as_view(), name="incident-report-list"),
+    
+    #CMS Views
+    path("cms/guides/", list_guides),
+    path("cms/guides/create/", create_guide),
+    path("cms/guides/<int:pk>/", update_guide),
+    path("cms/guides/<int:pk>/publish/", toggle_publish),
+    path("cms/guides/<int:pk>/archive/", archive_guide),
+
+    # Misc Views
+    path('test/', testEndPoint, name='test'),
 
     # Researcher Requests
     path("researcher/request/", CreateResearcherRequestView.as_view(), name="researcher_request_create"),

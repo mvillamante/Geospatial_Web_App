@@ -1,0 +1,82 @@
+.cms-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.cms-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Buttons */
+.cms-page .btn {
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.cms-page .btn.primary {
+    background: #2563eb;
+    color: white;
+}
+
+.cms-page .btn.secondary {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.cms-page .btn:hover {
+    transform: translateY(-1px);
+}
+
+
+.cms-page .icon-btn.danger,
+.reports-page .icon-btn.delete {
+    color: #dc2626;
+}
+
+/* Modal */
+.cms-page .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    display: flex;
+    justify-content: center;
+}
+
+.cms-page .modal {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.cms-page .modal h2 {
+    margin-bottom: 0.5rem;
+}
+
+.modal input,
+.modal textarea,
+.modal select {
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+    

@@ -49,8 +49,17 @@ class ApproveRejectResearcherRequestView(generics.UpdateAPIView):
             req_obj.status = "Approved"
             
             user = req_obj.user
-            user.role = "researcher"
+            # Ensure extra_roles exists and is a list
+            if not user.extra_roles:
+                user.extra_roles = []
+
+            # Add "Researcher" if not already present
+            if "Researcher" not in [r.lower() for r in user.extra_roles]:
+                user.extra_roles.append("Researcher")
+            
             user.save()
+            user.refresh_from_db()
+            
         else:
             req_obj.status = "Rejected"
 

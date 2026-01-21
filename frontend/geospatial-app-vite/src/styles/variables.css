@@ -1,0 +1,25 @@
+/*Variables for Colors*/
+:root {
+  --verylowrisk-color: #00FF00;
+  --lowrisk-color: #00A86B;
+  --moderaterisk-color: #FFD700;
+  --highrisk-color: #FFA500;
+  --veryhighrisk-color: #FF4500;
+  --criticalrisk-color: #FF0000;
+}
+
+.clr-green {
+  color: #16a34a;
+}
+
+.clr-gray {
+  color: #6b7280;
+}
+
+.clr-blue {
+  color: #2563eb;
+}
+
+.clr-red {
+  color: #dc2626;
+}

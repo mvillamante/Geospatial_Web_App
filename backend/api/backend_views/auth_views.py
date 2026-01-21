@@ -76,6 +76,9 @@ def login_user(request):
             user = CustomUser.objects.get(email=username_or_phone)
         else:
             user = CustomUser.objects.get(phone=username_or_phone)
+            
+        if not user.is_active:
+            return JsonResponse({"error": "Account is inactive. Please contact an administrator."}, status=403)
 
         if user.check_password(password):
             try:

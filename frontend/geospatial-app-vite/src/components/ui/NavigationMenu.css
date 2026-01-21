@@ -1,0 +1,381 @@
+.navigation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 80px;
+  height: 100vh;
+  background-color: #ffffff;
+  padding: 16px 0;
+  border-right: 1px solid #e5e7eb;
+  overflow: visible;
+}
+
+.navigation .nav-item {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.navigation .nav-item a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  transition: 0.25s ease;
+  margin-bottom: 10px;
+  color: #1f2937;
+}
+
+.navigation a {
+  text-decoration: none;
+}
+
+.navigation .nav-icon {
+  font-size: 22px;
+  transition: transform 0.25s ease;
+}
+
+.navigation .nav-item:hover a {
+  background: #eef4ff;
+}
+
+.navigation .nav-item:hover .nav-icon {
+  transform: scale(1.15);
+}
+
+.navigation .active {
+  background: #e0ebff;
+}
+
+.navigation .nav-label {
+  display: none;
+  position: absolute;
+  left: 115%;
+  color: #222;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.navigation .nav-item:hover .nav-label {
+  display: inline-block;
+}
+
+.user-profile {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  position: relative;
+}
+
+.user-profile .profile-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Profile Dropdown Trigger */
+.profile-dropdown-trigger {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 12px;
+  transition: background 0.2s ease;
+}
+
+.profile-dropdown-trigger:hover {
+  background: #f3f4f6;
+}
+
+.dropdown-arrow {
+  font-size: 16px;
+  color: #6b7280;
+  transition: transform 0.25s ease;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Dropdown Menu */
+.profile-dropdown-menu {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 8px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  padding: 12px;
+  z-index: 9999;
+  animation: dropdownSlideIn 0.2s ease;
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-profile-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.dropdown-profile-info:hover {
+  background: #f3f4f6;
+}
+
+.dropdown-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.dropdown-user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dropdown-username {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1f2937;
+}
+
+.dropdown-role {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 8px 0;
+}
+
+.dropdown-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #dc2626;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.dropdown-logout-btn:hover {
+  background: #fef2f2;
+}
+
+.dropdown-logout-icon {
+  font-size: 18px;
+}
+
+.logout-icon {
+  font-size: 22px;
+}
+
+/* For PWA Layout */
+.pwa-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: white;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-top-left-radius: 25px;
+  border-top-right-radius: 25px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+.pwa-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #888;
+  font-size: 13px;
+}
+
+.pwa-nav-item.active {
+  color: #3b82f6;
+}
+
+.pwa-nav-item span {
+  margin-top: 4px;
+}
+
+/*--------------------------------------*/
+
+/* Admin Layout (Navigation)*/
+
+.nav-item.admin-layout {
+  width: 100%;
+}
+
+.nav-item.admin-layout a {
+  white-space: normal !important;
+  word-break: break-word;
+}
+
+
+.navigation.admin-nav {
+  width: 230px;
+  align-items: flex-start !important;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.nav-item.admin-layout a {
+  display: flex !important;
+  flex-direction: row;
+  justify-content: flex-start !important;
+  align-items: center;
+  gap: 12px;
+  width: 100% !important;
+  padding: 12px 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #222;
+  font-weight: 500;
+  background: transparent;
+  transition: background 0.2s ease;
+}
+
+.nav-item.admin-layout a:hover,
+.nav-item.admin-layout a.active {
+  background: #E9F0FF;
+}
+
+.nav-item.admin-layout .nav-label {
+  display: inline-block;
+  position: static;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  white-space: normal;
+}
+
+.nav-item.admin-layout:hover .nav-label {
+  display: inline;
+}
+
+/* Admin Profile: with dropdown */
+.admin-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: auto;
+  padding: 0 16px 16px 16px;
+  position: relative;
+}
+
+.admin-profile .profile-dropdown-trigger {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.admin-profile .profile-dropdown-trigger:hover {
+  background: #f3f4f6;
+}
+
+.admin-profile .dropdown-arrow {
+  margin-left: auto;
+}
+
+.admin-profile .profile-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.admin-profile .profile-dropdown-menu {
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 8px;
+  transform: none;
+  min-width: 190px;
+  animation: dropdownSlideInAdmin 0.2s ease;
+}
+
+@keyframes dropdownSlideInAdmin {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

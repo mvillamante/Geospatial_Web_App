@@ -1,7 +1,7 @@
-from pytz import timezone
+from django.utils import timezone
 from api.models import CustomUser, ResearcherRequest
 from api.models import IncidentReport
-from api.supabase_storage import upload_private_photo
+from api.supabase_storage import upload_private_photo, create_signed_url
 from django.utils.timesince import timesince
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import update_last_login
@@ -151,6 +151,7 @@ class IncidentReportCreateSerializer(serializers.ModelSerializer):
     
 class IncidentReportListSerializer(serializers.ModelSerializer):
     user_label = serializers.SerializerMethodField()
+    photo_url = serializers.SerializerMethodField()
 
     class Meta:
         model = IncidentReport
@@ -158,13 +159,20 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
             "id",
             "user_label",
             "category",
+            "description",
             "location_display",
             "status",
             "created_at",
+            "photo_url"
         ]
     
     def get_user_label(self, obj):
         return f"Citizen #{obj.user_id}"
+
+    def get_photo_url(self, obj):
+        if not obj.photo_path:
+            return None
+        return create_signed_url(obj.photo_path, expires_in_seconds=3600)
     
 class ResearcherRequestSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)

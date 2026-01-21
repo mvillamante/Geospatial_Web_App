@@ -2,7 +2,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
+from rest_framework import status, generics, permissions
 from rest_framework.response import Response
 from api.serializer import IncidentReportListSerializer
 
@@ -61,3 +61,10 @@ class IncidentReportListView(APIView):
 
         serializer = IncidentReportListSerializer(qs, many=True)
         return Response(serializer.data)
+    
+class MyIncidentReportsView(generics.ListAPIView):
+    serializer_class = IncidentReportListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return IncidentReport.objects.filter(user=self.request.user).order_by("-created_at")

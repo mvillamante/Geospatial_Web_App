@@ -20,17 +20,14 @@ const AlertsMapPage: React.FC = () => {
   const handleBarangaySearch = (barangay: string, severity: string | null) => {
     setSearchedBarangay(barangay);
     setSearchedSeverity(severity);
-    setSelectedReportData(null); // Clear selected report when searching
+    setSelectedReportData(null);
   };
 
-  // Handle when user clicks on a verified report card
   const handleSelectReport = (report: Report) => {
-    // Include timestamp to ensure effect triggers even when clicking same report
     setSelectedReportData({
       report,
       clickedAt: Date.now()
     });
-    // Clear barangay search to prioritize report location
     setSearchedBarangay("");
     setSearchedSeverity(null);
   };

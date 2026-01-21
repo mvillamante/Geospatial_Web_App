@@ -29,10 +29,42 @@ body {
 
 .user-page h1,
 .cms-page h1,
+.reportverify-page h1,
 .reports-page h1,
 .sys-page h1 {
     font-size: 1.8rem;
     color: #0f172a;
+}
+
+.reportverify-page {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.reportverify-header,
+.evac-header {
+  margin-bottom: 20px;
+}
+
+.reportverify-header-title,
+.evac-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+
+.evac-header-desc,
+.reportverify-header-desc {
+  color: #6b7280;
+}
+
+.reportverify-title-icon,
+.evac-title-icon {
+  width: 36px;
+  height: 36px;
+  color: #2563eb;
 }
 
 

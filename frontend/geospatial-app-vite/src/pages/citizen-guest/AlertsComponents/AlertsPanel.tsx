@@ -64,8 +64,6 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
     const [selectedCategory, setSelectedCategory] = useState<string>("");
     const [selectedBarangay, setSelectedBarangay] = useState("");
     const [sortNewest, setSortNewest] = useState<boolean>(true);
-
-    // Severity priority for finding highest risk
     const severityPriority: Record<string, number> = {
         critical: 4,
         high: 3,
@@ -73,16 +71,13 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
         low: 1
     };
 
-    // Handle barangay search with callback to parent
     const handleBarangaySearch = (value: string) => {
         setSelectedBarangay(value);
         if (onBarangaySearch) {
-            // Find the highest severity report for the searched barangay
             const matchingReports = mockReports.filter(r => 
                 r.location.toLowerCase().includes(value.toLowerCase())
             );
             
-            // Get the highest severity from matching reports
             let highestSeverity: string | null = null;
             if (matchingReports.length > 0) {
                 const sorted = matchingReports.sort((a, b) => 

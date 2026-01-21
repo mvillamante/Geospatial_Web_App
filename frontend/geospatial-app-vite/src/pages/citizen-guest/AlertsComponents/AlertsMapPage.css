@@ -758,12 +758,7 @@ li.critical::before {
    padding: 14px;
    border-radius: 18px;
    z-index: 1200;
-   background: rgba(255, 255, 255, 0.2);
-   backdrop-filter: blr(12px);
-   -webkit-backdrop-filter: blur(12px);
-   box-shadow: 0 20px 60px rgba(0,0,0,0.18);
-   border: 1px solid rgba(0,0,0,0.06);
-   margin: 2px solid rgba(0,0,0,0.06);
+   background: #fafafa;
   }
 
   .sheet-handle {

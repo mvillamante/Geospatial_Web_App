@@ -1,31 +1,4 @@
-/* =========================
-   Base Layout
-========================= */
-.evac-page {
-  width: 100%;
-  min-height: 100vh;
-}
 
-.evac-header {
-  margin-bottom: 20px;
-}
-
-.evac-header-title {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
-}
-
-.evac-title-icon {
-  width: 36px;
-  height: 36px;
-  color: #2563eb;
-}
-
-.evac-header-desc {
-  color: #6b7280;
-}
 
 /* =========================
    Search

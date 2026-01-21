@@ -1,36 +1,114 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { GraduationCap } from "lucide-react";
 import ReportCard from './ReportCard';
 import "./ProfilePage.css";
 import { getUserRoleAndDisplayName } from "../../../libr/auth";
 
-const mockReports = [
-  {
-    id: 1,
-    title: "Residential Fire",
-    description: "Fire reported near residential area. Firefighters on site.",
-    location: "Brgy. San Isidro",
-    date: "Jan 8, 2025",
-    status: "Under Review",
-    progress: 0.5,
-    photo: "https://i.pinimg.com/736x/d9/cc/08/d9cc08adf42d5f64e2883b0d2e66448b.jpg"
-  },
-  {
-    id: 2,
-    title: "Road Crash",
-    description: "Multi-vehicle accident resolved. No casualties reported.",
-    location: "Brgy. San Isidro",
-    date: "Jan 7, 2025",
-    status: "Resolved",
-    progress: 1,
-    photo: "https://i.pinimg.com/736x/c2/4e/bc/c24ebcb2058f189d3e7dba4e49414956.jpg"
-  }
-];
+type ReportCardModel = {
+  id: number | string;
+  title: string;
+  description: string;
+  category: string;
+  location_display: string;
+  date: string;
+  status: string;
+  progress: number;
+  photo?: string | null;
+}
+
+type IncidentReportAPI = {
+  id: number;
+  category: string;
+  description: string;
+  location_display?: string;
+  created_at?: string;
+  status?: string;
+  photo_url?: string | null; 
+};
+
 
 const ProfilePage: React.FC = () => {
-  const { displayName, userRole, userRole2, profilePath } = getUserRoleAndDisplayName();
+  const { displayName, userRole, userRole2 } = getUserRoleAndDisplayName();
 
   const [isRequested, setIsRequested] = useState(false);
+
+  const [reports, setReports] = useState<ReportCardModel[]>([]);
+  const [loadingReports, setLoadingReports] = useState(true);
+  const [reportsError, setReportsError] = useState<string | null>(null);
+
+  const categoryTitleMap: Record<string, string> = {
+    fire: "Fire Incident",
+    flood: "Flood Incident",
+    accident: "Road Accident",
+    landslide: "Landslide Alert",
+    others: "Reported Incident",
+  };
+
+    useEffect(() => {
+      const fetchMyReports = async () => {
+        setLoadingReports(true);
+        setReportsError(null);
+
+        try {
+          const token = localStorage.getItem("access_token");
+
+          const res = await fetch("http://localhost:8000/api/reports/my/", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.detail || "Failed to load report history");
+          }
+
+          const data = await res.json();
+
+          const list: IncidentReportAPI[] = Array.isArray(data) ? data : (data.results ?? []);
+
+          const mapped: ReportCardModel[] = list.map((r) => {
+            const dateStr = r.created_at
+              ? new Date(r.created_at).toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
+              : "";
+
+            const status = r.status || r.verification_status || "Pending";
+
+            let progress = 0;
+            if (typeof r.progress === "number") {
+              progress = r.progress > 1 ? Math.min(r.progress / 100, 1) : Math.min(r.progress, 1);
+            } else {
+              progress =
+                status.toLowerCase().includes("resolved") ? 1 :
+                  status.toLowerCase().includes("review") ? 0.5 :
+                    0.25;
+            }
+            return {
+              id: r.id,
+              title: categoryTitleMap[r.category] || "Incident Report",
+              description: r.description || "No description provided.",
+              location: r.location_display || r.barangay || "Unknown location",
+              date: dateStr,
+              status,
+              progress,
+              photo: r.photo_url ||  null,
+            };
+          });
+          setReports(mapped);
+        } catch (e: any) {
+          setReportsError(e?.message || "Something went wrong");
+          setReports([]);
+        } finally {
+          setLoadingReports(false);
+        }
+      };
+      fetchMyReports();
+    }, []);
 
   const sendResearcherRequest = async () => {
     try {
@@ -73,8 +151,9 @@ const ProfilePage: React.FC = () => {
               {userRole}
               {userRole2 && userRole2.length > 0 ? ` & ${userRole2[0]}` : ""}
             </p>
+
             {(!userRole2 || userRole2.length === 0) && userRole !== "Researcher" && (
-              <button 
+              <button
                 className={`research-btn ${isRequested ? 'requested' : ''}`}
                 onClick={sendResearcherRequest}
                 disabled={isRequested}
@@ -94,20 +173,26 @@ const ProfilePage: React.FC = () => {
           </div>
           <div className="stat-divider" />
           <div className="stat-item">
-            <h1 className="verified-count">10</h1>
+            <h1 className="verified-count">{reports.filter(r => r.status.toLowerCase().includes("verified") || r.status.toLowerCase().includes("resolved")).length}</h1>
             <span>Verified</span>
           </div>
         </div>
       </div>
 
-      
+
 
       <div className="section-header">
         <h3 className="section-title">Report History</h3>
       </div>
 
       <div className="report-list">
-        {mockReports.map(report => (
+        {loadingReports && <p>Loading report history...</p>}
+        {reportsError && <p style={{ color: "crimson" }}>{reportsError}</p>}
+        {!loadingReports && !reportsError && reports.length === 0 && (
+          <p>No reports yet.</p>
+        )}
+
+        {reports.map((report) => (
           <ReportCard key={report.id} report={report} />
         ))}
       </div>

@@ -98,6 +98,13 @@ class IncidentReport(models.Model):
         ("others", "Others"),
     ]
 
+    SUGGESTED_CRITICAL_LEVEL_CHOICES = [
+        ("low", "Low"),
+        ("moderate", "Moderate"),
+        ("high", "High"),
+        ("critical", "Critical")
+    ]
+
     STATUS_CHOICES = [
         ("Pending", "Pending"),
         ("Verified", "Verified"),
@@ -112,14 +119,16 @@ class IncidentReport(models.Model):
     )
 
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    other_category = models.CharField(max_length=100, null=True, blank=True)
+
     description = models.TextField()
+    suggested_critical_level = models.CharField(max_length=20, null=True, choices=SUGGESTED_CRITICAL_LEVEL_CHOICES)
 
     latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     accuracy_m = models.FloatField(null=True, blank=True)
 
     location_display = models.TextField(blank=True, default="")
-    geocode_raw = models.JSONField(null=True, blank=True)
 
     photo_path = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

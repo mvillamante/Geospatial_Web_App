@@ -1,5 +1,5 @@
 from django.utils import timezone
-from api.models import CustomUser, ResearcherRequest
+from api.models import CustomUser, ResearcherRequest, CmsGuide
 from api.models import IncidentReport
 from api.supabase_storage import upload_private_photo, create_signed_url
 from django.utils.timesince import timesince
@@ -155,14 +155,20 @@ class IncidentReportCreateSerializer(serializers.ModelSerializer):
         model = IncidentReport
         fields = [
             "category",
+            "other_category",
             "description",
             "latitude",
             "longitude",
             "accuracy_m",
             "location_display",
-            "geocode_raw",
+            "suggested_critical_level",
             "photo",
         ]
+
+    def validate(self, attrs):
+        if attrs.get("category") == "others" and not (attrs.get("other_category") or "").strip():
+            raise serializers.ValidationError({"other_category": "Please specify the category."})
+        return attrs
     
     def create(self, validated_data):
         request = self.context["request"]
@@ -182,6 +188,7 @@ class IncidentReportCreateSerializer(serializers.ModelSerializer):
 class IncidentReportListSerializer(serializers.ModelSerializer):
     user_label = serializers.SerializerMethodField()
     photo_url = serializers.SerializerMethodField()
+    category_display = serializers.SerializerMethodField()
 
     class Meta:
         model = IncidentReport
@@ -189,12 +196,20 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
             "id",
             "user_label",
             "category",
+            "other_category",
+            "category_display",
             "description",
             "location_display",
             "status",
             "created_at",
+            "suggested_critical_level",
             "photo_url"
         ]
+        
+    def get_category_display(self, obj):
+        if obj.category == "others" and obj.other_category:
+            return obj.other_category
+        return obj.category
     
     def get_user_label(self, obj):
         return f"Citizen #{obj.user_id}"

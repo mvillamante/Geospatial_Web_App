@@ -1,14 +1,14 @@
 from django.urls import path
-
+from  .backend_views.satellite import get_ndvi_image
 from rest_framework_simplejwt.views import TokenRefreshView
-
+from .backend_views.cms_views import list_guides, create_guide, update_guide, toggle_publish, archive_guide
 from .backend_views.admin_views import AssignUserRoleView, UserListView
 from .backend_views.auth_views import (
     MyTokenObtainPairView,
     RegisterView,
     get_current_user,
     sign_up,
-    login_user,
+    login_user
 )
 from .backend_views.geocoding_views import reverse_geocode
 from .backend_views.incident_views import (

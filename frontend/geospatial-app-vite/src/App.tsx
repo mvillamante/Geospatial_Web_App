@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { 
   MainLayout, LandingPage,
-  EvacCenterPage, PrepGuidePage,
+  EvacCenterPage, CommunityFeedPage,
   CmsPage, DashboardPage, ReportsMgmtPage, SysMonitoringPage, UserMgmtPage,
   AlertsMapPage, ProfilePage, 
   DashboardMapPage, ReportVerifyPage,
@@ -106,19 +106,19 @@ const App: React.FC = () => {
           <Route path="researcher/profile" element={<ProfilePage />} />
 
           {/* Citizen Routes */}
-          <Route path="citizen" element={<Navigate to="citizen/alerts-map" replace />} />
+          <Route path="citizen" element={<Navigate to="citizen/community-feed" replace />} />
           <Route path="citizen/alerts-map" element={<AlertsMapPage />} />
           <Route path="citizen/evac-center" element={<EvacCenterPage />} />
-          <Route path="citizen/prep-guide" element={<PrepGuidePage />} />
+          <Route path="citizen/community-feed" element={<CommunityFeedPage />} />
           <Route path="citizen/profile" element={<ProfilePage />} />
 
           <Route path="citizen-pwa/login" element={<PwaAuthPage />} />
 
           {/* Guest Routes */}
-          <Route path="guest" element={<Navigate to="guest/alerts-map" replace />} />
+          <Route path="guest" element={<Navigate to="guest/community-feed" replace />} />
           <Route path="guest/alerts-map" element={<AlertsMapPage />} />
           <Route path="guest/evac-center" element={<EvacCenterPage />} />
-          <Route path="guest/prep-guide" element={<PrepGuidePage />} />
+          <Route path="guest/prep-guide" element={<CommunityFeedPage />} />
         </Route>
 
       </Routes>

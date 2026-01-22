@@ -430,7 +430,7 @@
   margin-top: 8px;
 }
 
-.step {
+.reportverify-page .step {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -442,30 +442,30 @@
   color: var(--subtext);
 }
 
-.step-dot {
+.reportverify-page .step-dot {
   width: 10px;
   height: 10px;
   border-radius: 999px;
   background: rgba(100, 116, 139, 0.6);
 }
 
-.step.active {
+.reportverify-page .step.active {
   border-color: rgba(37, 99, 235, 0.35);
   background: rgba(37, 99, 235, 0.08);
   color: var(--primary);
 }
 
-.step.active .step-dot {
+.reportverify-page .step.active .step-dot {
   background: var(--primary);
 }
 
-.step.done {
+.reportverify-page .step.done {
   border-color: rgba(22, 163, 74, 0.35);
   background: rgba(22, 163, 74, 0.10);
   color: var(--success);
 }
 
-.step.done .step-dot {
+.reportverify-page .step.done .step-dot {
   background: var(--success);
 }
 

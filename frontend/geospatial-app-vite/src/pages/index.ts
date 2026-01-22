@@ -3,7 +3,7 @@ export { default as MainLayout } from "./MainLayout";
 
 // shared
 export { default as EvacCenterPage } from "./shared/EvacCenterPage";
-export { default as PrepGuidePage } from "./shared/PrepGuidePage";
+export { default as CommunityFeedPage } from "./shared/CommunityFeedPage";
 
 // admin
 export { default as CmsPage } from "./admin/CmsPage";

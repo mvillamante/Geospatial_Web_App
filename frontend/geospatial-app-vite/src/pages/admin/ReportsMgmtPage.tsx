@@ -8,7 +8,8 @@ type ReportStatus = "Pending" | "Assigned" | "Verified" | "Rejected" | "Resolved
 interface Report {
   id: number;
   user_label: string;        
-  category: string;          
+  category: string;       
+  other_category?: string | null;   
   location_display: string;
   created_at: string;
   description: string;
@@ -20,6 +21,16 @@ const API_BASE = "http://localhost:8000";
 
 const reportCategory = (c: string) =>
   c ? c.charAt(0).toUpperCase() + c.slice(1) : "";
+
+const reportCategoryLabel = (r: Report) => {
+  const raw =
+    r.category === "others" && r.other_category?.trim()
+      ? r.other_category.trim()
+      : r.category;
+
+  return reportCategory(raw);
+};
+
 
 const formatDateTime = (iso: string) => {
   const dt = new Date(iso);
@@ -152,7 +163,7 @@ const ReportsMgmtPage: React.FC = () => {
                   <tr key={report.id}>
                     <td className="table-id">#R-{report.id}</td>
                     <td>{report.user_label}</td>
-                    <td>{reportCategory(report.category)}</td>
+                    <td>{reportCategoryLabel(report)}</td>
                     <td className="location-cell" title={report.location_display}>
                       {report.location_display || "-"}
                     </td>
@@ -214,7 +225,7 @@ const ReportsMgmtPage: React.FC = () => {
             <div className="modal-head">
               <div>
                 <div className="modal-title">
-                  Report #{selectedReport.id} • {reportCategory(selectedReport.category)}
+                  Report #{selectedReport.id} • {reportCategoryLabel(selectedReport)}
                 </div>
                 <div className="modal-sub">
                   {selectedReport.user_label} •{" "}

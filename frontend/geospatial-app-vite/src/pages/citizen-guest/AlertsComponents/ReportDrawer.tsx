@@ -56,14 +56,18 @@ function formatStreetBarangayCity(data: ReverseGeocodeResponse): string {
   return parts.join(', ');
 }
 
+
 export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
   const token = localStorage.getItem("access_token");
 
   const [category, setCategory] = useState("fire");
+  const [otherCategory, setOtherCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [criticalLevel, setCriticalLevel] = useState("low");
 
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
 
   const [location, setLocation] = useState<string>("Detecting location...");
   const [coords, setCoords] = useState<{ lat: number; lon: number; accuracy?: number } | null>(null);
@@ -75,7 +79,9 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
     if (!open) return;
 
     setCategory("fire");
+    setOtherCategory("");
     setDescription("");
+    setCriticalLevel("low");
     setPhotoFile(null);
     setPhotoPreview(null);
     setCoords(null);
@@ -166,8 +172,18 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
 
     try {
       const form = new FormData();
-      form.append("category", category);
+      if (category === "others" && !otherCategory.trim()) {
+        setError("Please specify the category.");
+        setSubmitting(false);
+        return;
+      }
+      form.append("category", category); 
+      if (category === "others") {
+        form.append("other_category", otherCategory.trim());
+      }
+
       form.append("description", description.trim());
+      form.append("suggested_critical_level", criticalLevel);
       form.append("location_display", location);
 
       if (coords) {
@@ -225,6 +241,18 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
             <option value="others">Others</option>
           </select>
 
+          {category === "others" && (
+            <>
+              <label>Please specify</label>
+              <input
+                type="text"
+                placeholder="Enter category"
+                value={otherCategory}
+                onChange={(e) => setOtherCategory(e.target.value)}
+              />
+            </>
+          )}
+
           <label>Description</label>
           <textarea
             value={description}
@@ -232,6 +260,14 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
             placeholder="Describe what you see (smoke, injuries, blocked roads, etc.)"
             rows={4}
           />
+
+          <label>Suggested Critical Level</label>
+          <select value={criticalLevel} onChange={(e) => setCriticalLevel(e.target.value)}>
+            <option value="low">Low</option>
+            <option value="moderate">Moderate</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+          </select>
 
           <label>Location</label>
           <div className="location-box">

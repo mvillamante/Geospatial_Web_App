@@ -106,7 +106,7 @@ const LandingPage: React.FC = () => {
           </p>
           <div className="cta-group">
             <button className="btn btn-primary" onClick={() => setModalType("login")}>Get Started</button>
-            <button className="btn btn-secondary" onClick={() => navigate("/main/guest/alerts-map", { replace: true })}>Explore the Map</button>
+            <button className="btn btn-secondary" onClick={() => navigate("/main/guest/community-feed", { replace: true })}>Explore the Map</button>
           </div>
 
           <div className="dashboard-preview">

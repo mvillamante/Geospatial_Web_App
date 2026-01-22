@@ -56,19 +56,19 @@ const NavigationMenu: React.FC = () => {
     return (
       <div className="pwa-bottom-nav">
         <NavLink
-          to="/main/citizen/alerts-map"
+          to="/main/citizen/community-feed"
           className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
         >
           <FaBullhorn size={22} />
-          <span>Alerts</span>
+          <span>Home</span>
         </NavLink>
 
         <NavLink
-          to="/main/citizen/prep-guide"
+          to="/main/citizen/alerts-map"
           className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
         >
-          <FaShieldAlt size={22} />
-          <span>Guides</span>
+          <FaMapMarkedAlt size={22} />
+          <span>Map</span>
         </NavLink>
 
         <NavLink
@@ -105,14 +105,14 @@ const NavigationMenu: React.FC = () => {
     ],
     Researcher: [{ label: "Dashboard & Map", path: "researcher/dashboard-map", icon: FaMapMarked }],
     Citizen: [
-      { label: "Current Alerts & Map", path: "citizen/alerts-map", icon: FaBullhorn },
+      { label: "Community Feed", path: "citizen/community-feed", icon: FaBullhorn },
+      { label: "Reports & Map", path: "citizen/alerts-map", icon: FaMapMarkedAlt },
       { label: "Evacuation Center", path: "citizen/evac-center", icon: MdPlace },
-      { label: "Preparedness Guide", path: "citizen/prep-guide", icon: FaShieldAlt },
     ],
     Guest: [
-      { label: "Current Alerts & Map", path: "guest/alerts-map", icon: FaBullhorn },
-      { label: "Evacuation Centers", path: "guest/evac-center", icon: MdPlace },
-      { label: "Preparedness Guide", path: "guest/prep-guide", icon: FaShieldAlt },
+      { label: "Community Feed", path: "guest/community-feed", icon: FaBullhorn },
+      { label: "Reports & Map", path: "guest/alerts-map", icon: FaMapMarkedAlt },
+      { label: "Evacuation Center", path: "guest/evac-center", icon: MdPlace },
     ],
   };
 

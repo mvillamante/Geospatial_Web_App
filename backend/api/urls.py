@@ -10,6 +10,13 @@ from .backend_views.auth_views import (
     sign_up,
     login_user
 )
+from .backend_views.cms_views import (
+    list_guides,
+    create_guide,
+    update_guide,
+    toggle_publish,
+    archive_guide,
+)
 from .backend_views.geocoding_views import reverse_geocode
 from .backend_views.incident_views import (
     IncidentReportCreateView,
@@ -23,6 +30,7 @@ from .backend_views.researcher_views import (
     ResearcherRequestListView,
     ApproveRejectResearcherRequestView,
 )
+from .backend_views.satellite import get_ndvi_image
 
 urlpatterns = [
     # JWT

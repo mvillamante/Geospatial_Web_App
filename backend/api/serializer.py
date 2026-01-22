@@ -1,6 +1,5 @@
 from django.utils import timezone
-from api.models import CustomUser, ResearcherRequest, CmsGuide
-from api.models import IncidentReport
+from api.models import CustomUser, ResearcherRequest, CmsGuide, IncidentReport
 from api.supabase_storage import upload_private_photo, create_signed_url
 from django.utils.timesince import timesince
 from django.contrib.auth.password_validation import validate_password

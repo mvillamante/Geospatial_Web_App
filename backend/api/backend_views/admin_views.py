@@ -7,13 +7,13 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
 from api.models import CustomUser
-from api.serializer import AdminUserListSerializer, AssignUserRoleSerializer
+from api.serializer import AdminUserListSerializer, AssignUserRoleSerializer, CreateStaffUserSerializer
 from api.admin_permissions import IsAdminRole
 
 from .pagination import AdminUserPagination
 
 class UserListView(ListAPIView):
-    queryset = CustomUser.objects.all()
+    queryset = CustomUser.objects.all().order_by('-date_joined')
     serializer_class = AdminUserListSerializer
     permission_classes = [IsAuthenticated, IsAdminRole]
     pagination_class = AdminUserPagination
@@ -79,3 +79,7 @@ def change_user_role(request, user_id):
     user.role = new_role
     user.save()
     return Response({"detail": "Role updated"}, status=status.HTTP_200_OK)
+
+class CreateStaffUserView(generics.CreateAPIView):
+    serializer_class = CreateStaffUserSerializer
+    permission_classes = [IsAuthenticated, IsAdminRole]

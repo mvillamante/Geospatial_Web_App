@@ -14,7 +14,7 @@ ROLE_CHOICES = [
 # Custom User model ------------------------------------------------------------------
 class CustomUser(AbstractUser):
     # Custom fields
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=True)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=True, null=True)
     extra_roles = models.JSONField(default=list, blank=True)
     phone = models.CharField(max_length=20, unique=True, null=True, blank=True)
     supabase_uid = models.CharField(max_length=255, null=True, blank=True)
@@ -80,7 +80,9 @@ class ResearcherRequest(models.Model):
     )
     requested_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
-
+    reject_reason = models.TextField(blank=True, null=True)
+    rejected_at = models.DateTimeField(blank=True, null=True)
+    
     def __str__(self):
         return f"{self.user.username} - {self.status}"
 

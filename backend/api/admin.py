@@ -19,9 +19,9 @@ admin.site.register(IncidentReport, IncidentReportAdmin)
 
 
 class ResearcherRequestAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'status', 'requested_at']
-    list_filter = ['status', 'requested_at']
-    search_fields = ['user__username']
+    list_display = ['id', 'user', 'status', 'requested_at', 'reject_reason', 'rejected_at']
+    list_filter = ['status', 'requested_at', 'rejected_at']
+    search_fields = ['user__username', 'reject_reason']
 
 admin.site.register(ResearcherRequest, ResearcherRequestAdmin)
 

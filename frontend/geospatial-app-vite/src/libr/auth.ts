@@ -90,10 +90,6 @@ export const saveUserSession = (user: User, accessToken: string) => {
 
   localStorage.setItem("access_token", accessToken);
   localStorage.setItem("current_user", JSON.stringify(user));
-
-  const user_roles = localStorage.getItem("user_roles")
-
-  console.log("roles of current user:", user_roles) //debug @here
 };
 
 // ===== CLEAR USER SESSION =====

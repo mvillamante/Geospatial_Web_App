@@ -1,3 +1,4 @@
+import './UserMgmtPage.css';
 import { useEffect, useRef, useState } from "react";
 import { formatDistanceToNow } from 'date-fns';
 import { Power, PowerOff, CheckCircle, XCircle, CircleChevronDown } from 'lucide-react';
@@ -6,8 +7,8 @@ import { FaUserSlash } from "react-icons/fa";
 import { FiSearch, FiPlus, FiUser, FiCheckCircle } from "react-icons/fi";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { HiChevronUpDown, HiChevronDown, HiChevronUp } from "react-icons/hi2";
-import './UserMgmtPage.css';
 import { getUserRoleAndDisplayName } from "../../libr/auth";
+import CreateUserModal from '../../components/ui/Modals/CreateUserModal';
 
 type Role = 'Researcher' | 'Officer' | 'Admin';
 type Status = 'Active' | 'Inactive';
@@ -67,13 +68,20 @@ const UserMgmtPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<"dateJoined" | "lastLogin" | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const [rejectingId, setRejectingId] = useState<number | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+
 
   /* GET CURRENT USER ROLE */
   const { userRole, currentUserId } = getUserRoleAndDisplayName(); // userRole2
 
   const filteredUsers = users.filter(user => {
     const roleMatch =
-      roleFilter === 'All' || user.role === roleFilter;
+      roleFilter === 'All' || 
+      user.role === roleFilter ||
+      (roleFilter === 'Researcher' && user.extra_roles?.includes('Researcher'));
 
     const statusMatch =
       statusFilter === 'All' || user.status === statusFilter;
@@ -101,7 +109,6 @@ const UserMgmtPage: React.FC = () => {
       }
 
       const data = await res.json();
-      console.log("fetched users:", data);
 
       const mappedUsers = data.results
         .filter((u: BackendUser) => {
@@ -136,7 +143,6 @@ const UserMgmtPage: React.FC = () => {
           lastLoginDisplay: u.last_login_display ?? "Never",
         })); 
 
-      console.log("mapped users:", mappedUsers);
       setUsers(mappedUsers);
       setCurrentPage(page);
       setTotalPages(Math.ceil(data.count / pageSize));
@@ -219,7 +225,6 @@ const UserMgmtPage: React.FC = () => {
       setUsers(users.map(u =>
         u.id === id ? { ...u, status: u.status === 'Active' ? 'Inactive' : 'Active' } : u
       ));
-      await fetchUsers();
       window.alert("User status updated successfully.");
     } catch (err) {
       console.error("Toggle status failed:", err);
@@ -238,21 +243,53 @@ const UserMgmtPage: React.FC = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ role: newRole }),
+          body: JSON.stringify({ role: newRole.toLowerCase() }),
         }
       );
 
       if (!res.ok) {
-        const err = await res.json();
-        alert(err.detail || "You are not allowed to change roles");
+        const contentType = res.headers.get("content-type");
+        let errorMsg = "Something went wrong";
+
+        if (contentType && contentType.includes("application/json")) {
+          const err = await res.json();
+          errorMsg = err.detail || JSON.stringify(err);
+        }
+
+        alert(errorMsg);
         return;
       }
 
-      // update UI after success
+      alert("Role has been updated.");
+
       const updatedUser = await res.json();
       setUsers(users.map(u => u.id === id ? updatedUser : u));
+      await fetchUsers();
     } catch (err) {
       console.error("Role update failed:", err);
+    }
+  };
+
+  const revokeResearcher = async (id: number) => {
+    try {
+      const token = localStorage.getItem("access_token");
+
+      const res = await fetch(
+        `http://127.0.0.1:8000/api/admin/users/${id}/revoke-researcher/`,
+        { method: "PATCH", headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (!res.ok) throw new Error("Failed");
+
+      alert("Researcher access revoked.");
+      
+      const updatedUser = await res.json();
+      setUsers(users.map(u => (u.id === id ? updatedUser : u)));
+
+      await fetchUsers();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to revoke researcher.");
     }
   };
 
@@ -283,7 +320,7 @@ const UserMgmtPage: React.FC = () => {
       setUsers(prev =>
         prev.map(u =>
           u.id === userId
-            ? { ...u, extra_roles: [...(u.extra_roles ?? []), "Researcher"] }
+            ? { ...u, extra_roles: [...(u.extra_roles ?? [])] }
             : u
         )
       );
@@ -297,7 +334,7 @@ const UserMgmtPage: React.FC = () => {
     }
   };
 
-  const rejectRequest = async (id: number) => {
+  const rejectRequest = async (id: number, reason: string) => {
     try {
       const token = localStorage.getItem("access_token");
 
@@ -307,7 +344,7 @@ const UserMgmtPage: React.FC = () => {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ action: "reject" }),
+        body: JSON.stringify({ action: "reject", reason }),
       });
 
       if (!res.ok) {
@@ -323,36 +360,11 @@ const UserMgmtPage: React.FC = () => {
       );
       
       await fetchRequests();
+      alert(`The request from ${updatedReq.userName ?? "the user"} has been rejected.`)
 
-      alert(`The request from ${updatedReq.userName ?? "the user"} has been rejected.`);
     } catch (err) {
       console.error("Reject request failed:", err);
     }
-  };
-
-  const revokeResearcher = async (id: number) => {
-    const token = localStorage.getItem("access_token");
-
-    const res = await fetch(
-      `http://127.0.0.1:8000/api/admin/users/${id}/revoke-researcher/`,
-      {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    if (!res.ok) {
-      const err = await res.json();
-      alert(err.detail || "Failed to revoke researcher access");
-      return;
-    }
-
-    const updatedUser = await res.json();
-    setUsers(users.map(u => (u.id === id ? updatedUser : u)));
-
-    await fetchUsers();
   };
 
 
@@ -485,7 +497,7 @@ const UserMgmtPage: React.FC = () => {
               </div>
 
               {/* Add New User */}
-              <button className="create-user-btn" onClick={() => alert('Open create user modal')}>
+              <button className="create-user-btn" onClick={() => setShowCreateModal(true)}>
                 <FiPlus size={16} /> Create User
               </button>
             </div>
@@ -498,6 +510,7 @@ const UserMgmtPage: React.FC = () => {
                   <th className="center">Staff ID</th>
                   <th className="center">User</th>
                   <th className="center">Role</th>
+                  <th className="center">Department</th>
                   <th className="center">Status</th>
                   <th className="center">
                     <span className="sort-header" onClick={() => handleSortClick("dateJoined")}>
@@ -529,11 +542,16 @@ const UserMgmtPage: React.FC = () => {
                     r => r.userId === user.id && r.status === 'Pending'
                   );
                   
-                  const roleClass = user.extra_roles?.[0]?.toLowerCase() || user.role?.toLowerCase() || "";
+                  //const roleClass = user.extra_roles?.[0]?.toLowerCase() || user.role?.toLowerCase() || "";
+                  const displayRole = user.extra_roles?.some(r => r.toLowerCase() === "researcher") 
+                    ? "Researcher" 
+                    : user.role;
+                  const roleClass = displayRole.charAt(0).toUpperCase() + displayRole.slice(1);
+
 
                   return (
                     <tr key={user.id}>
-                      <td className="cell-number">{index+1}</td>
+                      <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td>
                       <td className="center staff-id">{user.staff_id}</td>
                       <td>
                         <div className={`user-details role-${roleClass}`}>
@@ -546,14 +564,14 @@ const UserMgmtPage: React.FC = () => {
                         <div className="role-cell">
                           <div className="role-field">
                             <select
-                              className={`role-select ${user.extra_roles?.[0] ?? user.role ?? ""}`}
-                              value={user.extra_roles?.[0] ?? user.role ?? ""}
+                              className={`role-select ${displayRole}`}
+                              value={displayRole}
                               onChange={(e) => updateRole(user.id, e.target.value as Role)}
                               aria-label={`Change role for ${user.name}`}
                               disabled={
                                 userRole !== 'Admin' || 
-                                (user.role?.toLowerCase() === 'citizen' &&
-                                user.extra_roles?.some(r => r.toLowerCase() === 'researcher'))
+                                user.role?.toLowerCase() === 'citizen' || 
+                                user.role?.toLowerCase() === 'citizen' &&user.extra_roles?.some(r => r.toLowerCase() === 'researcher')
                               }
                             >
                               <option value="Researcher">Researcher</option>
@@ -561,6 +579,7 @@ const UserMgmtPage: React.FC = () => {
                               <option value="Admin">Admin</option>
                             </select>
                             {!(
+                              user.role?.toLowerCase() === 'citizen' || 
                               user.role?.toLowerCase() === "citizen" &&
                               user.extra_roles?.some(r => r.toLowerCase() === "researcher")
                             ) && (
@@ -574,6 +593,7 @@ const UserMgmtPage: React.FC = () => {
                           )}
                         </div>
                       </td>
+                      <td className="center muted">{user.role === "Researcher" ? "N/A" : "Dept XYZ"}</td>
                       <td className="center"><span className={`badge ${user.status}`}>{user.status}</span></td>
                       <td className="center muted">{user.dateJoined}</td>
                       <td className="center muted">{user.lastLoginDisplay}</td>
@@ -609,8 +629,6 @@ const UserMgmtPage: React.FC = () => {
                                     );
 
                                     if (!confirmed) return;
-
-                                    window.alert("Researcher access revoked.");
 
                                     revokeResearcher(user.id);
                                     setOpenMenu(null);
@@ -659,32 +677,71 @@ const UserMgmtPage: React.FC = () => {
                       <span className={`badge ${req.status}`}>{req.status}</span>
                     </td>
                     <td className="center actions">
-                      {req.status === 'Pending' && (
+                      {req.status === "Pending" && (
                         <>
-                          <button
-                            className="approve-btn"
-                            onClick={() => {
-                              const confirmed = window.confirm(`Are you sure you want to approve the request from ${req.userName}?`);
-                              if (confirmed) {
-                                approveRequest(req.id);
-                              }
-                            }}
-                            aria-label={`Approve request from ${req.userName}`}
-                          >
-                            <CheckCircle size={16} /> Approve
-                          </button>
-                          <button
-                            className="reject-btn"
-                            onClick={() => {
-                              const confirmed = window.confirm(`Are you sure you want to reject the request from ${req.userName}?`);
-                              if (confirmed) {
-                                rejectRequest(req.id);
-                              }
-                            }}
-                            aria-label={`Reject request from ${req.userName}`}
-                          >
-                            <XCircle size={16} /> Reject
-                          </button>
+                          {rejectingId !== req.id ? (
+                            // NORMAL MODE: Approve / Reject buttons
+                            <>
+                              <button
+                                className="approve-btn"
+                                onClick={() => {
+                                  const confirmed = window.confirm(
+                                    `Are you sure you want to approve the request from ${req.userName}?`
+                                  );
+                                  if (confirmed) approveRequest(req.id);
+                                }}
+                                aria-label={`Approve request from ${req.userName}`}
+                              >
+                                <CheckCircle size={16} /> Approve
+                              </button>
+
+                              <button
+                                className="reject-btn"
+                                onClick={() => {
+                                  setRejectingId(req.id);
+                                  setRejectReason("");
+                                }}
+                                aria-label={`Reject request from ${req.userName}`}
+                              >
+                                <XCircle size={16} /> Reject
+                              </button>
+                            </>
+                          ) : (
+                            // REJECT MODE: Textarea + Cancel / Confirm buttons
+                            <div className="reject-box">
+                              <textarea
+                                placeholder="Enter reason for rejection..."
+                                value={rejectReason}
+                                onChange={(e) => setRejectReason(e.target.value)}
+                                rows={3}
+                                autoFocus
+                              />
+
+                              <div className="reject-actions">
+                                <button
+                                  className="cancel-btn"
+                                  onClick={() => {
+                                    setRejectingId(null);
+                                    setRejectReason("");
+                                  }}
+                                >
+                                  Cancel
+                                </button>
+
+                                <button
+                                  className="confirm-btn"
+                                  disabled={!rejectReason.trim()}
+                                  onClick={() => {
+                                    rejectRequest(req.id, rejectReason);
+                                    setRejectingId(null);
+                                    setRejectReason("");
+                                  }}
+                                >
+                                  Confirm
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </>
                       )}
                     </td>
@@ -692,10 +749,19 @@ const UserMgmtPage: React.FC = () => {
                 ))}
               </tbody>
             </table>
-            
+
           </div>
           {renderPagination(requestsPage, requestsTotalPages, fetchRequests)}
         </>
+      )}
+      {showCreateModal && (
+        <CreateUserModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={async () => {
+            await fetchUsers(currentPage);
+            setShowCreateModal(false);
+          }}
+        />
       )}
     </div>
   );

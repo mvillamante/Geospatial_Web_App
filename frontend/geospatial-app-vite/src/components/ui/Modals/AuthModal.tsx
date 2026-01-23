@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import { saveUserSession } from "../../libr/auth";
-import { normalizePrimaryRole, normalizeSecondaryRole, roleToBasePath } from "../../utils/roles";
-import "./AuthModal.css";
-import type { User } from "../../libr/fetchCurrentUser";
+import { useAuth } from "../../../context/AuthContext";
+import { saveUserSession } from "../../../libr/auth";
+import { normalizePrimaryRole, normalizeSecondaryRole, roleToBasePath } from "../../../utils/roles";
+import "./GlobalModal.css";
+import type { User } from "../../../libr/fetchCurrentUser";
 
 const AuthModal = ({ type = "login", onClose, switchModal }) => {
     const navigate = useNavigate();

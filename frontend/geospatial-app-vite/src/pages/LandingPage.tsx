@@ -4,7 +4,7 @@ import { FaUser, FaChartBar, FaUniversity } from "react-icons/fa";
 import "./LandingPage.css";
 import { useAuth } from "../context/AuthContext";
 import { getUserRoleAndDisplayName } from "../libr/auth";
-import AuthModal from "../components/ui/AuthModal";
+import AuthModal from "../components/ui/Modals/AuthModal";
 import LeafletMap from "../components/ui/LeafletMap";
 
 const LandingPage: React.FC = () => {

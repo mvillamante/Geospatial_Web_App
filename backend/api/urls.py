@@ -10,6 +10,7 @@ from .backend_views.incident_views import *
 from .backend_views.misc_views import *
 from .backend_views.researcher_views import *
 from .backend_views.satellite import *
+from .backend_views.tomtom_views import tomtom_roads_tile, tomtom_traffic_tile
 
 urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),

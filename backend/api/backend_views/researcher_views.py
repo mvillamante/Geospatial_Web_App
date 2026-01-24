@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from api.models import ResearcherRequest, CustomUser
 from api.serializer import ResearcherRequestSerializer
 from api.admin_permissions import IsAdminRole
+from django.utils import timezone
 
 # Citizen Requesting Researcher Role
 class CreateResearcherRequestView(generics.CreateAPIView):
@@ -27,7 +28,7 @@ class CreateResearcherRequestView(generics.CreateAPIView):
 
 # Admin (list all pending requests)
 class ResearcherRequestListView(generics.ListAPIView):
-    queryset = ResearcherRequest.objects.filter(status="Pending")
+    queryset = ResearcherRequest.objects.filter(status="Pending").order_by('-requested_at')
     serializer_class = ResearcherRequestSerializer
     permission_classes = [IsAuthenticated, IsAdminRole]
 
@@ -62,6 +63,10 @@ class ApproveRejectResearcherRequestView(generics.UpdateAPIView):
             
         else:
             req_obj.status = "Rejected"
+            
+            reject_reason = request.data.get("reason", "")
+            req_obj.reject_reason = reject_reason
+            req_obj.rejected_at = timezone.now()
 
         req_obj.save()
         serializer = self.get_serializer(req_obj)

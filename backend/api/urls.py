@@ -31,6 +31,7 @@ from .backend_views.researcher_views import (
     ApproveRejectResearcherRequestView,
 )
 from .backend_views.satellite import get_ndvi_image
+from .backend_views.tomtom_views import tomtom_roads_tile, tomtom_traffic_tile
 
 urlpatterns = [
     # JWT
@@ -58,6 +59,10 @@ urlpatterns = [
     
     # Satellite Views
     path("satellite/ndvi/", get_ndvi_image, name="satellite_ndvi"),
+
+    # TomTom Tiles
+    path("tomtom/roads/<int:z>/<int:x>/<int:y>.png", tomtom_roads_tile, name="tomtom_roads_tile"),
+    path("tomtom/traffic/<int:z>/<int:x>/<int:y>.png", tomtom_traffic_tile, name="tomtom_traffic_tile"),
     
     # Incident Views
     path("reports/", IncidentReportCreateView.as_view(), name="incident-create"),

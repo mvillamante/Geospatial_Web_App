@@ -10,13 +10,51 @@ from api.models import CustomUser
 from api.serializer import AdminUserListSerializer, AssignUserRoleSerializer, CreateStaffUserSerializer
 from api.admin_permissions import IsAdminRole
 
+from django.db.models import Q
+
 from .pagination import AdminUserPagination
 
 class UserListView(ListAPIView):
-    queryset = CustomUser.objects.all().order_by('-date_joined')
     serializer_class = AdminUserListSerializer
     permission_classes = [IsAuthenticated, IsAdminRole]
     pagination_class = AdminUserPagination
+
+    def get_queryset(self):
+        qs = CustomUser.objects.all()
+
+        # Exclude citizens with empty extra_roles
+        qs = CustomUser.objects.exclude(
+            role__iexact='citizen',
+            extra_roles=[]
+        )
+        
+        # Filters
+        role = self.request.query_params.get('role')
+        status = self.request.query_params.get('status')
+        search = self.request.query_params.get('search')
+        ordering = self.request.query_params.get('ordering')
+
+        if role and role.lower() != "all":
+            role_lower = role.lower()
+            if role_lower == "researcher":
+                qs = qs.filter(extra_roles__contains=['Researcher'])
+            else:
+                qs = qs.filter(role__iexact=role)
+
+        if status and status.lower() != "all":
+            is_active = status.lower() == "active"
+            qs = qs.filter(is_active=is_active)
+
+        if search:
+            qs = qs.filter(username__icontains=search)
+
+        if ordering:
+            qs = qs.order_by(ordering)
+        else:
+            qs = qs.order_by('-date_joined')
+
+        return qs
+
     
 class AssignUserRoleView(generics.UpdateAPIView):
     queryset = CustomUser.objects.all()

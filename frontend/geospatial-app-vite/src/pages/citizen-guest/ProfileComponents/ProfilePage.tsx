@@ -9,6 +9,7 @@ type ReportCardModel = {
   title: string;
   description: string;
   category: string;
+  other_category?: string | null;
   location_display: string;
   date: string;
   status: string;
@@ -20,10 +21,12 @@ type IncidentReportAPI = {
   id: number;
   category: string;
   description: string;
+  other_category?: string | null;
   location_display?: string;
   created_at?: string;
   status?: string;
-  photo_url?: string | null; 
+  suggested_critical_level?: string;
+  photo_url?: string | null;
 };
 
 
@@ -44,71 +47,80 @@ const ProfilePage: React.FC = () => {
     others: "Reported Incident",
   };
 
-    useEffect(() => {
-      const fetchMyReports = async () => {
-        setLoadingReports(true);
-        setReportsError(null);
+  useEffect(() => {
+    const fetchMyReports = async () => {
+      setLoadingReports(true);
+      setReportsError(null);
 
-        try {
-          const token = localStorage.getItem("access_token");
+      try {
+        const token = localStorage.getItem("access_token");
 
-          const res = await fetch("http://localhost:8000/api/reports/my/", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          });
+        const res = await fetch("http://localhost:8000/api/reports/my/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
-          if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.detail || "Failed to load report history");
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || "Failed to load report history");
+        }
+
+        const data = await res.json();
+
+        const list: IncidentReportAPI[] = Array.isArray(data) ? data : (data.results ?? []);
+
+        const mapped: ReportCardModel[] = list.map((r) => {
+          const dateStr = r.created_at
+            ? new Date(r.created_at).toLocaleDateString(undefined, {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })
+            : "";
+
+          const status = r.status || r.verification_status || "Pending";
+
+          let progress = 0;
+          if (typeof r.progress === "number") {
+            progress = r.progress > 1 ? Math.min(r.progress / 100, 1) : Math.min(r.progress, 1);
+          } else {
+            progress =
+              status.toLowerCase().includes("resolved") ? 1 :
+                status.toLowerCase().includes("review") ? 0.5 :
+                  0.25;
           }
 
-          const data = await res.json();
+          const customTitle =
+            r.category === "others" && r.other_category?.trim()
+              ? r.other_category.trim()
+              : null;
 
-          const list: IncidentReportAPI[] = Array.isArray(data) ? data : (data.results ?? []);
-
-          const mapped: ReportCardModel[] = list.map((r) => {
-            const dateStr = r.created_at
-              ? new Date(r.created_at).toLocaleDateString(undefined, {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })
-              : "";
-
-            const status = r.status || r.verification_status || "Pending";
-
-            let progress = 0;
-            if (typeof r.progress === "number") {
-              progress = r.progress > 1 ? Math.min(r.progress / 100, 1) : Math.min(r.progress, 1);
-            } else {
-              progress =
-                status.toLowerCase().includes("resolved") ? 1 :
-                  status.toLowerCase().includes("review") ? 0.5 :
-                    0.25;
-            }
-            return {
-              id: r.id,
-              title: categoryTitleMap[r.category] || "Incident Report",
-              description: r.description || "No description provided.",
-              location: r.location_display || r.barangay || "Unknown location",
-              date: dateStr,
-              status,
-              progress,
-              photo: r.photo_url ||  null,
-            };
-          });
-          setReports(mapped);
-        } catch (e: any) {
-          setReportsError(e?.message || "Something went wrong");
-          setReports([]);
-        } finally {
-          setLoadingReports(false);
-        }
-      };
-      fetchMyReports();
-    }, []);
+          return {
+            id: r.id,
+            title: customTitle
+              ? customTitle
+              : (categoryTitleMap[r.category] || "Incident Report"),
+            description: r.description || "No description provided.",
+            location: r.location_display || "Unknown location",
+            date: dateStr,
+            status,
+            criticalLevel: r.suggested_critical_level,
+            progress,
+            photo: r.photo_url || null,
+          };
+        });
+        setReports(mapped);
+      } catch (e: any) {
+        setReportsError(e?.message || "Something went wrong");
+        setReports([]);
+      } finally {
+        setLoadingReports(false);
+      }
+    };
+    fetchMyReports();
+  }, []);
 
   const sendResearcherRequest = async () => {
     try {
@@ -153,7 +165,7 @@ const ProfilePage: React.FC = () => {
             </p>
 
             {(!userRole2?.length || userRole2[0] === "") && userRole !== "Researcher" && (
-              <button 
+              <button
                 className={`research-btn ${isRequested ? 'requested' : ''}`}
                 onClick={sendResearcherRequest}
                 disabled={isRequested}

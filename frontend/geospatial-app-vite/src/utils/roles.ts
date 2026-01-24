@@ -37,10 +37,10 @@ export const roleToBasePath = (role: Role | string) => {
     case "Officer":
       return "/main/officer/dashboard-map";
     case "Citizen":
-      return "/main/citizen/alerts-map";
+      return "/main/citizen/community-feed";
     case "Researcher":
       return "/main/researcher/dashboard-map";
     default:
-      return "/main/guest/alerts-map";
+      return "/main/guest/community-feed";
   }
 };

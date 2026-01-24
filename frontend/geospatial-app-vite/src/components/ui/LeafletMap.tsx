@@ -291,7 +291,7 @@ export default function LeafletMap({
     // Helper fetch function with timeout and error handling
     const fetchData = async (query: string, onSuccess: (data: OverpassResponse) => void) => {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+      const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout
 
       try {
         const res = await fetch("https://overpass-api.de/api/interpreter", {
@@ -317,10 +317,10 @@ export default function LeafletMap({
     if (mapView === "interactive") {
       fetchData(
         `
-          [out:json];
+          [out:json][timeout:25];
           area["name"="Cabuyao"]["boundary"="administrative"]->.a;
           relation["admin_level"="10"](area.a);
-          out center;
+          out center qt;
         `,
         (data) => {
           // Store barangay data for search functionality

@@ -14,7 +14,7 @@ export default function LandingPage() {
                     <button className="btn-primary" onClick={() => navigate("/main/citizen-pwa/login")}>
                         Login
                     </button>
-                    <button className="btn-secondary" onClick={() => navigate("/main/citizen/alerts-map")}>
+                    <button className="btn-secondary" onClick={() => navigate("/main/citizen/community-feed")}>
                         Continue as Guest
                     </button>
                 </div>

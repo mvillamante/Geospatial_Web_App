@@ -101,8 +101,8 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
           username: finalUsername,
           email: email.trim(),
           phone: phone.trim(),
-          role,
-          department: role === "officer" ? department : undefined,
+          role: role === "researcher" ? "Researcher" : role.toLowerCase(),
+          ...(role === "officer" ? { department } : {}),
           password: tempPasswordRef.current,
         }),
       });

@@ -11,6 +11,7 @@ import {
   createLandslideRiskLayer,
   createEvacuationCentersLayer,
   createRoadsLayer,
+  createTrafficLayer,
   createNDVILayer,
 } from "./mapLayers";
 
@@ -154,7 +155,8 @@ export default function LeafletMap({
   const floodZonesLayerRef = useRef<L.LayerGroup | null>(null);
   const landslideRiskLayerRef = useRef<L.LayerGroup | null>(null);
   const evacuationCentersLayerRef = useRef<L.LayerGroup | null>(null);
-  const roadsLayerRef = useRef<L.LayerGroup | null>(null);
+  const roadsLayerRef = useRef<L.Layer | null>(null);
+  const trafficLayerRef = useRef<L.Layer | null>(null);
   const ndviLayerRef = useRef<L.LayerGroup | null>(null);
 
   // Initialize map
@@ -627,6 +629,23 @@ export default function LeafletMap({
     // Add roads if layer is active
     if (showRoads) {
       roadsLayerRef.current = createRoadsLayer(map);
+    }
+  }, [activeLayers]);
+
+  // Handle Traffic Conditions layer toggle
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const showTraffic = activeLayers.includes("Traffic Conditions");
+
+    if (trafficLayerRef.current) {
+      trafficLayerRef.current.remove();
+      trafficLayerRef.current = null;
+    }
+
+    if (showTraffic) {
+      trafficLayerRef.current = createTrafficLayer(map);
     }
   }, [activeLayers]);
 

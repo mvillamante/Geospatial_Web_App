@@ -196,6 +196,7 @@
 .timeslider-container .year-slider {
   width: 100%;
   -webkit-appearance: none;
+  appearance: none;
   height: 8px;
   border-radius: 999px;
   background: #e5e7eb;
@@ -1224,180 +1225,6 @@ li.critical::before { background: var(--criticalrisk-color); }
   animation: roadsLegendSlideIn 0.4s ease-out;
 }
 
-/*---------------------NDVI CONTROLS + LEGEND----------------------*/
-.ndvi-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.ndvi-control-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  color: #374151;
-}
-
-.ndvi-control-row .ndvi-label {
-  font-weight: 500;
-}
-
-.ndvi-control-row .ndvi-value {
-  font-weight: 600;
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.1);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-}
-
-.ndvi-opacity-slider,
-.ndvi-month-slider {
-  width: 100%;
-  height: 6px;
-  -webkit-appearance: none;
-  appearance: none;
-  background: #e5e7eb;
-  border-radius: 3px;
-  outline: none;
-  cursor: pointer;
-}
-
-.ndvi-opacity-slider::-webkit-slider-thumb,
-.ndvi-month-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  background: #10b981;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.ndvi-opacity-slider::-webkit-slider-thumb:hover,
-.ndvi-month-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: 0 3px 6px rgba(16, 185, 129, 0.4);
-}
-
-.ndvi-opacity-slider::-moz-range-thumb,
-.ndvi-month-slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  background: #10b981;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
-}
-
-.ndvi-date-range {
-  font-size: 11px;
-  color: #6b7280;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.ndvi-month-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 10px;
-  color: #9ca3af;
-  margin-top: 2px;
-}
-
-.ndvi-cloud-note {
-  font-size: 10px;
-  color: #059669;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  margin-top: 4px;
-  padding: 4px 8px;
-  background: rgba(16, 185, 129, 0.1);
-  border-radius: 6px;
-}
-
-.ndvi-legend {
-  position: absolute;
-  bottom: 24px;
-  left: 40px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 253, 244, 0.98));
-  backdrop-filter: blur(12px);
-  border-radius: 14px;
-  padding: 16px 18px;
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.18);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  z-index: 1000;
-  min-width: 200px;
-  animation: ndviLegendSlideIn 0.35s ease-out;
-}
-
-@keyframes ndviLegendSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.ndvi-legend h4 {
-  margin: 0 0 6px 0;
-  font-size: 14px;
-  font-weight: 700;
-  color: #047857;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.ndvi-legend .ndvi-legend-subtitle {
-  font-size: 11px;
-  color: #6b7280;
-  margin-bottom: 10px;
-}
-
-.ndvi-gradient {
-  height: 12px;
-  border-radius: 6px;
-  /* Matches evalscript color ramp: red (low) -> orange -> yellow -> green (high) */
-  background: linear-gradient(90deg, 
-    rgb(178, 46, 38) 0%,       /* Very low/no vegetation - dark red */
-    rgb(217, 89, 46) 12%,      /* Low vegetation - red-orange */
-    rgb(235, 140, 56) 24%,     /* Sparse vegetation - orange */
-    rgb(242, 199, 71) 36%,     /* Light vegetation - yellow-orange */
-    rgb(191, 224, 77) 50%,     /* Moderate vegetation - yellow-green */
-    rgb(115, 209, 71) 65%,     /* Good vegetation - lime green */
-    rgb(51, 184, 56) 80%,      /* Dense vegetation - bright green */
-    rgb(20, 140, 38) 100%      /* Very dense - deep emerald */
-  );
-  border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.ndvi-legend-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 10px;
-  color: #4b5563;
-  margin-top: 6px;
-}
-
-.ndvi-legend-note {
-  margin-top: 10px;
-  font-size: 11px;
-  color: #6b7280;
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
 @keyframes roadsLegendSlideIn {
   from {
     opacity: 0;
@@ -1583,6 +1410,180 @@ li.critical::before { background: var(--criticalrisk-color); }
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+/*---------------------NDVI CONTROLS + LEGEND----------------------*/
+.ndvi-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ndvi-control-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #374151;
+}
+
+.ndvi-control-row .ndvi-label {
+  font-weight: 500;
+}
+
+.ndvi-control-row .ndvi-value {
+  font-weight: 600;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.ndvi-opacity-slider,
+.ndvi-month-slider {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #e5e7eb;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.ndvi-opacity-slider::-webkit-slider-thumb,
+.ndvi-month-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #10b981;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ndvi-opacity-slider::-webkit-slider-thumb:hover,
+.ndvi-month-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(16, 185, 129, 0.4);
+}
+
+.ndvi-opacity-slider::-moz-range-thumb,
+.ndvi-month-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: #10b981;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.ndvi-date-range {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.ndvi-month-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.ndvi-cloud-note {
+  font-size: 10px;
+  color: #059669;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 6px;
+}
+
+.ndvi-legend {
+  position: absolute;
+  bottom: 24px;
+  left: 40px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 253, 244, 0.98));
+  backdrop-filter: blur(12px);
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  z-index: 1000;
+  min-width: 200px;
+  animation: ndviLegendSlideIn 0.35s ease-out;
+}
+
+@keyframes ndviLegendSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ndvi-legend h4 {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #047857;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ndvi-legend .ndvi-legend-subtitle {
+  font-size: 11px;
+  color: #6b7280;
+  margin-bottom: 10px;
+}
+
+.ndvi-gradient {
+  height: 12px;
+  border-radius: 6px;
+  /* Matches evalscript color ramp: red (low) -> orange -> yellow -> green (high) */
+  background: linear-gradient(90deg, 
+    rgb(178, 46, 38) 0%,       /* Very low/no vegetation - dark red */
+    rgb(217, 89, 46) 12%,      /* Low vegetation - red-orange */
+    rgb(235, 140, 56) 24%,     /* Sparse vegetation - orange */
+    rgb(242, 199, 71) 36%,     /* Light vegetation - yellow-orange */
+    rgb(191, 224, 77) 50%,     /* Moderate vegetation - yellow-green */
+    rgb(115, 209, 71) 65%,     /* Good vegetation - lime green */
+    rgb(51, 184, 56) 80%,      /* Dense vegetation - bright green */
+    rgb(20, 140, 38) 100%      /* Very dense - deep emerald */
+  );
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.ndvi-legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #4b5563;
+  margin-top: 6px;
+}
+
+.ndvi-legend-note {
+  margin-top: 10px;
+  font-size: 11px;
+  color: #6b7280;
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 
 /*-- EDA MODAL -----------------------------------------------*/

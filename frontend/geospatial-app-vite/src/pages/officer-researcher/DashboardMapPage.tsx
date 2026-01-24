@@ -86,6 +86,11 @@ const DashboardMapPage: React.FC = () => {
   /*----------toggle map layers----------*/
   const [activeLayers, setActiveLayers] = useState<string[]>([]);
 
+  // Display name mapping for layer identifiers
+  const layerDisplayNames: Record<string, string> = {
+    "NDVI": "Green Index",
+  };
+
   const mapLayers = [
     {
       group: "Green Coverage",
@@ -346,7 +351,7 @@ const DashboardMapPage: React.FC = () => {
 
           {/* Time Slider */}
           <div className="timeslider-container panel-card">
-            <h4>NDVI Year & Projections</h4>
+            <h4>Year</h4>
 
             <div className="year-display">{year}</div>
 
@@ -370,7 +375,7 @@ const DashboardMapPage: React.FC = () => {
           {/* NDVI Controls */}
           {activeLayers.includes("NDVI") && (
             <div className="ndvi-controls panel-card">
-              <h4>NDVI Layer Controls</h4>
+              <h4>Green Index</h4>
               
               {/* Opacity Slider */}
               <div className="ndvi-control-row">
@@ -426,7 +431,7 @@ const DashboardMapPage: React.FC = () => {
 
                 {section.items.map((item) => (
                   <div className="layer-item" key={item}>
-                    <span>{item}</span>
+                    <span>{layerDisplayNames[item] || item}</span>
                     <button
                       className={`toggle-btn ${activeLayers.includes(item) ? "active" : ""}`}
                       onClick={() => toggleLayer(item)}
@@ -781,7 +786,7 @@ const DashboardMapPage: React.FC = () => {
 
                 <div className="columnpanel-card">
                   {keyInsights.map((item, index) => (
-                    <div className={`panel-card insight-card ${colors[index % colors.length]}`}>
+                    <div key={index} className={`panel-card insight-card ${colors[index % colors.length]}`}>
                       <span className="insight-icon">{insightIcons[index % insightIcons.length]}</span>
                       <div className="insight-text">
                         <strong>{item.label}:</strong> {item.description}

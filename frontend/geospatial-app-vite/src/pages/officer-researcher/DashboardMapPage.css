@@ -40,7 +40,7 @@
   display: block;
   font-size: 13px;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 18px;
 }
 
 .panel-card-eda {
@@ -51,6 +51,68 @@
   font-size: 12px;
   color: rgb(100, 100, 100);
   margin-bottom: 12px;
+}
+
+.panel-card-value {
+  margin-top: 5px;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.panel-card-value .unit {
+  font-size: 18px;
+  margin-left: 4px;
+  font-weight: 500;
+}
+
+.panel-card-meta {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/*----Current Hazard and Green Index-----*/
+.panel-card.green .panel-card-sub-title,
+.panel-card.hazard .panel-card-sub-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 0;
+}
+
+.panel-card.green {
+  background-color: #deeee9;
+  border-left: 5px solid #22c55e;
+}
+
+.panel-card.green .panel-card-sub-title {
+  color: #0e632d;
+}
+
+.panel-card.green .panel-card-value {
+  color: #15803d;
+}
+
+.panel-card.green .panel-card-meta {
+  color: #16a34a;
+}
+
+.panel-card.hazard {
+  background-color: #f1dbdb;
+  border-left: 5px solid #ef4444;
+}
+
+.panel-card.hazard .panel-card-sub-title {
+  color: #a01616;
+}
+
+.panel-card.hazard .panel-card-value {
+  color: #b91c1c;
+}
+
+.panel-card.hazard .panel-card-meta {
+  color: #dc2626;
 }
 
 /*----Map View----*/
@@ -131,7 +193,8 @@
 /*Data Layer (Choropleth View)*/
 .choropleth-data-layer {
   position: relative;
-  width: 200px;
+  width: 100%;
+  margin-bottom: 10px;
 }
 .choropleth-data-layer .select-btn {
   width: 100%;
@@ -148,7 +211,7 @@
 }
 .choropleth-data-layer .select-options {
   list-style: none;
-  margin: 0;
+  margin-top: 125px;
   padding: 4px 0;
   position: absolute;
   width: 100%;
@@ -181,7 +244,7 @@
 /*----Time Slider----*/
 .timeslider-container {
   position: relative;
-  padding: 16px;
+  padding: 5px 16px;
 }
 .timeslider-container .year-display {
   margin-bottom: 8px;
@@ -271,21 +334,19 @@
     transform: translateX(20px);
 }
 
-.maplayer-container .section-divider {
+.section-divider {
     border: none;
     border-top: 1px solid #e5e7eb;
     margin: 12px 0;
 }
 
 /*----Risk Legend----*/
-.risklegend-container ul,
-.choropleth-legend-box ul {
+.risklegend-container ul {
     padding: 0;
     margin: 0;
 }
 
-.risklegend-container ul li,
-.choropleth-legend-box ul li {
+.risklegend-container ul li {
     display: flex;
     align-items: center;
     margin-bottom: 6px;
@@ -293,8 +354,7 @@
     font-size: 12px;
 }
 
-.risklegend-container ul li::before,
-.choropleth-legend-box ul li::before {
+.risklegend-container ul li::before {
     content: '';
     width: 16px;
     height: 16px;
@@ -349,53 +409,29 @@ li.critical::before { background: var(--criticalrisk-color); }
 .choropleth-header {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  background: rgb(243, 243, 243);
-  border-bottom: 1px solid #e5e7eb;
-  padding: 20px 10px;
+  gap: 4px;
+
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.92);
+
+  border-bottom: 1px solid #d1d5db;
+  backdrop-filter: blur(4px);
 }
 
 .choropleth-header h3 {
   margin: 0;
-  font-size: 19px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.2;
 }
 
 .choropleth-header h5 {
-  margin: 4px 0 0 0;
+  margin: 0;
   font-size: 13px;
   font-weight: 400;
-  color: rgb(77, 76, 76);
+  color: #4b5563;
 }
-
-.choropleth-legend-box {
-  background: rgb(243, 243, 243);
-  border-top: 1px solid #e5e7eb;
-  padding: 20px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.choropleth-legend-box h4 {
-  grid-column: span 2;
-}
-
-.choropleth-legend-box ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: contents;
-}
-
-.choropleth-legend-box li {
-  margin-bottom: 8px;
-}
-
-
-
-
-
 
 /*---------------------RIGHT PANEL----------------------*/
 .dbmright-panel {
@@ -527,7 +563,8 @@ li.critical::before { background: var(--criticalrisk-color); }
   font-size: 13px;
 }
 
-.panel-card.insight-card {
+.panel-card.insight-card,
+.panel-card.left-insight-card {
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -539,7 +576,12 @@ li.critical::before { background: var(--criticalrisk-color); }
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.insight-card:hover {
+.panel-card.left-insight-card {
+  font-size: 12px;
+}
+
+.insight-card:hover,
+.left-insight-card:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
@@ -570,10 +612,20 @@ li.critical::before { background: var(--criticalrisk-color); }
   border-left: 4px solid #ed8936;
   color: #c05621;
 }
-.insight-card.green {
-  background: linear-gradient(90deg, #e6f4ea, #f3faf4);
-  border-left: 4px solid #38a169;
-  color: #2f855a;
+.left-insight-card.pink {
+  background: linear-gradient(90deg, #fde2f0, #fdf6fa);
+  border-left: 4px solid #ec4899;
+  color: #9d174d;
+}
+.left-insight-card.blue {
+  background: linear-gradient(90deg, #e0f0ff, #f4f9ff);
+  border-left: 4px solid #3b82f6;
+  color: #1e40af;
+}
+.left-insight-card.coral {
+  background: linear-gradient(90deg, #fff1eb, #fff8f6);
+  border-left: 4px solid #fb923c;
+  color: #c2410c;
 }
 
 

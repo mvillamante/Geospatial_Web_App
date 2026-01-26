@@ -48,7 +48,7 @@ const DashboardMapPage: React.FC = () => {
   const options = [
     { value: "hazard", label: "Hazard Index" },
     { value: "green", label: "Green Index" },
-    { value: "population", label: "Population Density" },
+    { value: "calamity", label: "Calamity Risk Likelihood" },
   ];
 
   const handleSelect = (value: string) => {
@@ -59,7 +59,7 @@ const DashboardMapPage: React.FC = () => {
   /*----------time slider----------*/
   const currentYear = new Date().getFullYear(); // today’s year
   const minYear = 2020;
-  const maxYear = 2025;
+  const maxYear = 2030;
   const initialYear = Math.min(maxYear, Math.max(minYear, currentYear));
   const [year, setYear] = useState(initialYear);
   const [ndviOpacity, setNdviOpacity] = useState(0.8);
@@ -93,12 +93,16 @@ const DashboardMapPage: React.FC = () => {
 
   const mapLayers = [
     {
-      group: "Green Coverage",
-      items: ["NDVI"],
+      group: "NDVI",
+      items: ["Green Index"],
+    },
+    {
+      group: "Population Density",
+      items: ["Population Density"],
     },
     {
       group: "Hazard Zones",
-      items: ["Fault Lines", "Flood Zones", "Landslide Risk",],
+      items: ["Fault Lines", "Flood Zones", "Landslide Risk","Hazard Location"],
     },
     {
       group: "Infrastructure",
@@ -106,11 +110,35 @@ const DashboardMapPage: React.FC = () => {
     },
   ];
 
+  const mapViewAllowedGroups = ["Population Density", "Hazard Zones", "Infrastructure"];
+  const visibleMapLayers =
+    mapView === "interactive"
+      ? mapLayers.filter(layer => mapViewAllowedGroups.includes(layer.group))
+      : mapLayers;
+
+
   const toggleLayer = (layer: string) => {
     setActiveLayers((prev) =>
       prev.includes(layer) ? prev.filter((l) => l !== layer) : [...prev, layer]
     );
   };
+
+  /*----------Insights (in Left Panel)----------*/
+  const leftInsights = [
+    {
+      label: "Rainfall Trend",
+      description: "Recent patterns show moderate increase in precipitation levels.",
+    },
+    {
+      label: "Urban Green Space",
+      description: "Current green coverage is steadily improving across the city.",
+    },
+    {
+      label: "Slope Stability",
+      description: "Steeper regions have a higher likelihood of erosion or landslides.",
+    },
+  ];
+
 
   /*----------Right Panel----------*/
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
@@ -132,7 +160,8 @@ const DashboardMapPage: React.FC = () => {
   }, []);
 
   /* Analytics Section */
-  const colors = ["violet", "teal", "orange", "green"]
+  const colors = ["violet", "teal", "orange"]
+  const colors2 = ["pink", "coral", "blue"]
   const keyInsights = [
     {
       label: "Flood Risk",
@@ -307,7 +336,7 @@ const DashboardMapPage: React.FC = () => {
             </div>
 
           {/* Map Type - only show if Interactive is selected */}
-          {mapView === "interactive" ? (
+          {mapView === "interactive" && (
             <div className="segmented-control small slide two">
               <span className={`slider ${mapType}`} />
 
@@ -322,55 +351,92 @@ const DashboardMapPage: React.FC = () => {
                 Terrain
               </button>
             </div>
-          ) : mapView === "choropleth" ? (
-            <div className="info-text choropleth-data-layer">
-              <h5>Data Layer</h5>
-              <div
-                className={`select-wrapper ${open ? "active" : ""}`}
-                onClick={() => setOpen(!open)}
-              >
-                <button className="select-btn">
-                  {options.find((opt) => opt.value === selected)?.label || "Select an option"}
-                  <span className="arrow">▼</span>
-                </button>
-                <ul className="select-options">
-                  {options.map((opt) => (
-                    <li
-                      key={opt.value}
-                      className={selected === opt.value ? "selected" : ""}
-                      onClick={() => handleSelect(opt.value)}
-                    >
-                      {opt.label}
-                    </li>
-                  ))}
-                </ul>
+          )}
+          </div>
+
+          {mapView === "interactive" ? (
+            <>
+              <div className="rowpanel-card">
+              {/* Current Green Index */}
+              <div className="panel-card green">
+                <span className="panel-card-sub-title">Current Green Index</span>
+
+                <div className="panel-card-value">
+                  72<span className="unit">%</span>
+                </div>
+
+                <div className="panel-card-meta">
+                  ↑ 4.2% from last year
+                </div>
+              </div>
+
+              {/* Current Hazard Index */}
+              <div className="panel-card hazard">
+                <span className="panel-card-sub-title">Current Hazard Index</span>
+
+                <div className="panel-card-value">
+                  38<span className="unit">%</span>
+                </div>
+
+                <div className="panel-card-meta">
+                  ↓ 1.1% from last year
+                </div>
               </div>
             </div>
-          ) : null }
-          </div>
+            </>
+          ) : (
+            <div className="panel-card">
+              {/* Data Layer */}
+              <div className="info-text choropleth-data-layer">
+                <h5>Data Layer</h5>
+                <div
+                  className={`select-wrapper ${open ? "active" : ""}`}
+                  onClick={() => setOpen(!open)}
+                >
+                  <button className="select-btn">
+                    {options.find((opt) => opt.value === selected)?.label || "Select an option"}
+                    <span className="arrow">▼</span>
+                  </button>
+                  <ul className="select-options">
+                    {options.map((opt) => (
+                      <li
+                        key={opt.value}
+                        className={selected === opt.value ? "selected" : ""}
+                        onClick={() => handleSelect(opt.value)}
+                      >
+                        {opt.label}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
 
-          {/* Time Slider */}
-          <div className="timeslider-container panel-card">
-            <h4>Year</h4>
+              <hr className="section-divider" />
 
-            <div className="year-display">{year}</div>
+              {/* Time Slider */}
+              <div className="timeslider-container">
+                <h4>Projections Year</h4>
 
-            <div className="slider-wrapper">
-              <input
-                type="range"
-                min={minYear}
-                max={maxYear}
-                value={year}
-                className="year-slider"
-                onChange={handleChange}
-              />
+                <div className="year-display">{year}</div>
+
+                <div className="slider-wrapper">
+                  <input
+                    type="range"
+                    min={minYear}
+                    max={maxYear}
+                    value={year}
+                    className="year-slider"
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="year-labels">
+                  <span>{minYear}</span>
+                  <span>{maxYear}</span>
+                </div>
+              </div>
             </div>
-
-            <div className="year-labels">
-              <span>{minYear}</span>
-              <span>{maxYear}</span>
-            </div>
-          </div>
+          )}
 
           {/* NDVI Controls */}
           {activeLayers.includes("NDVI") && (
@@ -425,7 +491,7 @@ const DashboardMapPage: React.FC = () => {
           <div className="maplayer-container panel-card">
             <h4>Map Layers</h4>
 
-            {mapLayers.map((section, index) => (
+            {visibleMapLayers.map((section, index) => (
               <div key={section.group}>
                 <p className="layer-group">{section.group}</p>
 
@@ -438,21 +504,37 @@ const DashboardMapPage: React.FC = () => {
                     />
                   </div>
                 ))}
-                {index < mapLayers.length - 1 && <hr className="section-divider" />}  
+                {index < visibleMapLayers.length - 1 && <hr className="section-divider" />}  
               </div>
             ))}
           </div>
 
           {/* Risk Legend */}
-          <div className="risklegend-container panel-card">
-            <h4>Risk Index Legend</h4>
-            <ul>
-              <li className="low">Low Risk</li>
-              <li className="moderate">Moderate Risk</li>
-              <li className="high">High Risk</li>
-              <li className="critical">Critical Risk</li>
-            </ul>
-          </div>
+          { mapView == "choropleth" ? (
+            <div className="risklegend-container panel-card">
+              <h4>Index Legend</h4>
+              <ul>
+                <li className="low">Low Risk</li>
+                <li className="moderate">Moderate Risk</li>
+                <li className="high">High Risk</li>
+                <li className="critical">Critical Risk</li>
+              </ul>
+            </div>
+          ) : (
+            <div className="panel-card">
+              <span className="panel-card-title">Insights</span>
+              <div className="columnpanel-card">
+                  {leftInsights.map((item, index) => (
+                    <div key={index} className={`panel-card left-insight-card ${colors2[index % colors.length]}`}>
+                      {/*<span className="insight-icon">{insightIcons[index % insightIcons.length]}</span>*/}
+                      <div className="insight-text">
+                        <strong>{item.label}:</strong> {item.description}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
         </aside>
 
         
@@ -664,20 +746,7 @@ const DashboardMapPage: React.FC = () => {
             </div>
 
             {/* Map Visual*/}
-            <LeafletMap height="75vh" mapView="choropleth" mapType={mapType} /> 
-
-            {/* Legends */}
-            <div className="choropleth-legend-box">
-              <h4>Legend</h4>
-              <ul>
-                <li className="critical">Critical (≥8)</li>
-                <li className="very-high">Very High (7-8)</li>
-                <li className="high">High (6-7)</li>
-                <li className="moderate">Moderate (5-6)</li>
-                <li className="low">Low (4-5)</li>
-                <li className="very-low">Very Low (&lt;4)</li>
-              </ul>
-            </div>
+            <LeafletMap height="92vh" mapView="choropleth" mapType={mapType} /> 
 
           </div>
         ) : null }

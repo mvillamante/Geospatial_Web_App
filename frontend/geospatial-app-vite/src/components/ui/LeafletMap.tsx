@@ -110,6 +110,7 @@ const tileLayerConfigs = {
 
 interface LeafletMapProps {
   height?: string;
+  width?: string;
   mapView?: "interactive" | "choropleth";
   mapType?: "basic" | "satellite" | "terrain";
   searchedBarangay?: string;
@@ -127,6 +128,7 @@ interface LeafletMapProps {
 
 export default function LeafletMap({ 
   height = "600px", 
+  width = "100%",
   mapView = "interactive", 
   mapType = "basic", 
   searchedBarangay = "", 
@@ -674,6 +676,6 @@ export default function LeafletMap({
   }, [activeLayers, ndviOpacity, ndviYear, ndviMonth, ndviFromDate, ndviToDate, ndviMaxCloud]);
 
   return (
-    <div id="map" style={{ height: height, width: "100%" }}></div>
+    <div id="map" style={{ height: height, width: width }}></div>
   );
 }

@@ -45,6 +45,16 @@
   align-items: stretch;
 }
 
+.evac-grid.officer {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  overflow-x: hidden;
+  padding-bottom: 12px;
+  margin-top: 15px;
+  gap: 16px;
+}
+
 .evac-card {
   background: #ffffff;
   border-radius: 16px;
@@ -52,6 +62,10 @@
   border: 1px solid #e5e7eb;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transition: all 0.25s ease;
+}
+
+.evac-grid.officer .evac-card {
+  height: 240px;
 }
 
 .evac-card:hover {
@@ -134,11 +148,132 @@
   transform: translateY(-2px);
 }
 
+.selected-evac-card {
+  width: 100%;
+  padding: 15px;
+  position: sticky;
+  top: 1rem;
+  max-height: calc(80vh - 2rem);
+  overflow-y: auto;
+}
+
+.selected-evac-card h2 {
+  margin-bottom: 8px;
+}
+
+.selected-evac-card .small-editor {
+  border-radius: 12px;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.selected-evac-card .small-editor .form-group,
+.selected-evac-card .small-editor .form-row {
+  margin-bottom: 0.2rem; /* tighter spacing */
+}
+
+.selected-evac-card .small-editor input,
+.selected-evac-card .small-editor select {
+  font-size: 0.85rem;
+  padding: 0.3rem 0.5rem;
+}
+
+.selected-evac-card .small-editor .modal-actions button {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.editor-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.2rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  transition: transform 0.35s ease, opacity 0.35s ease;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.editor-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.12);
+}
+
+.animate-card {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideDownFade 0.25s ease-out forwards;
+}
+
+.animate-card.exit {
+  animation: slideUpFade 0.25s ease-in forwards;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================
+   Scroll Btn
+========================= */
+
+.evac-grid-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scroll-btn {
+  background: rgba(0,0,0,0.05);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.scroll-btn.left {
+  left: -18px;
+}
+
+.scroll-btn.right {
+  right: -18px;
+}
+
+.scroll-btn:hover {
+  background: rgba(0,0,0,0.1);
+}
+
+
 /* =========================
    Reminders
 ========================= */
 .evac-reminders {
-  margin-top: 2rem;
+  margin: 1.5rem;
+  margin-top: 5px;
   background: #fff7d6;
   border: 1px solid #ffe8a3;
   padding: 1.5rem;
@@ -248,9 +383,9 @@
 .evac-search-add-container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: left;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin: 1rem 0;
 }
 
 .evac-search-wrapper.officer {
@@ -290,11 +425,18 @@
 }
 
 /* Officer Stats */
+.evac-map-wrapper {
+  display: flex;
+  justify-content: justify;
+  align-items: flex-start;
+}
+
 .evac-stat-container {
   display: grid;
+  flex: 1;
   grid-template-columns: repeat(2, minmax(260px, 1fr));
   gap: 1rem;
-  margin: 1rem 0 1.5rem;
+  margin-left: 1rem;
 }
 
 .evac-stat-card {

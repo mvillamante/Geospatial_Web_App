@@ -10,10 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@lexical/code": "^0.39.0",
+    "@lexical/html": "^0.39.0",
+    "@lexical/list": "^0.39.0",
+    "@lexical/react": "^0.39.0",
+    "@lexical/rich-text": "^0.39.0",
+    "@lexical/selection": "^0.39.0",
     "@supabase/supabase-js": "^2.90.0",
     "date-fns": "^4.1.0",
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
+    "lexical": "^0.39.0",
     "lucide-react": "^0.556.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Edit, Eye, Trash2, Send } from 'lucide-react';
 import './CmsPage.css';
+import RichTextEditor from './TextEditor/RichTextEditor';
 
 interface Guide {
   id: number;
@@ -302,10 +303,9 @@ const CmsPage: React.FC = () => {
             </select>
 
             <label>Content</label>
-            <textarea
-              rows={5}
-              value={newGuide.content}
-              onChange={e => setNewGuide({ ...newGuide, content: e.target.value })}
+            <RichTextEditor
+              initialHtml={newGuide.content}
+              onChange={(html) => setNewGuide({ ...newGuide, content: html })}
             />
 
             <div className="modal-actions">
@@ -347,12 +347,9 @@ const CmsPage: React.FC = () => {
             </select>
 
             <label>Content</label>
-            <textarea
-              rows={5}
-              value={editingGuide.content || ""}
-              onChange={e =>
-                setEditingGuide({ ...editingGuide, content: e.target.value })
-              }
+            <RichTextEditor
+              initialHtml={editingGuide.content || ""}
+              onChange={(html) => setEditingGuide({ ...editingGuide, content: html })}
             />
 
             <div className="modal-actions">
@@ -414,7 +411,6 @@ const CmsPage: React.FC = () => {
           </div>
         </div>
       )}
-
 
     </div>
 

@@ -85,3 +85,18 @@
   color: white;
 }
 
+/* Rich  Text Editor */
+.editor-input {
+  min-height: 150px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.editor-bold {
+  font-weight: bold;
+}
+
+.editor-italic {
+  font-style: italic;
+}

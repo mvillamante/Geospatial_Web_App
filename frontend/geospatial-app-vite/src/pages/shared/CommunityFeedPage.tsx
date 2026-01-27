@@ -1,7 +1,15 @@
 import React, { useMemo, useState } from "react";
-import { Pin, Search, SlidersHorizontal, AlertTriangle, Megaphone, BookOpen, Image as ImageIcon } from "lucide-react";
-import { set } from "date-fns";
-
+import {
+    Pin,
+    Search,
+    SlidersHorizontal,
+    AlertTriangle,
+    Megaphone,
+    BookOpen,
+    Image as ImageIcon,
+    MapPin,
+} from "lucide-react";
+import "./CommunityFeedPage.css";
 
 type PostType = "advisory" | "announcement" | "guide";
 
@@ -43,6 +51,13 @@ const timeAgo = (iso: string) => {
     return `${days}d`;
 };
 
+function initials(name: string) {
+    const parts = name.trim().split(/\s+/);
+    const first = parts[0]?.[0] ?? "?";
+    const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+    return (first + last).toUpperCase();
+}
+
 export default function CommunityFeedPage() {
     const [query, setQuery] = useState("");
     const [filter, setFilter] = useState<"all" | PostType>("all");
@@ -54,11 +69,11 @@ export default function CommunityFeedPage() {
                 id: 1,
                 type: "advisory",
                 title: "Flood Advisory: Yellow Warning Level",
-                body: "Heavy rainfall expected in the next 6 hours. Prepare go-bags and monitor updates. Avoid riverbanks and low-lying areas.",
-                author: "MDRRMO",
+                body: "Heavy rainfall expected in the next 6 hours. Prepare go-bags and monitor updates. Avoid low-lying areas.",
+                author: "CDRRMO",
                 created_at: new Date(Date.now() - 55 * 60 * 1000).toISOString(),
                 pinned: true,
-                area: "Citywide",
+                area: "Brgy. San Isidro",
                 photo_url:
                     "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=1200&q=70",
             },
@@ -67,21 +82,10 @@ export default function CommunityFeedPage() {
                 type: "announcement",
                 title: "Road Clearing: Main Highway (9AM–12NN)",
                 body: "Road clearing operation will be conducted. Expect delays. Please use alternate routes. Keep lanes clear for emergency vehicles.",
-                author: "LGU Traffic Office",
+                author: "CDRRMO",
                 created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-                area: "Downtown",
+                area: "Brgy. Banay-Banay",
                 photo_url: null,
-            },
-            {
-                id: 3,
-                type: "guide",
-                title: "How to Report an Incident (Quick Steps)",
-                body: "Open Report & Map, allow location access, select category, add description, then upload a photo if available. Submit and wait for verification.",
-                author: "LGU Admin",
-                created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-                area: "Citywide",
-                photo_url:
-                    "https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=1200&q=70",
             },
         ],
         []
@@ -100,53 +104,116 @@ export default function CommunityFeedPage() {
 
     return (
         <div className="feed-page">
-            <div className="feed-header">
-                <div className="feed-title-block">
-                    <h1>Community Feed</h1>
-                    <p className="subtitle">Latest advisories, announcements, and guides</p>
-                </div>
+            <div className="feed-layout">
+                {/* Main */}
+                <main className="feed-main">
+                    <header className="feed-topbar">
+                        <div className="feed-title">
+                            <h1>Community Feed</h1>
+                            <p className="feed-header-desc">Latest advisories, announcements, and guides</p>
+                        </div>
 
-                <div className="feed-controls">
-                    <div className="search">
-                        <Search size={16} />
-                        <input
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            placeholder="Search updates..."
-                        />
+                        <div className="feed-controls">
+                            <label className="search">
+                                <Search size={16} />
+                                <input
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    placeholder="Search updates..."
+                                />
+                            </label>
+
+                            <label className="filter">
+                                <SlidersHorizontal size={16} />
+                                <select value={filter} onChange={(e) => setFilter(e.target.value as any)}>
+                                    <option value="all">All</option>
+                                    <option value="advisory">Advisories</option>
+                                    <option value="announcement">Announcements</option>
+                                    <option value="guide">Guides</option>
+                                </select>
+                            </label>
+                        </div>
+                    </header>
+
+                    {pinned.length > 0 && (
+                        <section className="pinned-block">
+                            <div className="section-title">
+                                <Pin size={16} /> Pinned
+                            </div>
+                            <div className="feed-list">
+                                {pinned.map((p) => (
+                                    <PostRow key={p.id} post={p} onOpen={() => setSelected(p)} />
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                    <section className="feed-list">
+                        {normal.length === 0 && pinned.length === 0 ? (
+                            <div className="empty-state">No updates yet.</div>
+                        ) : (
+                            normal.map((p) => <PostRow key={p.id} post={p} onOpen={() => setSelected(p)} />)
+                        )}
+                    </section>
+                </main>
+
+                <aside className="feed-rail">
+                    <div className="rail-card">
+                        <div className="rail-title">Quick Contacts</div>
+
+                        <div className="contact-card">
+                            <div className="contact-top">
+                                <div className="contact-name">Cabuyao CDRRMO</div>
+                                <div className="contact-sub">Official channels</div>
+                            </div>
+
+                            <div className="contact-actions">
+                                <a
+                                    className="contact-btn"
+                                    href="https://facebook.com/YOUR_LGU_PAGE"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    Facebook Page
+                                </a>
+
+                                <a className="contact-btn" href="mailto:info@lgu.gov.ph">
+                                    Email
+                                </a>
+                            </div>
+
+                            <div className="contact-meta">
+                                <div className="contact-line">
+                                    <span className="k">Hotline:</span>
+                                    <span className="v">+63 9XX XXX XXXX</span>
+                                </div>
+                                <div className="contact-line">
+                                    <span className="k">Landline:</span>
+                                    <span className="v">(0XX) XXX-XXXX</span>
+                                </div>
+                                <div className="contact-line">
+                                    <span className="k">Office Hours:</span>
+                                    <span className="v">Mon–Fri, 8:00 AM–5:00 PM</span>
+                                </div>
+                                <div className="contact-line">
+                                    <span className="k">Address:</span>
+                                    <span className="v">City Hall, Main St.</span>
+                                </div>
+
+                                <a
+                                    className="contact-link"
+                                    href="https://maps.google.com/?q=City+Hall"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    View on map →
+                                </a>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="filter">
-                        <SlidersHorizontal size={16} />
-                        <select value={filter} onChange={(e) => setFilter(e.target.value as any)}>
-                            <option value="all">All</option>
-                            <option value="advisory">Advisories</option>
-                            <option value="announcement">Announcements</option>
-                            <option value="guide">Guides</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+                </aside>
 
-            {pinned.length > 0 && (
-                <div className="pinned-block">
-                    <div className="section-title">
-                        <Pin size={16} /> Pinned
-                    </div>
-                    <div className="feed-list">
-                        {pinned.map((p) => (
-                            <PostCard key={p.id} post={p} onOpen={() => setSelected(p)} />
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            <div className="feed-list">
-                {normal.length === 0 && pinned.length === 0 ? (
-                    <div className="empty-state">No updates yet.</div>
-                ) : (
-                    normal.map((p) => <PostCard key={p.id} post={p} onOpen={() => setSelected(p)} />)
-                )}
             </div>
 
             {selected && (
@@ -163,18 +230,29 @@ export default function CommunityFeedPage() {
                             </button>
                         </div>
 
-                        <h2 className="modal-title">{selected.title}</h2>
+                        <div className="modal-header">
+                            <div className="avatar avatar-lg" aria-hidden="true">
+                                {initials(selected.author)}
+                            </div>
 
-                        <div className="modal-meta">
-                            <span className="meta-strong">{selected.author}</span>
-                            <span className="dot">•</span>
-                            <span>{timeAgo(selected.created_at)}</span>
-                            {selected.area ? (
-                                <>
+                            <div className="modal-header-text">
+                                <div className="modal-title">{selected.title}</div>
+
+                                <div className="modal-meta">
+                                    <span className="meta-strong">{selected.author}</span>
                                     <span className="dot">•</span>
-                                    <span>{selected.area}</span>
-                                </>
-                            ) : null}
+                                    <span>{timeAgo(selected.created_at)}</span>
+                                    {selected.area ? (
+                                        <>
+                                            <span className="dot">•</span>
+                                            <span className="area">
+                                                <MapPin size={12} />
+                                                {selected.area}
+                                            </span>
+                                        </>
+                                    ) : null}
+                                </div>
+                            </div>
                         </div>
 
                         <p className="modal-body">{selected.body}</p>
@@ -191,54 +269,63 @@ export default function CommunityFeedPage() {
     );
 }
 
-
-function PostCard({ post, onOpen }: { post: FeedPost; onOpen: () => void }) {
+function PostRow({ post, onOpen }: { post: FeedPost; onOpen: () => void }) {
     return (
-        <button className="post-card" onClick={onOpen} type="button">
-            <div className="post-top">
-                <div className="type-badge">
-                    {iconForType(post.type)}
-                    <span>{labelForType(post.type)}</span>
-                </div>
-
-                <div className="post-top-right">
-                    {post.photo_url ? (
-                        <span className="has-photo" title="Has photo">
-                            <ImageIcon size={14} />
-                            <span className="has-photo-text">Photo</span>
-                        </span>
-                    ) : null}
-
-                    {post.pinned ? (
-                        <span className="pinned-tag">
-                            <Pin size={14} />
-                            <span>Pinned</span>
-                        </span>
-                    ) : null}
-                </div>
+        <button className="post-row" onClick={onOpen} type="button">
+            <div className="avatar" aria-hidden="true">
+                {initials(post.author)}
             </div>
 
-            <div className="post-title">{post.title}</div>
-
-            <div className="post-meta">
-                <span className="meta-strong">{post.author}</span>
-                <span className="dot">•</span>
-                <span>{timeAgo(post.created_at)}</span>
-                {post.area ? (
-                    <>
+            <div className="post-content">
+                <div className="post-head">
+                    <div className="post-author">
+                        <span className="meta-strong">{post.author}</span>
                         <span className="dot">•</span>
-                        <span className="area">{post.area}</span>
-                    </>
+                        <span className="muted">{timeAgo(post.created_at)}</span>
+                        {post.area ? (
+                            <>
+                                <span className="dot">•</span>
+                                <span className="area">
+                                    <MapPin size={12} />
+                                    {post.area}
+                                </span>
+                            </>
+                        ) : null}
+                    </div>
+
+                    <div className="post-badges">
+                        <span className={`pill pill-${post.type}`}>
+                            {iconForType(post.type)}
+                            {labelForType(post.type)}
+                        </span>
+
+                        {post.photo_url ? (
+                            <span className="pill pill-soft" title="Has photo">
+                                <ImageIcon size={14} />
+                                Photo
+                            </span>
+                        ) : null}
+
+                        {post.pinned ? (
+                            <span className="pill pill-soft">
+                                <Pin size={14} />
+                                Pinned
+                            </span>
+                        ) : null}
+                    </div>
+                </div>
+
+                <div className="post-title">{post.title}</div>
+                <div className="post-preview">{post.body}</div>
+
+                {post.photo_url ? (
+                    <div className="post-photo-wrap">
+                        <img className="post-photo" src={post.photo_url} alt="Post attachment preview" />
+                    </div>
                 ) : null}
             </div>
-
-            <div className="post-preview">{post.body}</div>
-
-            {post.photo_url ? (
-                <span className="post-photo-wrap">
-                    <img className="post-photo" src={post.photo_url} alt="Post attachment preview" />
-                </span>
-            ) : null}
         </button>
     );
 }
+
+

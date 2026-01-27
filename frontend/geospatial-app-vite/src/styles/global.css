@@ -31,6 +31,7 @@ body {
 .cms-page h1,
 .reportverify-page h1,
 .reports-page h1,
+.feed-page h1,
 .sys-page h1 {
     font-size: 1.8rem;
     color: #0f172a;
@@ -56,7 +57,8 @@ body {
 
 
 .evac-header-desc,
-.reportverify-header-desc {
+.reportverify-header-desc,
+.feed-page-header-desc {
   color: #6b7280;
 }
 

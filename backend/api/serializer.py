@@ -2,6 +2,7 @@ from django.utils import timezone
 from api.models import CustomUser, ResearcherRequest, CmsGuide, IncidentReport
 from api.supabase_storage import upload_private_photo, create_signed_url
 from django.utils.timesince import timesince
+from django.utils.crypto import get_random_string
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import update_last_login
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -124,10 +125,13 @@ class AssignUserRoleSerializer(serializers.ModelSerializer):
         return value
 
     def update(self, instance, validated_data):
-        new_role = validated_data.get('role')
+        new_role = validated_data.get('role', '').lower()
+        current_role = (instance.role or '').lower()
+        extra_roles = [r.lower() for r in (instance.extra_roles or [])]
 
-        current_role = instance.role
-        extra_roles = instance.extra_roles or []
+        print("Current Role:", instance.role)
+        print("New Role:", new_role)
+        print("Extra Roles:", instance.extra_roles)
 
         # Admin/Officer → Researcher
         if current_role in ['admin', 'officer'] and new_role == 'researcher':
@@ -137,12 +141,13 @@ class AssignUserRoleSerializer(serializers.ModelSerializer):
             instance.extra_roles = extra_roles
 
         # Researcher → Officer/Admin
-        elif current_role is None and 'Researcher' in extra_roles and new_role in ['admin', 'officer']:
+        elif 'researcher' in extra_roles and new_role in ['admin', 'officer']:
             instance.role = new_role
             instance.extra_roles = []
 
         else:
             instance.role = new_role
+            instance.extra_roles = extra_roles if 'researcher' in extra_roles else []
 
         instance.save()
         return instance
@@ -287,10 +292,59 @@ class ResearcherRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ResearcherRequest
-        fields = ['id', 'user', 'username', 'email', 'status', 'requested_at']
-        read_only_fields = ['id', 'user', 'username', 'email', 'requested_at']
+        fields = ['id', 'user', 'username', 'email', 'status', 'requested_at', 'reject_reason', 'rejected_at']
+        read_only_fields = ['id', 'user', 'username', 'email', 'requested_at', 'rejected_at']
 
 class CmsGuideSerializer(serializers.ModelSerializer):
     class Meta:
         model = CmsGuide
         fields = "__all__"
+        
+class CreateStaffUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+    class Meta:
+        model = CustomUser
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "username",
+            "email",
+            "phone",
+            "role",
+            "extra_roles",
+            "password",
+            "date_joined",
+            "is_staff",
+            "is_active",
+        ]
+
+    def validate_role(self, value):
+        allowed = ["admin", "officer", "researcher"]
+        if value not in allowed:
+            raise serializers.ValidationError("Citizen cannot be created here.")
+        return value
+
+    def create(self, validated_data):
+        role = validated_data.pop("role")
+        password = validated_data.pop("password")  # get frontend password
+
+        user = CustomUser(
+            **validated_data,
+            is_staff=True,
+            is_active=True,
+        )
+
+        # Role logic
+        if role == "researcher":
+            user.role = ""
+            user.extra_roles = ["researcher"]
+        else:
+            user.role = role
+            user.extra_roles = []
+
+        user.set_password(password)
+        user.save()
+
+        user.password = password
+        return user

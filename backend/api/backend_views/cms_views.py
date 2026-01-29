@@ -75,3 +75,17 @@ def archive_guide(request, pk):
     guide.status = "archived"
     guide.save()
     return Response(status=204)
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def permanent_delete_guide(request, pk):
+    if request.user.role != "admin":
+        return Response({"detail": "Forbidden"}, status=403)
+
+    try:
+        guide = CmsGuide.objects.get(pk=pk)
+    except CmsGuide.DoesNotExist:
+        return Response({"error": "Guide not found"}, status=404)
+
+    guide.delete()  # 💀 hard delete
+    return Response(status=status.HTTP_204_NO_CONTENT)

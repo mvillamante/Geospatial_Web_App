@@ -50,6 +50,7 @@ urlpatterns = [
     path("reports/<int:report_id>/photo-url/", IncidentReportPhotoSignedUrlView.as_view(), name="incident-photo-url"),
     path("reports/list/", IncidentReportListView.as_view(), name="incident-report-list"),
     path("reports/queue/", IncidentReportsQueueView.as_view(), name="incident-report-queue"),
+    path("reports/<int:report_id>/", IncidentReportPatchView.as_view(), name="report-patch"),
     
     #CMS_Views
     path("cms/guides/", list_guides),

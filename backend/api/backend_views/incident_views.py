@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status, generics, permissions
 from rest_framework.response import Response
-from api.serializer import IncidentReportListSerializer, IncidentReportQueueSerializer
+from api.serializer import *
 
 from api.supabase_storage import create_signed_url
 
@@ -74,3 +74,26 @@ class IncidentReportsQueueView(generics.ListAPIView):
 
     def get_queryset(self):
         return IncidentReport.objects.select_related("user").order_by("-created_at")
+    
+class IncidentReportPatchView(generics.UpdateAPIView):
+    queryset = IncidentReport.objects.select_related("user", "assigned_officer")
+    serializer_class = IncidentReportUpdateSerializer
+    lookup_url_kwarg = "report_id"   
+
+    def patch(self, request, *args, **kwargs):
+        report = self.get_object()
+        data = request.data.copy()
+
+        if data.get("assignToMe") is True:
+            report.assigned_officer = request.user
+            report.save(update_fields=["assigned_officer"])
+            ser = self.get_serializer(report)
+            return Response(ser.data)
+
+        if "status" in data and isinstance(data["status"], str):
+            data["status"] = data["status"].lower()
+
+        serializer = self.get_serializer(report, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

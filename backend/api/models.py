@@ -108,10 +108,11 @@ class IncidentReport(models.Model):
     ]
 
     STATUS_CHOICES = [
-        ("Pending", "Pending"),
-        ("Verified", "Verified"),
-        ("Rejected", "Rejected"),
-        ("Resolved", "Resolved"),
+        ("pending", "Pending"),
+        ("in_progress", "In Progress"),
+        ("needs_info", "Needs Info"),
+        ("rejected", "Rejected"),
+        ("resolved", "Resolved"),
     ]
 
     user = models.ForeignKey(
@@ -137,6 +138,12 @@ class IncidentReport(models.Model):
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
 
+    verified_critical_level = models.CharField(max_length=20, null=True, blank=True, choices=SUGGESTED_CRITICAL_LEVEL_CHOICES,)
+    assigned_officer = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="assigned_incident_reports",)
+    officer_note = models.TextField(null=True, blank=True)
+    rejection_reason = models.TextField(null=True, blank=True)
+
+    last_updated_at = models.DateTimeField(auto_now=True)
 
 # CMS Guide model ------------------------------------------------------------------
 class CmsGuide(models.Model):

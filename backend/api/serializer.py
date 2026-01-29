@@ -235,6 +235,9 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
     createdAt = serializers.DateTimeField(source="created_at")
     lat = serializers.DecimalField(source="latitude", max_digits=10, decimal_places=7, allow_null=True)
     lng = serializers.DecimalField(source="longitude", max_digits=10, decimal_places=7, allow_null=True)
+    assignedOfficerId = serializers.IntegerField(source="assigned_officer_id", allow_null=True)
+    assignedTo = serializers.SerializerMethodField()
+
 
     class Meta:
         model = IncidentReport
@@ -247,6 +250,8 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
             "barangay",     
             "createdAt",
             "reporterName",
+            "assignedTo",
+            "assignedOfficerId",
             "lastUpdatedAt",
             "description",
             "lat",
@@ -254,6 +259,15 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
             "status",
             "photo_path",
         ]
+    
+    def get_assignedOfficerId(self, obj):
+        return obj.assigned_officer_id 
+
+    def get_assignedTo(self, obj):
+        u = obj.assigned_officer
+        if not u:
+            return None
+        return (u.get_full_name().strip() or u.username)
     
     def get_status(self, obj):
         s = (obj.status or "").lower()
@@ -284,6 +298,43 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
 
     def get_barangay(self, obj):
         return obj.location_display
+    
+class IncidentReportUpdateSerializer(serializers.ModelSerializer):
+    verifiedRisk = serializers.CharField(source="verified_critical_level", required=False, allow_null=True)
+    assignedTo = serializers.SerializerMethodField()
+    officerNote = serializers.CharField(source="officer_note", required=False, allow_blank=True, allow_null=True)
+    rejectionReason = serializers.CharField(source="rejection_reason", required=False, allow_blank=True, allow_null=True)
+    lastUpdatedAt = serializers.DateTimeField(source="last_updated_at", read_only=True)
+
+    class Meta:
+        model = IncidentReport
+        fields = [
+            "status",
+            "verifiedRisk",
+            "status",
+            "officerNote",
+            "rejectionReason",
+            "assignedTo",
+            "lastUpdatedAt",
+        ]
+
+    def get_status(self, obj):
+        s = (obj.status or "").lower()
+        if s == "pending":
+            return "pending"
+        if s == "verified":
+            return "in_progress"
+        if s == "resolved":
+            return "resolved"
+        if s == "rejected":
+            return "rejected"
+        return "pending"
+    
+    def get_assignedTo(self, obj):
+        u = obj.assigned_officer
+        if not u:
+            return None
+        return (u.get_full_name().strip() or u.username or f"Citizen #{u.id}")
 
     
 class ResearcherRequestSerializer(serializers.ModelSerializer):

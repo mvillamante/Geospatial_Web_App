@@ -22,6 +22,7 @@ from .backend_views.incident_views import (
     IncidentReportCreateView,
     IncidentReportPhotoSignedUrlView,
     IncidentReportListView,
+    IncidentReportsQueueView,
     MyIncidentReportsView,  
 )
 from .backend_views.misc_views import getRoutes, testEndPoint
@@ -63,6 +64,7 @@ urlpatterns = [
     path("reports/", IncidentReportCreateView.as_view(), name="incident-create"),
     path("reports/<int:report_id>/photo-url/", IncidentReportPhotoSignedUrlView.as_view(), name="incident-photo-url"),
     path("reports/list/", IncidentReportListView.as_view(), name="incident-report-list"),
+    path("reports/queue/", IncidentReportsQueueView.as_view(), name="incident-report-queue"),
     
     #CMS Views
     path("cms/guides/", list_guides),

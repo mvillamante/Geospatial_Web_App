@@ -218,6 +218,69 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
             return None
         return create_signed_url(obj.photo_path, expires_in_seconds=3600)
     
+class IncidentReportQueueSerializer(serializers.ModelSerializer):
+    reporterName = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
+    location = serializers.CharField(source="location_display")
+    barangay = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    lastUpdatedAt = serializers.DateTimeField(source="created_at")
+    citizenRisk = serializers.CharField(source="suggested_critical_level")
+    createdAt = serializers.DateTimeField(source="created_at")
+    lat = serializers.DecimalField(source="latitude", max_digits=10, decimal_places=7, allow_null=True)
+    lng = serializers.DecimalField(source="longitude", max_digits=10, decimal_places=7, allow_null=True)
+
+    class Meta:
+        model = IncidentReport
+        fields = [
+            "id",
+            "title",        
+            "citizenRisk",
+            "category",
+            "location",    
+            "barangay",     
+            "createdAt",
+            "reporterName",
+            "lastUpdatedAt",
+            "description",
+            "lat",
+            "lng",
+            "status",
+            "photo_path",
+        ]
+    
+    def get_status(self, obj):
+        s = (obj.status or "").lower()
+        if s == "pending":
+            return "pending"
+        if s == "verified":
+            return "in_progress"
+        if s == "resolved":
+            return "resolved"
+        if s == "rejected":
+            return "rejected"
+        return "pending"
+
+
+    def get_reporterName(self, obj):
+        u = obj.user
+        return(u.get_full_name().strip() or u.username or "Anonymous")
+
+    def get_title(self, obj):
+        if obj.category == "others" and obj.other_category:
+            return obj.other_category
+        return obj.get_category_display()
+    
+    def get_category(self, obj):
+        if obj.category == "others" and obj.other_category:
+            return "Others"
+        return obj.get_category_display()
+
+    def get_barangay(self, obj):
+        return obj.location_display
+
+    
 class ResearcherRequestSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.CharField(source='user.email', read_only=True)

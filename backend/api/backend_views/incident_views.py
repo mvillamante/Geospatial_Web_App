@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status, generics, permissions
 from rest_framework.response import Response
-from api.serializer import IncidentReportListSerializer
+from api.serializer import IncidentReportListSerializer, IncidentReportQueueSerializer
 
 from api.supabase_storage import create_signed_url
 
@@ -68,3 +68,9 @@ class MyIncidentReportsView(generics.ListAPIView):
 
     def get_queryset(self):
         return IncidentReport.objects.filter(user=self.request.user).order_by("-created_at")
+
+class IncidentReportsQueueView(generics.ListAPIView):
+    serializer_class = IncidentReportQueueSerializer
+
+    def get_queryset(self):
+        return IncidentReport.objects.select_related("user").order_by("-created_at")

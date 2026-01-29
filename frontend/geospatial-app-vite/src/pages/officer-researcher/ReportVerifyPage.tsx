@@ -23,13 +23,8 @@ interface CitizenReport {
   id: number;
   title: string;
   category: ReportCategory;
-
-  // citizen suggested severity
   citizenRisk: RiskLevel;
-
-  // officer verified severity (actual level)
   verifiedRisk?: RiskLevel;
-
   location: string;
   barangay: string;
   createdAt: string;
@@ -37,19 +32,15 @@ interface CitizenReport {
   description: string;
   lat: number;
   lng: number;
-
   status: ReportStatus;
   assignedTo?: string;
-
-  // visible update to citizen
+  assignedOfficerId?: number | null;
   officerNote?: string;
-
-  // for rejected/fake
   rejectionReason?: string;
-
   lastUpdatedAt: string;
 }
 
+// Report status
 const statusLabel: Record<ReportStatus, string> = {
   pending: "Pending",
   in_progress: "In Progress",
@@ -58,7 +49,7 @@ const statusLabel: Record<ReportStatus, string> = {
   rejected: "Rejected",
 };
 
-const riskOrder: Record<RiskLevel, number> = { critical: 4, high: 3, moderate: 2, low: 1 };
+
 
 function formatTime(iso: string) {
   const d = new Date(iso);
@@ -83,8 +74,14 @@ function statusIcon(s: ReportStatus) {
 type ModalType = "none" | "resolve" | "reject";
 
 const ReportVerifyPage: React.FC = () => {
-  const { displayName } = getUserRoleAndDisplayName();
+
+  const { displayName, currentUserId } = getUserRoleAndDisplayName();
+  const myOfficerId = currentUserId;
   const officerName = `Officer ${displayName ?? ""}`.trim() || "Officer";
+
+  const [needsInfoMode, setNeedsInfoMode] = useState(false);
+
+  const riskOrder: Record<RiskLevel, number> = { critical: 4, high: 3, moderate: 2, low: 1 };
 
   const [reports, setReports] = useState<CitizenReport[]>([]);
   const [selectedId, setSelectedId] = useState<number>(0);
@@ -109,6 +106,16 @@ const ReportVerifyPage: React.FC = () => {
     () => reports.find((r) => r.id === selectedId) ?? reports[0],
     [reports, selectedId]
   );
+
+  // const stepStatus: "pending" | "in_progress" | "resolved" =
+  // selected.status === "resolved"
+  //   ? "resolved"
+  //   : selected.status === "in_progress"
+  //   ? "in_progress"
+  //   : "pending";
+
+  const isAssignedToMe = !!selected && selected.assignedOfficerId === myOfficerId;
+  const isAssignedToSomeone = !!selected && !!selected.assignedTo;
 
   const effectiveRisk = (r: CitizenReport) => r.verifiedRisk ?? r.citizenRisk;
 
@@ -169,6 +176,27 @@ const ReportVerifyPage: React.FC = () => {
     );
   };
 
+  // Patching of report
+  async function patchReport(id: number, body: any) {
+    const token = localStorage.getItem("access_token");
+    const res = await fetch(`http://localhost:8000/api/reports/${id}/`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Update failed (${res.status}): ${text}`);
+    }
+
+    return res.json();
+  }
+  
+  // Queue reports on the left
   useEffect(() => {
     (async () => {
       try {
@@ -215,27 +243,72 @@ const ReportVerifyPage: React.FC = () => {
     })();
   }, []);
 
+  useEffect(() => {
+    setNeedsInfoMode(false);
+  }, [selectedId]);
 
-  const setVerifiedRisk = (level: RiskLevel) => {
-    if (!selected) return;
-    updateReport(selected.id, { verifiedRisk: level });
-  };
-
-  const assignToMe = () => {
-    if (!selected) return;
-    updateReport(selected.id, { assignedTo: officerName });
-  };
-
-  const setStatus = (status: ReportStatus) => {
+  const setVerifiedRisk = async (level: RiskLevel) => {
     if (!selected) return;
 
-    const patch: Partial<CitizenReport> = { status };
+    try {
+      const updated = await patchReport(selected.id, { verifiedRisk: level });
 
-    // auto assign when going in progress
-    if (status === "in_progress" && !selected.assignedTo) patch.assignedTo = officerName;
-
-    updateReport(selected.id, patch);
+      setReports(prev =>
+        prev.map(r =>
+          r.id === selected.id
+            ? {
+              ...r,
+              ...updated,
+              verifiedRisk: updated.verifiedRisk ?? level,
+              lastUpdatedAt: updated.lastUpdatedAt ?? r.lastUpdatedAt,
+            }
+            : r
+        )
+      );
+    } catch (e: any) {
+      alert(e.message);
+    }
   };
+
+
+  // To assign a report
+  const assignToMe = async () => {
+    if (!selected) return;
+    try {
+      const updated = await patchReport(selected.id, { assignToMe: true })
+
+      setReports(prev =>
+        prev.map(r => (r.id === selected.id ? { ...r, ...updated, assignedTo: officerName } : r))
+      );
+    } catch (e: any) {
+      alert(e.message);
+    }
+  };
+
+  // Save report status
+  const setStatus = async (status: ReportStatus) => {
+    if (!selected) return;
+
+    try {
+      const updated = await patchReport(selected.id, { status });
+
+      setReports(prev =>
+        prev.map(r =>
+          r.id === selected.id
+            ? {
+              ...r,
+              ...updated,
+              status: (updated.status ?? status) as ReportStatus,
+              lastUpdatedAt: updated.lastUpdatedAt ?? r.lastUpdatedAt,
+            }
+            : r
+        )
+      );
+    } catch (e: any) {
+      alert(e.message);
+    }
+  };
+
 
   // Needs info: just set status + store note 
   const markNeedsInfo = () => {
@@ -258,7 +331,7 @@ const ReportVerifyPage: React.FC = () => {
     setModal("resolve");
   };
 
-  const confirmResolve = () => {
+  const confirmResolve = async () => {
     if (!selected) return;
 
     const finalPost = `${resolveTitle}\n\n${resolveMessage}`.trim();
@@ -267,15 +340,33 @@ const ReportVerifyPage: React.FC = () => {
       return;
     }
 
-    updateReport(selected.id, {
-      status: "resolved",
-      officerNote: finalPost, // citizen-facing post
-      rejectionReason: undefined,
-    });
+    try {
+      const updated = await patchReport(selected.id, {
+        status: "resolved",
+        officerNote: finalPost,
+      });
 
-    setModal("none");
-    setResolveTitle("");
-    setResolveMessage("");
+      setReports(prev =>
+        prev.map(r =>
+          r.id === selected.id
+            ? {
+              ...r,
+              ...updated,
+              status: (updated.status ?? "resolved") as ReportStatus,
+              officerNote: updated.officerNote ?? finalPost,
+              rejectionReason: updated.rejectionReason ?? undefined,
+              lastUpdatedAt: updated.lastUpdatedAt ?? r.lastUpdatedAt,
+            }
+            : r
+        )
+      );
+
+      setModal("none");
+      setResolveTitle("");
+      setResolveMessage("");
+    } catch (e: any) {
+      alert(e.message);
+    }
   };
 
   const openRejectModal = () => {
@@ -284,23 +375,44 @@ const ReportVerifyPage: React.FC = () => {
     setModal("reject");
   };
 
-  const confirmReject = () => {
+  const confirmReject = async () => {
     if (!selected) return;
+
     const reason = rejectReason.trim();
     if (reason.length < 5) {
       alert("Please provide a clear reason for rejection.");
       return;
     }
 
-    updateReport(selected.id, {
-      status: "rejected",
-      rejectionReason: reason,
-      officerNote: `Rejected: ${reason}`, // citizen-facing explanation
-    });
+    try {
+      const updated = await patchReport(selected.id, {
+        status: "rejected",
+        rejectionReason: reason,
+        officerNote: `Rejected: ${reason}`,
+      });
 
-    setModal("none");
-    setRejectReason("");
+      setReports(prev =>
+        prev.map(r =>
+          r.id === selected.id
+            ? {
+              ...r,
+              ...updated,
+              status: (updated.status ?? "rejected") as ReportStatus,
+              rejectionReason: updated.rejectionReason ?? reason,
+              officerNote: updated.officerNote ?? `Rejected: ${reason}`,
+              lastUpdatedAt: updated.lastUpdatedAt ?? r.lastUpdatedAt,
+            }
+            : r
+        )
+      );
+
+      setModal("none");
+      setRejectReason("");
+    } catch (e: any) {
+      alert(e.message);
+    }
   };
+
 
   const saveNeedsInfoNote = (note: string) => {
     if (!selected) return;
@@ -556,22 +668,57 @@ const ReportVerifyPage: React.FC = () => {
                   <button
                     className="btn primary"
                     onClick={() => setStatus("in_progress")}
-                    disabled={selected.status === "in_progress" || selected.status === "resolved"}
+                    disabled={!isAssignedToMe || selected.status === "in_progress" || selected.status === "resolved"}
                   >
                     Mark In Progress
                   </button>
 
-                  <button className="btn success" onClick={openResolveModal} disabled={selected.status === "resolved"}>
+                  <button
+                    className="btn warn"
+                    onClick={async () => {
+                      if (!selected.officerNote || selected.officerNote.trim().length < 3) {
+                        alert("Please type an update/request first.");
+                        return;
+                      }
+
+                      try {
+                        const updated = await patchReport(selected.id, {
+                          status: "needs_info",
+                          officerNote: selected.officerNote,
+                        });
+
+                        setReports(prev =>
+                          prev.map(r =>
+                            r.id === selected.id ? { ...r, ...updated } : r
+                          )
+                        );
+
+                        setNeedsInfoMode(false);
+                      } catch (e: any) {
+                        alert(e.message);
+                      }
+                    }}
+                  >
+                    Send Needs Info
+                  </button>
+
+
+                  <button
+                    className="btn success"
+                    onClick={openResolveModal}
+                    disabled={!isAssignedToMe || selected.status === "resolved"}
+                  >
                     Mark Resolved
                   </button>
 
-                  <button className="btn warn" onClick={markNeedsInfo} disabled={selected.status === "resolved"}>
-                    Needs Info
-                  </button>
-
-                  <button className="btn danger" onClick={openRejectModal} disabled={selected.status === "resolved"}>
+                  <button
+                    className="btn danger"
+                    onClick={openRejectModal}
+                    disabled={!isAssignedToMe || selected.status === "resolved"}
+                  >
                     Reject / Fake
                   </button>
+
                 </div>
 
                 {/* if rejected show reason */}
@@ -588,16 +735,45 @@ const ReportVerifyPage: React.FC = () => {
                 <div className="detail-label-block">
                   Update / Message to Citizen {selected.status === "needs_info" ? "(Needs Info Sent)" : ""}
                 </div>
+
                 <textarea
                   className="note-area"
                   value={selected.officerNote ?? ""}
                   onChange={(e) => saveNeedsInfoNote(e.target.value)}
-                  placeholder="Type an update for the citizen. If you click Needs Info, this message will be shown to them."
+                  placeholder="Type an update for the citizen..."
+                  disabled={!isAssignedToMe || (!needsInfoMode && selected.status !== "needs_info")}
                 />
+
                 <div className="note-hint">
                   Use this for guidance (e.g., “Please send a clearer photo and confirm exact location.”) or for public updates.
                 </div>
+
+                {/* Show Send button only when composing Needs Info */}
+                {isAssignedToMe && needsInfoMode && selected.status !== "resolved" && (
+                  <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+                    <button className="btn ghost" onClick={() => setNeedsInfoMode(false)}>
+                      Cancel
+                    </button>
+
+                    <button
+                      className="btn warn"
+                      onClick={() => {
+                        // must have message
+                        if (!selected.officerNote || selected.officerNote.trim().length < 3) {
+                          alert("Please type an update/request first (Needs Info message).");
+                          return;
+                        }
+                        setStatus("needs_info");
+                        setNeedsInfoMode(false);
+                      }}
+                      disabled={!selected.officerNote || selected.officerNote.trim().length < 3}
+                    >
+                      Send Needs Info
+                    </button>
+                  </div>
+                )}
               </div>
+
             </>
           ) : (
             <div className="empty-detail">Select a report to review.</div>

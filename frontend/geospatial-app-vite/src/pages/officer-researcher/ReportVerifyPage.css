@@ -201,12 +201,27 @@
   color: var(--text);
 }
 
-.btn-icon {
+.reportverify-page .btn-icon {
   width: 16px;
   height: 16px;
   margin-right: 8px;
   vertical-align: -2px;
 }
+
+.reportverify-page .btn:disabled,
+.reportverify-page .btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+  pointer-events: none;
+}
+
+.reportverify-page .btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+
 
 /* ===== Reason box ===== */
 .reason-box {
@@ -830,6 +845,24 @@
 .note-area:focus {
   border-color: rgba(37, 99, 235, 0.45);
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.reportverify-page .note-area:disabled {
+  background: #f3f4f6;   
+  color: #9ca3af;        
+  border-color: #e5e7eb;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.reportverify-page .note-area:disabled::placeholder {
+  color: #b0b6c0;
+}
+
+.reportverify-page .note-area:not(:disabled) {
+  background: #fff;
+  border-color: #f97316;   
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.25);
 }
 
 .note-hint {

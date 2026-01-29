@@ -1,7 +1,6 @@
 type ReportStatus =
   | "Pending"
   | "Under Review"
-  | "Assigned"
   | "In Progress"
   | "Resolved";
 
@@ -12,7 +11,6 @@ interface ProgressBarProps {
 const steps: ReportStatus[] = [
   "Pending",
   "Under Review",
-  "Assigned",
   "In Progress",
   "Resolved"
 ];

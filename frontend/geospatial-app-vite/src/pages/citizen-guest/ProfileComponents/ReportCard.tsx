@@ -2,6 +2,13 @@ import { useState } from "react";
 import ProgressBar from './ProgressBar';
 import ReportModal from "./ReportModal";
 
+function formatStatus(status: string) {
+    return status
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+
 export default function ReportCard({ report }) {
     const [open, setOpen] = useState(false);
 
@@ -15,12 +22,15 @@ export default function ReportCard({ report }) {
                     </p>
                 </div>
 
-                <ProgressBar status={report.status} />
+                <ProgressBar status={report.progressStatus} />
 
                 <div className="report-actions">
-                    <span className={`status-pill ${report.status.toLowerCase().replace(" ", '-')}`}>
-                        {report.status}
+                    <span className={`status-pill ${report.status.replace("_", "-")}`}>
+                        {formatStatus(report.status)}
                     </span>
+
+
+
                     <button className="dots-btn" onClick={() => setOpen(true)}>...</button>
                 </div>
             </div>

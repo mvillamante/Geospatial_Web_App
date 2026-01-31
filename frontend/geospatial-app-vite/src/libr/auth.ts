@@ -50,19 +50,29 @@ export const getSession = async (): Promise<Session | null> => {
 
 // ===== GET CURRENT SESSION (mainly user role) =====
 export const getUserRoleAndDisplayName = () => {
-  const storedRoles = JSON.parse(localStorage.getItem("user_roles") || '{}');
-  const currentUser = JSON.parse(localStorage.getItem("current_user") || '{}');
+  const storedRoles = JSON.parse(localStorage.getItem("user_roles") || "{}");
+  const currentUser = JSON.parse(localStorage.getItem("current_user") || "{}");
 
   const currentUserId = currentUser.id || null;
 
   const userRole = storedRoles.primaryRole?.trim() ? storedRoles.primaryRole : "Guest";
   const userRole2 = storedRoles.secondaryRoles ?? [];
 
-  const displayName = currentUser.name || currentUser.username || (userRole || "Guest");
+  const first = (currentUser.first_name || currentUser.firstName || "").trim();
+  const last = (currentUser.last_name || currentUser.lastName || "").trim();
+  const fullName = `${first} ${last}`.trim();
+
+  const displayName =
+    fullName ||
+    currentUser.name ||
+    currentUser.username ||
+    (userRole || "Guest");
+
   const profilePath = `/main/${userRole.toLowerCase()}/profile`;
 
   return { currentUserId, userRole, userRole2, displayName, profilePath };
 };
+
 
 // ===== LISTEN TO AUTH CHANGES =====
 export const onAuthChange = (

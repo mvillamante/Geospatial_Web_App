@@ -76,7 +76,7 @@ type ModalType = "none" | "resolve" | "reject";
 const ReportVerifyPage: React.FC = () => {
 
   const { displayName, currentUserId } = getUserRoleAndDisplayName();
-  const myOfficerId = currentUserId;
+  const myOfficerId = currentUserId != null ? Number(currentUserId) : null;
   const officerName = `Officer ${displayName ?? ""}`.trim() || "Officer";
 
   const [needsInfoMode, setNeedsInfoMode] = useState(false);
@@ -107,14 +107,11 @@ const ReportVerifyPage: React.FC = () => {
     [reports, selectedId]
   );
 
-  // const stepStatus: "pending" | "in_progress" | "resolved" =
-  // selected.status === "resolved"
-  //   ? "resolved"
-  //   : selected.status === "in_progress"
-  //   ? "in_progress"
-  //   : "pending";
-
-  const isAssignedToMe = !!selected && selected.assignedOfficerId === myOfficerId;
+  const isAssignedToMe =
+    !!selected &&
+    myOfficerId != null &&
+    selected.assignedOfficerId != null &&
+    Number(selected.assignedOfficerId) === myOfficerId;
   const isAssignedToSomeone = !!selected && !!selected.assignedTo;
 
   const effectiveRisk = (r: CitizenReport) => r.verifiedRisk ?? r.citizenRisk;
@@ -195,7 +192,7 @@ const ReportVerifyPage: React.FC = () => {
 
     return res.json();
   }
-  
+
   // Queue reports on the left
   useEffect(() => {
     (async () => {
@@ -227,11 +224,14 @@ const ReportVerifyPage: React.FC = () => {
 
         const data: CitizenReport[] = raw.map((r: any) => ({
           ...r,
+          assignedOfficerId: r.assignedOfficerId != null ? Number(r.assignedOfficerId) : null,
           lat: r.lat != null ? Number(r.lat) : 0,
           lng: r.lng != null ? Number(r.lng) : 0,
           barangay: r.barangay ?? r.location ?? "",
           lastUpdatedAt: r.lastUpdatedAt ?? r.createdAt,
         }));
+
+
 
         setReports(data);
         if (data.length) setSelectedId(data[0].id);
@@ -242,6 +242,17 @@ const ReportVerifyPage: React.FC = () => {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    if (!selected) return;
+    console.log("ASSIGN DEBUG", {
+      currentUserId,
+      myOfficerId,
+      assignedOfficerId: selected.assignedOfficerId,
+      isAssignedToMe,
+    });
+  }, [selectedId, selected?.assignedOfficerId, currentUserId]);
+
 
   useEffect(() => {
     setNeedsInfoMode(false);
@@ -274,16 +285,41 @@ const ReportVerifyPage: React.FC = () => {
   // To assign a report
   const assignToMe = async () => {
     if (!selected) return;
+
+    updateReport(selected.id, {
+      assignedOfficerId: Number(myOfficerId),
+      assignedTo: officerName,
+      status: "in_progress",
+    });
+
     try {
-      const updated = await patchReport(selected.id, { assignToMe: true })
+      const updated = await patchReport(selected.id, { assignToMe: true });
 
       setReports(prev =>
-        prev.map(r => (r.id === selected.id ? { ...r, ...updated, assignedTo: officerName } : r))
+        prev.map(r =>
+          r.id === selected.id
+            ? {
+              ...r,
+              ...updated,
+              assignedOfficerId: Number(myOfficerId),
+              assignedTo: updated.assignedTo ?? officerName,
+              status: (updated.status ?? "in_progress") as ReportStatus,
+            }
+            : r
+        )
       );
     } catch (e: any) {
       alert(e.message);
+
+
+      updateReport(selected.id, {
+        assignedOfficerId: null,
+        assignedTo: undefined,
+        status: "pending",
+      });
     }
   };
+
 
   // Save report status
   const setStatus = async (status: ReportStatus) => {
@@ -291,6 +327,7 @@ const ReportVerifyPage: React.FC = () => {
 
     try {
       const updated = await patchReport(selected.id, { status });
+      console.log("PATCH RESPONSE:", updated);
 
       setReports(prev =>
         prev.map(r =>
@@ -650,19 +687,44 @@ const ReportVerifyPage: React.FC = () => {
                 </div>
 
                 <div className="workflow-steps">
-                  <div className={`step ${selected.status === "pending" ? "active" : selected.status !== "pending" ? "done" : ""}`}>
-                    <span className="step-dot" />
-                    <span className="step-text">Pending</span>
-                  </div>
-                  <div className={`step ${selected.status === "in_progress" ? "active" : selected.status === "resolved" ? "done" : ""}`}>
-                    <span className="step-dot" />
-                    <span className="step-text">In Progress</span>
-                  </div>
-                  <div className={`step ${selected.status === "resolved" ? "active done" : ""}`}>
-                    <span className="step-dot" />
-                    <span className="step-text">Resolved</span>
-                  </div>
+                  {(() => {
+                    if (!selected) return null;
+
+                    const stepStatus: "pending" | "in_progress" | "resolved" =
+                      selected.status === "resolved"
+                        ? "resolved"
+                        : selected.status === "in_progress"
+                          ? "in_progress"
+                          : "pending";
+
+                    return (
+                      <>
+                        <div className={`step ${stepStatus === "pending" ? "active" : "done"}`}>
+                          <span className="step-dot" />
+                          <span className="step-text">Pending</span>
+                        </div>
+
+                        <div
+                          className={`step ${stepStatus === "in_progress"
+                            ? "active"
+                            : stepStatus === "resolved"
+                              ? "done"
+                              : ""
+                            }`}
+                        >
+                          <span className="step-dot" />
+                          <span className="step-text">In Progress</span>
+                        </div>
+
+                        <div className={`step ${stepStatus === "resolved" ? "active done" : ""}`}>
+                          <span className="step-dot" />
+                          <span className="step-text">Resolved</span>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
+
 
                 <div className="workflow-actions">
                   <button
@@ -675,32 +737,12 @@ const ReportVerifyPage: React.FC = () => {
 
                   <button
                     className="btn warn"
-                    onClick={async () => {
-                      if (!selected.officerNote || selected.officerNote.trim().length < 3) {
-                        alert("Please type an update/request first.");
-                        return;
-                      }
-
-                      try {
-                        const updated = await patchReport(selected.id, {
-                          status: "needs_info",
-                          officerNote: selected.officerNote,
-                        });
-
-                        setReports(prev =>
-                          prev.map(r =>
-                            r.id === selected.id ? { ...r, ...updated } : r
-                          )
-                        );
-
-                        setNeedsInfoMode(false);
-                      } catch (e: any) {
-                        alert(e.message);
-                      }
-                    }}
+                    onClick={() => setNeedsInfoMode(true)}
+                    disabled={!isAssignedToMe || selected.status === "resolved"}
                   >
-                    Send Needs Info
+                    Needs Info
                   </button>
+
 
 
                   <button
@@ -758,7 +800,6 @@ const ReportVerifyPage: React.FC = () => {
                     <button
                       className="btn warn"
                       onClick={() => {
-                        // must have message
                         if (!selected.officerNote || selected.officerNote.trim().length < 3) {
                           alert("Please type an update/request first (Needs Info message).");
                           return;

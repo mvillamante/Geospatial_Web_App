@@ -145,6 +145,8 @@ class IncidentReport(models.Model):
 
     last_updated_at = models.DateTimeField(auto_now=True)
 
+
+
 # CMS Guide model ------------------------------------------------------------------
 class CmsGuide(models.Model):
     STATUS_CHOICES = [
@@ -181,3 +183,35 @@ class CmsGuide(models.Model):
 
     def __str__(self):
         return self.title
+    
+
+
+# Evacuation Center model ---------------------------------------------------------------
+class EvacuationCenter(models.Model):
+    CENTER_TYPE_CHOICES = [
+        ("school", "School"),
+        ("court", "Court"),
+        ("hall", "Hall"),
+        ("gymnasium", "Gymnasium"),
+    ]
+
+    name = models.CharField(max_length=255)
+    type = models.CharField(max_length=50, choices=CENTER_TYPE_CHOICES)
+    latitude = models.DecimalField(max_digits=10, decimal_places=7)
+    longitude = models.DecimalField(max_digits=10, decimal_places=7)
+    capacity = models.PositiveIntegerField(default=0)
+    address = models.TextField(blank=True)
+    barangay = models.CharField(max_length=100, blank=True)
+    contact = models.CharField(max_length=50, blank=True)
+    facilities = models.JSONField(default=list, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.get_type_display()})"
+
+    @property
+    def coordinates(self):
+        """Return coordinates as a tuple for Leaflet use"""
+        return (float(self.latitude), float(self.longitude))

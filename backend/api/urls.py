@@ -32,12 +32,15 @@ urlpatterns = [
 
     # Geocoding_Views
     path("geocoding/reverse/", reverse_geocode, name="reverse_geocode"),
+    path("evacuation-centers/", EvacuationCenterListAPIView.as_view()),
+    path("evacuation-centers/<int:pk>/", EvacuationCenterDetailAPIView.as_view()),
 
     # Incident_Views
     path("reports/", IncidentReportCreateView.as_view(), name="incident-create"),
     path("reports/<int:report_id>/photo-url/", IncidentReportPhotoSignedUrlView.as_view(), name="incident-photo-url"),
     path("reports/list/", IncidentReportListView.as_view(), name="incident-report-list"),
     path("reports/my/", MyIncidentReportsView.as_view(), name="incident-report-list-my"),
+    path('incident-reports/verified/', VerifiedIncidentReportsView.as_view(), name='verified-reports'),
     
     # Satellite_Views
     path("satellite/ndvi/", get_ndvi_image, name="satellite_ndvi"),

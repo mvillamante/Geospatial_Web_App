@@ -1,5 +1,5 @@
 from django.utils import timezone
-from api.models import CustomUser, ResearcherRequest, CmsGuide, IncidentReport
+from api.models import CustomUser, ResearcherRequest, CmsGuide, IncidentReport, EvacuationCenter
 from api.supabase_storage import upload_private_photo, create_signed_url
 from django.utils.timesince import timesince
 from django.utils.crypto import get_random_string
@@ -441,3 +441,26 @@ class CreateStaffUserSerializer(serializers.ModelSerializer):
 
         user.password = password
         return user
+
+
+class EvacuationCenterSerializer(serializers.ModelSerializer):
+    coordinates = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EvacuationCenter
+        fields = [
+            "id",
+            "name",
+            "type",
+            "latitude",
+            "longitude",
+            "coordinates",
+            "capacity",
+            "address",
+            "contact",
+            "barangay",
+            "facilities",
+        ]
+
+    def get_coordinates(self, obj):
+        return [float(obj.latitude), float(obj.longitude)]

@@ -1,7 +1,7 @@
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status, generics, permissions
 from rest_framework.response import Response
 from api.serializer import *
@@ -98,3 +98,16 @@ class IncidentReportPatchView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(IncidentReportQueueSerializer(report).data)
+
+
+class VerifiedIncidentReportsView(generics.ListAPIView):
+    """
+    Returns all incident reports where status='verified'.
+    """
+    serializer_class = IncidentReportListSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        return IncidentReport.objects.filter(
+            risk__in=["low", "moderate", "high", "critical"]
+        ).order_by('-created_at')

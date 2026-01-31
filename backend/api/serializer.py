@@ -16,6 +16,48 @@ class UserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ('id', 'username', 'email', 'role', 'extra_roles', 'staff_id')
 
+class MeSerializer(serializers.ModelSerializer):
+    staff_id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "phone",
+            "role",
+            "extra_roles",
+            "staff_id",
+        )
+        read_only_fields = ("id", "username", "role", "extra_roles", "staff_id")
+
+        def validate_email(self, value):
+            value = (value or "").strip()
+            if not value:
+                return value
+            
+            qs = CustomUser.objects.filter(email_iexact=value)
+            if self.instance:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise serializers.ValidationError("This email is already in use.")
+            return value
+        
+        def validate_phone(self, value):
+            value = (value or "").strip()
+            if value == "":
+                return None
+            
+            qs = CustomUser.objects.filter(phone=value)
+            if self.instance:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise serializers.ValidationError("This phone number is already in use.")
+            return value
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -229,7 +271,7 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
     location = serializers.CharField(source="location_display")
     barangay = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField()
+    status = serializers.CharField(read_only=True)
     lastUpdatedAt = serializers.DateTimeField(source="created_at")
     citizenRisk = serializers.CharField(source="suggested_critical_level")
     createdAt = serializers.DateTimeField(source="created_at")
@@ -273,7 +315,7 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
         s = (obj.status or "").lower()
         if s == "pending":
             return "pending"
-        if s == "verified":
+        if s == "in_progress":
             return "in_progress"
         if s == "resolved":
             return "resolved"

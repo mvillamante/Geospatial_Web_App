@@ -28,6 +28,7 @@ urlpatterns = [
     path("current_user/", get_current_user, name="get_current_user"),
     path("sign_up/", sign_up, name="sign_up"),
     path("login_user/", login_user, name="login_user"),
+    path("users/me/", MeView.as_view(), name="users-me"),
 
     # Geocoding_Views
     path("geocoding/reverse/", reverse_geocode, name="reverse_geocode"),

@@ -5,14 +5,15 @@ from django.http import JsonResponse
 from django.db import IntegrityError
 from django.conf import settings
 
+from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import generics
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from api.models import CustomUser
-from api.serializer import MyTokenObtainPairSerializer, RegisterSerializer
+from api.serializer import *
 
 from supabase import create_client, Client
 
@@ -163,3 +164,9 @@ def sign_up(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
     
+class MeView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = MeSerializer
+
+    def get_object(self):
+        return self.request.user

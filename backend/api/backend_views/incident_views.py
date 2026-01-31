@@ -87,6 +87,7 @@ class IncidentReportPatchView(generics.UpdateAPIView):
         if data.get("assignToMe") is True:
             report.assigned_officer = request.user
             report.save(update_fields=["assigned_officer"])
+            report.status = "in_progress"
             ser = self.get_serializer(report)
             return Response(ser.data)
 
@@ -96,4 +97,4 @@ class IncidentReportPatchView(generics.UpdateAPIView):
         serializer = self.get_serializer(report, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        return Response(IncidentReportQueueSerializer(report).data)

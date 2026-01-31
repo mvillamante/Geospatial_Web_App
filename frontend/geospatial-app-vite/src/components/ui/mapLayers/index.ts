@@ -17,7 +17,7 @@ export { landslideRiskData, landslideZoneColors, createLandslideRiskLayer } from
 export type { LandslideRiskData } from "./landslideRisk";
 
 // Evacuation Centers Layer
-export { evacuationCentersData, evacuationTypeConfig, createEvacuationCentersLayer } from "./evacuationCenters";
+export { createEvacuationCentersLayer } from "./evacuationCenters";
 export type { EvacuationCenterData, EvacuationCenterType, EvacuationTypeConfig } from "./evacuationCenters";
 
 // Roads Layer

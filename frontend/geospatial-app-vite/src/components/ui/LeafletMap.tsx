@@ -603,12 +603,6 @@ export default function LeafletMap({
 
     const showEvacuationCenters = activeLayers.includes("Evacuation Centers");
 
-    // Remove existing evacuation centers layer if it exists
-    if (evacuationCentersLayerRef.current) {
-      evacuationCentersLayerRef.current.remove();
-      evacuationCentersLayerRef.current = null;
-    }
-
     // Add evacuation centers if layer is active
     if (showEvacuationCenters) {
       evacuationCentersLayerRef.current = createEvacuationCentersLayer(map);

@@ -1,9 +1,9 @@
 import '../../../pages/shared/EvacCenterPage.css';
-
 import React, { useState } from "react";
 import MapPickerModal from "./MapPickerModal";
 
-interface EvacuationCenter {
+// Type for an evacuation center
+export interface EvacuationCenter {
   id: number;
   name: string;
   type: string;
@@ -12,16 +12,21 @@ interface EvacuationCenter {
   capacity: number;
   contact: string;
   coordinates: string;
+  facilities: string[];
 }
 
+// Props for the modal
 interface AddEvacCenterModalProps {
   open: boolean;
   onClose: () => void;
   onAdd: (newCenter: EvacuationCenter) => void;
+  barangays: string[];
 }
 
-const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = ({ open, onClose, onAdd }) => {
-  const [formState, setFormState] = useState({
+const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = ({ open, onClose, onAdd, barangays }) => {
+  // Fully typed state
+  const [formState, setFormState] = useState<EvacuationCenter>({
+    id: 0,
     name: "",
     type: "",
     barangay: "",
@@ -29,20 +34,41 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = ({ open, onClose, 
     capacity: 0,
     contact: "",
     coordinates: "",
+    facilities: [],
   });
+
   const [mapOpen, setMapOpen] = useState(false);
 
   if (!open) return null;
 
+  // Handle input/select changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormState(prev => ({ ...prev, [name]: name === "capacity" ? Number(value) : value }));
+
+    setFormState(prev => ({
+      ...prev,
+      [name]: name === "capacity" ? Number(value) : value,
+    }));
   };
 
+  // Handle form submit
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAdd({ ...formState, id: Date.now() });
-    setFormState({ name: "", type: "", barangay: "", address: "", capacity: 0, contact: "", coordinates: "" });
+    onAdd({ ...formState, id: Date.now() }); // temporary id
+    // Reset form
+    setFormState({
+      id: 0,
+      name: "",
+      type: "",
+      barangay: "",
+      address: "",
+      capacity: 0,
+      contact: "",
+      coordinates: "",
+      facilities: [],
+    });
+
+    onClose();
   };
 
   return (
@@ -51,36 +77,31 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = ({ open, onClose, 
         <div className="modal">
           <h3>Add Evacuation Center</h3>
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
+            {/* Name */}
+            <div className="form-group small">
               <label>Name</label>
               <input name="name" value={formState.name} onChange={handleChange} required />
             </div>
 
-            <div className="form-row">
+            {/* Barangay, Type, Capacity */}
+            <div className="form-row three">
               <div className="form-group small">
                 <label>Barangay</label>
-                <input name="barangay" value={formState.barangay} onChange={handleChange} required />
+                <select name="barangay" value={formState.barangay} onChange={handleChange} required>
+                  <option value="">Select Barangay</option>
+                  {barangays.map(b => <option key={b} value={b}>{b}</option>)}
+                </select>
               </div>
+
               <div className="form-group small">
                 <label>Type</label>
                 <select name="type" value={formState.type} onChange={handleChange} required>
                   <option value="">Select Type</option>
                   <option value="school">School</option>
                   <option value="gymnasium">Gymnasium</option>
-                  <option value="barangay hall">Barangay Hall</option>
+                  <option value="court">Covered Court</option>
+                  <option value="hall">Multi-Purpose Hall</option>
                 </select>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Address</label>
-              <input name="address" value={formState.address} onChange={handleChange} required />
-            </div>
-
-            <div className="form-row">
-              <div className="form-group small">
-                <label>Contact</label>
-                <input name="contact" value={formState.contact} onChange={handleChange} required />
               </div>
 
               <div className="form-group small">
@@ -89,14 +110,45 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = ({ open, onClose, 
               </div>
             </div>
 
+            {/* Address */}
             <div className="form-group">
-              <label>Coordinates</label>
-              <div className="coord-row">
-                <input name="coordinates" readOnly value={formState.coordinates} placeholder="Lat, Long" />
-                <button className="pick-map-btn" type="button" onClick={() => setMapOpen(true)}>Pick on Map</button>
+              <label>Address</label>
+              <input name="address" value={formState.address} onChange={handleChange} required />
+            </div>
+
+            {/* Contact and Coordinates */}
+            <div className="form-row two">
+              <div className="form-group small">
+                <label>Contact</label>
+                <input name="contact" value={formState.contact} onChange={handleChange} required />
+              </div>
+
+              <div className="form-group">
+                <label>Coordinates</label>
+                <div className="coord-row">
+                  <input name="coordinates" readOnly value={formState.coordinates} placeholder="Lat, Long" required />
+                  <button type="button" className="pick-map-btn" onClick={() => setMapOpen(true)}>Pick on Map</button>
+                </div>
               </div>
             </div>
 
+            {/* Facilities */}
+            <div className="form-group">
+              <label>Facilities (comma-separated)</label>
+              <input
+                name="facilities"
+                value={formState.facilities.join(", ")}
+                onChange={(e) =>
+                  setFormState(prev => ({
+                    ...prev,
+                    facilities: e.target.value.split(",").map(f => f.trim()),
+                  }))
+                }
+                placeholder="e.g., Water, Restrooms, Cots"
+              />
+            </div>
+
+            {/* Form actions */}
             <div className="modal-actions">
               <button type="submit">Add Center</button>
               <button type="button" onClick={onClose}>Cancel</button>
@@ -105,6 +157,7 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = ({ open, onClose, 
         </div>
       </div>
 
+      {/* Map Picker Modal */}
       <MapPickerModal
         open={mapOpen}
         initial={formState.coordinates ? (() => {
@@ -113,7 +166,10 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = ({ open, onClose, 
         })() : null}
         onClose={() => setMapOpen(false)}
         onConfirm={(picked) => {
-          setFormState(prev => ({ ...prev, coordinates: `${picked.lat.toFixed(6)}, ${picked.lng.toFixed(6)}` }));
+          setFormState(prev => ({
+            ...prev,
+            coordinates: `${picked.lat.toFixed(6)}, ${picked.lng.toFixed(6)}`
+          }));
           setMapOpen(false);
         }}
       />

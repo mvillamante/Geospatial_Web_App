@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef  } from 'react';
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import LeafletMap from "../../components/ui/LeafletMap";
+import { fetchEvacCenters, createEvacCenter, updateEvacCenter, deleteEvacCenter } from "../../libr/evacCentersApi";
 
 import { Search, MapPin, Phone, Navigation, Users } from 'lucide-react';
 import { GrLocationPin } from "react-icons/gr";
@@ -35,60 +36,21 @@ interface EvacuationCenter {
   capacity: number;
   contact: string;
   coordinates: string;
+  facilities?: string[];
 }
 
-const evacuationCenters: EvacuationCenter[] = [
-  {
-    id: 1,
-    name: 'Cabuyao Elementary School',
-    type: 'school',
-    barangay: 'Barangay I (Poblacion)',
-    address: 'National Road, Cabuyao City',
-    capacity: 500,
-    contact: '(049) 531-1234',
-    coordinates: '14.2752, 121.1245'
-  },
-  {
-    id: 2,
-    name: 'Banay-Banay Covered Court',
-    type: 'gymnasium',
-    barangay: 'Barangay Banay-Banay',
-    address: 'Brgy. Banay-Banay, Cabuyao City',
-    capacity: 300,
-    contact: '(049) 531-2345',
-    coordinates: '14.2891, 121.1356'
-  },
-  {
-    id: 3,
-    name: 'Mamatid Multi-Purpose Hall',
-    type: 'barangay hall',
-    barangay: 'Barangay Mamatid',
-    address: 'Mamatid Road, Cabuyao City',
-    capacity: 400,
-    contact: '(049) 531-3456',
-    coordinates: '14.2634, 121.1189'
-  },
-  {
-    id: 4,
-    name: 'Marinig Barangay Hall',
-    type: 'barangay hall',
-    barangay: 'Barangay Marinig',
-    address: 'Brgy. Marinig, Cabuyao City',
-    capacity: 250,
-    contact: '(049) 531-4567',
-    coordinates: '14.2812, 121.1423'
-  },
-  {
-    id: 5,
-    name: 'Pulo Gymnasium',
-    type: 'gymnasium',
-    barangay: 'Barangay Pulo',
-    address: 'Brgy. Pulo, Cabuyao City',
-    capacity: 600,
-    contact: '(049) 531-5678',
-    coordinates: '14.2698, 121.1267'
-  }
-];
+const mapApiToCenter = (api: any): EvacuationCenter => ({
+  id: api.id,
+  name: api.name,
+  type: api.type,
+  barangay: api.barangay,
+  address: api.address || "",
+  capacity: api.capacity || 0,
+  contact: api.contact || "",
+  coordinates: api.coordinates
+    ? `${api.coordinates[0]}, ${api.coordinates[1]}`
+    : "",
+});
 
 function getCabuyaoBarangays(): string[] {
   return [
@@ -130,7 +92,8 @@ function EvacCenterEditor({
           />
         </div>
 
-        <div className="form-row">
+        <div className="form-row three">
+          {/* Barangay */}
           <div className="form-group small">
             <label>Barangay</label>
             {readOnly ? (
@@ -149,6 +112,7 @@ function EvacCenterEditor({
             )}
           </div>
 
+          {/* Type */}
           <div className="form-group small">
             <label>Type</label>
             {readOnly ? (
@@ -164,29 +128,8 @@ function EvacCenterEditor({
               </select>
             )}
           </div>
-        </div>
-          
-        <div className="form-row">
-          <div className="form-group">
-            <label>Address</label>
-            <input
-              value={center.address}
-              onChange={(e) => onChange({ ...center, address: e.target.value })}
-              readOnly={readOnly}
-            />
-          </div>
 
-          <div className="form-group">
-            <label>Contact</label>
-            <input
-              value={center.contact}
-              onChange={(e) => onChange({ ...center, contact: e.target.value })}
-              readOnly={readOnly}
-            />
-          </div>
-        </div>
-
-        <div className="form-row">
+          {/* Capacity */}
           <div className="form-group small">
             <label>Capacity</label>
             <input
@@ -198,7 +141,30 @@ function EvacCenterEditor({
               readOnly={readOnly}
             />
           </div>
+        </div>
 
+        {/* Address */}
+        <div className="form-group">
+          <label>Address</label>
+          <input
+            value={center.address}
+            onChange={(e) => onChange({ ...center, address: e.target.value })}
+            readOnly={readOnly}
+          />
+        </div>
+          
+        <div className="form-row two">
+          {/* Contact */}
+          <div className="form-group">
+            <label>Contact</label>
+            <input
+              value={center.contact}
+              onChange={(e) => onChange({ ...center, contact: e.target.value })}
+              readOnly={readOnly}
+            />
+          </div>
+
+          {/* Coordinates */}
           <div className="form-group small">
             <label>Coordinates</label>
             <div className="coord-row">
@@ -214,8 +180,6 @@ function EvacCenterEditor({
               )}
             </div>
           </div>
-
-          {/* Pick Map */}
         </div>
 
         {!readOnly && (
@@ -236,7 +200,7 @@ function EvacCenterEditor({
 /* EVAC CENTER PAGE ----------------------------------------------------- */
 function EvacCenterPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [centers, setCenters] = useState<EvacuationCenter[]>(evacuationCenters);
+  const [centers, setCenters] = useState<EvacuationCenter[]>([]);
   const [editingCenter, setEditingCenter] = useState<EvacuationCenter | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
@@ -250,11 +214,19 @@ function EvacCenterPage() {
     window.open(url, '_blank');
   };
 
+  useEffect(() => {
+    fetchEvacCenters().then((data) => {
+      setCenters(data.map(mapApiToCenter));
+    });
+  }, []);
+
   // Evac Center Tag Colors
   const centerColors = {
     school: { bg: "#E8F0FE", text: "#1E40AF" },
     gymnasium: { bg: "#ECFDF5", text: "#047857" },
-    "barangay hall": { bg: "#FFF7ED", text: "#9A3412" },
+    hall: { bg: "#FFF7ED", text: "#9A3412" },
+    court: { bg: "#F0F9FF", text: "#0369A1" },
+    barangay_center: { bg: "#FAF5FF", text: "#6B21A8" },
     default: { bg: "#F3F4F6", text: "#4B5563" },
   } as const;
 
@@ -274,7 +246,7 @@ function EvacCenterPage() {
     return (
       center.name.toLowerCase().includes(query) ||
       center.barangay.toLowerCase().includes(query)
-    );
+    );  
   });
 
   // Manage Evacuation Center Cards ----------------------------------------
@@ -287,22 +259,46 @@ function EvacCenterPage() {
       setShowAddModal(false);
     }, 250);
   };
-  const handleSaveEdit = (updatedCenter: EvacuationCenter) => {
-    setCenters(prev =>
-      prev.map(c => (c.id === updatedCenter.id ? updatedCenter : c))
+  
+  const handleSaveEdit = async (updatedCenter: EvacuationCenter) => {
+    const [lat, lng] = updatedCenter.coordinates
+      .split(",")
+      .map((s) => Number(s.trim()));
+
+    const payload = {
+      name: updatedCenter.name,
+      type: updatedCenter.type,
+      latitude: lat,
+      longitude: lng,
+      capacity: updatedCenter.capacity,
+      address: updatedCenter.address,
+      contact: updatedCenter.contact,
+      barangay: updatedCenter.barangay,
+      facilities: (updatedCenter as any).facilities,
+    };
+
+    const saved = await updateEvacCenter(updatedCenter.id, payload);
+
+    setCenters((prev) =>
+      prev.map((c) =>
+        c.id === saved.id ? mapApiToCenter(saved) : c
+      )
     );
+
     setEditingCenter(null);
   };
-  const handleDeleteCenter = (id: number) => {
+
+
+  const handleDeleteCenter = async (id: number) => {
     if (!confirm("Are you sure you want to delete this center?")) return;
 
     setClosingId(id);
 
-    setTimeout(() => {
-      setCenters(prev => prev.filter(c => c.id !== id));
-      if (editingCenter?.id === id) setEditingCenter(null);
+    setTimeout(async () => {
+      await deleteEvacCenter(id);
+      setCenters((prev) => prev.filter((c) => c.id !== id));
       setClosingId(null);
-    }, 250); 
+    }, 250);
   };
 
   /* Evacuation Center Map */
@@ -350,15 +346,15 @@ function EvacCenterPage() {
       <div className="evac-map-wrapper">
         {/* Interactive Map Component */}
         <LeafletMap
-          height="47vh"
-          width="50%"
+          height="44vh"
+          width="45%"
           mapView="interactive"
           mapType="basic"
           activeLayers={["Evacuation Centers"]}
         />
 
-        <div style={{ width: "350px", display: "flex", flex: "1", flexDirection: "column"}}>
-          {userRole === "Officer" && (
+        <div className="evac-side-content">
+          {/*{userRole === "Officer" && (
             <div className="evac-stat-container">
               <div className="evac-stat-card evac-stat-primary">
                 <div className="evac-stat-text">
@@ -376,7 +372,7 @@ function EvacCenterPage() {
                 <Users className="evac-card-icon" />
               </div>
             </div>
-          )}
+          )}*/}
 
           { userRole === "Citizen" && (
             <div className="evac-reminders">
@@ -402,6 +398,8 @@ function EvacCenterPage() {
                     onChange={setEditingCenter}
                     onSave={() => handleSaveEdit(editingCenter)}
                     onCancel={handleCloseEditor}
+                    showCoordinatesPicker={true}
+                    onPickCoordinates={() => setMapOpen(true)}
                   />
                 </div>
               )}
@@ -410,9 +408,14 @@ function EvacCenterPage() {
         </div>
       </div>
 
-      <div>
+      <hr className="evac-hr-divider" />
+
+      <div className="evac-header-wrapper">
+        <h2>List of Evacuation Centers</h2>
+
         <div className="evac-search-add-container">
           <div className="evac-search-wrapper officer">
+            <Search className="evac-search-icon" />
             <input
               type="text"
               placeholder="Search by name or barangay..."
@@ -420,7 +423,6 @@ function EvacCenterPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="evac-search"
             />
-            <Search className="evac-search-icon" />
           </div>
           {userRole === "Officer" && (
             <div className="evac-add-center">
@@ -432,46 +434,6 @@ function EvacCenterPage() {
           )}
         </div>
       </div>
-
-      {/* Evacuation Centers Legend - appears when Evacuation Centers layer is active */}
-      {activeLayers.includes("Evacuation Centers") && (
-        <div className="evac-centers-legend">
-          <h4>🆘 Evacuation Centers</h4>
-          <div className="evac-legend-subtitle">Cabuyao, Laguna</div>
-          <ul>
-            <li className="school">
-              <span className="legend-icon">🏫</span>
-              <span className="legend-text">School</span>
-            </li>
-            <li className="covered-court">
-              <span className="legend-icon">🏀</span>
-              <span className="legend-text">Covered Court</span>
-            </li>
-            <li className="multi-purpose">
-              <span className="legend-icon">🏛️</span>
-              <span className="legend-text">Multi-Purpose Hall</span>
-            </li>
-            <li className="gymnasium">
-              <span className="legend-icon">🏟️</span>
-              <span className="legend-text">Gymnasium</span>
-            </li>
-          </ul>
-          <div className="evac-legend-stats">
-            <div className="stat-item">
-              <span className="stat-number">18</span>
-              <span className="stat-label">Sites</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number">6.5K+</span>
-              <span className="stat-label">Total Capacity</span>
-            </div>
-          </div>
-          <div className="evac-legend-note">
-            <span>💡</span>
-            <span>Click markers for details</span>
-          </div>
-        </div>
-      )}
 
       <div className="evac-grid-wrapper">
         {/* Left Arrow */}
@@ -606,7 +568,27 @@ function EvacCenterPage() {
       <AddEvacCenterModal
         open={showAddModal}
         onClose={() => setShowAddModal(false)}
-        onAdd={(newCenter) => setCenters([...centers, newCenter])}
+        onAdd={async (newCenter) => {
+          const [lat, lng] = newCenter.coordinates
+            .split(",")
+            .map((s: string) => Number(s.trim()));
+
+          const payload = {
+            name: newCenter.name,
+            type: newCenter.type,
+            latitude: lat,
+            longitude: lng,
+            capacity: newCenter.capacity,
+            address: newCenter.address,
+            contact: newCenter.contact,
+            barangay: newCenter.barangay,
+            facilities: newCenter.facilities, //@here
+          };
+
+          const saved = await createEvacCenter(payload);
+          setCenters((prev) => [...prev, mapApiToCenter(saved)]);
+        }}
+        barangays={getCabuyaoBarangays()}
       />
 
       <MapPickerModal
@@ -622,7 +604,10 @@ function EvacCenterPage() {
         onClose={() => setMapOpen(false)}
         onConfirm={(picked) => {
           if (editingCenter) {
-            setEditingCenter({ ...editingCenter, coordinates: `${picked.lat.toFixed(6)}, ${picked.lng.toFixed(6)}` });
+            setEditingCenter({
+              ...editingCenter,
+              coordinates: `${picked.lat.toFixed(6)}, ${picked.lng.toFixed(6)}`
+            });
           }
           setMapOpen(false);
         }}

@@ -3,13 +3,21 @@ import { Eye, UserPlus, RefreshCcw, X } from "lucide-react";
 import { toast } from "sonner";
 import "./ReportsMgmtPage.css";
 
-type ReportStatus = "Pending" | "Assigned" | "Verified" | "Rejected" | "Resolved" | "Archived";
+type ReportStatus =
+  | "Pending"
+  | "Assigned"
+  | "In Progress"
+  | "Verified"
+  | "Rejected"
+  | "Resolved"
+  | "Archived";
+
 
 interface Report {
   id: number;
-  user_label: string;        
-  category: string;       
-  other_category?: string | null;   
+  user_label: string;
+  category: string;
+  other_category?: string | null;
   location_display: string;
   created_at: string;
   description: string;
@@ -46,23 +54,46 @@ const badgeClass = (status: ReportStatus) => {
       return "badge pending";
     case "Assigned":
       return "badge assigned";
-    case "Verified":
-      return "badge verified";
     case "Rejected":
       return "badge rejected";
     case "Resolved":
       return "badge resolved";
     case "Archived":
       return "badge archived";
+    case "In Progress":
+      return "badge in_progress";
     default:
       return "badge";
   }
 };
 
+type ApiStatus =
+  | "pending"
+  | "in_progress"
+  | "needs_info"
+  | "rejected"
+  | "resolved"
+  | "archived"
+  | "verified"
+  | "assigned";
+
+const normalizeStatus = (raw: any): ReportStatus => {
+  const s = String(raw ?? "").toLowerCase();
+
+  if (s === "pending") return "Pending";
+  if (s === "in_progress" || s === "in progress") return "In Progress";
+  if (s === "assigned") return "Assigned";
+  if (s === "rejected") return "Rejected";
+  if (s === "resolved") return "Resolved";
+  if (s === "archived") return "Archived";
+
+  return "Pending";
+};
+
 const ReportsMgmtPage: React.FC = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  
+
   // dito kukunin mga officer accounts/names
   const officers = useMemo(
     () => ["Officer Hopps", "Officer Wilde", "Chief Bogo"],
@@ -103,10 +134,10 @@ const ReportsMgmtPage: React.FC = () => {
       prev.map((r) =>
         r.id === reportId
           ? {
-              ...r,
-              assigned_officer_label: officerLabel,
-              status: r.status === "Resolved" || r.status === "Archived" ? r.status : "Assigned",
-            }
+            ...r,
+            assigned_officer_label: officerLabel,
+            status: r.status === "Resolved" || r.status === "Archived" ? r.status : "Assigned",
+          }
           : r
       )
     );
@@ -114,10 +145,10 @@ const ReportsMgmtPage: React.FC = () => {
     setSelectedReport((prev) =>
       prev && prev.id === reportId
         ? {
-            ...prev,
-            assigned_officer_label: officerLabel,
-            status: prev.status === "Resolved" || prev.status === "Archived" ? prev.status : "Assigned",
-          }
+          ...prev,
+          assigned_officer_label: officerLabel,
+          status: prev.status === "Resolved" || prev.status === "Archived" ? prev.status : "Assigned",
+        }
         : prev
     );
 
@@ -156,7 +187,7 @@ const ReportsMgmtPage: React.FC = () => {
               </tr>
             ) : (
               reports.map((report) => {
-                const status: ReportStatus = report.status ?? "Pending";
+                const status = normalizeStatus(report.status);
                 const { date, time } = formatDateTime(report.created_at);
 
                 return (
@@ -189,7 +220,11 @@ const ReportsMgmtPage: React.FC = () => {
                         <button
                           className="icon-btn"
                           title="View details"
-                          onClick={() => setSelectedReport(report)}
+                          onClick={() => {
+                            const latest = reports.find(r => r.id === report.id) ?? report;
+                            setSelectedReport(latest);
+                          }}
+
                         >
                           <Eye size={16} />
                         </button>

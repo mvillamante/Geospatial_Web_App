@@ -3,6 +3,7 @@ from django.db.models.signals import post_save
 from django.db import models
 from django.dispatch import receiver
 from django.conf import settings
+from django.utils.timezone import now
 
 ROLE_CHOICES = [
     ('researcher', 'Researcher'),
@@ -155,13 +156,40 @@ class CmsGuide(models.Model):
         ("archived", "Archived"),
     ]
 
-    title = models.CharField(max_length=255)
-    category = models.CharField(max_length=50)
-    content = models.TextField()
-    status = models.CharField(max_length=20, default="draft")
-    views = models.IntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    POST_TYPE_CHOICES = [
+        ("safety", "Safety"),
+        ("protocol", "Protocol"),
+        ("preparedness", "Preparedness"),
+        ("announcement", "Announcement"),
+    ]
+
+    # Internal ID
+    id = models.BigAutoField(primary_key=True)
+
+    # Public-facing ID
+    post_id = models.CharField(
+        max_length=50,
+        unique=True,
+        blank=True,
+        null=True
+    )
+
+    created_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cms_guides"
+    )
+
+    post_type = models.CharField(
+        max_length=50,
+        choices=POST_TYPE_CHOICES,
+        default="safety"
+    )
+
+    post_title = models.CharField(max_length=255)
+    post_body = models.TextField()  # Lexical HTML / JSON
 
     status = models.CharField(
         max_length=20,
@@ -169,21 +197,60 @@ class CmsGuide(models.Model):
         default="draft"
     )
 
-    views = models.IntegerField(default=0)
-
-    created_by = models.ForeignKey(
-        CustomUser,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
+    is_pinned = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    published_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return self.title
-    
+        return f"{self.post_title} ({self.status})"
+
+    @property
+    def staff_id(self):
+        return self.created_by.staff_id if self.created_by else ""
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        old_status = None
+
+        if self.pk:
+            old_status = CmsGuide.objects.get(pk=self.pk).status
+
+        if self.status == "published" and (old_status != "published"):
+            self.published_at = now()
+
+        if self.status != "published":
+            self.published_at = None
+
+        super().save(*args, **kwargs)
+
+        if is_new and not self.post_id:
+            self.post_id = f"POST-{self.id}"
+            super().save(update_fields=["post_id"])
+
+class CmsGuideAttachment(models.Model):
+    FILE_TYPE_CHOICES = [
+        ("image", "Image"),
+    ]
+
+    guide = models.ForeignKey(
+        CmsGuide,
+        on_delete=models.CASCADE,
+        related_name="attachments"
+    )
+
+    file = models.ImageField(upload_to="cms_guides/")
+    file_type = models.CharField(
+        max_length=20,
+        choices=FILE_TYPE_CHOICES,
+        default="image"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.file_type} - {self.guide.post_title}"
 
 
 # Evacuation Center model ---------------------------------------------------------------

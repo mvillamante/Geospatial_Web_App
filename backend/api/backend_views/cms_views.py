@@ -1,3 +1,5 @@
+from django.utils.timezone import now
+
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -6,10 +8,19 @@ from rest_framework import status
 from api.models import CmsGuide
 from api.serializer import CmsGuideSerializer
 
+
+def admin_only(user):
+    return user.role == "admin"
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def list_guides(request):
-    guides = CmsGuide.objects.exclude(status="archived").order_by("-updated_at")
+    guides = (
+        CmsGuide.objects
+        .exclude(status="archived")
+        .order_by("-updated_at")
+    )
     serializer = CmsGuideSerializer(guides, many=True)
     return Response(serializer.data)
 
@@ -17,75 +28,103 @@ def list_guides(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_guide(request):
-    if request.user.role != "admin":
-        return Response({"detail": "Forbidden"}, status=403)
+    if not admin_only(request.user):
+        return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
 
     guide = CmsGuide.objects.create(
-        title=request.data["title"],
-        category=request.data["category"],
-        content=request.data["content"],
+        post_title=request.data.get("postTitle"),
+        post_type=request.data.get("postType"),
+        post_body=request.data.get("postBody"),
         status="draft",
+        created_by=request.user,
     )
 
-    return Response({
-        "id": guide.id,
-        "title": guide.title,
-        "category": guide.category,
-        "updated_at": guide.updated_at,
-    }, status=201)
+    serializer = CmsGuideSerializer(guide)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 
-@api_view(["PUT"])
+@api_view(["PUT", "PATCH"])
 @permission_classes([IsAuthenticated])
 def update_guide(request, pk):
+    if not admin_only(request.user):
+        return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
     try:
         guide = CmsGuide.objects.get(pk=pk)
     except CmsGuide.DoesNotExist:
-        return Response({"error": "Guide not found"}, status=404)
+        return Response({"error": "Guide not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    serializer = CmsGuideSerializer(guide, data=request.data, partial=True)
+    data = {
+        "post_title": request.data.get("postTitle"),
+        "post_type": request.data.get("postType"),
+        "post_body": request.data.get("postBody"),
+    }
+
+    serializer = CmsGuideSerializer(guide, data=data, partial=True)
+
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data)
-    return Response(serializer.errors, status=400)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def toggle_publish(request, pk):
+    if not admin_only(request.user):
+        return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
     try:
         guide = CmsGuide.objects.get(pk=pk)
     except CmsGuide.DoesNotExist:
-        return Response({"error": "Guide not found"}, status=404)
+        return Response({"error": "Guide not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    guide.status = "published" if guide.status != "published" else "draft"
+    if guide.status != "published":
+        guide.status = "published"
+        guide.published_at = now()
+    else:
+        guide.status = "draft"
+        guide.published_at = None
+
     guide.save()
-    return Response({"status": guide.status})
+
+    return Response({
+        "status": guide.status,
+        "published_at": guide.published_at,
+        "updated_at": guide.updated_at,
+    })
 
 
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def archive_guide(request, pk):
+    if not admin_only(request.user):
+        return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
     try:
         guide = CmsGuide.objects.get(pk=pk)
     except CmsGuide.DoesNotExist:
-        return Response({"error": "Guide not found"}, status=404)
+        return Response({"error": "Guide not found"}, status=status.HTTP_404_NOT_FOUND)
 
     guide.status = "archived"
     guide.save()
-    return Response(status=204)
+
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def permanent_delete_guide(request, pk):
-    if request.user.role != "admin":
-        return Response({"detail": "Forbidden"}, status=403)
+    if not admin_only(request.user):
+        return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
 
     try:
         guide = CmsGuide.objects.get(pk=pk)
     except CmsGuide.DoesNotExist:
-        return Response({"error": "Guide not found"}, status=404)
+        return Response({"error": "Guide not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    guide.delete()  # 💀 hard delete
+    guide.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)

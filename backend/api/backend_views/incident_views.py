@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status, generics, permissions
 from rest_framework.response import Response
+from django.db.models.functions import Lower
 from api.serializer import *
 
 from api.supabase_storage import create_signed_url
@@ -111,6 +112,13 @@ class VerifiedIncidentReportsView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        return IncidentReport.objects.filter(
-            risk__in=["low", "moderate", "high", "critical"]
-        ).order_by('-created_at')
+        qs = (
+            IncidentReport.objects
+            .exclude(verified_critical_level__isnull=True)
+            .annotate(vcl_lower=Lower("verified_critical_level"))
+            .filter(vcl_lower__in=["low", "moderate", "high", "critical"])
+            .order_by("-created_at")
+        )
+        
+        print("DEBUG: Verified Reports QuerySet ->", list(qs.values("id", "verified_critical_level", "created_at")))
+        return qs

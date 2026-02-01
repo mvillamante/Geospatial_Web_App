@@ -1,3 +1,25 @@
+:root {
+    --bg: #f6f7fb;
+    --surface: #ffffff;
+    --surface-2: #fbfcfe;
+
+    --panel-bg: var(--white-bg);
+    --border-light: #e5e7eb;
+    --secondary-color: #f9fafb;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+    --border: rgba(15, 23, 42, 0.10);
+    --border-strong: rgba(15, 23, 42, 0.16);
+
+    --radius-xl: 18px;
+    --radius-lg: 14px;
+    --radius-md: 12px;
+
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -76,7 +98,7 @@ body {
 .reports-page table,
 .user-page table {
     width: 100%;
-    background: white;
+    background: var(--white-bg);
     border-collapse: collapse;
 }
 
@@ -95,10 +117,10 @@ body {
 .cms-page td,
 .reports-page td,
 .sys-page td  {
-    background: #ffffff;
+    background: var(--white-bg);
     padding: 0.75rem;
     font-size: 0.8rem;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--light-gray-border);
 }
 
 .cms-page tr:hover,
@@ -129,14 +151,14 @@ body {
 .cms-page .badge.Published,
 .reports-page .badge.Verified {
     background: #22c55e;
-    color: white;
+    color: var(--text-white);
 }
 
 
 .cms-page .badge.Draft,
 .reports-page .badge.Pending {
-    background: #e5e7eb;
-    color: #374151;
+    background: var(--light-gray-bg);
+    color: var(--text-slate-black);
 }
 
 /* Actions */
@@ -149,7 +171,7 @@ body {
 /* Card */
 .cms-page .card,
 .reports-page .card {
-    background: white;
+    background: var(--white-bg);
     border-radius: 16px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
 }

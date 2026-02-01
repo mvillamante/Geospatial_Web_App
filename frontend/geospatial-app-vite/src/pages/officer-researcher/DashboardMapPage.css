@@ -4,23 +4,23 @@
   width: 300px;
   padding: 12px;
   background: #f9fafb;
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid var(--light-gray-border);
 
   height: 100vh;
   overflow-y: auto;
 }
 
 .panel-card {
-  background: #ffffff;
+  background: var(--white-bg);
   border-radius: 14px;
   padding: 14px;
   margin-bottom: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--light-gray-border);
 }
 
 .panel-card.researcher {
   background-color: black;
-  color: white;
+  color: var(--text-white);
   text-align: center;
   padding: 8px 14px;
 }
@@ -129,7 +129,7 @@
 .segmented-control.slide {
   position: relative;
   display: flex;
-  background: #e5e7eb;
+  background: var(--light-gray-bg);
   border-radius: 999px;
   padding: 4px;
   overflow: hidden;
@@ -158,7 +158,7 @@
   left: 4px;
   height: calc(100% - 8px);
   width: calc(50% - 4px);
-  background: #ffffff;
+  background: var(--white-bg);
   border-radius: 999px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.12);
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -201,7 +201,7 @@
   padding: 6px 12px;
   border-radius: 999px;
   border: none;
-  background: #e5e7eb;
+  background: var(--light-gray-bg);
   font-size: 13px;
   cursor: pointer;
   display: flex;
@@ -215,7 +215,7 @@
   padding: 4px 0;
   position: absolute;
   width: 100%;
-  background: #ffffff;
+  background: var(--white-bg);
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   display: none; /* hidden by default */
@@ -227,7 +227,7 @@
   font-size: 13px;
 }
 .choropleth-data-layer .select-options li:hover {
-  background: #e5e7eb;
+  background: var(--light-gray-bg);
   border-radius: 8px;
 }
 .choropleth-data-layer .select-wrapper.active .select-options {
@@ -262,7 +262,7 @@
   appearance: none;
   height: 8px;
   border-radius: 999px;
-  background: #e5e7eb;
+  background: var(--light-gray-bg);
   outline: none;
 }
 .timeslider-container .year-slider::-webkit-slider-thumb {
@@ -324,7 +324,7 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: #ffffff;
+    background: var(--white-bg);
     transition: transform 0.2s;
 }
 .maplayer-container .layer-item .toggle-btn.active {
@@ -336,7 +336,7 @@
 
 .section-divider {
     border: none;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--light-gray-border);
     margin: 12px 0;
 }
 
@@ -374,13 +374,12 @@ li.critical::before { background: var(--criticalrisk-color); }
 /*interactive map view*/
 .main-layout-dbmap {
   flex: 1;
-  background-color: #e5e7eb;
+  background-color: var(--light-gray-bg);
 }
 
 .dashboardmap-container {
     display: flex;
     height: 100%;
-    background-color: pink;
 }
 .dashboardmap-container .dashboardview-map,
 .dashboardmap-container .choroplethview-map {
@@ -397,7 +396,7 @@ li.critical::before { background: var(--criticalrisk-color); }
     background: rgb(19, 19, 37);
     font-size: 11px;
     font-weight: 700;
-    color: white;
+    color: var(--text-white);
     padding: 6px;
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
@@ -438,7 +437,7 @@ li.critical::before { background: var(--criticalrisk-color); }
   width: 380px;
   padding: 12px;
   background: #f9fafb;
-  border-left: 1px solid #e5e7eb;
+  border-left: 1px solid var(--light-gray-border);
   transition: width 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -703,10 +702,10 @@ li.critical::before { background: var(--criticalrisk-color); }
   flex-shrink: 0;
 }
 .export-left-icon.report {
-  color: #ff1e00;
+  color: var(--clr-red);
 }
 .export-left-icon.chart {
-  color: #007bff;
+  color: var(--clr-blue);
 }
 
 .export-content > input[type="checkbox"] + .export-text + .export-download-icon {
@@ -731,7 +730,7 @@ li.critical::before { background: var(--criticalrisk-color); }
 .config-row label {
   font-size: 13px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-slate-black);
 }
 
 .config-row select {
@@ -765,9 +764,9 @@ li.critical::before { background: var(--criticalrisk-color); }
 }
 
 .dataset-controls button {
-  background-color: #f3f4f6;
+  background-color: var(--off-white-bg);
   border: 1px solid #d1d5db;
-  color: #374151;
+  color: var(--text-slate-black);
   padding: 6px 14px;
   font-size: 13px;
   border-radius: 6px;
@@ -776,11 +775,11 @@ li.critical::before { background: var(--criticalrisk-color); }
 }
 
 .dataset-controls .datasets-export {
-  color: white;
+  color: var(--text-white);
 }
 
 .dataset-controls button:hover {
-  background-color: #e5e7eb;
+  background-color: var(--light-gray-bg);
   border-color: #9ca3af;
 }
 
@@ -823,7 +822,7 @@ li.critical::before { background: var(--criticalrisk-color); }
 .selected-count {
   font-size: 12px;
   font-weight: 600;
-  color: #121314;
+  color: var(--text-primary);
   margin-left: auto;
   border: 1px solid #6b7280;
   border-radius: 15px;
@@ -1169,7 +1168,7 @@ li.critical::before { background: var(--criticalrisk-color); }
   margin-bottom: 10px;
   font-size: 12px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-slate-black);
   padding: 6px 10px;
   border-radius: 8px;
   transition: background-color 0.2s ease;
@@ -1336,7 +1335,7 @@ li.critical::before { background: var(--criticalrisk-color); }
   margin-bottom: 8px;
   font-size: 12px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-slate-black);
   padding: 5px 10px;
   border-radius: 8px;
   transition: background-color 0.2s ease;
@@ -1476,7 +1475,7 @@ li.critical::before { background: var(--criticalrisk-color); }
   justify-content: space-between;
   align-items: center;
   font-size: 12px;
-  color: #374151;
+  color: var(--text-slate-black);
 }
 
 .ndvi-control-row .ndvi-label {
@@ -1498,7 +1497,7 @@ li.critical::before { background: var(--criticalrisk-color); }
   height: 6px;
   -webkit-appearance: none;
   appearance: none;
-  background: #e5e7eb;
+  background: var(--light-gray-bg);
   border-radius: 3px;
   outline: none;
   cursor: pointer;
@@ -1539,7 +1538,7 @@ li.critical::before { background: var(--criticalrisk-color); }
   color: #6b7280;
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--light-gray-border);
 }
 
 .ndvi-month-labels {
@@ -1653,7 +1652,7 @@ li.critical::before { background: var(--criticalrisk-color); }
 
 /* Modal */
 .eda-modal {
-  background: #ffffff;
+  background: var(--white-bg);
   width: 720px;
   padding: 15px;
   max-height: 85vh;
@@ -1846,12 +1845,12 @@ li.critical::before { background: var(--criticalrisk-color); }
 
 .eda-health-badge.green {
   background: #16a34a;
-  color: white;
+  color: var(--text-white);
 }
 
 .eda-health-badge.orange {
   background: #f59e0b;
-  color: white;
+  color: var(--text-white);
 }
 
 /*EDA Findings*/

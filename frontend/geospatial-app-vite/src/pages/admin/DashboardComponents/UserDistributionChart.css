@@ -1,7 +1,7 @@
 .chart-card {
-    background: #ffffff;
+    background: var(--white-bg);
     border-radius: 16px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--light-gray-border);
     padding: 16px 20px;
     transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
@@ -35,7 +35,7 @@
 
 .recharts-legend-item-text {
     font-size: 0.75rem;
-    color: #374151 !important;
+    color: var(--text-slate-black) !important;
 }
 
 .recharts-tooltip-wrapper {

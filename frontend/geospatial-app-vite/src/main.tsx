@@ -2,7 +2,7 @@
 import { createRoot } from 'react-dom/client'
 import { AuthProvider } from "./context/AuthContext";
 import './styles/global.css'
-import './styles/variables.css'
+import './styles/colors.css'
 import App from './App'
 import "leaflet/dist/leaflet.css";
 

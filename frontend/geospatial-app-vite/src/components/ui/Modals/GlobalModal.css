@@ -20,7 +20,7 @@
 }
 
 .modal-content {
-    background: white;
+    background: var(--white-bg);
     border-radius: 20px;
     padding: 3rem;
     max-width: 500px;
@@ -131,7 +131,7 @@
 .modal-form input:focus {
     outline: none;
     border-color: #3b82f6;
-    background: white;
+    background: var(--white-bg);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -139,7 +139,7 @@
     width: 100%;
     padding: 1rem;
     background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: white;
+    color: var(--text-white);
     border: none;
     border-radius: 10px;
     font-weight: 600;
@@ -250,7 +250,7 @@
 
 .create-user-modal .dropdown-selected:hover {
   border-color: #3b82f6;
-  background: #ffffff;
+  background: var(--white-bg);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -264,7 +264,7 @@
   top: 100%;
   left: 0;
   margin-top: 5px;
-  background: #ffffff;
+  background: var(--white-bg);
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   max-height: 150px;
@@ -316,7 +316,7 @@
   padding: 1rem 1.5rem;
   max-width: 520px;
   border-radius: 20px;
-  background: #ffffff;
+  background: var(--white-bg);
   box-shadow: 0 25px 50px rgba(0,0,0,0.15);
   display: block;
   flex-direction: column;

@@ -4,15 +4,16 @@ import './CmsPage.css';
 import RichTextEditor from './TextEditor/RichTextEditor';
 
 interface Guide {
-  id: number;
-  title: string;
-  category: string;
+  postId: number;
+  postTitle: string;
+  postType: string;
+  postBody?: string;
   status: 'Published' | 'Draft';
-  views: number;
-  lastUpdated: string;
-  content?: string; 
+  isPinned: boolean;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
 }
-
 
 const CmsPage: React.FC = () => {
   const [guides, setGuides] = useState<Guide[]>([]);
@@ -22,9 +23,9 @@ const CmsPage: React.FC = () => {
   const [guideToDelete, setGuideToDelete] = useState<Guide | null>(null);
   const [editingGuide, setEditingGuide] = useState<Guide | null>(null);
   const [newGuide, setNewGuide] = useState({
-    title: "",
-    category: "Safety",
-    content: "",
+    postTitle: "",
+    postType: "safety",
+    postBody: "",
   });
   const [showNotificationDialog, setShowNotificationDialog] = useState(false);
   const [notification, setNotification] = useState({ type: 'alert', message: '' });
@@ -38,59 +39,59 @@ const CmsPage: React.FC = () => {
       .then(res => res.json())
       .then(data => {
         const mappedGuide = data.map((g: any) => ({
-          id: g.id,
-          title: g.title,
-          category: g.category,
-          content: g.content,
+          postId: g.id,
+          postTitle: g.post_title,
+          postType: g.post_type,
+          postBody: g.post_body,
           status: g.status === "published" ? "Published" : "Draft",
-          views: g.views,
-          lastUpdated: new Date(g.updated_at).toLocaleDateString(),
+          isPinned: g.is_pinned,
+          createdAt: g.created_at,
+          updatedAt: g.updated_at,
+          publishedAt: g.published_at,
         }));
 
         setGuides(mappedGuide);
       });
   }, []);
 
-  const togglePublish = async (id: number) => {
-    await fetch(`http://127.0.0.1:8000/api/cms/guides/${id}/publish/`, {
+  const togglePublish = async (postId: number) => {
+    await fetch(`/api/cms/guides/${postId}/publish/`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       },
     });
 
-
     setGuides(g =>
       g.map(item =>
-        item.id === id
+        item.postId === postId
           ? { ...item, status: item.status === "Published" ? "Draft" : "Published" }
           : item
       )
     );
   };
 
-  const archiveGuide = async (id: number) => {
-    await fetch(`http://127.0.0.1:8000/api/cms/guides/${id}/archive/`, {
+  const archiveGuide = async (postId: number) => {
+    await fetch(`/api/cms/guides/${postId}/archive/`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       },
     });
 
-    setGuides(g => g.filter(item => item.id !== id));
+    setGuides(g => g.filter(item => item.postId !== postId));
   };
 
-  const permanentDeleteGuide = async (id: number) => {
-    await fetch(`http://127.0.0.1:8000/api/cms/guides/${id}/permanent-delete/`, {
+  const permanentDeleteGuide = async (postId: number) => {
+    await fetch(`/api/cms/guides/${postId}/permanent-delete/`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       },
     });
 
-    setGuides(g => g.filter(item => item.id !== id));
+    setGuides(g => g.filter(item => item.postId !== postId));
   };
-
 
   const createGuide = async () => {
     const res = await fetch("/api/cms/guides/create/", {
@@ -111,34 +112,36 @@ const CmsPage: React.FC = () => {
 
     setGuides(prev => [
       {
-        id: created.id,
-        title: created.title,
-        category: created.category,
-        content: created.content,
+        postId: created.id,
+        postTitle: created.post_title,
+        postType: created.post_type,
+        postBody: created.post_body,
         status: "Draft",
-        views: 0,
-        lastUpdated: new Date(created.updated_at).toLocaleDateString(),
+        isPinned: false,
+        createdAt: created.created_at,
+        updatedAt: created.updated_at,
+        publishedAt: created.published_at,
       },
       ...prev,
     ]);
 
-    setNewGuide({ title: "", category: "Safety", content: "" });
+    setNewGuide({ postTitle: "", postType: "safety", postBody: "" });
     setShowCreateModal(false);
   };
 
   const updateGuide = async () => {
     if (!editingGuide) return;
 
-    const res = await fetch(`/api/cms/guides/${editingGuide.id}/`, {
+    const res = await fetch(`/api/cms/guides/${editingGuide.postId}/`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       },
       body: JSON.stringify({
-        title: editingGuide.title,
-        category: editingGuide.category,
-        content: editingGuide.content,
+        postTitle: editingGuide.postTitle,
+        postType: editingGuide.postType,
+        postBody: editingGuide.postBody,
       }),
     });
 
@@ -151,13 +154,14 @@ const CmsPage: React.FC = () => {
 
     setGuides(prev =>
       prev.map(g =>
-        g.id === updated.id
+        g.postId === updated.id
           ? {
               ...g,
-              title: updated.title,
-              category: updated.category,
-              content: updated.content,
-              lastUpdated: new Date(updated.updated_at).toLocaleDateString(),
+              postTitle: updated.post_title,
+              postType: updated.post_type,
+              postBody: updated.post_body,
+              updatedAt: updated.updated_at,
+              publishedAt: updated.published_at,
             }
           : g
       )
@@ -167,10 +171,8 @@ const CmsPage: React.FC = () => {
     setShowEditModal(false);
   };
 
-
   return (
     <div className="cms-page">
-
       {/* Header */}
       <div className="cms-header">
         <h1>Content Management System</h1>
@@ -181,7 +183,7 @@ const CmsPage: React.FC = () => {
           <button
             className="btn primary"
             onClick={() => {
-              setNewGuide({ title: "", category: "Safety", content: "" });
+              setNewGuide({ postTitle: "", postType: "safety", postBody: "" });
               setShowCreateModal(true);
             }}
           >
@@ -190,230 +192,229 @@ const CmsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="card">
-        <table>
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Category</th>
-              <th>Status</th>
-              <th>Views</th>
-              <th>Last Updated</th>
-              <th>Actions</th>
+    {/* Table */}
+    <div className="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Created At</th>
+            <th>Updated At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {guides.map(guide => (
+            <tr key={guide.postId}>
+              <td>{guide.postTitle}</td>
+              <td>{guide.postType.charAt(0).toUpperCase() + guide.postType.slice(1)}</td>
+
+              <td>
+                <span className={`badge ${guide.status}`}>{guide.status}</span>
+              </td>
+              <td>{new Date(guide.createdAt).toLocaleDateString()}</td>
+              <td>{new Date(guide.updatedAt).toLocaleDateString()}</td>
+              <td>
+                <div className="table-actions">
+                  <button
+                    className="icon-btn"
+                    onClick={() => {
+                      setEditingGuide({ ...guide });
+                      setShowEditModal(true);
+                    }}
+                  >
+                    <Edit size={16} />
+                  </button>
+                  <button className="icon-btn" onClick={() => togglePublish(guide.postId)}>
+                    <Eye size={16} />
+                  </button>
+                  <button
+                    className="icon-btn danger"
+                    onClick={() => {
+                      setGuideToDelete(guide);
+                      setShowDeleteModal(true);
+                    }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {guides.map(guide => (
-              <tr key={guide.id}>
-                <td className="table-title">{guide.title}</td>
-                <td>{guide.category}</td>
-                <td>
-                  <span className={`badge ${guide.status}`}>
-                    {guide.status}
-                  </span>
-                </td>
-                <td>{guide.views}</td>
-                <td>{guide.lastUpdated}</td>
-                <td>
-                  <div className="table-actions">
-                    <button
-                      className="icon-btn"
-                      onClick={() => {
-                        setEditingGuide({ ...guide });
-                        setShowEditModal(true);
-                      }}
-                    >
-                      <Edit size={16} />
-                    </button>
-                    <button className="icon-btn" onClick={() => togglePublish(guide.id)}>
-                      <Eye size={16} />
-                    </button>
-                    <button
-                      className="icon-btn danger"
-                      onClick={() => {
-                        setGuideToDelete(guide);
-                        setShowDeleteModal(true);
-                      }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Notification Modal */}
-      {showNotificationDialog && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>Send Notification</h2>
-
-            <label>Type</label>
-            <select
-              value={notification.type}
-              onChange={e => setNotification({ ...notification, type: e.target.value })}>
-              <option value="alert">Alert</option>
-              <option value="warning">Warning</option>
-              <option value="information">Information</option>
-              <option value="emergency">Emergency</option>
-            </select>
-
-            <label>Message</label>
-            <textarea
-              rows={5}
-              value={notification.message}
-              onChange={e => setNotification({ ...notification, message: e.target.value })} />
-
-            <div className="modal-actions">
-              <button className="btn secondary" onClick={() => setShowNotificationDialog(false)}>
-                Cancel
-              </button>
-              <button className="btn primary">
-                <Send size={16} /> Send
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Create Modal */}
-      {showCreateModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>Create New Guide</h2>
-
-            <label>Title</label>
-            <input
-              value={newGuide.title}
-              onChange={e => setNewGuide({ ...newGuide, title: e.target.value })}
-            />
-
-            <label>Category</label>
-            <select
-              value={newGuide.category}
-              onChange={e => setNewGuide({ ...newGuide, category: e.target.value })}
-            >
-              <option>Safety</option>
-              <option>Protocol</option>
-              <option>Preparedness</option>
-            </select>
-
-            <label>Content</label>
-            <RichTextEditor
-              initialHtml={newGuide.content}
-              onChange={(html) => setNewGuide({ ...newGuide, content: html })}
-            />
-
-            <div className="modal-actions">
-              <button className="btn secondary" onClick={() => setShowCreateModal(false)}>
-                Cancel
-              </button>
-              <button className="btn primary" onClick={createGuide}>
-                Create
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Modal */}
-      {showEditModal && editingGuide && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>Edit Guide</h2>
-
-            <label>Title</label>
-            <input
-              value={editingGuide.title}
-              onChange={e =>
-                setEditingGuide({ ...editingGuide, title: e.target.value })
-              }
-            />
-
-            <label>Category</label>
-            <select
-              value={editingGuide.category}
-              onChange={e =>
-                setEditingGuide({ ...editingGuide, category: e.target.value })
-              }
-            >
-              <option>Safety</option>
-              <option>Protocol</option>
-              <option>Preparedness</option>
-            </select>
-
-            <label>Content</label>
-            <RichTextEditor
-              initialHtml={editingGuide.content || ""}
-              onChange={(html) => setEditingGuide({ ...editingGuide, content: html })}
-            />
-
-            <div className="modal-actions">
-              <button className="btn secondary" onClick={() => setShowEditModal(false)}>
-                Cancel
-              </button>
-              <button className="btn primary" onClick={updateGuide}>
-                Update
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* Delete Modal */}
-      {showDeleteModal && guideToDelete && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>Delete Guide</h2>
-
-            <p>
-              What would you like to do with
-              <strong> "{guideToDelete.title}"</strong>?
-            </p>
-
-            <div className="modal-actions">
-              <button
-                className="btn secondary"
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setGuideToDelete(null);
-                }}
-              >
-                Cancel
-              </button>
-
-              <button
-                className="btn secondary"
-                onClick={() => {
-                  archiveGuide(guideToDelete.id);
-                  setShowDeleteModal(false);
-                  setGuideToDelete(null);
-                }}
-              >
-                Archive
-              </button>
-
-              <button
-                className="btn danger"
-                onClick={() => {
-                  permanentDeleteGuide(guideToDelete.id);
-                  setShowDeleteModal(false);
-                  setGuideToDelete(null);
-                }}
-              >
-                Permanent Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+          ))}
+        </tbody>
+      </table>
     </div>
 
+
+        {/* Notification Modal */}
+        {showNotificationDialog && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h2>Send Notification</h2>
+
+              <label>Type</label>
+              <select
+                value={notification.type}
+                onChange={e => setNotification({ ...notification, type: e.target.value })}>
+                <option value="alert">Alert</option>
+                <option value="warning">Warning</option>
+                <option value="information">Information</option>
+                <option value="emergency">Emergency</option>
+              </select>
+
+              <label>Message</label>
+              <textarea
+                rows={5}
+                value={notification.message}
+                onChange={e => setNotification({ ...notification, message: e.target.value })} />
+
+              <div className="modal-actions">
+                <button className="btn secondary" onClick={() => setShowNotificationDialog(false)}>
+                  Cancel
+                </button>
+                <button className="btn primary">
+                  <Send size={16} /> Send
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Create Modal */}
+        {showCreateModal && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h2>Create New Guide</h2>
+
+              <label>Title</label>
+              <input
+                value={newGuide.postTitle}
+                onChange={e => setNewGuide({ ...newGuide, postTitle: e.target.value })}
+              />
+
+              <label>Type</label>
+              <select
+                value={newGuide.postType}
+                onChange={e => setNewGuide({ ...newGuide, postType: e.target.value })}
+              >
+                <option value="safety">Safety</option>
+                <option value="protocol">Protocol</option>
+                <option value="preparedness">Preparedness</option>
+              </select>
+
+              <label>Body</label>
+              <RichTextEditor
+                initialHtml={newGuide.postBody}
+                onChange={(html) => setNewGuide({ ...newGuide, postBody: html })}
+              />
+
+              <div className="modal-actions">
+                <button className="btn secondary" onClick={() => setShowCreateModal(false)}>
+                  Cancel
+                </button>
+                <button className="btn primary" onClick={createGuide}>
+                  Create
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Modal */}
+        {showEditModal && editingGuide && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h2>Edit Guide</h2>
+
+              <label>Title</label>
+              <input
+                value={editingGuide.postTitle}
+                onChange={e =>
+                  setEditingGuide({ ...editingGuide, postTitle: e.target.value })
+                }
+              />
+
+              <label>Type</label>
+              <select
+                value={editingGuide.postType}
+                onChange={e =>
+                  setEditingGuide({ ...editingGuide, postType: e.target.value })
+                }
+              >
+                <option value="safety">Safety</option>
+                <option value="protocol">Protocol</option>
+                <option value="preparedness">Preparedness</option>
+              </select>
+
+              <label>Body</label>
+              <RichTextEditor
+                initialHtml={editingGuide.postBody || ""}
+                onChange={(html) => setEditingGuide({ ...editingGuide, postBody: html })}
+              />
+
+              <div className="modal-actions">
+                <button className="btn secondary" onClick={() => setShowEditModal(false)}>
+                  Cancel
+                </button>
+                <button className="btn primary" onClick={updateGuide}>
+                  Update
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Delete Modal */}
+        {showDeleteModal && guideToDelete && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h2>Delete Guide</h2>
+
+              <p>
+                What would you like to do with
+                <strong> "{guideToDelete.postTitle}"</strong>?
+              </p>
+
+              <div className="modal-actions">
+                <button
+                  className="btn secondary"
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setGuideToDelete(null);
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="btn secondary"
+                  onClick={() => {
+                    archiveGuide(guideToDelete.postId);
+                    setShowDeleteModal(false);
+                    setGuideToDelete(null);
+                  }}
+                >
+                  Archive
+                </button>
+
+                <button
+                  className="btn danger"
+                  onClick={() => {
+                    permanentDeleteGuide(guideToDelete.postId);
+                    setShowDeleteModal(false);
+                    setGuideToDelete(null);
+                  }}
+                >
+                  Permanent Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
   );
 };
 

@@ -2,6 +2,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import get_user_model
 from rest_framework import status, generics, permissions
 from rest_framework.response import Response
 from api.serializer import *
@@ -10,6 +11,8 @@ from api.supabase_storage import create_signed_url
 
 from api.serializer import IncidentReportCreateSerializer
 from api.models import IncidentReport
+
+User = get_user_model
 
 class IncidentReportCreateView(APIView):
 
@@ -86,10 +89,13 @@ class IncidentReportPatchView(generics.UpdateAPIView):
 
         if data.get("assignToMe") is True:
             report.assigned_officer = request.user
-            report.save(update_fields=["assigned_officer"])
             report.status = "in_progress"
-            ser = self.get_serializer(report)
-            return Response(ser.data)
+            report.save(update_fields=["assigned_officer", "status"])
+            return Response(IncidentReportQueueSerializer(report).data)
+
+        if data.get("assigned_officer_id"):
+            ...
+            return Response(IncidentReportQueueSerializer(report).data)
 
         if "status" in data and isinstance(data["status"], str):
             data["status"] = data["status"].lower()
@@ -98,3 +104,4 @@ class IncidentReportPatchView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(IncidentReportQueueSerializer(report).data)
+

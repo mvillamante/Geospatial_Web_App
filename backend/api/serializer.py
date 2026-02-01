@@ -235,6 +235,7 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
     user_label = serializers.SerializerMethodField()
     photo_url = serializers.SerializerMethodField()
     category_display = serializers.SerializerMethodField()
+    assigned_officer_label = serializers.SerializerMethodField()
 
     class Meta:
         model = IncidentReport
@@ -249,7 +250,8 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
             "status",
             "created_at",
             "suggested_critical_level",
-            "photo_url"
+            "photo_url",
+            "assigned_officer_label",
         ]
         
     def get_category_display(self, obj):
@@ -260,10 +262,25 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
     def get_user_label(self, obj):
         return f"Citizen #{obj.user_id}"
 
+    def get_assigned_officer_label(self, obj):
+        if not obj.assigned_officer:
+            return None
+        fn = (obj.assigned_officer.first_name or "").strip()
+        ln = (obj.assigned_officer.last_name or "").strip()
+        full = f"{fn} {ln}".strip()
+        return full if full else (obj.assigned_officer.username or "Officer")
+
     def get_photo_url(self, obj):
         if not obj.photo_path:
             return None
         return create_signed_url(obj.photo_path, expires_in_seconds=3600)
+
+class AssignOfficerSerializer(serializers.Serializer):
+    officer_id = serializers.IntegerField()
+
+class UpdateStatusSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=IncidentReport.STATUS_CHOICES)
+
     
 class IncidentReportQueueSerializer(serializers.ModelSerializer):
     reporterName = serializers.SerializerMethodField()

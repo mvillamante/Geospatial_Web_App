@@ -1,9 +1,14 @@
 import requests
 import logging
 from django.http import JsonResponse
+
+from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework import status
+
+from api.models import EvacuationCenter
+from api.serializer import EvacuationCenterSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -229,3 +234,15 @@ def reverse_geocode(request):
             {'error': f'Internal server error: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+class EvacuationCenterListAPIView(generics.ListCreateAPIView):
+    queryset = EvacuationCenter.objects.all()
+    serializer_class = EvacuationCenterSerializer
+    permission_classes = [AllowAny]
+    
+    pagination_class = None
+    
+class EvacuationCenterDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = EvacuationCenter.objects.all()
+    serializer_class = EvacuationCenterSerializer
+    permission_classes = [AllowAny]

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from api.models import CustomUser, IncidentReport, ResearcherRequest, CmsGuide
+from api.models import CustomUser, IncidentReport, ResearcherRequest, CmsGuide, EvacuationCenter
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ['username', 'staff_id', 'email', 'role', 'extra_roles', 'last_login', 'is_active']
@@ -40,3 +40,11 @@ class CmsGuideAdmin(admin.ModelAdmin):
     ordering = ['-updated_at']
 
 admin.site.register(CmsGuide, CmsGuideAdmin)
+
+class EvacuationCenterAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'type', 'capacity', 'latitude', 'longitude']
+    list_filter = ['type', 'capacity']
+    search_fields = ['name', 'address', 'facilities']
+    ordering = ['name']
+
+admin.site.register(EvacuationCenter, EvacuationCenterAdmin)

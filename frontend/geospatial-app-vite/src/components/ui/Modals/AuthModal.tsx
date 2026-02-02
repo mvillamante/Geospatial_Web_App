@@ -130,17 +130,21 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
 
         setResetLoading(true);
         try {
-            const res = await fetch("http://localhost:8000/api/auth/password-reset/request/", {
+            const res = await fetch("http://localhost:8000/api/password-reset/request/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email_or_phone: resetTarget.trim() }),
             });
 
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.detail || "Failed to send OTP");
+            const text = await res.text();
+            console.log("RESET OTP status:", res.status);
+            console.log("RESET OTP raw response:", text);
 
-            alert("If the account exists, an OTP was sent.");
-            switchModal("verifyOtp");
+            let data: any = {};
+            try { data = JSON.parse(text); } catch { }
+            if (!res.ok) throw new Error(data.detail || text || "Failed to send OTP");
+
+
         } catch (e: any) {
             alert(e?.message || "Failed to send OTP");
         } finally {
@@ -157,7 +161,7 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
 
         setResetLoading(true);
         try {
-            const res = await fetch("http://localhost:8000/api/auth/password-reset/confirm/", {
+            const res = await fetch("http://localhost:8000/api/password-reset/confirm/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

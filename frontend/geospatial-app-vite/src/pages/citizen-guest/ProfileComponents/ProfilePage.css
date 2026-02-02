@@ -267,7 +267,7 @@
 .stat-divider {
   width: 1px;
   height: 54px;
-  background: #e5e7eb;
+  background: var(--light-gray-bg);
 }
 
 .profile-page .stats h1 {
@@ -318,7 +318,7 @@
   padding: 0 14px;
   border-radius: 12px;
   border: 1px solid rgba(15, 23, 42, 0.10);
-  background: #ffffff;
+  background: var(--white-bg);
   color: #0f172a;
   font-weight: 800;
   font-size: 13px;
@@ -379,7 +379,7 @@
    Report Cards
 ========================= */
 .profile-page .report-card {
-  background: white;
+  background: var(--white-bg);
   border-radius: 18px;
   padding: 1.4rem;
   margin-bottom: 0.5rem;
@@ -399,7 +399,7 @@
 }
 
 .profile-page .muted {
-  color: #64748b;
+  color: (--muted-text);
 }
 
 /* =========================
@@ -420,7 +420,7 @@
   left: 8px;
   right: 8px;
   height: 4px;
-  background: #e5e7eb;
+  background: var(--light-gray-bg);
   transform: translateY(-50%);
   border-radius: 999px;
 }
@@ -447,7 +447,7 @@
 .profile-page .step span {
   width: 16px;
   height: 16px;
-  background: #e5e7eb;
+  background: var(--light-gray-bg);
   border-radius: 50%;
   display: inline-block;
   border: 3px solid white;
@@ -550,7 +550,7 @@
 }
 
 .profile-page .modal {
-  background: white;
+  background: var(--white-bg);
   padding: 2rem;
   border-radius: 18px;
   width: min(560px, 96vw);
@@ -612,7 +612,7 @@
   border-radius: 12px;
   border: none;
   background: #0f172a;
-  color: white;
+  color: var(--text-white);
   font-weight: 800;
   cursor: pointer;
 }

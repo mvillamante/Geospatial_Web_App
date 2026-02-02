@@ -1,0 +1,69 @@
+/*Variables for Colors*/
+:root {
+  /*risk colors*/
+  --verylowrisk-color: #4ade80;
+  --lowrisk-color: #10b981;
+  --moderaterisk-color: #f59e0b;
+  --highrisk-color: #ef4444;
+  --veryhighrisk-color: #b91c1c;
+  --criticalrisk-color: #7f1d1d;
+
+  /*insight card colors*/
+
+  /*background colors*/
+  --white-bg: #ffffff;
+  --off-white-bg: #f3f4f6;
+  --light-gray-bg: #e5e7eb;
+
+  /*border-colors*/
+  --light-gray-border: #e5e7eb;
+
+  /*text colors*/
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-slate-black: #374151; 
+  --text-white: #ffffff;
+  --muted-text: #6b7280;
+  --text: #0f172a;
+  --subtext: #475569;
+
+  /*button colors*/
+  --primary-btn-color: #3b82f6;
+  --primary-btn-hover: #2563eb;
+  --delete-btn-color: #dc2626;
+  --delete-btn-hover: #b11d1d;
+
+  /*status*/
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --rejected: #dc2626;
+  --lacking-info: #0ea5e9;
+
+  --primary: #2563eb;
+
+  /*general colors*/
+  --clr-blue: #2563eb;
+  --clr-red: #dc2626;
+  --clr-orange: #ff4e00;
+  --clr-orange-2: #ffa040;
+}
+
+.clr-green {
+  color: #16a34a;
+}
+
+.clr-gray {
+  color: #6b7280;
+}
+
+.clr-blue {
+  color: var(--clr-blue);
+}
+
+.clr-red {
+  color: var(--clr-red);
+}
+
+.clr-orange {
+  color: var(--clr-orange);
+}

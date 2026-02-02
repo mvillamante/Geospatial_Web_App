@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from 'lucide-react';
 
 const barangays = {
@@ -12,13 +12,12 @@ const barangays = {
 
 export interface Report {
     id: number;
-    title: string;
-    category: "Fire" | "Flood" | "Landslide" | "Accident";
-    risk: "low" | "moderate" | "high" | "critical";
-    location: string;
-    time: string;
-    lat: number;
-    lng: number;
+    incident_type: "fire" | "flood" | "landslide" | "accident";
+    verified_critical_level: "low" | "moderate" | "high" | "critical";
+    barangay: string;
+    created_at: string;
+    latitude: number;
+    longitude: number;
 }
 
 interface AlertsPanelProps {
@@ -27,6 +26,7 @@ interface AlertsPanelProps {
     onBarangaySearch?: (barangay: string, severity: string | null) => void;
 }
 
+/*
 const mockReports: Report[] = [
     {
         id: 1,
@@ -59,11 +59,13 @@ const mockReports: Report[] = [
         lng: 121.1320,
     },
 ];
+*/
 
 export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch }: AlertsPanelProps) {
     const [selectedCategory, setSelectedCategory] = useState<string>("");
     const [selectedBarangay, setSelectedBarangay] = useState("");
     const [sortNewest, setSortNewest] = useState<boolean>(true);
+    const [reports, setReports] = useState<Report[]>([]);
     const severityPriority: Record<string, number> = {
         critical: 4,
         high: 3,
@@ -71,33 +73,73 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
         low: 1
     };
 
+    useEffect(() => {
+        const token = localStorage.getItem("access_token");
+        if (!token) return;
+
+        fetch("/api/incident-reports/verified/", {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        })
+        .then(async (res) => {
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.detail || `HTTP error ${res.status}`);
+            }
+            return res.json();
+        })
+        .then((data) => {
+            console.log("Fetched verified reports:", data);
+
+            const mappedReports: Report[] = (data.results || []).map(r => ({
+                id: r.id,
+                incident_type: r.category_display ?? r.category ?? "others",
+                verified_critical_level: r.suggested_critical_level ?? "low",
+                barangay: r.location_display?.split(",")[0].replace("Barangay ", "").trim() ?? "",
+                created_at: r.created_at,
+                latitude: r.lat ?? 0,
+                longitude: r.lng ?? 0,
+            }));
+
+            setReports(mappedReports);
+        })
+        .catch((err) => {
+            console.error("Failed to fetch verified reports:", err.message);
+            setReports([]);
+        });
+    }, []);
+
+
+
     const handleBarangaySearch = (value: string) => {
         setSelectedBarangay(value);
         if (onBarangaySearch) {
-            const matchingReports = mockReports.filter(r => 
-                r.location.toLowerCase().includes(value.toLowerCase())
+            const matchingReports = reports.filter(r => 
+                r.barangay.toLowerCase().includes(value.toLowerCase())
             );
             
             let highestSeverity: string | null = null;
             if (matchingReports.length > 0) {
                 const sorted = matchingReports.sort((a, b) => 
-                    severityPriority[b.risk] - severityPriority[a.risk]
+                    severityPriority[b.verified_critical_level] - severityPriority[a.verified_critical_level]
                 );
-                highestSeverity = sorted[0].risk;
+                highestSeverity = sorted[0].verified_critical_level;
             }
             
             onBarangaySearch(value, highestSeverity);
         }
     };
 
-    const filteredReports = mockReports
-        .filter(r => selectedCategory === "" || r.category === selectedCategory)
-        .filter(r => selectedBarangay === "" || r.location.toLowerCase().includes(selectedBarangay.toLowerCase())
-        );
+    const filteredReports = reports
+        .filter(r => selectedCategory === "" || r.incident_type.toLowerCase() === selectedCategory.toLowerCase())
+        .filter(r => selectedBarangay === "" || r.barangay.toLowerCase().includes(selectedBarangay.toLowerCase()));
+
 
     const sortedReports = [...filteredReports].sort((a, b) => {
-        if (sortNewest) return new Date(b.time).getTime() - new Date(a.time).getTime();
-        return new Date(a.time).getTime() - new Date(b.time).getTime();
+        if (sortNewest) return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     });
 
     return (
@@ -151,18 +193,26 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
                 {sortedReports.map((report) => (
                     <li
                         key={report.id}
-                        className={`report-card ${report.risk}`}
+                        className={`report-card ${report.verified_critical_level}`}
                         onClick={() => onSelectReport?.(report)}
-                    >
+                        >
                         <div className="report-header">
-                            <span className="report-title">{report.title}</span>
-                            <span className={`risk-badge ${report.risk}`}>{report.risk.toUpperCase()}</span>
+                            <span className="report-title">
+                            {report.incident_type.toUpperCase()}
+                            </span>
+                            <span className={`risk-badge ${report.verified_critical_level}`}>
+                            {report.verified_critical_level.toUpperCase()}
+                            </span>
                         </div>
 
-                        <span className="report-location">{report.location}</span>
+                        <span className="report-location">
+                            Barangay {report.barangay}
+                        </span>
 
                         <div className="report-footer">
-                            <span>{new Date(report.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            <span>
+                            {new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
                         </div>
                     </li>
                 ))}

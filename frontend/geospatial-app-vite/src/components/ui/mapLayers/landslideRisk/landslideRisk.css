@@ -26,13 +26,13 @@
 
 .landslide-zone-label.high {
   background: linear-gradient(135deg, rgba(180, 83, 9, 0.95), rgba(146, 64, 14, 0.95));
-  color: white;
+  color: var(--text-white);
   border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 .landslide-zone-label.moderate {
   background: linear-gradient(135deg, rgba(217, 119, 6, 0.95), rgba(180, 83, 9, 0.95));
-  color: white;
+  color: var(--text-white);
   border: 2px solid rgba(255, 255, 255, 0.4);
 }
 
@@ -77,13 +77,13 @@
 
 .landslide-zone-tooltip.high {
   background: linear-gradient(135deg, #92400e, #b45309);
-  color: white;
+  color: var(--text-white);
   border: 2px solid #78350f;
 }
 
 .landslide-zone-tooltip.moderate {
   background: linear-gradient(135deg, #b45309, #d97706);
-  color: white;
+  color: var(--text-white);
   border: 2px solid #92400e;
 }
 

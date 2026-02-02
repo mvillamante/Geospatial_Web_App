@@ -1,7 +1,7 @@
 .alerts-card {
-    background: #ffffff;
+    background: var(--white-bg);
     border-radius: 16px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--light-gray-border);
     padding: 16px 20px;
 }
 
@@ -27,7 +27,7 @@
 .alerts-card .section-header h3 {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #374151;
+    color: var(--text-slate-black);
 }
 
 .alerts-card .section-icon {
@@ -51,7 +51,7 @@
     border-radius: 10px;
     background: #f9fafb;
     font-size: 0.875rem;
-    color: #374151;
+    color: var(--text-slate-black);
     transition: background-color 0.2s ease;
 }
 
@@ -62,7 +62,7 @@
 
 .alerts-card .alert-item:hover,
 .alerts-card .guide-item:hover {
-    background: #f3f4f6;
+    background: var(--off-white-bg);
 }
 
 .alerts-card .guide-views {

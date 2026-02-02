@@ -10,7 +10,7 @@
   padding: 4px 8px;
   font-weight: bold;
   border: 1px solid #ccc;
-  background: white;
+  background: var(--white-bg);
   cursor: pointer;
 }
 

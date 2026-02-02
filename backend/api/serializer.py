@@ -194,6 +194,14 @@ class AssignUserRoleSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
     
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email_or__phone = serializers.CharField()
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    email_or_phone = serializers.CharField()
+    otp = serializers.CharField(min_length=4, max_length=4)
+    new_password = serializers.CharField(min_length=8)
+    
 class IncidentReportCreateSerializer(serializers.ModelSerializer):
     photo = serializers.ImageField(required=False, allow_null=True, write_only=True)
 

@@ -2,7 +2,12 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.db import models
 from django.dispatch import receiver
+from django.utils import timezone
 from django.conf import settings
+
+import uuid
+import hashlib
+
 
 ROLE_CHOICES = [
     ('researcher', 'Researcher'),
@@ -215,3 +220,29 @@ class EvacuationCenter(models.Model):
     def coordinates(self):
         """Return coordinates as a tuple for Leaflet use"""
         return (float(self.latitude), float(self.longitude))
+    
+class PasswordResetOTP(models.Model):
+    """
+    Stores a hashed OTP for password reset.
+    Use email_or_phone to find the user.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email_or_phone = models.CharField(max_length=255, db_index=True)
+
+    otp_hash = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField
+
+    attempts = models.PositiveIntegerField(default=0)
+    max_attempts = models.PositiveIntegerField(default=5)
+    is_used = models.BooleanField(default=False)
+
+    def is_expired(self) -> bool:
+        return timezone.now() >= self.expires_at
+    
+    @staticmethod
+    def hash_otp(otp: str) -> str:
+        return hashlib.sha256(otp.encode("utf-8")).hexdigest()
+    
+    def __str__(self):
+        return f"PasswordResetOTP({self.email_or_phone})"

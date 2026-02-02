@@ -182,3 +182,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "incident-photos")
 
+PASSWORD_RESET_OTP_EXP_MINUTES = 5
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "hazspot12@gmail.com"
+EMAIL_HOST_PASSWORD = "HazzySpot@12"  
+DEFAULT_FROM_EMAIL = "HazSpot hazspot12@gmail.com"
+
+

@@ -11,7 +11,6 @@ from api.supabase_storage import create_signed_url
 from api.serializer import IncidentReportCreateSerializer
 from api.models import IncidentReport
 
-User = get_user_model
 
 class IncidentReportCreateView(APIView):
 

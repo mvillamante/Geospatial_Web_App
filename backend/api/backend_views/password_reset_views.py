@@ -1,0 +1,118 @@
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.db import transaction
+
+from api.models import PasswordResetOTP
+from api.serializer import *
+
+from api.utils import *
+
+User = get_user_model
+
+def find_user_by_email_or_phone(email_or_phone: str):
+    eop = (email_or_phone or "").strip()
+    if not eop:
+        return None
+    user = User.objects.filter(email_iexcact=eop).first()
+    if user:
+        return user
+    return User.objects.filter(phone_iexact=eop).first()
+
+
+class PasswordResetRequestOTP(APIView):
+    """
+    POST { email_or_phone }
+    Always returns 200 to avoid account enumeration.
+    """
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        ser = PasswordResetRequestSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        email_or_phone = ser.validated_data["email_or_phone"].strip()
+
+        recent = PasswordResetOTP.objects.filter(
+            email_or_phone=email_or_phone,
+            created_at__gte=timezone.now() - timezone.timedelta(seconds=60)
+        ).exists()
+
+        if recent:
+            return Response(
+                {"detail": "If the account exists, an OTP was sent. Please wait a minute before retrying."},
+                status=status.HTTP_200_OK,
+            )
+        
+        otp = generate_otp(6)
+        otp_hash = PasswordResetOTP(otp)
+        expires_at = make_expiry()
+
+        PasswordResetOTP.objects.create(
+            email_or_phone=email_or_phone,
+            otp_hash=otp_hash,
+            expires_at=expires_at
+        )
+
+        user = find_user_by_email_or_phone(email_or_phone)
+        if user:
+            if "@" in email_or_phone:
+                send_otp_email(email_or_phone, otp)
+            else:
+                send_otp_sms(email_or_phone, otp)
+        return Response(
+            {"detail": "If the account exists, an OTP has been sent."},
+            status=status.HTTP_200_OK,
+        )
+    
+class PasswordResetConfirmOTP(APIView):
+    """
+    POST { email_or_phone, otp, new_password }
+    Validates OTP and resets password.
+    """
+    authentication_classes = []
+    permission_classes = []
+
+    @transaction.atomic
+    def post(self, request):
+        ser = PasswordResetConfirmSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        email_or_phone = ser.validated_data["email_or_phone"].strip()
+        otp = ser.validated_data["otp"].strip()
+        new_password = ser.validated_data["new_password"]
+
+        user = find_user_by_email_or_phone(email_or_phone)
+        if not user:
+            return Response({"detail": "Invalid OTP or expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+        record = (
+            PasswordResetOTP.objects.filter(email_or_phone=email_or_phone, is_used=False)
+            .order_by("-created_at")
+            .first()
+        )
+
+        if not record:
+            return Response({"detail": "Invalid OTP or expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if record.is_expired():
+            return Response({"detail": "OTP expired. Please request a new one."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if record.attempts >= record.max_attempts:
+            return Response({"detail": "Too many attempts. Please request a new OTP."}, status=status.HTTP_400_BAD_REQUEST)
+
+        incoming_hash = PasswordResetOTP.hash_otp(otp)
+        if incoming_hash != record.otp_hash:
+            record.attempts += 1
+            record.save(update_fields=["attempts"])
+            return Response({"detail": "Invalid OTP or expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+        record.is_used = True
+        record.save(update_fields=["is_used"])
+
+        user.set_password(new_password)
+        user.save(update_fields=["password"])
+
+        return Response({"detail": "Password reset successful."}, status=status.HTTP_200_OK)
+

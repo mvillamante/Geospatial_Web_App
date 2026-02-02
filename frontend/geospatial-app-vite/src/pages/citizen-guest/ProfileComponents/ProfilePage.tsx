@@ -43,6 +43,15 @@ function toProgressStatus(raw: string | undefined | null): ProgressStatus {
 const ProfilePage: React.FC = () => {
   const { displayName, userRole, userRole2 } = getUserRoleAndDisplayName();
 
+  const normalizedRole = (userRole || "").toLowerCase();
+  const normalizedRole2 = (userRole2?.[0] || "").toLowerCase();
+
+  const isStaff =
+    normalizedRole === "admin" ||
+    normalizedRole === "officer" ||
+    normalizedRole2 === "admin" ||
+    normalizedRole2 === "officer";
+
   const [isRequested, setIsRequested] = useState(false);
 
   const [reports, setReports] = useState<ReportCardModel[]>([]);
@@ -173,8 +182,16 @@ const ProfilePage: React.FC = () => {
         setLoadingReports(false);
       }
     };
-    fetchMyReports();
-  }, []);
+    if (!isStaff) {
+      fetchMyReports();
+    } else {
+      setLoadingReports(false);
+      setReports([]);
+      setReportsError(null);
+    }
+
+  }, [isStaff]);
+
 
   const saveProfile = async () => {
     try {
@@ -287,6 +304,7 @@ const ProfilePage: React.FC = () => {
     <div className="profile-page">
       {/* Profile Header */}
       <div className="profile-card">
+
         <div className="profile-left">
           <div className="avatar-wrapper">
 
@@ -366,100 +384,108 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        <div className="stats">
-          <div className="stat-item">
-            <h1>{reports.length}</h1>
-            <span>Total Reports</span>
+        {!isStaff && (
+          <div className="stats">
+            <div className="stat-item">
+              <h1>{reports.length}</h1>
+              <span>Total Reports</span>
+            </div>
+            <div className="stat-divider" />
+            <div className="stat-item">
+              <h1 className="verified-count">
+                {reports.filter(
+                  (r) =>
+                    r.status.toLowerCase().includes("verified") ||
+                    r.status.toLowerCase().includes("resolved")
+                ).length}
+              </h1>
+              <span>Verified</span>
+            </div>
           </div>
-          <div className="stat-divider" />
-          <div className="stat-item">
-            <h1 className="verified-count">{reports.filter(r => r.status.toLowerCase().includes("verified") || r.status.toLowerCase().includes("resolved")).length}</h1>
-            <span>Verified</span>
-          </div>
+        )}
+      </div>
+
+
+        <div className="section-header section-header-row">
+          <h3 className="section-title">Security</h3>
+
+          <button
+            className="security-toggle-btn"
+            onClick={() => setShowPasswordForm((v) => !v)}
+            aria-expanded={showPasswordForm}
+          >
+            {showPasswordForm ? "Close" : "Change Password"}
+          </button>
         </div>
-      </div>
 
-      <div className="section-header section-header-row">
-        <h3 className="section-title">Security</h3>
+        {showPasswordForm && (
+          <div className="security-card">
+            <div className="security-row">
+              <label>Current Password</label>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+              />
+            </div>
 
-        <button
-          className="security-toggle-btn"
-          onClick={() => setShowPasswordForm((v) => !v)}
-          aria-expanded={showPasswordForm}
-        >
-          {showPasswordForm ? "Close" : "Change Password"}
-        </button>
-      </div>
+            <div className="security-row">
+              <label>New Password</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
 
-      {showPasswordForm && (
-        <div className="security-card">
-          <div className="security-row">
-            <label>Current Password</label>
-            <input
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-            />
+            <div className="security-row">
+              <label>Confirm New Password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+
+            <div className="security-actions">
+              <button className="save-btn" onClick={changePassword} disabled={passwordLoading}>
+                {passwordLoading ? "Changing..." : "Update Password"}
+              </button>
+
+              <button
+                className="cancel-btn"
+                onClick={() => {
+                  setShowPasswordForm(false);
+                  setCurrentPassword("");
+                  setNewPassword("");
+                  setConfirmPassword("");
+                }}
+                disabled={passwordLoading}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
-
-          <div className="security-row">
-            <label>New Password</label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-          </div>
-
-          <div className="security-row">
-            <label>Confirm New Password</label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
-
-          <div className="security-actions">
-            <button className="save-btn" onClick={changePassword} disabled={passwordLoading}>
-              {passwordLoading ? "Changing..." : "Update Password"}
-            </button>
-
-            <button
-              className="cancel-btn"
-              onClick={() => {
-                setShowPasswordForm(false);
-                setCurrentPassword("");
-                setNewPassword("");
-                setConfirmPassword("");
-              }}
-              disabled={passwordLoading}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-
-
-
-      <div className="section-header">
-        <h3 className="section-title">Report History</h3>
-      </div>
-
-      <div className="report-list">
-        {loadingReports && <p>Loading report history...</p>}
-        {reportsError && <p style={{ color: "crimson" }}>{reportsError}</p>}
-        {!loadingReports && !reportsError && reports.length === 0 && (
-          <p>No reports yet.</p>
         )}
 
-        {reports.map((report) => (
-          <ReportCard key={report.id} report={report} />
-        ))}
+        {!isStaff && (
+          <>
+            <div className="section-header">
+              <h3 className="section-title">Report History</h3>
+            </div>
+
+            <div className="report-list">
+              {loadingReports && <p>Loading report history...</p>}
+              {reportsError && <p style={{ color: "crimson" }}>{reportsError}</p>}
+              {!loadingReports && !reportsError && reports.length === 0 && <p>No reports yet.</p>}
+
+              {reports.map((report) => (
+                <ReportCard key={report.id} report={report} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
-    </div>
   );
 };
 

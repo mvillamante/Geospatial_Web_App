@@ -77,14 +77,9 @@
   color: #c2410c;
 }
 
-.badge.assigned {
+.badge.badge.in_progress {
   background: #eff6ff;
   color: #1d4ed8;
-}
-
-.badge.in_progress {
-  background: #ecfdf5;
-  color: #047857;
 }
 
 .badge.rejected {

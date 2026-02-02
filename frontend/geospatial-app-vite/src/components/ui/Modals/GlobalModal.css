@@ -404,3 +404,19 @@
     padding: 1.5rem;
   }
 }
+
+/* Forgot Password */
+.forgot-password {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #64748b;
+  text-align: right;
+  cursor: pointer;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.forgot-password:hover {
+  color: #2563eb; 
+  text-decoration: underline;
+}
+

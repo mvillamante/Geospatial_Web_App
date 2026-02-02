@@ -87,6 +87,32 @@
   color: var(--text-primary);
 }
 
+.location-mode {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.location-mode button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+}
+
+.location-mode button.active {
+  border-color: #333;
+  font-weight: 600;
+}
+
+.pin-hint {
+  display: block;
+  margin-top: 6px;
+  opacity: 0.7;
+}
+
+
 /* =========================
    Filters and Search
 ========================= */
@@ -431,6 +457,14 @@ li.critical::before {
     box-shadow: 0 0 0 4px rgba(153, 27, 27, 0);
   }
 }
+
+/* Warning */
+.profanity-warning {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
 
 /* =========================
    Scrollbar 

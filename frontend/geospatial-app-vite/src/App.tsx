@@ -118,7 +118,6 @@ const App: React.FC = () => {
           <Route path="guest" element={<Navigate to="guest/community-feed" replace />} />
           <Route path="guest/alerts-map" element={<AlertsMapPage />} />
           <Route path="guest/evac-center" element={<EvacCenterPage />} />
-          <Route path="guest/prep-guide" element={<CommunityFeedPage />} />
         </Route>
 
       </Routes>

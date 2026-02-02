@@ -132,6 +132,8 @@ AUTH_PASSWORD_VALIDATORS = [
     {   'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'  },
 ]
 
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 # REST FRAMEWORK
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -189,7 +191,7 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "hazspot12@gmail.com"
-EMAIL_HOST_PASSWORD = "HazzySpot@12"  
-DEFAULT_FROM_EMAIL = "HazSpot hazspot12@gmail.com"
+EMAIL_HOST_PASSWORD = "oevfkgdqoihmufuq"  
+DEFAULT_FROM_EMAIL = "HazSpot <hazspot12@gmail.com>"
 
 

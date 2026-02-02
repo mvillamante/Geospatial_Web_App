@@ -298,7 +298,7 @@ class PasswordResetOTP(models.Model):
 
     otp_hash = models.CharField(max_length=64)
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField
+    expires_at = models.DateTimeField()
 
     attempts = models.PositiveIntegerField(default=0)
     max_attempts = models.PositiveIntegerField(default=5)

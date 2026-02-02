@@ -32,8 +32,8 @@ urlpatterns = [
     path("users/me/", MeView.as_view(), name="users-me"),
 
     #Password_Reset_Views
-    path("password-reset/request", PasswordResetRequestOTP.as_view(), name="password-reset"),
-    path("password-reset/confirm", PasswordResetConfirmOTP.as_view(), name="password-confirm"),
+    path("password-reset/request/", PasswordResetRequestOTP.as_view(), name="password-reset"),
+    path("password-reset/confirm/", PasswordResetConfirmOTP.as_view(), name="password-confirm"),
 
     # Geocoding_Views
     path("geocoding/reverse/", reverse_geocode, name="reverse_geocode"),

@@ -3,6 +3,7 @@ from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from datetime import timedelta
 from django.db import transaction
 
 from api.models import PasswordResetOTP
@@ -10,16 +11,16 @@ from api.serializer import *
 
 from api.utils import *
 
-User = get_user_model
+User = get_user_model()
 
 def find_user_by_email_or_phone(email_or_phone: str):
     eop = (email_or_phone or "").strip()
     if not eop:
         return None
-    user = User.objects.filter(email_iexcact=eop).first()
+    user = User.objects.filter(email__iexact=eop).first()
     if user:
         return user
-    return User.objects.filter(phone_iexact=eop).first()
+    return User.objects.filter(phone__iexact=eop).first()
 
 
 class PasswordResetRequestOTP(APIView):
@@ -37,7 +38,7 @@ class PasswordResetRequestOTP(APIView):
 
         recent = PasswordResetOTP.objects.filter(
             email_or_phone=email_or_phone,
-            created_at__gte=timezone.now() - timezone.timedelta(seconds=60)
+            created_at__gte=timezone.now() - timedelta(seconds=60)
         ).exists()
 
         if recent:
@@ -47,7 +48,7 @@ class PasswordResetRequestOTP(APIView):
             )
         
         otp = generate_otp(6)
-        otp_hash = PasswordResetOTP(otp)
+        otp_hash = PasswordResetOTP.hash_otp(otp)
         expires_at = make_expiry()
 
         PasswordResetOTP.objects.create(

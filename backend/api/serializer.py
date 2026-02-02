@@ -195,7 +195,7 @@ class AssignUserRoleSerializer(serializers.ModelSerializer):
         return instance
     
 class PasswordResetRequestSerializer(serializers.Serializer):
-    email_or__phone = serializers.CharField()
+    email_or_phone = serializers.CharField()
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
     email_or_phone = serializers.CharField()

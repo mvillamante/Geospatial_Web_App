@@ -65,20 +65,43 @@ export function createNDVILayer(map: L.Map, options: NDVILayerOptions = {}): L.L
     [bbox[3], bbox[2]], // north-east (lat, lon)
   ];
 
+  // Add a loading indicator popup at the center of the bounds
+  const center: L.LatLngExpression = [
+    (bbox[1] + bbox[3]) / 2,
+    (bbox[0] + bbox[2]) / 2,
+  ];
+  
+  const loadingPopup = L.popup({
+    closeButton: false,
+    autoClose: false,
+    closeOnClick: false,
+    className: "ndvi-loading-popup",
+  })
+    .setLatLng(center)
+    .setContent('<div style="padding: 12px; text-align: center;"><span>Loading Green Index...<br/></span></div>')
+    .addTo(layerGroup);
+
+  console.log("[NDVI] Fetching satellite image:", imageUrl);
+
   fetch(imageUrl, { signal: controller.signal })
     .then(async (res) => {
       if (!res.ok) {
         const errorText = await res.text().catch(() => "");
-        throw new Error(`NDVI request failed: ${res.status} ${res.statusText} ${errorText}`.trim());
+        console.error("[NDVI] API Error Response:", res.status, errorText);
+        throw new Error(`NDVI request failed: ${res.status} ${res.statusText} - ${errorText}`.trim());
       }
       const contentType = res.headers.get("content-type") || "";
       if (!contentType.includes("image/")) {
         const errorText = await res.text().catch(() => "");
+        console.error("[NDVI] Invalid content type:", contentType, errorText);
         throw new Error(`NDVI response is not an image (${contentType}) ${errorText}`.trim());
       }
       return res.blob();
     })
     .then((blob) => {
+      // Remove loading popup on success
+      loadingPopup.remove();
+      
       const objectUrl = URL.createObjectURL(blob);
       const imageOverlay = L.imageOverlay(objectUrl, bounds, {
         opacity,
@@ -88,10 +111,18 @@ export function createNDVILayer(map: L.Map, options: NDVILayerOptions = {}): L.L
 
       imageOverlay.on("remove", () => URL.revokeObjectURL(objectUrl));
       imageOverlay.addTo(layerGroup).bringToFront();
+      console.log("[NDVI] Layer loaded successfully");
     })
     .catch((err) => {
       if (err.name !== "AbortError") {
-        console.error("NDVI layer failed to load:", err);
+        console.error("[NDVI] Layer failed to load:", err);
+        // Show error in the popup
+        loadingPopup.setContent(
+          `<div style="padding: 8px; text-align: center; color: #c00; max-width: 250px;">
+            <strong>Green Index Error</strong><br/>
+            <span style="font-size: 12px;">${err.message || "Failed to load satellite imagery"}</span>
+          </div>`
+        );
       }
     });
 

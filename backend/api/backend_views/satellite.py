@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime, timedelta
 
@@ -5,6 +6,8 @@ import requests
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+
+logger = logging.getLogger(__name__)
 
 COPERNICUS_CLIENT_ID = os.getenv("COPERNICUS_CLIENT_ID")
 COPERNICUS_CLIENT_SECRET = os.getenv("COPERNICUS_CLIENT_SECRET")
@@ -15,8 +18,10 @@ PROCESS_URL = "https://sh.dataspace.copernicus.eu/api/v1/process"
 
 def _get_access_token() -> str:
     if not COPERNICUS_CLIENT_ID or not COPERNICUS_CLIENT_SECRET:
-        raise ValueError("Copernicus credentials are not configured")
+        logger.error("Copernicus credentials not configured. Set COPERNICUS_CLIENT_ID and COPERNICUS_CLIENT_SECRET env vars.")
+        raise ValueError("Copernicus credentials are not configured. Please set COPERNICUS_CLIENT_ID and COPERNICUS_CLIENT_SECRET environment variables.")
 
+    logger.info("Requesting Copernicus access token...")
     response = requests.post(
         TOKEN_URL,
         data={
@@ -27,6 +32,7 @@ def _get_access_token() -> str:
         timeout=20,
     )
     response.raise_for_status()
+    logger.info("Successfully obtained Copernicus access token")
     return response.json()["access_token"]
 
 
@@ -119,18 +125,20 @@ def get_ndvi_image(request):
         if parsed_from > parsed_to:
             parsed_from = parsed_to - timedelta(days=30)
 
-        # Optional: expand the search window slightly to find clearer imagery
-        # For month-specific requests, expand by a few days to increase chances of clear images
-        # For year requests, no expansion needed as we have a full year
+        # Expand the search window to find clearer imagery and enable compositing
+        # The leastCC mosaicking will select the CLEAREST PIXEL from ALL images in the time range
+        # So a wider range = more chances to fill gaps with clear pixels
         if month_param:
-            default_expand = "7"  # Expand 7 days for month requests to find clearer images
+            # For month requests, expand significantly to get complete coverage
+            # This allows compositing from ~3 months of data centered on the requested month
+            default_expand = "45"
         elif year_param:
             default_expand = "0"  # Full year has enough data
         else:
-            default_expand = "5"
+            default_expand = "30"
         
         expand_days = int(request.GET.get("expandDays", default_expand))
-        expand_days = max(0, min(expand_days, 30))  # Cap at 30 days expansion
+        expand_days = max(0, min(expand_days, 90))  # Allow up to 90 days expansion
 
         search_from = parsed_from - timedelta(days=expand_days)
         search_to = parsed_to + timedelta(days=expand_days)
@@ -138,18 +146,19 @@ def get_ndvi_image(request):
         # Clamp search_to to today
         if search_to > end_date:
             search_to = end_date
+        
+        # Ensure we have at least 30 days of data to composite from
+        min_range_days = 30
+        if (search_to - search_from).days < min_range_days:
+            search_from = search_to - timedelta(days=min_range_days)
 
         from_date = search_from.isoformat()
         to_date = search_to.isoformat()
 
-        # Cloud coverage filter - use higher threshold for month requests since availability varies
-        # The leastCC mosaicking will still pick the clearest available image
-        if month_param:
-            default_cloud = "50"  # Higher threshold for month-specific to ensure data is found
-        else:
-            default_cloud = "30"  # Reasonable default for year-wide searches
-        
-        max_cloud = int(request.GET.get("maxCloud", default_cloud))
+        # Cloud coverage filter - use 100% to include ALL images for compositing
+        # The leastCC mosaicking will still pick only the clearest PIXELS from each image
+        # This ensures we get complete coverage by combining clear pixels from multiple passes
+        max_cloud = int(request.GET.get("maxCloud", "100"))
         max_cloud = max(0, min(max_cloud, 100))
 
         def _parse_size(value: str | None, default: int) -> int:
@@ -167,51 +176,89 @@ def get_ndvi_image(request):
 
         try:
             access_token = _get_access_token()
+        except ValueError as exc:
+            # Credentials not configured
+            logger.error(f"Copernicus credentials error: {exc}")
+            return JsonResponse(
+                {"error": str(exc)},
+                status=500,
+            )
         except requests.RequestException as exc:
             details = getattr(exc.response, "text", None)
+            logger.error(f"Copernicus token request failed: {details or str(exc)}")
             return JsonResponse(
                 {"error": "Copernicus token request failed", "details": details or str(exc)},
                 status=502,
             )
 
         # Evalscript with Scene Classification Layer (SCL) for cloud masking
-        # SCL values: 4=Vegetation, 5=Bare Soil, 6=Water, 7=Unclassified (clear pixels)
-        # Clouds/shadows: 3=Cloud Shadow, 8=Cloud Med, 9=Cloud High, 10=Cirrus, 11=Snow
+        # With leastCC mosaicking + 100% cloud threshold, Sentinel Hub will:
+        # - Collect ALL images in the time range
+        # - For each pixel, select the image with least cloud at that location
+        # - Apply this evalscript to render the best available data
         evalscript = """
 //VERSION=3
 function setup() {
   return {
-    input: [{ bands: ["B04", "B08", "SCL"] }],
-    output: { bands: 4 }
+    input: [{ bands: ["B04", "B08", "SCL"], units: "DN" }],
+    output: { bands: 4 },
+    mosaicking: "ORBIT"
   };
 }
 
-function evaluatePixel(sample) {
-  let scl = sample.SCL;
+function preProcessScenes(collections) {
+  // Sort scenes by cloud coverage (ascending) so clearest images are preferred
+  collections.scenes.orbits.sort(function(a, b) {
+    return a.tileCloudCoverage - b.tileCloudCoverage;
+  });
+  return collections;
+}
 
-  // Check if pixel is cloudy or shadowy - use a neutral color for these
-  // SCL: 3=cloud shadow, 8=cloud medium prob, 9=cloud high prob, 10=thin cirrus
-  let isCloudy = (scl === 3 || scl === 8 || scl === 9 || scl === 10);
+function evaluatePixel(samples) {
+  // With ORBIT mosaicking, we get an array of samples from different orbits
+  // Iterate through samples to find the best (clearest) pixel
   
-  let ndvi = (sample.B08 - sample.B04) / (sample.B08 + sample.B04 + 0.0001);
+  for (let i = 0; i < samples.length; i++) {
+    let sample = samples[i];
+    let scl = sample.SCL;
+    
+    // Skip no-data pixels (SCL = 0)
+    if (scl === 0) continue;
+    
+    // Skip cloudy/shadow pixels if we have more samples to check
+    // SCL: 1=saturated, 3=cloud shadow, 8=cloud med, 9=cloud high, 10=cirrus, 11=snow
+    let isBad = (scl === 1 || scl === 3 || scl === 8 || scl === 9 || scl === 10 || scl === 11);
+    
+    if (isBad && i < samples.length - 1) {
+      // Try next sample if this one is bad and we have more
+      continue;
+    }
+    
+    // Calculate NDVI for this pixel
+    let ndvi = (sample.B08 - sample.B04) / (sample.B08 + sample.B04 + 0.0001);
+    
+    // If still cloudy but no better option, show semi-transparent
+    if (isBad) {
+      // Use a neutral green-gray for unavoidable cloud pixels
+      return [0.6, 0.65, 0.5, 0.5];
+    }
+    
+    // Stretch NDVI range for clearer contrast
+    let scaled = Math.max(0.0, Math.min(1.0, (ndvi + 0.1) / 0.9));
+    // Slight gamma boost to emphasize greens
+    scaled = Math.pow(scaled, 0.85);
 
-  // For cloudy pixels, show a muted version
-  if (isCloudy) {
-    // Return transparent to reveal the basemap beneath clouds
-    return [0.85, 0.85, 0.85, 0.0];
+    // Enhanced color ramp (brown -> yellow -> light green -> deep green)
+    if (scaled < 0.15) return [0.55, 0.35, 0.20, 1.0];  // Brown (bare soil/urban)
+    if (scaled < 0.30) return [0.85, 0.70, 0.35, 1.0];  // Tan/yellow
+    if (scaled < 0.45) return [0.75, 0.82, 0.35, 1.0];  // Yellow-green
+    if (scaled < 0.60) return [0.50, 0.78, 0.30, 1.0];  // Light green
+    if (scaled < 0.75) return [0.25, 0.70, 0.25, 1.0];  // Medium green
+    return [0.08, 0.55, 0.15, 1.0];                      // Deep green (dense vegetation)
   }
   
-  // Stretch NDVI range for clearer contrast
-  let scaled = Math.max(0.0, Math.min(1.0, (ndvi + 0.1) / 0.9));
-  // Slight gamma boost to emphasize greens
-  scaled = Math.pow(scaled, 0.8);
-
-  // Enhanced color ramp (brown -> yellow-green -> deep green)
-  if (scaled < 0.2) return [0.45, 0.25, 0.12, 1.0];
-  if (scaled < 0.4) return [0.9, 0.75, 0.35, 1.0];
-  if (scaled < 0.6) return [0.65, 0.85, 0.25, 1.0];
-  if (scaled < 0.8) return [0.2, 0.75, 0.25, 1.0];
-  return [0.05, 0.55, 0.12, 1.0];
+  // No valid samples found - return transparent
+  return [0, 0, 0, 0];
 }
 """
 
@@ -230,6 +277,8 @@ function evaluatePixel(sample) {
                                 "to": f"{to_date}T23:59:59Z",
                             },
                             "maxCloudCoverage": max_cloud,
+                        },
+                        "processing": {
                             "mosaickingOrder": "leastCC",
                         },
                     }
@@ -243,6 +292,8 @@ function evaluatePixel(sample) {
             "evalscript": evalscript,
         }
 
+        logger.info(f"Requesting NDVI image: bbox={bbox}, from={from_date}, to={to_date}, maxCloud={max_cloud}")
+        
         response = requests.post(
             PROCESS_URL,
             json=payload,
@@ -254,6 +305,7 @@ function evaluatePixel(sample) {
         )
 
         if not response.ok:
+            logger.error(f"Copernicus process request failed: {response.status_code} - {response.text[:500]}")
             return JsonResponse(
                 {
                     "error": "Copernicus process request failed",
@@ -263,14 +315,18 @@ function evaluatePixel(sample) {
                 status=502,
             )
 
+        logger.info(f"NDVI image retrieved successfully ({len(response.content)} bytes)")
         return HttpResponse(response.content, content_type="image/png")
     except requests.RequestException as exc:
         details = getattr(exc.response, "text", None)
+        logger.error(f"Copernicus request failed: {details or str(exc)}")
         return JsonResponse(
             {"error": "Copernicus request failed", "details": details or str(exc)},
             status=502,
         )
     except ValueError as exc:
+        logger.warning(f"Invalid request parameters: {exc}")
         return JsonResponse({"error": str(exc)}, status=400)
     except Exception as exc:
+        logger.exception(f"Unexpected error in get_ndvi_image: {exc}")
         return JsonResponse({"error": "Unexpected error", "details": str(exc)}, status=500)

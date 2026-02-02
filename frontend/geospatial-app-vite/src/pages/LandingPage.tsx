@@ -12,11 +12,11 @@ const LandingPage: React.FC = () => {
   const { user, refreshUser } = useAuth(); // Get current user from context
 
   const [loading, setLoading] = useState(true);
-  const [modalType, setModalType] = useState<"login" | "signup" | null>(null);
+  const [modalType, setModalType] = useState<"login" | "signup" | "forgotPassword" | "verifyOtp" | null>(null);
   const [activeSection, setActiveSection] = useState("home");
 
   const closeModal = () => setModalType(null);
-  const switchModal = (type: "login" | "signup") => setModalType(type);
+  const switchModal = (type: "login" | "signup" | "forgotPassword" | "verifyOtp") => setModalType(type);
 
   // Fetch user info on mount
   useEffect(() => {

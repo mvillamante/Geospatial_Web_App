@@ -132,6 +132,8 @@ AUTH_PASSWORD_VALIDATORS = [
     {   'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'  },
 ]
 
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 # REST FRAMEWORK
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -181,4 +183,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "incident-photos")
+
+PASSWORD_RESET_OTP_EXP_MINUTES = 5
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "hazspot12@gmail.com"
+EMAIL_HOST_PASSWORD = "oevfkgdqoihmufuq"  
+DEFAULT_FROM_EMAIL = "HazSpot <hazspot12@gmail.com>"
+
 

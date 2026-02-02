@@ -1,5 +1,5 @@
 from django.contrib import admin
-from api.models import CustomUser, IncidentReport, ResearcherRequest, CmsGuide, EvacuationCenter
+from api.models import CustomUser, IncidentReport, ResearcherRequest, CmsGuide, EvacuationCenter, CmsGuideAttachment
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ['username', 'staff_id', 'email', 'role', 'extra_roles', 'last_login', 'is_active']
@@ -25,21 +25,35 @@ class ResearcherRequestAdmin(admin.ModelAdmin):
 
 admin.site.register(ResearcherRequest, ResearcherRequestAdmin)
 
+class CmsGuideAttachmentInline(admin.TabularInline):
+    model = CmsGuideAttachment
+    extra = 1
+
 class CmsGuideAdmin(admin.ModelAdmin):
-    list_display = [
-        'id',
-        'title',
-        'category',
-        'status',
-        'created_at',
-        'updated_at',
-    ]
+    inlines = [CmsGuideAttachmentInline]
+    list_display = (
+        "post_id",
+        "post_title",
+        "staff_id",
+        "post_type",
+        "status",
+        "is_pinned",
+        "created_at",
+        "published_at",
+    )
 
-    list_filter = ['status', 'category', 'created_at']
-    search_fields = ['title', 'category', 'content']
-    ordering = ['-updated_at']
+    list_filter = ("status","post_type","is_pinned",)
+    search_fields = ("post_title","post_body",)
+    ordering = ("-created_at",)
 
+class CmsGuideAttachmentAdmin(admin.ModelAdmin):
+    list_display = (
+        "guide",
+        "file_type",
+        "created_at",
+    )
 admin.site.register(CmsGuide, CmsGuideAdmin)
+admin.site.register(CmsGuideAttachment, CmsGuideAttachmentAdmin)
 
 class EvacuationCenterAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'type', 'capacity', 'latitude', 'longitude']

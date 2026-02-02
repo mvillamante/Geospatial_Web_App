@@ -10,6 +10,7 @@ from .backend_views.incident_views import *
 from .backend_views.misc_views import *
 from .backend_views.researcher_views import *
 from .backend_views.satellite import *
+from .backend_views.password_reset_views import *
 from .backend_views.tomtom_views import tomtom_roads_tile, tomtom_traffic_tile
 
 urlpatterns = [
@@ -29,6 +30,10 @@ urlpatterns = [
     path("sign_up/", sign_up, name="sign_up"),
     path("login_user/", login_user, name="login_user"),
     path("users/me/", MeView.as_view(), name="users-me"),
+
+    #Password_Reset_Views
+    path("password-reset/request/", PasswordResetRequestOTP.as_view(), name="password-reset"),
+    path("password-reset/confirm/", PasswordResetConfirmOTP.as_view(), name="password-confirm"),
 
     # Geocoding_Views
     path("geocoding/reverse/", reverse_geocode, name="reverse_geocode"),

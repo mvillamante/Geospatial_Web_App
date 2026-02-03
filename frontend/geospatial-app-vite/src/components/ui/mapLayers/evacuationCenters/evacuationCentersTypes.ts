@@ -2,7 +2,8 @@ export type EvacuationCenterType =
   | "school"
   | "court"
   | "hall"
-  | "gymnasium";
+  | "gymnasium"
+  | "others";
 
 export interface EvacuationCenterData {
   name: string;

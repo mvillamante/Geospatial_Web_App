@@ -20,12 +20,13 @@ interface AddEvacCenterModalProps {
   open: boolean;
   onClose: () => void;
   onAdd: (newCenter: EvacuationCenter) => void;
-  barangays: string[];
+  barangays: readonly string[];
 }
 
-const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = ({ open, onClose, onAdd, barangays }) => {
+const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = (
+  { open, onClose, onAdd, barangays }) => {
   // Fully typed state
-  const [formState, setFormState] = useState<EvacuationCenter>({
+  const [formState, setFormState] = useState<EvacuationCenter & { typeSelected?: boolean }>({
     id: 0,
     name: "",
     type: "",
@@ -35,6 +36,7 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = ({ open, onClose, 
     contact: "",
     coordinates: "",
     facilities: [],
+    typeSelected: false,
   });
 
   const [mapOpen, setMapOpen] = useState(false);
@@ -66,6 +68,7 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = ({ open, onClose, 
       contact: "",
       coordinates: "",
       facilities: [],
+      typeSelected: false,
     });
 
     onClose();
@@ -95,12 +98,32 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = ({ open, onClose, 
 
               <div className="form-group small">
                 <label>Type</label>
-                <select name="type" value={formState.type} onChange={handleChange} required>
+                <select
+                  value={formState.type === "" && !formState.typeSelected ? "" : formState.typeSelected ? "others" : formState.type}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "others") {
+                      setFormState(prev => ({
+                        ...prev,
+                        type: "",
+                        typeSelected: true, // mark that user selected Others
+                      }));
+                    } else {
+                      setFormState(prev => ({
+                        ...prev,
+                        type: value,
+                        typeSelected: false,
+                      }));
+                    }
+                  }}
+                  required
+                >
                   <option value="">Select Type</option>
                   <option value="school">School</option>
                   <option value="gymnasium">Gymnasium</option>
                   <option value="court">Covered Court</option>
                   <option value="hall">Multi-Purpose Hall</option>
+                  <option value="others">Others</option>
                 </select>
               </div>
 
@@ -109,6 +132,24 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = ({ open, onClose, 
                 <input name="capacity" type="number" value={formState.capacity} onChange={handleChange} required />
               </div>
             </div>
+
+            {formState.typeSelected && (
+              <div className="form-group small">
+                <label>Other Type</label>
+                <input
+                  type="text"
+                  placeholder="Enter type"
+                  value={formState.type}
+                  onChange={(e) =>
+                    setFormState(prev => ({
+                      ...prev,
+                      type: e.target.value,
+                    }))
+                  }
+                  required
+                />
+              </div>
+            )}
 
             {/* Address */}
             <div className="form-group">

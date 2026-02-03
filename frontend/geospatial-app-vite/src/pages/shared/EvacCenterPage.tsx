@@ -19,6 +19,7 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
+import { getCabuyaoBarangays } from "../../constants";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -52,14 +53,6 @@ const mapApiToCenter = (api: any): EvacuationCenter => ({
     : "",
 });
 
-function getCabuyaoBarangays(): string[] {
-  return [
-    "Baclaran", "Banaybanay", "Banlic", "Bigaa", "Butong",
-    "Casile", "Diezmo", "Gulod", "Mamatid", "Marinig",
-    "Niugan", "Pittland", "Pulo", "Sala", "San Isidro",
-    "Uno (Poblacion 1)", "Dos (Poblacion 2)", "Tres (Poblacion 3)",
-  ];
-}
 
 interface EvacCenterEditorProps {
   center: EvacuationCenter;
@@ -519,6 +512,14 @@ function EvacCenterPage() {
                         <Phone className="evac-info-icon" />
                         <span>{center.contact}</span>
                       </div>
+                      <div className="evac-info-row">
+                        <Phone className="evac-info-icon" />
+                        <div className="evac-facilities">
+                          {center.facilities?.map((facility, index) => (
+                            <span key={index}>{facility}</span>
+                          ))}
+                        </div>
+                      </div>
                     </>
                   )}
                 </div>
@@ -582,7 +583,7 @@ function EvacCenterPage() {
             address: newCenter.address,
             contact: newCenter.contact,
             barangay: newCenter.barangay,
-            facilities: newCenter.facilities, //@here
+            facilities: newCenter.facilities,
           };
 
           const saved = await createEvacCenter(payload);

@@ -1,7 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from .backend_views.cms_views import *
 from .backend_views.admin_views import *
 from .backend_views.auth_views import *
 from .backend_views.cms_views import *
@@ -12,6 +11,7 @@ from .backend_views.researcher_views import *
 from .backend_views.satellite import *
 from .backend_views.password_reset_views import *
 from .backend_views.tomtom_views import tomtom_roads_tile, tomtom_traffic_tile
+from .backend_views.community_feed_views import *
 
 urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
@@ -69,6 +69,9 @@ urlpatterns = [
     path("cms/guides/<int:pk>/archive/", archive_guide),
     path("cms/guides/<int:pk>/permanent-delete/", permanent_delete_guide),
     path("cms/guides/<int:pk>/attachments/", upload_guide_attachment),
+
+    # Community_Feed_Views
+    path("community-feed/", community_feed, name="community-feed"),
 
     # Misc_Views
     path("test/", testEndPoint, name="test"),

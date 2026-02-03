@@ -68,6 +68,7 @@ urlpatterns = [
     path("cms/guides/<int:pk>/publish/", toggle_publish),
     path("cms/guides/<int:pk>/archive/", archive_guide),
     path("cms/guides/<int:pk>/permanent-delete/", permanent_delete_guide),
+    path("cms/guides/<int:pk>/attachments/", upload_guide_attachment),
 
     # Misc_Views
     path('test/', testEndPoint, name='test'),

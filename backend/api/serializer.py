@@ -1,6 +1,6 @@
 from django.utils import timezone
-from api.models import CustomUser, ResearcherRequest, CmsGuide, IncidentReport, EvacuationCenter
-from api.supabase_storage import upload_private_photo, create_signed_url
+from api.models import CustomUser, ResearcherRequest, CmsGuide, IncidentReport, EvacuationCenter, CmsGuideAttachment
+from api.supabase_storage import upload_private_photo, create_signed_url, upload_cms_photo
 from django.utils.timesince import timesince
 from django.utils.crypto import get_random_string
 from django.contrib.auth.password_validation import validate_password
@@ -413,11 +413,35 @@ class ResearcherRequestSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'username', 'email', 'status', 'requested_at', 'reject_reason', 'rejected_at']
         read_only_fields = ['id', 'user', 'username', 'email', 'requested_at', 'rejected_at']
 
+class CmsGuideAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CmsGuideAttachment
+        fields = ["id", "guide", "file_url", "file_type", "created_at"]
+
+
 class CmsGuideSerializer(serializers.ModelSerializer):
+    attachments = CmsGuideAttachmentSerializer(many=True, read_only=True)
+
     class Meta:
         model = CmsGuide
         fields = "__all__"
-        
+
+
+class CmsGuideAttachmentCreateSerializer(serializers.Serializer):
+    image = serializers.ImageField(write_only=True)
+
+    def create(self, validated_data):
+        guide = self.context["guide"]
+        image = validated_data["image"]
+
+        public_url = upload_cms_photo(image)
+
+        return CmsGuideAttachment.objects.create(
+            guide=guide,
+            file_url=public_url,
+            file_type="image",
+        )
+             
 class CreateStaffUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     class Meta:

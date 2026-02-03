@@ -5,9 +5,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from api.models import CmsGuide
-from api.serializer import CmsGuideSerializer
-
+from api.models import CmsGuide, CmsGuideAttachment
+from api.serializer import CmsGuideSerializer, CmsGuideAttachmentSerializer, CmsGuideAttachmentCreateSerializer
+from api.supabase_storage import upload_cms_photo
 
 def admin_only(user):
     return user.role == "admin"
@@ -128,3 +128,31 @@ def permanent_delete_guide(request, pk):
 
     guide.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def upload_guide_attachment(request, pk):
+    if not admin_only(request.user):
+        return Response({"detail": "Forbidden"}, status=403)
+
+    try:
+        guide = CmsGuide.objects.get(pk=pk)
+    except CmsGuide.DoesNotExist:
+        return Response({"error": "Guide not found"}, status=404)
+
+    file = request.FILES.get("image")
+    if not file:
+        return Response({"error": "No file provided"}, status=400)
+
+    file_url, file_type = upload_cms_photo(file, "cms-photos")
+
+    attachment = CmsGuideAttachment.objects.create(
+        guide=guide,
+        file_url=file_url,
+        file_type=file_type
+    )
+
+    return Response(
+        CmsGuideAttachmentSerializer(attachment).data,
+        status=201
+    )

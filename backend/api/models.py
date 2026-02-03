@@ -5,6 +5,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.conf import settings
 from django.utils.timezone import now
+from api.supabase_storage import delete_cms_photo
 
 import uuid
 import hashlib
@@ -234,28 +235,21 @@ class CmsGuide(models.Model):
             self.post_id = f"POST-{self.id}"
             super().save(update_fields=["post_id"])
 
-class CmsGuideAttachment(models.Model):
-    FILE_TYPE_CHOICES = [
-        ("image", "Image"),
-    ]
+    def delete(self, *args, **kwargs):
+        for attachment in getattr(self, "attachments", []).all():
+            delete_cms_photo(attachment.file_url)
+        super().delete(*args, **kwargs)
 
+class CmsGuideAttachment(models.Model):
     guide = models.ForeignKey(
         CmsGuide,
-        on_delete=models.CASCADE,
-        related_name="attachments"
+        related_name="attachments",
+        on_delete=models.CASCADE
     )
-
-    file = models.ImageField(upload_to="cms_guides/")
-    file_type = models.CharField(
-        max_length=20,
-        choices=FILE_TYPE_CHOICES,
-        default="image"
-    )
-
+    file_url = models.TextField()
+    file_type = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.file_type} - {self.guide.post_title}"
 
 
 # Evacuation Center model ---------------------------------------------------------------

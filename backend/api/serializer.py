@@ -136,6 +136,8 @@ class AdminUserListSerializer(serializers.ModelSerializer):
             'id',
             'staff_id',
             'username',
+            'first_name',
+            'last_name',
             'email',
             'phone',
             'role',

@@ -42,6 +42,45 @@
     color: #dc2626;
 }
 
+/* CMS Active / Archived tabs */
+
+.cms-page .page-actions {
+  display: inline-flex;
+  background: #f3f4f6;
+  padding: 4px;
+  border-radius: 14px;
+  gap: 4px;
+}
+
+.cms-page .tab-btn {
+  border: none;
+  background: transparent;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.cms-page .tab-btn:hover {
+  color: #111827;
+}
+
+.cms-page .tab-btn.active {
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.cms-page .tab-btn:active {
+  transform: scale(0.97);
+}
+
+
 /* Modal */
 .cms-page .modal-overlay {
     position: fixed;

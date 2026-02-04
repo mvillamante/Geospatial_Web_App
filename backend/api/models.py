@@ -188,22 +188,16 @@ class CmsGuide(models.Model):
     ]
 
     POST_TYPE_CHOICES = [
-        ("safety", "Safety"),
-        ("protocol", "Protocol"),
-        ("preparedness", "Preparedness"),
+        ("advisory", "Advisory"),
         ("announcement", "Announcement"),
+        ("guide", "Guide"),
     ]
 
     # Internal ID
     id = models.BigAutoField(primary_key=True)
 
     # Public-facing ID
-    post_id = models.CharField(
-        max_length=50,
-        unique=True,
-        blank=True,
-        null=True
-    )
+    post_id = models.CharField(max_length=50, unique=True, blank=True, null=True)
 
     created_by = models.ForeignKey(
         CustomUser,
@@ -216,7 +210,7 @@ class CmsGuide(models.Model):
     post_type = models.CharField(
         max_length=50,
         choices=POST_TYPE_CHOICES,
-        default="safety"
+        default="advisory"
     )
 
     post_title = models.CharField(max_length=255)
@@ -233,6 +227,7 @@ class CmsGuide(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     published_at = models.DateTimeField(null=True, blank=True)
+
 
     def __str__(self):
         return f"{self.post_title} ({self.status})"

@@ -16,13 +16,10 @@ def admin_only(user):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def list_guides(request):
-    guides = (
-        CmsGuide.objects
-        .exclude(status="archived")
-        .order_by("-updated_at")
-    )
+    guides = CmsGuide.objects.all().order_by("-updated_at")
     serializer = CmsGuideSerializer(guides, many=True)
     return Response(serializer.data)
+
 
 
 @api_view(["POST"])
@@ -113,6 +110,31 @@ def archive_guide(request, pk):
     guide.save()
 
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def restore_guide(request, pk):
+    if not admin_only(request.user):
+        return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        guide = CmsGuide.objects.get(pk=pk)
+    except CmsGuide.DoesNotExist:
+        return Response({"error": "Guide not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if guide.status != "archived":
+        return Response(
+            {"error": "Guide is not archived"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    guide.status = "draft"
+    guide.save()
+
+    return Response(
+        CmsGuideSerializer(guide).data,
+        status=status.HTTP_200_OK
+    )
 
 
 @api_view(["DELETE"])

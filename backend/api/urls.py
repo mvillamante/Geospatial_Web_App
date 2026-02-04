@@ -70,6 +70,8 @@ urlpatterns = [
     path("cms/guides/<int:pk>/archive/", archive_guide),
     path("cms/guides/<int:pk>/permanent-delete/", permanent_delete_guide),
     path("cms/guides/<int:pk>/attachments/", upload_guide_attachment),
+    path("cms/guides/<int:pk>/restore/", restore_guide),
+
 
     # Community_Feed_Views
     path("community-feed/", community_feed, name="community-feed"),

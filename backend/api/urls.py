@@ -53,6 +53,7 @@ urlpatterns = [
     path("reports/queue/", IncidentReportsQueueView.as_view(), name="incident-report-queue"),
     path('incident-reports/verified/', VerifiedIncidentReportsView.as_view(), name='verified-reports'),
     path("reports/<int:report_id>/", IncidentReportPatchView.as_view(), name="report-patch"),
+    path("reports/list/officers/", OfficerListView.as_view(), name="officer-list"),
     
     # Satellite_Views
     path("satellite/ndvi/", get_ndvi_image, name="satellite_ndvi"),

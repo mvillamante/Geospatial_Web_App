@@ -243,9 +243,14 @@ class IncidentReportCreateSerializer(serializers.ModelSerializer):
     
 class IncidentReportListSerializer(serializers.ModelSerializer):
     user_label = serializers.SerializerMethodField()
+    verified_critical_level  = serializers.CharField(allow_null=True)
     photo_url = serializers.SerializerMethodField()
     category_display = serializers.SerializerMethodField()
     assigned_officer_label = serializers.SerializerMethodField()
+    assigned_officer_id = serializers.IntegerField(
+    allow_null=True,
+    read_only=True
+)
 
     class Meta:
         model = IncidentReport
@@ -260,8 +265,10 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
             "status",
             "created_at",
             "suggested_critical_level",
+            "verified_critical_level",
             "photo_url",
             "assigned_officer_label",
+            "assigned_officer_id",
         ]
         
     def get_category_display(self, obj):
@@ -270,7 +277,7 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
         return obj.category
     
     def get_user_label(self, obj):
-        return f"Citizen #{obj.user_id}"
+        return f"Citizen #0{obj.user_id}"
 
     def get_assigned_officer_label(self, obj):
         if not obj.assigned_officer:
@@ -291,7 +298,22 @@ class AssignOfficerSerializer(serializers.Serializer):
 class UpdateStatusSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=IncidentReport.STATUS_CHOICES)
 
-    
+class OfficerOptionSerializer(serializers.ModelSerializer):
+    label = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CustomUser
+        fields = ["id", "label"]
+
+    def get_label(self, obj):
+        full = obj.get_full_name().strip()
+        if full:
+            return full
+        if obj.username:
+            return obj.username
+        return f"Officer #{obj.id}"
+
+
 class IncidentReportQueueSerializer(serializers.ModelSerializer):
     reporterName = serializers.SerializerMethodField()
     title = serializers.SerializerMethodField()

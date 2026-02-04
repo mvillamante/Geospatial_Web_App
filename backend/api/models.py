@@ -120,6 +120,7 @@ class IncidentReport(models.Model):
         ("needs_info", "Needs Info"),
         ("rejected", "Rejected"),
         ("resolved", "Resolved"),
+        ("archived", "Archived"),
     ]
 
     user = models.ForeignKey(

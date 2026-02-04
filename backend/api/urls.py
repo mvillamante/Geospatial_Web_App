@@ -1,7 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from .backend_views.cms_views import *
 from .backend_views.admin_views import *
 from .backend_views.auth_views import *
 from .backend_views.cms_views import *
@@ -12,6 +11,7 @@ from .backend_views.researcher_views import *
 from .backend_views.satellite import *
 from .backend_views.password_reset_views import *
 from .backend_views.tomtom_views import tomtom_roads_tile, tomtom_traffic_tile
+from .backend_views.community_feed_views import *
 
 urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
@@ -22,6 +22,11 @@ urlpatterns = [
     path('admin/users/<int:pk>/toggle-status/', ToggleUserStatusView.as_view()),
     path('admin/users/<int:pk>/revoke-researcher/', RevokeResearcherView.as_view()),
     path('admin/users/create/', CreateStaffUserView.as_view(), name="create-staff-user"),
+    
+    # Researcher_Views
+    path("researcher/request/", CreateResearcherRequestView.as_view(), name="researcher_request_create"),
+    path("admin/researcher_requests/", ResearcherRequestListView.as_view(), name="researcher_requests_list"),
+    path("admin/researcher_requests/<int:pk>/", ApproveRejectResearcherRequestView.as_view(), name="researcher_request_update"),
 
     # Auth_Views
     path("token/", MyTokenObtainPairView.as_view(), name="token_obtain_pair"),
@@ -45,7 +50,9 @@ urlpatterns = [
     path("reports/<int:report_id>/photo-url/", IncidentReportPhotoSignedUrlView.as_view(), name="incident-photo-url"),
     path("reports/list/", IncidentReportListView.as_view(), name="incident-report-list"),
     path("reports/my/", MyIncidentReportsView.as_view(), name="incident-report-list-my"),
+    path("reports/queue/", IncidentReportsQueueView.as_view(), name="incident-report-queue"),
     path('incident-reports/verified/', VerifiedIncidentReportsView.as_view(), name='verified-reports'),
+    path("reports/<int:report_id>/", IncidentReportPatchView.as_view(), name="report-patch"),
     
     # Satellite_Views
     path("satellite/ndvi/", get_ndvi_image, name="satellite_ndvi"),
@@ -54,13 +61,6 @@ urlpatterns = [
     path("tomtom/roads/<int:z>/<int:x>/<int:y>.png", tomtom_roads_tile, name="tomtom_roads_tile"),
     path("tomtom/traffic/<int:z>/<int:x>/<int:y>.png", tomtom_traffic_tile, name="tomtom_traffic_tile"),
     
-    # Incident_Views
-    path("reports/", IncidentReportCreateView.as_view(), name="incident-create"),
-    path("reports/<int:report_id>/photo-url/", IncidentReportPhotoSignedUrlView.as_view(), name="incident-photo-url"),
-    path("reports/list/", IncidentReportListView.as_view(), name="incident-report-list"),
-    path("reports/queue/", IncidentReportsQueueView.as_view(), name="incident-report-queue"),
-    path("reports/<int:report_id>/", IncidentReportPatchView.as_view(), name="report-patch"),
-    
     #CMS_Views
     path("cms/guides/", list_guides),
     path("cms/guides/create/", create_guide),
@@ -68,14 +68,10 @@ urlpatterns = [
     path("cms/guides/<int:pk>/publish/", toggle_publish),
     path("cms/guides/<int:pk>/archive/", archive_guide),
     path("cms/guides/<int:pk>/permanent-delete/", permanent_delete_guide),
+    path("cms/guides/<int:pk>/attachments/", upload_guide_attachment),
 
-    # Misc_Views
-    path('test/', testEndPoint, name='test'),
-
-    # Researcher_Views
-    path("researcher/request/", CreateResearcherRequestView.as_view(), name="researcher_request_create"),
-    path("admin/researcher_requests/", ResearcherRequestListView.as_view(), name="researcher_requests_list"),
-    path("admin/researcher_requests/<int:pk>/", ApproveRejectResearcherRequestView.as_view(), name="researcher_request_update"),
+    # Community_Feed_Views
+    path("community-feed/", community_feed, name="community-feed"),
 
     # Misc_Views
     path("test/", testEndPoint, name="test"),

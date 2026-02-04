@@ -30,3 +30,26 @@ def create_signed_url(path: str, expires_in_seconds: int = 3600) -> str:
     if not signed:
         raise RuntimeError("Failed to create signed URL")
     return signed
+
+def upload_cms_photo(file, bucket="cms-photos"):
+    ext = file.name.split(".")[-1]
+    path = f"cms-guides/{uuid.uuid4()}.{ext}"
+
+    supabase.storage.from_(bucket).upload(
+        path,
+        file.read(),
+        {"content-type": file.content_type}
+    )
+
+    public_url = supabase.storage.from_(bucket).get_public_url(path)
+    return public_url, file.content_type
+
+def delete_cms_photo(file_url: str, bucket="cms-photos"):
+    """
+    Deletes a file from Supabase storage given its public URL
+    """
+    try:
+        path = file_url.split(f"/{bucket}/")[1]
+        supabase.storage.from_(bucket).remove([path])
+    except IndexError:
+        print(f"Failed to extract path from URL: {file_url}")

@@ -296,13 +296,14 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
     location = serializers.CharField(source="location_display")
     barangay = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
-    status = serializers.CharField(read_only=True)
-    lastUpdatedAt = serializers.DateTimeField(source="created_at")
+    status = serializers.SerializerMethodField()
+    lastUpdatedAt = serializers.DateTimeField(source="last_updated_at", read_only=True)
     citizenRisk = serializers.CharField(source="suggested_critical_level")
     createdAt = serializers.DateTimeField(source="created_at")
     lat = serializers.DecimalField(source="latitude", max_digits=10, decimal_places=7, allow_null=True)
     lng = serializers.DecimalField(source="longitude", max_digits=10, decimal_places=7, allow_null=True)
     assignedOfficerId = serializers.IntegerField(source="assigned_officer_id", allow_null=True)
+    verifiedRisk = serializers.CharField(source="verified_critical_level", required=False, allow_null=True)
     assignedTo = serializers.SerializerMethodField()
 
 
@@ -313,6 +314,7 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
             "title",        
             "citizenRisk",
             "category",
+            "verifiedRisk",
             "location",    
             "barangay",     
             "createdAt",

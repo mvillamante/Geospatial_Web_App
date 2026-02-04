@@ -228,15 +228,18 @@
   appearance: none;
 }
 
+.role-field .role-select.Researcher { background: #ede9fe; color: #7c3aed; border: 1px solid #c4b5fd; }
+.role-field .role-select.Officer { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+.role-field .role-select.Admin { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
 
 .role-field .role-select:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fcd34d;
 }
 
-.role-field .role-select.Researcher { background: #ede9fe; color: #7c3aed; }
-.role-field .role-select.Officer { background: #dbeafe; color: #1e40af; }
-.role-field .role-select.Admin { background: #fee2e2; color: #b91c1c; }
 
 .user-table-body .role-field .chev {
   position: absolute;

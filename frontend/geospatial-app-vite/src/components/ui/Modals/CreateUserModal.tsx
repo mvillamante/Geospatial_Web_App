@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import "./GlobalModal.css";
+import { getDepartments, type Departments } from "../../../constants"
+
 
 type StaffRole = "admin" | "officer" | "researcher";
 
@@ -8,7 +10,7 @@ interface Props {
   onCreated: () => Promise<void>;
 }
 
-const departments = ["HR", "IT", "Finance", "Operations", "Marketing", "Support"];
+const departments: readonly Departments[] = getDepartments();
 
 const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
   const today = new Date().toLocaleDateString();
@@ -20,7 +22,7 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState<StaffRole | "">("");
-  const [department, setDepartment] = useState("");
+  const [department, setDepartment] = useState<Departments | "">("");
   const [deptOpen, setDeptOpen] = useState(false);
   const deptRef = useRef<HTMLDivElement>(null);
 

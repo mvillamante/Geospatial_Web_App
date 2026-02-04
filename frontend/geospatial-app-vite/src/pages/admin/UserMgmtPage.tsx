@@ -24,6 +24,7 @@ interface User {
   role: string;
   status: Status;
   extra_roles?: string[];
+  department?: string;
   dateJoined: string;
   lastLogin: string;
   lastLoginDisplay: string;
@@ -39,6 +40,7 @@ interface BackendUser {
   phone: string;
   role: string;
   extra_roles?: string[];
+  department?: string;
   is_active: boolean;
   date_joined_display: string;
   last_login?: string;
@@ -109,6 +111,7 @@ const UserMgmtPage: React.FC = () => {
         phone: u.phone,
         role: u.role ? u.role.charAt(0).toUpperCase() + u.role.slice(1) : "",
         extra_roles: u.extra_roles ?? [],
+        department: u.department ?? "---",
         status: u.is_active ? "Active" : "Inactive",
         dateJoined: u.date_joined_display,
         lastLogin: u.last_login ?? "",
@@ -341,7 +344,7 @@ const UserMgmtPage: React.FC = () => {
                           {userRole !== 'Admin' && <span className="role-hint">Admin only</span>}
                         </div>
                       </td>
-                      <td className="center muted">{user.role === "Researcher" ? "N/A" : "Dept XYZ"}</td>
+                      <td className="center muted">{user.department}</td>
                       <td className="center"><span className={`badge ${user.status}`}>{user.status}</span></td>
                       <td className="center muted">{user.dateJoined}</td>
                       <td className="center muted">{user.lastLoginDisplay}</td>

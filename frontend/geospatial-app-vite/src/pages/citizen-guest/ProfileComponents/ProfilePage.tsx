@@ -147,7 +147,7 @@ const ProfilePage: React.FC = () => {
             })
             : "";
 
-          const rawStatus = r.status || (r as any).verification_status || "pending";
+          const rawStatus = r.status || (r as any).verification_status || "Pending";
           const progressStatus = toProgressStatus(rawStatus);
 
           const progress =

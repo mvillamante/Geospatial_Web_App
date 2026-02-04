@@ -253,7 +253,13 @@ const UserMgmtPage: React.FC = () => {
             <div className="filters-left">
               <div className="select-wrapper">
                 <FiUser className="select-icon" />
-                <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value as Role | 'All')} className="role-select">
+                <select 
+                  value={roleFilter} 
+                  onChange={(e) => {
+                    setRoleFilter(e.target.value as Role | "All");
+                  }}
+                  className="role-select"
+                >
                   <option value="All">All Roles</option>
                   <option value="Researcher">Researcher</option>
                   <option value="Officer">Officer</option>
@@ -327,7 +333,21 @@ const UserMgmtPage: React.FC = () => {
                       <td className="center">
                         <div className="role-cell">
                           <div className="role-field">
-                            <select className={`role-select ${displayRole}`} value={displayRole} onChange={(e) => updateRole(user.id, e.target.value as Role)} aria-label={`Change role for ${user.name}`} disabled={userRole !== 'Admin' || user.role?.toLowerCase() === 'citizen' || (user.role?.toLowerCase() === 'citizen' && user.extra_roles?.some(r => r.toLowerCase() === 'researcher'))}>
+                            <select className={`role-select ${displayRole}`} 
+                              value={displayRole} 
+                              onChange={(e) => {
+                                const newRole = e.target.value as Role;
+
+                                if (!window.confirm(`Are you sure you want to change this user’s role to ${newRole}?`)) {
+                                  e.target.value = displayRole;
+                                  return;
+                                }
+
+                                updateRole(user.id, newRole);
+                              }}
+                              aria-label={`Change role for ${user.name}`} 
+                              disabled={userRole !== 'Admin' || user.role?.toLowerCase() === 'citizen' || (user.role?.toLowerCase() === 'citizen' && user.extra_roles?.some(r => r.toLowerCase() === 'researcher'))}
+                            >
                               <option value="Researcher">Researcher</option>
                               <option value="Officer">Officer</option>
                               <option value="Admin">Admin</option>

@@ -75,6 +75,14 @@ type ModalType = "none" | "resolve" | "reject";
 
 const ReportVerifyPage: React.FC = () => {
 
+  const normalizeRisk = (v: any): RiskLevel => {
+    const s = String(v ?? "").toLowerCase();
+    if (s === "low" || s === "moderate" || s === "high" || s === "critical") {
+      return s as RiskLevel;
+    }
+    return "low"; 
+  };
+
   const { displayName, currentUserId } = getUserRoleAndDisplayName();
   const myOfficerId = currentUserId != null ? Number(currentUserId) : null;
   const officerName = `Officer ${displayName ?? ""}`.trim() || "Officer";
@@ -561,7 +569,10 @@ const ReportVerifyPage: React.FC = () => {
                 >
                   <div className="queue-item-top">
                     <div className="queue-title">{r.title}</div>
-                    <div className={`queue-risk-pill ${eff}`}>{eff.toUpperCase()}</div>
+                    <div className={`queue-risk-pill ${normalizeRisk(eff)}`}>
+                      {normalizeRisk(eff).toUpperCase()}
+                    </div>
+
                   </div>
 
                   <div className="queue-sub">
@@ -599,16 +610,28 @@ const ReportVerifyPage: React.FC = () => {
                   <div className="detail-riskWrap">
                     <div className="detail-riskLine">
                       <span className="detail-riskLabel">Effective:</span>
-                      <span className={`detail-riskPill ${effectiveRisk(selected)}`}>
-                        {effectiveRisk(selected).toUpperCase()}
-                      </span>
+                      {(() => {
+                        const eff = effectiveRisk(selected);
+                        return (
+                          <span className={`detail-riskPill ${eff}`}>
+                            {eff.toUpperCase()}
+                          </span>
+                        );
+                      })()}
+
                     </div>
 
                     <div className="detail-riskLine">
                       <span className="detail-riskLabel">Citizen:</span>
-                      <span className={`detail-riskPill subtle ${selected.citizenRisk}`}>
-                        {selected.citizenRisk.toUpperCase()}
-                      </span>
+                      {(() => {
+                        const c = normalizeRisk(selected.citizenRisk);
+                        return (
+                          <span className={`detail-riskPill subtle ${c}`}>
+                            {c.toUpperCase()}
+                          </span>
+                        );
+                      })()}
+
                     </div>
                   </div>
                 </div>

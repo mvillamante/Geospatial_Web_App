@@ -223,21 +223,21 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                                 />
                             </div>
 
-                            <div
-                                className="forgot-password"
-                                onClick={() => switchModal("forgotPassword")}
-                                role="button"
-                                tabIndex={0}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" || e.key === " ") switchModal("forgotPassword");
-                                }}
-                            >
-                                Forgot password?
-                            </div>
-
                             <button className="btn-submit" onClick={handleLogin}>
                                 Login
                             </button>
+                        </div>
+
+                        <div
+                            className="forgot-password"
+                            onClick={() => switchModal("forgotPassword")}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") switchModal("forgotPassword");
+                            }}
+                        >
+                            Forgot password?
                         </div>
 
                         <div className="modal-footer">

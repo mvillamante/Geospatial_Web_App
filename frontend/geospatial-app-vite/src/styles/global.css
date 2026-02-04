@@ -37,6 +37,7 @@ body {
 .cms-page,
 .evac-page,
 .user-page,
+.dashboard-page,
 .cms-page,
 .feed-page,
 .reportsmgmt-page,
@@ -52,6 +53,7 @@ body {
 
 .user-page h1,
 .cms-page h1,
+.dashboard-page h1,
 .reportverify-page h1,
 .reportsmgmt-page h1,
 .feed-page h1,
@@ -66,12 +68,14 @@ body {
 }
 
 .reportverify-header,
-.evac-header {
+.evac-header,
+.dashboard-header {
   margin-bottom: 20px;
 }
 
 .reportverify-header-title,
-.evac-header-title {
+.evac-header-title,
+.dashboard-title {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -81,7 +85,8 @@ body {
 
 .evac-header-desc,
 .reportverify-header-desc,
-.feed-page-header-desc {
+.feed-page-header-desc,
+.dashboard-subtitle {
   color: #6b7280;
 }
 

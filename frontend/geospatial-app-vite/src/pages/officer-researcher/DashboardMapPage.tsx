@@ -10,7 +10,7 @@ import floodZoneIcon from "../../assets/icons/floodzone.png";
 import landslideIcon from "../../assets/icons/landslide.png";
 
 type DatasetsItem = [string, string, string]
-type ReportItem = [string, string]; // [title, meta]
+type ReportItem = [string, string];
 type ChartItem = string;
 type DownloadItem = { name: string; type: "report" | "chart" };
 

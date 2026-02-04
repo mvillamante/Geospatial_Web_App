@@ -118,17 +118,16 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
 
         user.set_password(password)
+        user.add_group("Citizen")
         user.save()
         return user
 
-        # Profile will be created automatically via post_save
-        #user.profile.full_name = f"{first_name} {last_name}"
-        #user.profile.save()
 
 class AdminUserListSerializer(serializers.ModelSerializer):
     staff_id = serializers.ReadOnlyField()
     date_joined_display = serializers.SerializerMethodField()
     last_login_display = serializers.SerializerMethodField()
+    department = serializers.SerializerMethodField()
     
     class Meta:
         model = CustomUser
@@ -142,6 +141,7 @@ class AdminUserListSerializer(serializers.ModelSerializer):
             'phone',
             'role',
             'extra_roles',
+            'department',
             'is_active',
             'date_joined_display',
             'last_login',
@@ -156,6 +156,9 @@ class AdminUserListSerializer(serializers.ModelSerializer):
         if obj.last_login:
             return f"{timesince(obj.last_login)} ago"
         return "Never"
+    
+    def get_department(self, obj):
+        return getattr(obj, "department", "N/A") 
 
 class AssignUserRoleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -194,6 +197,18 @@ class AssignUserRoleSerializer(serializers.ModelSerializer):
             instance.extra_roles = extra_roles if 'researcher' in extra_roles else []
 
         instance.save()
+        
+        # ----- SYNC GROUPS -----
+        instance.groups.clear()
+
+        # Add primary role
+        if instance.role:
+            instance.add_group(instance.role.capitalize())
+
+        # Add extra roles
+        for r in instance.extra_roles or []:
+            instance.add_group(r.capitalize()) 
+        
         return instance
     
 class PasswordResetRequestSerializer(serializers.Serializer):
@@ -470,6 +485,8 @@ class CmsGuideAttachmentCreateSerializer(serializers.Serializer):
              
 class CreateStaffUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    staff_id = serializers.CharField(read_only=True)
+
     class Meta:
         model = CustomUser
         fields = [
@@ -481,40 +498,45 @@ class CreateStaffUserSerializer(serializers.ModelSerializer):
             "phone",
             "role",
             "extra_roles",
+            "department",
             "password",
-            "date_joined",
-            "is_staff",
-            "is_active",
+            "staff_id",
         ]
 
     def validate_role(self, value):
         allowed = ["admin", "officer", "researcher"]
-        if value not in allowed:
+        value_lower = value.lower()
+        if value_lower not in allowed:
             raise serializers.ValidationError("Citizen cannot be created here.")
-        return value
+        return value_lower
 
     def create(self, validated_data):
         role = validated_data.pop("role")
-        password = validated_data.pop("password")  # get frontend password
+        password = validated_data.pop("password")
+        
+        print("this is validated data", validated_data)
 
         user = CustomUser(
             **validated_data,
             is_staff=True,
             is_active=True,
         )
+        user.set_password(password)
+        
+        user.save()
 
         # Role logic
         if role == "researcher":
             user.role = ""
-            user.extra_roles = ["researcher"]
+            user.extra_roles = ["Researcher"]
+            user.add_group("Researcher")
         else:
             user.role = role
             user.extra_roles = []
-
-        user.set_password(password)
+            user.add_group(role.capitalize())
+            
         user.save()
 
-        user.password = password
         return user
 
 

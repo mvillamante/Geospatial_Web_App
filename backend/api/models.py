@@ -24,7 +24,8 @@ class CustomUser(AbstractUser):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=True, null=True)
     extra_roles = models.JSONField(default=list, blank=True)
     phone = models.CharField(max_length=20, unique=True, null=True, blank=True)
-    supabase_uid = models.CharField(max_length=255, null=True, blank=True)
+    staff_number = models.PositiveIntegerField(null=True, blank=True, unique=True)
+    department = models.CharField(max_length=100, blank=True, null=True)
 
     groups = models.ManyToManyField(
         'auth.Group',
@@ -47,29 +48,52 @@ class CustomUser(AbstractUser):
     # ===== Staff ID property =====
     @property
     def staff_id(self) -> str:
-        role = (self.role or "").lower()
-        extra_roles = self.extra_roles or []
-
-        # Citizens without Researcher role do NOT get a staff ID
-        if role == "citizen" and "Researcher" not in extra_roles:
+        if not self.staff_number:
             return ""
-
-        if not self.id:
-            return ""
-
-        # Base36 style ID
-        import string
-        chars = string.digits + string.ascii_uppercase
-        n = self.id
-        result = ""
-        while n > 0:
-            n, rem = divmod(n, 36)
-            result = chars[rem] + result
-
-        return f"STF-{result or '0'}"
+        return f"STF-{self.staff_number:03d}"
     
+    def save(self, *args, **kwargs):
+        staff_roles = ["researcher", "officer", "admin"]
+
+        # Only assign staff_number if role is staff and not assigned yet
+        user_roles = [(self.role or "").lower()] + [r.lower() for r in self.extra_roles or []]
+        if any(r in staff_roles for r in user_roles) and not self.staff_number:
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+
+            max_number = User.objects.filter(staff_number__isnull=False).aggregate(models.Max('staff_number'))['staff_number__max'] or 0
+            self.staff_number = max_number + 1
+
+        super().save(*args, **kwargs)
     
-    
+    def has_group(self, name: str) -> bool:
+        return self.groups.filter(name=name).exists()
+
+    def add_group(self, name: str):
+        from django.contrib.auth.models import Group
+        group, _ = Group.objects.get_or_create(name=name)
+        self.groups.add(group)
+
+    def remove_group(self, name: str):
+        from django.contrib.auth.models import Group
+        self.groups.remove(Group.objects.filter(name=name))
+        
+        
+@receiver(post_save, sender=CustomUser)
+def sync_user_groups(sender, instance: CustomUser, **kwargs):
+    instance.groups.clear()
+
+    # Primary role
+    if instance.role:
+        instance.add_group(instance.role.capitalize())
+
+    # Extra roles
+    for r in instance.extra_roles or []:
+        instance.add_group(r.capitalize()) 
+        
+        
+        
+        
     
     
 # Researcher Request model -----------------------------------------------------------

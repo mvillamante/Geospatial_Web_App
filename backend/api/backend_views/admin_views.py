@@ -121,3 +121,13 @@ def change_user_role(request, user_id):
 class CreateStaffUserView(generics.CreateAPIView):
     serializer_class = CreateStaffUserSerializer
     permission_classes = [IsAuthenticated, IsAdminRole]
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            # Debug: print errors
+            print("Serializer errors:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

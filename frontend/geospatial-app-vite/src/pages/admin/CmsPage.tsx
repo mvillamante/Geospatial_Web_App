@@ -44,6 +44,8 @@ const CmsPage: React.FC = () => {
   const [showNotificationDialog, setShowNotificationDialog] = useState(false);
   const [notification, setNotification] = useState({ type: 'alert', message: '' });
   const [viewArchived, setViewArchived] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
+  const [guideToPublish, setGuideToPublish] = useState<Guide | null>(null);
 
   useEffect(() => {
     fetch("/api/cms/guides/", {
@@ -125,7 +127,7 @@ const CmsPage: React.FC = () => {
     setGuides(g => g.filter(item => item.postId !== postId));
   };
 
-const createGuide = async () => {
+const createGuide = async (publishImmediately = false) => {
   const res = await fetch("/api/cms/guides/create/", {
     method: "POST",
     headers: {
@@ -147,25 +149,38 @@ const createGuide = async () => {
     uploadedImage = await uploadImage(created.id, newGuide.imageFile);
   }
 
+  if (publishImmediately) {
+    await fetch(`/api/cms/guides/${created.id}/publish/`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
+  }
+
   setGuides(prev => [
     {
       postId: created.id,
       postTitle: created.post_title,
       postType: created.post_type,
       postBody: created.post_body,
-      status: "Draft",
+      status: publishImmediately ? "Published" : "Draft",
       isPinned: false,
       createdAt: created.created_at,
       updatedAt: created.updated_at,
-      publishedAt: created.published_at,
+      publishedAt: publishImmediately
+        ? new Date().toISOString()
+        : undefined,
       attachments: uploadedImage ? [uploadedImage] : [],
     },
     ...prev,
   ]);
 
+
   setNewGuide({ postTitle: "", postType: "advisory", postBody: "" });
   setShowCreateModal(false);
 };
+
 
 
   const updateGuide = async () => {
@@ -307,7 +322,13 @@ const createGuide = async () => {
                         <Edit size={16} />
                       </button>
 
-                      <button className="icon-btn" onClick={() => togglePublish(guide.postId)}>
+                      <button
+                        className="icon-btn"
+                        onClick={() => {
+                          setGuideToPublish(guide);
+                          setShowPublishModal(true);
+                        }}
+                      >
                         <Eye size={16} />
                       </button>
                     </>
@@ -411,11 +432,25 @@ const createGuide = async () => {
                 }}
               />
               <div className="modal-actions">
-                <button className="btn secondary" onClick={() => setShowCreateModal(false)}>
+                <button
+                  className="btn secondary"
+                  onClick={() => setShowCreateModal(false)}
+                >
                   Cancel
                 </button>
-                <button className="btn primary" onClick={createGuide}>
-                  Create
+
+                <button
+                  className="btn secondary"
+                  onClick={() => createGuide(false)}
+                >
+                  Save Draft
+                </button>
+
+                <button
+                  className="btn primary"
+                  onClick={() => createGuide(true)}
+                >
+                  Publish Content
                 </button>
               </div>
             </div>
@@ -558,6 +593,55 @@ const createGuide = async () => {
             </div>
           </div>
         )}
+
+        {/* Publish Confirmation Modal */}
+        {showPublishModal && guideToPublish && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h2>
+                {guideToPublish.status === "Published"
+                  ? "Unpublish Content"
+                  : "Publish Content"}
+              </h2>
+
+              <p>
+                Are you sure you want to{" "}
+                <strong>
+                  {guideToPublish.status === "Published"
+                    ? "unpublish"
+                    : "publish"}
+                </strong>{" "}
+                <strong>"{guideToPublish.postTitle}"</strong>?
+              </p>
+
+              <div className="modal-actions">
+                <button
+                  className="btn secondary"
+                  onClick={() => {
+                    setShowPublishModal(false);
+                    setGuideToPublish(null);
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="btn primary"
+                  onClick={async () => {
+                    await togglePublish(guideToPublish.postId);
+                    setShowPublishModal(false);
+                    setGuideToPublish(null);
+                  }}
+                >
+                  {guideToPublish.status === "Published"
+                    ? "Unpublish"
+                    : "Publish"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
 
       </div>
   );

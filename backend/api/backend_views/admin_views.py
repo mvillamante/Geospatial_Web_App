@@ -54,6 +54,14 @@ class UserListView(ListAPIView):
             qs = qs.order_by('-date_joined')
 
         return qs
+    
+class UserDistributionView(ListAPIView):
+    permission_classes = [IsAuthenticated, IsAdminRole]
+
+    def get(self, request):
+        users = CustomUser.objects.all()
+        serializer = AdminUserListSerializer(users, many=True)
+        return Response(serializer.data)
 
     
 class AssignUserRoleView(generics.UpdateAPIView):

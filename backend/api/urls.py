@@ -18,6 +18,7 @@ urlpatterns = [
 
     # Admin_Views
     path("admin/users/", UserListView.as_view(), name="admin-users"),
+    path("admin/users/distribution/", UserDistributionView.as_view()),
     path('admin/users/<int:pk>/role/', AssignUserRoleView.as_view()),
     path('admin/users/<int:pk>/toggle-status/', ToggleUserStatusView.as_view()),
     path('admin/users/<int:pk>/revoke-researcher/', RevokeResearcherView.as_view()),

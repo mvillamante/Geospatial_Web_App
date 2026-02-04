@@ -114,7 +114,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             phone=validated_data['phone'],
             role="citizen",  # default role
             is_active=True,
-            supabase_uid=None
         )
 
         user.set_password(password)

@@ -21,7 +21,7 @@ class CreateResearcherRequestView(generics.CreateAPIView):
         if existing:
             return Response({"detail": "You already have a pending request."}, status=status.HTTP_400_BAD_REQUEST)
         
-        req = ResearcherRequest.objects.create(user=request.user)
+        req = ResearcherRequest.objects.create(user=request.user, status="Pending")
         serializer = self.get_serializer(req)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

@@ -155,7 +155,6 @@ def sign_up(request):
                 "email": user.email,
                 "phone": user.phone,
                 "role": user.role,
-                "supabase_uid": user.supabase_uid,
             }
         }, status=201)
 

@@ -160,6 +160,7 @@ export default function LeafletMap({
   const roadsLayerRef = useRef<L.Layer | null>(null);
   const trafficLayerRef = useRef<L.Layer | null>(null);
   const ndviLayerRef = useRef<L.LayerGroup | null>(null);
+  const verifiedReportsLayerRef = useRef<L.LayerGroup | null>(null);
 
   // Initialize map
   useEffect(() => {
@@ -668,6 +669,8 @@ export default function LeafletMap({
       });
     }
   }, [activeLayers, ndviOpacity, ndviYear, ndviMonth, ndviFromDate, ndviToDate, ndviMaxCloud]);
+
+  // Handle Verified Reports layer toggle
 
   return (
     <div id="map" style={{ height: height, width: width }}></div>

@@ -2,6 +2,16 @@
     margin-bottom: 2rem;
 }
 
+.reportsmgmt-page .reports-table-wrapper {
+  border-radius: 10px;
+  border: 1px solid var(--light-gray-border);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  margin-top: 1.7rem;
+  margin-bottom: 1.7rem;
+  height: 71vh;
+  overflow-y: auto;
+}
+
 /* Toggle Buttons */
 .reportsmgmt-page .page-head {
   display: flex;
@@ -44,12 +54,6 @@
 
 .reportsmgmt-page .tab-btn:active {
   transform: scale(0.97);
-}
-
-
-.reportsmgmt-page .reports-table {
-  width: 100%;
-  border-collapse: collapse;
 }
 
 .reportsmgmt-page .location-cell {

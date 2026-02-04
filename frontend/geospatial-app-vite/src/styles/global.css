@@ -243,15 +243,3 @@ body {
   color: #3b82f6;
   pointer-events: none;
 }
-
-/* =====================
-   ALIGNMENT
-===================== */
-
-.reportsmgmt-page .center {
-  text-align: center;
-}
-
-.reportsmgmt-page .right {
-  text-align: right;
-}

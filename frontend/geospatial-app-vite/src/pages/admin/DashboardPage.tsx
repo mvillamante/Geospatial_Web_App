@@ -1,9 +1,12 @@
 import React from "react";
+import { Link } from "react-router-dom";
+
 import { Users, FileText, Clock, AlertTriangle, Shield, Newspaper } from "lucide-react";
 import { StatsCard } from "./DashboardComponents/StatsCard";
 import { ReportsTable } from "./DashboardComponents/ReportsTable";
 import { UserDistributionChart } from "./DashboardComponents/UserDistributionChart";
 import { ReportsStatusChart } from "./DashboardComponents/ReportsStatusChart";
+
 import "./DashboardPage.css";
 
 const DashboardPage: React.FC = () => {
@@ -54,7 +57,9 @@ const DashboardPage: React.FC = () => {
         <div className="span-2 panel">
           <div className="panel-head">
             <div className="panel-title">Reports Needing Action</div>
-            <button className="panel-link">View all reports</button>
+            <Link to="/main/admin/manage-reports" className="panel-link">
+              View all reports
+            </Link>
           </div>
 
           <ReportsTable />

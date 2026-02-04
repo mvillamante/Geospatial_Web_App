@@ -12,6 +12,18 @@
   overflow-y: auto;
 }
 
+/* =====================
+   ALIGNMENT
+===================== */
+
+.reportsmgmt-page .center {
+  text-align: center;
+}
+
+.reportsmgmt-page .right {
+  text-align: right;
+}
+
 /* Toggle Buttons */
 .reportsmgmt-page .page-head {
   display: flex;

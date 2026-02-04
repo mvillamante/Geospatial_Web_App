@@ -1,22 +1,79 @@
+import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import "./UserDistributionChart.css";
 
-const data = [
-  { name: "Citizens", value: 1820 },
-  { name: "Researchers", value: 340 },
-  { name: "LGU Officers", value: 210 },
-];
-
-const COLORS = ["#ea580c", "#fb923c", "#fdba74"];
+interface User {
+  role: string | null;
+  extra_roles?: string[];
+}
 
 interface Props {
   small?: boolean;
 }
 
 export const UserDistributionChart: React.FC<Props> = ({ small }) => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem("access_token");
+        const res = await fetch(
+          `http://127.0.0.1:8000/api/admin/users/distribution/`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch users");
+
+        const data = await res.json()
+
+        const mappedUsers: User[] = data.map((u: any) => ({
+          username: u.username,
+          role: u.role ?? null,
+          extra_roles: u.extra_roles ?? [],
+        }));
+
+        setUsers(mappedUsers);
+        console.log("eto eon", mappedUsers)
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  // Count roles safely
+  const researchersCount = users.filter(u =>
+    u.extra_roles?.some(r => r?.toLowerCase() === "researcher")
+  ).length;
+
+  const officersCount = users.filter(u =>
+    u.role?.toLowerCase() === "officer"
+  ).length;
+
+  const citizensCount = users.filter(u =>
+      u.role?.toLowerCase() === "citizen"
+  ).length;
+
+  const data = [
+    { name: "Citizens", value: citizensCount },
+    { name: "Researchers", value: researchersCount },
+    { name: "LGU Officers", value: officersCount },
+  ];
+
+  const COLORS = ["#ea580c", "#fb923c", "#fdba74"];
   const height = small ? 220 : 320;
   const inner = small ? 45 : 60;
   const outer = small ? 70 : 95;
+
+  const totalUsers = users.length;
+
+  if (loading) return <p>Loading chart...</p>;
 
   return (
     <div className={`chart-card ${small ? "small" : ""}`}>
@@ -45,8 +102,17 @@ export const UserDistributionChart: React.FC<Props> = ({ small }) => {
               {data.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
-            </Pie>
+              <text
+                x="50%"
+                y="45%"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                style={{ fontSize: small ? 14 : 18, fontWeight: "bold" }}
+              >
+                {totalUsers} Users
+              </text>
 
+            </Pie>
             <Tooltip />
             <Legend
               verticalAlign="bottom"

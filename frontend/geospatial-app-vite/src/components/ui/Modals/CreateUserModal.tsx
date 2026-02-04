@@ -216,7 +216,7 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
             <div className="form-group">
               <label>Role <span className="required-star">*</span></label>
               <select value={role} onChange={e => setRole(e.target.value as StaffRole)}>
-                <option value="">Select role</option>
+                <option value="" disabled>Select role</option>
                 <option value="admin">Admin</option>
                 <option value="officer">Officer</option>
                 <option value="Researcher">Researcher</option>

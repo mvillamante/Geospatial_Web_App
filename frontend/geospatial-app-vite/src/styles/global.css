@@ -39,7 +39,7 @@ body {
 .user-page,
 .cms-page,
 .feed-page,
-.reports-page,
+.reportsmgmt-page,
 .reportverify-page,
 .sys-page {
     width: 100%;
@@ -53,7 +53,7 @@ body {
 .user-page h1,
 .cms-page h1,
 .reportverify-page h1,
-.reports-page h1,
+.reportsmgmt-page h1,
 .feed-page h1,
 .sys-page h1 {
     font-size: 1.8rem;
@@ -95,7 +95,7 @@ body {
 
 /* Tables */
 .cms-page table,
-.reports-page table,
+.reportsmgmt-page table,
 .user-page table {
     width: 100%;
     background: var(--white-bg);
@@ -104,7 +104,7 @@ body {
 
 .user-page table th,
 .cms-page th,
-.reports-page th,
+.reportsmgmt-page th,
 .sys-page th {
     background: #ebf0f5;
     padding: 1rem;
@@ -115,7 +115,7 @@ body {
 }
 
 .cms-page td,
-.reports-page td,
+.reportsmgmt-page td,
 .sys-page td  {
     background: var(--white-bg);
     padding: 0.75rem;
@@ -124,13 +124,13 @@ body {
 }
 
 .cms-page tr:hover,
-.reports-page tr:hover,
+.reportsmgmt-page tr:hover,
 .sys-page tr:hover {
     background: #f8fafc;
 }
 
 .cms-page .table-title,
-.reports-page .table-id {
+.reportsmgmt-page .table-id {
     font-weight: 500;
 }
 
@@ -142,42 +142,42 @@ body {
 
 /* Badges */
 .cms-page .badge,
-.reports-page .badge {
+.reportsmgmt-page .badge {
     padding: 0.25rem 0.6rem;
     border-radius: 999px;
     font-size: 0.75rem;
 }
 
 .cms-page .badge.Published,
-.reports-page .badge.Verified {
+.reportsmgmt-page .badge.Verified {
     background: #22c55e;
     color: var(--text-white);
 }
 
 
 .cms-page .badge.Draft,
-.reports-page .badge.Pending {
+.reportsmgmt-page.badge.Pending {
     background: var(--light-gray-bg);
     color: var(--text-slate-black);
 }
 
 /* Actions */
 .cms-page .table-actions,
-.reports-page .table-actions {
+.reportsmgmt-page .table-actions {
     display: flex;
     gap: 0.4rem;
 }
 
 /* Card */
 .cms-page .card,
-.reports-page .card {
+.reportsmgmt-page .card {
     background: var(--white-bg);
     border-radius: 16px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
 .cms-page .icon-btn,
-.reports-page .icon-btn {
+.reportsmgmt-page .icon-btn {
     border: none;
     background: transparent;
     cursor: pointer;

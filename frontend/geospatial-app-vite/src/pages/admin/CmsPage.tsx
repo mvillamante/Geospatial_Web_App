@@ -222,9 +222,6 @@ const createGuide = async () => {
       <div className="cms-header">
         <h1>Content Management System</h1>
         <div className="cms-actions">
-          <button className="btn secondary" onClick={() => setShowNotificationDialog(true)}>
-            <Send size={16} /> Send Notification
-          </button>
           <button
             className="btn primary"
             onClick={() => {
@@ -232,7 +229,7 @@ const createGuide = async () => {
               setShowCreateModal(true);
             }}
           >
-            <Plus size={16} /> Create Guide
+            <Plus size={16} /> Create Content
           </button>
         </div>
       </div>

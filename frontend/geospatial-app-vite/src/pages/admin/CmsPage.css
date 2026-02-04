@@ -38,7 +38,7 @@
 
 
 .cms-page .icon-btn.danger,
-.reports-page .icon-btn.delete {
+.reportsmgmt-page .icon-btn.delete {
     color: #dc2626;
 }
 
@@ -78,9 +78,9 @@
     font-weight: 600;
 }
 
-.modal input,
-.modal textarea,
-.modal select {
+.cms-page .modal input,
+.cms-page .modal textarea,
+.cms-page .modal select {
     padding: 0.65rem;
     border-radius: 10px;
     border: 1px solid #d1d5db; 

@@ -6,7 +6,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
-from api.models import CustomUser
+from api.models import CustomUser, IncidentReport
 from api.serializer import AdminUserListSerializer, AssignUserRoleSerializer, CreateStaffUserSerializer
 from api.admin_permissions import IsAdminRole
 
@@ -139,3 +139,24 @@ class CreateStaffUserView(generics.CreateAPIView):
         
         user = serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+# Dashboard Views
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def dashboard_stats(request):
+    active_users = CustomUser.objects.filter(is_active=True).count()
+
+    #count all reports even archived
+    total_reports = IncidentReport.objects.count()
+
+    #count reports that have no assigned officer and are not archived
+    unassigned_reports = IncidentReport.objects.filter(assigned_officer__isnull=True).exclude(status="archived").count()
+
+    high_critical_reports = IncidentReport.objects.filter(suggested_critical_level__in=["high", "critical"]).exclude(status="archived").count()
+
+    return Response({
+        "active_users": active_users,
+        "total_reports": total_reports,
+        "unassigned_reports": unassigned_reports,
+        "high_critical_reports": high_critical_reports,
+    })

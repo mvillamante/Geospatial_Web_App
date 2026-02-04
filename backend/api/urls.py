@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/users/<int:pk>/toggle-status/', ToggleUserStatusView.as_view()),
     path('admin/users/<int:pk>/revoke-researcher/', RevokeResearcherView.as_view()),
     path('admin/users/create/', CreateStaffUserView.as_view(), name="create-staff-user"),
+    path("admin/stats/", dashboard_stats,name="dashboard-stats"),
     
     # Researcher_Views
     path("researcher/request/", CreateResearcherRequestView.as_view(), name="researcher_request_create"),

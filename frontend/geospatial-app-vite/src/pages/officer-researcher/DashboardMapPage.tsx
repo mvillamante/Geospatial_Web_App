@@ -94,7 +94,7 @@ const DashboardMapPage: React.FC = () => {
   const mapLayers = [
     {
       group: "NDVI",
-      items: ["Green Index"],
+      items: ["NDVI"],
     },
     {
       group: "Population Density",
@@ -116,6 +116,12 @@ const DashboardMapPage: React.FC = () => {
       ? mapLayers.filter(layer => mapViewAllowedGroups.includes(layer.group))
       : mapLayers;
 
+  // Remove NDVI layer when switching to interactive mode (NDVI is only available in choropleth)
+  useEffect(() => {
+    if (mapView === "interactive" && activeLayers.includes("NDVI")) {
+      setActiveLayers((prev) => prev.filter((l) => l !== "NDVI"));
+    }
+  }, [mapView]);
 
   const toggleLayer = (layer: string) => {
     setActiveLayers((prev) =>
@@ -438,8 +444,8 @@ const DashboardMapPage: React.FC = () => {
             </div>
           )}
 
-          {/* NDVI Controls */}
-          {activeLayers.includes("NDVI") && (
+          {/* NDVI Controls - Only show in Choropleth mode */}
+          {mapView === "choropleth" && activeLayers.includes("NDVI") && (
             <div className="ndvi-controls panel-card">
               <h4>Green Index</h4>
               
@@ -718,7 +724,29 @@ const DashboardMapPage: React.FC = () => {
               </div>
             )}
 
-            {/* NDVI Legend - appears when NDVI layer is active */}
+          </div>
+        ) : mapView === "choropleth" ? (
+          <div className="choroplethview-map">
+            { /* Choropleth Map Component */}
+
+            {/* Header */}
+            <div className="choropleth-header">
+              <h3>Choropleth Map: {options.find((opt) => opt.value === selected)?.label || ""}</h3>
+              <h5>Cabuyao, Laguna Barangays - {year}</h5>
+            </div>
+
+            {/* Map Visual*/}
+            <LeafletMap 
+              height="92vh" 
+              mapView="choropleth" 
+              mapType={mapType}
+              activeLayers={activeLayers}
+              ndviOpacity={ndviOpacity}
+              ndviYear={year}
+              ndviMonth={ndviMonth}
+            /> 
+
+            {/* NDVI Legend - appears when NDVI layer is active in Choropleth mode */}
             {activeLayers.includes("NDVI") && (
               <div className="ndvi-legend">
                 <h4>NDVI Green Index</h4>
@@ -734,19 +762,6 @@ const DashboardMapPage: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
-        ) : mapView === "choropleth" ? (
-          <div className="choroplethview-map">
-            { /* Choropleth Map Component */}
-
-            {/* Header */}
-            <div className="choropleth-header">
-              <h3>Choropleth Map: {options.find((opt) => opt.value === selected)?.label || ""}</h3>
-              <h5>Cabuyao, Laguna Barangays - {year}</h5>
-            </div>
-
-            {/* Map Visual*/}
-            <LeafletMap height="92vh" mapView="choropleth" mapType={mapType} /> 
 
           </div>
         ) : null }

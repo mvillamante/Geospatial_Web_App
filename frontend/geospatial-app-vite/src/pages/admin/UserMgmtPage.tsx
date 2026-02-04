@@ -16,7 +16,9 @@ type Status = 'Active' | 'Inactive';
 interface User {
   id: number;
   staff_id: string;
-  name: string;
+  username: string;
+  first_name: string;
+  last_name: string;
   email: string;
   phone: string;
   role: string;
@@ -31,6 +33,8 @@ interface BackendUser {
   id: number;
   staff_id: string;
   username: string;
+  first_name: string;
+  last_name: string;
   email: string;
   phone: string;
   role: string;
@@ -94,11 +98,13 @@ const UserMgmtPage: React.FC = () => {
       if (!res.ok) throw new Error("Failed to fetch users");
 
       const data = await res.json();
+      console.log("raw data", data)
 
       const mappedUsers: User[] = data.results.map((u: BackendUser) => ({
         id: u.id,
         staff_id: u.staff_id,
-        name: u.username,
+        username: u.username,
+        name: `${u.first_name} ${u.last_name}`,
         email: u.email,
         phone: u.phone,
         role: u.role ? u.role.charAt(0).toUpperCase() + u.role.slice(1) : "",
@@ -110,6 +116,7 @@ const UserMgmtPage: React.FC = () => {
       }));
 
       setUsers(mappedUsers);
+      console.log("eto map", mappedUsers);
       setCurrentPage(page);
       setTotalPages(Math.ceil(data.count / pageSize));
     } catch (err) {
@@ -346,7 +353,7 @@ const UserMgmtPage: React.FC = () => {
                           {openMenu === user.id && (
                             <div className="menu-dropdown">
                               {alreadyRequested && <div className="menu-item disabled">Pending request</div>}
-                              <button className="menu-item" onClick={() => { toggleStatus(user.id); setOpenMenu(null); }}>
+                              <button className="menu-item" onClick={() => { if (!window.confirm("Are you sure you want to deactivate this user?")) return; toggleStatus(user.id); setOpenMenu(null); }}>
                                 {user.status === 'Active' ? <PowerOff size={14} /> : <Power size={14} />} {user.status === 'Active' ? 'Deactivate' : 'Activate'}
                               </button>
                               {user.role === "Citizen" && user.extra_roles?.some(r => r.toLowerCase() === "researcher") && (

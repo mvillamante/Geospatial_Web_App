@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { Search } from 'lucide-react';
 
-const barangays = {
+/*const barangays = {
     Poblacion: ["Uno", "Dos", "Tres"],
     Lakeside: ["Marinig", "Pulo", "Sala"],
     Others: [
         "Baclaran", "Banay-banay", "Banlic", "Bigaa", "Butong", "Casile",
         "Diezmo", "Gulod", "Mamatid", "Niugan", "Pittland", "San Isidro"
     ]
-};
+};*/
 
 export interface Report {
     id: number;

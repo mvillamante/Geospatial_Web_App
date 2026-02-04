@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Eye, UserPlus, RefreshCcw, X } from "lucide-react";
+import { FiUser, FiCheckCircle } from "react-icons/fi";
+import { HiChevronUpDown, HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { toast } from "sonner";
 import "./ReportsMgmtPage.css";
+
+import { getIncidentCategories } from "../../constants";
+console.log("IT IS WORKING ",  getIncidentCategories() )
 
 type ReportStatus =
   | "Pending"
@@ -11,6 +16,16 @@ type ReportStatus =
   | "Rejected"
   | "Resolved"
   | "Archived";
+
+const reportStatuses: ReportStatus[] = [
+  "Pending",
+  "Assigned",
+  "In Progress",
+  "Verified",
+  "Rejected",
+  "Resolved",
+  "Archived",
+];
 
 
 interface Report {
@@ -93,6 +108,12 @@ const normalizeStatus = (raw: any): ReportStatus => {
 const ReportsMgmtPage: React.FC = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string | 'All'>('All');
+  const [statusFilter, setStatusFilter] = useState<ReportStatus | 'All'>('All');
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
+
+  const categories = useMemo(() => getIncidentCategories(), []);
+  
 
   // dito kukunin mga officer accounts/names
   const officers = useMemo(
@@ -155,11 +176,68 @@ const ReportsMgmtPage: React.FC = () => {
     toast.success(`Assigned to ${officerLabel}`);
   };
 
+  const toggleSort = () => {
+    setSortOrder((prev) => {
+      if (prev === null) return "asc";
+      if (prev === "asc") return "desc";
+      return null;
+    });
+  };
+
+  const filteredReports = reports
+  .filter((r) =>
+    categoryFilter === "All"
+      ? true
+      : r.category.toLowerCase() === categoryFilter.toLowerCase() ||
+        r.other_category?.toLowerCase() === categoryFilter.toLowerCase()
+  )
+  .filter((r) =>
+    statusFilter === "All" ? true : normalizeStatus(r.status) === statusFilter
+  )
+  .sort((a, b) => {
+    if (sortOrder === null) return 0;
+
+    const aTime = new Date(a.created_at).getTime();
+    const bTime = new Date(b.created_at).getTime();
+
+    return sortOrder === "asc"
+      ? aTime - bTime
+      : bTime - aTime;
+  });
+
   return (
     <div className="reports-page">
       <div className="page-head">
         <div>
           <h1>Reports Management</h1>
+        </div>
+      </div>
+
+      {/* Filters + Search + Create User */}
+      <div className="filters">
+        <div className="filters-left">
+          <div className="select-wrapper">
+            <FiUser className="select-icon" />
+            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="role-select">
+              <option value="All">All Categories</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="select-wrapper">
+            <FiCheckCircle className="select-icon" />
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as ReportStatus | 'All')} className="status-select">
+              <option value="All">All Status</option>
+              {reportStatuses.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -171,7 +249,16 @@ const ReportsMgmtPage: React.FC = () => {
               <th>Reporter</th>
               <th>Category</th>
               <th>Location</th>
-              <th>Submitted</th>
+              <th onClick={toggleSort} className="sort-header">
+                Submitted{" "}
+                {sortOrder === "asc" ? (
+                  <HiChevronUp />
+                ) : sortOrder === "desc" ? (
+                  <HiChevronDown />
+                ) : (
+                  <HiChevronUpDown />
+                )}
+              </th>
               <th>Status</th>
               <th>Assigned Officer</th>
               <th className="th-actions">Actions</th>
@@ -179,14 +266,14 @@ const ReportsMgmtPage: React.FC = () => {
           </thead>
 
           <tbody>
-            {reports.length === 0 ? (
+            {filteredReports.length === 0 ? (
               <tr>
                 <td colSpan={8} className="empty">
                   No reports found.
                 </td>
               </tr>
             ) : (
-              reports.map((report) => {
+              filteredReports.map((report) => {
                 const status = normalizeStatus(report.status);
                 const { date, time } = formatDateTime(report.created_at);
 

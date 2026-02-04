@@ -101,6 +101,12 @@
 
 .evac-card {
   background: var(--white-bg);
+  /*height: 220px;*/
+  width: 360px;
+
+  display: flex;
+  flex-direction: column;
+
   border-radius: 16px;
   padding: 1.75rem;
   border: 1px solid var(--light-gray-border);
@@ -108,8 +114,8 @@
   transition: all 0.25s ease;
 }
 
-.evac-grid.officer .evac-card {
-  height: 240px;
+.evac-card.officer {
+  height: 230px;
 }
 
 .evac-card:hover {
@@ -118,7 +124,7 @@
 }
 
 .evac-card-name {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   margin: 0;
   display: flex;
@@ -153,16 +159,20 @@
 .evac-info {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.2rem;
   color: #4b5563;
+  /*background-color: pink;*/
 }
 
 .evac-info-row {
   display: flex;
   gap: 8px;
+  font-size: 0.8rem;
+  color: #6b7280;
 }
 
 .evac-info-icon {
+  font-size: 0.85rem;
   width: 18px;
   height: 18px;
   color: #6b7280;
@@ -170,9 +180,9 @@
 
 .evac-btn {
   width: 100%;
-  margin-top: 1.2rem;
+  margin-top: auto;
   padding: 0.75rem;
-  background: var(--primary-color);
+  background: var(--primary-btn-color);
   color: var(--text-white);
   border: none;
   border-radius: 12px;
@@ -622,6 +632,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: auto;
   gap: 0.75rem;
 }
 

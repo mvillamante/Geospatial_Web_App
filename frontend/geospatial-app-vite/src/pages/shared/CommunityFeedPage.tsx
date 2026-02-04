@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect  } from "react";
 import {
     Pin,
     Search,
@@ -23,6 +23,7 @@ type FeedPost = {
     pinned?: boolean;
     area?: string;
     photo_url?: string | null;
+    attachments?: string[];
 };
 
 const labelForType = (type: PostType) =>
@@ -59,37 +60,33 @@ function initials(name: string) {
 }
 
 export default function CommunityFeedPage() {
+    const [posts, setPosts] = useState<FeedPost[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
     const [query, setQuery] = useState("");
     const [filter, setFilter] = useState<"all" | PostType>("all");
     const [selected, setSelected] = useState<FeedPost | null>(null);
 
-    const posts: FeedPost[] = useMemo(
-        () => [
-            {
-                id: 1,
-                type: "advisory",
-                title: "Flood Advisory: Yellow Warning Level",
-                body: "Heavy rainfall expected in the next 6 hours. Prepare go-bags and monitor updates. Avoid low-lying areas.",
-                author: "CDRRMO",
-                created_at: new Date(Date.now() - 55 * 60 * 1000).toISOString(),
-                pinned: true,
-                area: "Brgy. San Isidro",
-                photo_url:
-                    "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=1200&q=70",
-            },
-            {
-                id: 2,
-                type: "announcement",
-                title: "Road Clearing: Main Highway (9AM–12NN)",
-                body: "Road clearing operation will be conducted. Expect delays. Please use alternate routes. Keep lanes clear for emergency vehicles.",
-                author: "CDRRMO",
-                created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-                area: "Brgy. Banay-Banay",
-                photo_url: null,
-            },
-        ],
-        []
-    );
+    useEffect(() => {
+        const fetchFeed = async () => {
+            try {
+                setLoading(true);
+                const res = await fetch("http://localhost:8000/api/community-feed/");
+                if (!res.ok) throw new Error("Failed to fetch feed");
+
+                const data = await res.json();
+                setPosts(data);
+            } catch (err: any) {
+                setError(err.message ?? "Something went wrong");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchFeed();
+    }, []);
+
 
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
@@ -148,13 +145,18 @@ export default function CommunityFeedPage() {
                         </section>
                     )}
 
-                    <section className="feed-list">
-                        {normal.length === 0 && pinned.length === 0 ? (
-                            <div className="empty-state">No updates yet.</div>
-                        ) : (
-                            normal.map((p) => <PostRow key={p.id} post={p} onOpen={() => setSelected(p)} />)
-                        )}
-                    </section>
+                        <section className="feed-list">
+                            {loading ? (
+                                <div className="empty-state">Loading updates…</div>
+                            ) : error ? (
+                                <div className="empty-state error">{error}</div>
+                            ) : normal.length === 0 && pinned.length === 0 ? (
+                                <div className="empty-state">No updates yet.</div>
+                            ) : (
+                                normal.map((p) => <PostRow key={p.id} post={p} onOpen={() => setSelected(p)} />)
+                            )}
+                        </section>
+
                 </main>
 
                 <aside className="feed-rail">
@@ -255,13 +257,17 @@ export default function CommunityFeedPage() {
                             </div>
                         </div>
 
-                        <p className="modal-body">{selected.body}</p>
+                        <p className="modal-body" 
+                        dangerouslySetInnerHTML={{ __html: selected.body }} 
+                        />
 
-                        {selected.photo_url ? (
-                            <div className="modal-photo-wrap">
-                                <img className="modal-photo" src={selected.photo_url} alt="Post attachment" />
-                            </div>
-                        ) : null}
+
+                        {selected.attachments?.map((url, i) => (
+                        <div className="modal-photo-wrap" key={i}>
+                            <img className="modal-photo" src={url} alt={`Attachment ${i + 1}`} />
+                        </div>
+                        ))}
+
                     </div>
                 </div>
             )}
@@ -316,13 +322,17 @@ function PostRow({ post, onOpen }: { post: FeedPost; onOpen: () => void }) {
                 </div>
 
                 <div className="post-title">{post.title}</div>
-                <div className="post-preview">{post.body}</div>
+                <div className="post-preview" 
+                    dangerouslySetInnerHTML={{ __html: post.body }} 
+                />
 
-                {post.photo_url ? (
-                    <div className="post-photo-wrap">
-                        <img className="post-photo" src={post.photo_url} alt="Post attachment preview" />
-                    </div>
-                ) : null}
+
+                {post.attachments?.map((url, i) => (
+                <div className="post-photo-wrap" key={i}>
+                    <img className="post-photo" src={url} alt={`Post attachment ${i + 1}`} />
+                </div>
+                ))}
+
             </div>
         </button>
     );

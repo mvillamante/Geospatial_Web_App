@@ -6,7 +6,7 @@ import {
   CmsPage, DashboardPage, ReportsMgmtPage, SysMonitoringPage, UserMgmtPage,
   AlertsMapPage, ProfilePage, 
   DashboardMapPage, ReportVerifyPage,
-  PwaLandingPage, PwaAuthPage
+  PwaAuthPage
  } from "./pages";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 

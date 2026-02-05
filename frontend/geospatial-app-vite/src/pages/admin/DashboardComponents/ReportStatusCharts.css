@@ -1,52 +1,27 @@
-/* Card wrapper */
-.report-status-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 18px 20px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
-  display: flex;
-  flex-direction: column;
+.chart-card {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.10);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
 }
 
-/* Header */
-.report-status-header {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 14px;
+.chart-card .chart-header {
+    margin-bottom: 10px;
 }
 
-.report-status-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #b4692b;
-  margin: 0;
+.chart-card .chart-title {
+    font-size: 14px;
+    font-weight: 800;
+    margin: 0;
 }
 
-.report-status-subtitle {
-  font-size: 13px;
-  color: #c67431;
-  margin: 2px 0 0 0;
+.chart-card .chart-subtitle {
+    font-size: 12px;
+    margin: 4px 0 0;
+    color: #6b7280;
 }
 
-/* Chart container */
-.report-status-content {
-  width: 100%;
-  height: 280px;
-}
-
-.report-status-card.small {
-  padding: 14px 16px;
-}
-
-.report-status-card.small .report-status-content {
-  height: 220px;
-}
-
-.report-status-card.small .report-status-title {
-  font-size: 14px;
-}
-
-.report-status-card.small .report-status-subtitle {
-  font-size: 12px;
+.chart-card .chart-content {
+    width: 100%;
 }

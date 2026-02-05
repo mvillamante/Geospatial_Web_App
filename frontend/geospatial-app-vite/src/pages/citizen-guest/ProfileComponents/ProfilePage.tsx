@@ -369,18 +369,20 @@ const ProfilePage: React.FC = () => {
                 )}
               </div>
             </div>
-
-            {(!userRole2?.length || userRole2[0] === "") && userRole !== "Researcher" && (
-              <button
-                className={`research-btn ${isRequested ? 'requested' : ''}`}
-                onClick={sendResearcherRequest}
-                disabled={isRequested}
-              >
-                <GraduationCap size={16} className="cap-icon" />
-                {isRequested ? "Request Sent" : "Request Researcher Access"}
-              </button>
+            {!isStaff && (
+              <>
+                {(!userRole2?.length || userRole2[0] === "") && userRole !== "Researcher" && (
+                  <button
+                    className={`research-btn ${isRequested ? 'requested' : ''}`}
+                    onClick={sendResearcherRequest}
+                    disabled={isRequested}
+                  >
+                    <GraduationCap size={16} className="cap-icon" />
+                    {isRequested ? "Request Sent" : "Request Researcher Access"}
+                  </button>
+                )}
+              </>
             )}
-
           </div>
         </div>
 
@@ -406,86 +408,86 @@ const ProfilePage: React.FC = () => {
       </div>
 
 
-        <div className="section-header section-header-row">
-          <h3 className="section-title">Security</h3>
+      <div className="section-header section-header-row">
+        <h3 className="section-title">Security</h3>
 
-          <button
-            className="security-toggle-btn"
-            onClick={() => setShowPasswordForm((v) => !v)}
-            aria-expanded={showPasswordForm}
-          >
-            {showPasswordForm ? "Close" : "Change Password"}
-          </button>
-        </div>
-
-        {showPasswordForm && (
-          <div className="security-card">
-            <div className="security-row">
-              <label>Current Password</label>
-              <input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-              />
-            </div>
-
-            <div className="security-row">
-              <label>New Password</label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-            </div>
-
-            <div className="security-row">
-              <label>Confirm New Password</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
-
-            <div className="security-actions">
-              <button className="save-btn" onClick={changePassword} disabled={passwordLoading}>
-                {passwordLoading ? "Changing..." : "Update Password"}
-              </button>
-
-              <button
-                className="cancel-btn"
-                onClick={() => {
-                  setShowPasswordForm(false);
-                  setCurrentPassword("");
-                  setNewPassword("");
-                  setConfirmPassword("");
-                }}
-                disabled={passwordLoading}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
-
-        {!isStaff && (
-          <>
-            <div className="section-header">
-              <h3 className="section-title">Report History</h3>
-            </div>
-
-            <div className="report-list">
-              {loadingReports && <p>Loading report history...</p>}
-              {reportsError && <p style={{ color: "crimson" }}>{reportsError}</p>}
-              {!loadingReports && !reportsError && reports.length === 0 && <p>No reports yet.</p>}
-
-              {reports.map((report) => (
-                <ReportCard key={report.id} report={report} />
-              ))}
-            </div>
-          </>
-        )}
+        <button
+          className="security-toggle-btn"
+          onClick={() => setShowPasswordForm((v) => !v)}
+          aria-expanded={showPasswordForm}
+        >
+          {showPasswordForm ? "Close" : "Change Password"}
+        </button>
       </div>
+
+      {showPasswordForm && (
+        <div className="security-card">
+          <div className="security-row">
+            <label>Current Password</label>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+            />
+          </div>
+
+          <div className="security-row">
+            <label>New Password</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+          </div>
+
+          <div className="security-row">
+            <label>Confirm New Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+          </div>
+
+          <div className="security-actions">
+            <button className="save-btn" onClick={changePassword} disabled={passwordLoading}>
+              {passwordLoading ? "Changing..." : "Update Password"}
+            </button>
+
+            <button
+              className="cancel-btn"
+              onClick={() => {
+                setShowPasswordForm(false);
+                setCurrentPassword("");
+                setNewPassword("");
+                setConfirmPassword("");
+              }}
+              disabled={passwordLoading}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!isStaff && (
+        <>
+          <div className="section-header">
+            <h3 className="section-title">Report History</h3>
+          </div>
+
+          <div className="report-list">
+            {loadingReports && <p>Loading report history...</p>}
+            {reportsError && <p style={{ color: "crimson" }}>{reportsError}</p>}
+            {!loadingReports && !reportsError && reports.length === 0 && <p>No reports yet.</p>}
+
+            {reports.map((report) => (
+              <ReportCard key={report.id} report={report} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
   );
 };
 

@@ -4,6 +4,7 @@ import { StatsCard } from "./DashboardComponents/StatsCard";
 import { ReportsTable } from "./DashboardComponents/ReportsTable";
 import { UserDistributionChart } from "./DashboardComponents/UserDistributionChart";
 import { ReportsStatusChart } from "./DashboardComponents/ReportsStatusChart";
+import { ActionCenter } from "./DashboardComponents/ActionCenter";
 import "./DashboardPage.css";
 
 const DashboardPage: React.FC = () => {
@@ -60,33 +61,7 @@ const DashboardPage: React.FC = () => {
           <ReportsTable />
         </div>
 
-        {/* Action Center (right column) */}
-        <div className="panel action-center">
-          <div className="panel-head">
-            <div className="panel-title">Action Center</div>
-          </div>
-
-          <div className="action-list">
-            <div className="action-item">
-              <div className="action-title">Unassigned reports</div>
-              <div className="action-sub">Assign officers to pending cases</div>
-              <button className="action-btn">Open</button>
-            </div>
-
-
-            <div className="action-item">
-              <div className="action-title">CMS drafts</div>
-              <div className="action-sub">Review unpublished community posts</div>
-              <button className="action-btn">Open</button>
-            </div>
-
-            <div className="action-item">
-              <div className="action-title">User management</div>
-              <div className="action-sub">Review roles / disabled accounts</div>
-              <button className="action-btn">Open</button>
-            </div>
-          </div>
-        </div>
+        <ActionCenter />
       </section>
 
       {/* Bottom */}

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Eye, UserPlus, RefreshCcw, X } from "lucide-react";
 import { FiUser, FiCheckCircle } from "react-icons/fi";
 import { HiChevronUpDown, HiChevronDown, HiChevronUp } from "react-icons/hi2";
@@ -13,12 +14,14 @@ type ReportStatus =
   | "In Progress"
   | "Rejected"
   | "Resolved"
+  | "Archived";
 
 const reportStatuses: ReportStatus[] = [
   "Pending",
   "In Progress",
   "Rejected",
   "Resolved",
+  "Archived",
 ];
 
 type Officer = {
@@ -120,6 +123,8 @@ const normalizeStatus = (raw: any): ReportStatus => {
   return "Pending";
 };
 
+
+
 const ReportsMgmtPage: React.FC = () => {
   const [viewArchived, setViewArchived] = useState(false);
   const [confirmArchiveId, setConfirmArchiveId] = useState<number | null>(null);
@@ -136,6 +141,18 @@ const ReportsMgmtPage: React.FC = () => {
 
 
   const categories = useMemo(() => getIncidentCategories(), []);
+
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    setViewArchived(tab === "archived");
+
+    const status = searchParams.get("status");
+    if (status && ["Pending", "In Progress", "Rejected", "Resolved", "Archived"].includes(status)) {
+      setStatusFilter(status as any);
+    }
+}, [searchParams]);
 
 
   useEffect(() => {
@@ -424,8 +441,8 @@ const ReportsMgmtPage: React.FC = () => {
           <tbody>
             {filteredReports.length === 0 ? (
               <tr>
-                <td colSpan={8} className="empty">
-                  No reports found.
+                <td colSpan={9} className="empty">
+                  Loading Reports...
                 </td>
               </tr>
             ) : (
@@ -574,7 +591,7 @@ const ReportsMgmtPage: React.FC = () => {
                   {(selectedReport.status ?? "Pending") as ReportStatus}
                 </div>
               </div>
-              <button className="icon-btn" onClick={() => { setSelectedReport(null); setSelectedOfficer(""); }} title="Close">
+              <button className="icon-btn" onClick={() => { setSelectedReport(null); setSelectedOfficer(""); setOpenMenuId(null); }} title="Close">
                 <X size={16} />
               </button>
             </div>

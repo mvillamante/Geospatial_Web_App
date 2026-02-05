@@ -21,7 +21,6 @@ export const UserDistributionChart: React.FC<Props> = ({ small }) => {
   return (
     <div className={`chart-card ${small ? "small" : ""}`}>
       <div className="chart-header">
-        <h2 className="chart-title">User Distribution</h2>
         <p className="chart-subtitle">By role</p>
       </div>
 

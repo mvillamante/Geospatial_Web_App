@@ -6,7 +6,6 @@ export interface User {
   email: string;
   role: string;
   extra_roles: string[];
-  supabase_uid?: string;
 }
 
 //returns full user info.

@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
 import { Users, FileText, Clock, AlertTriangle, Shield, Newspaper } from "lucide-react";
 import { StatsCard } from "./DashboardComponents/StatsCard";
 import { ReportsTable } from "./DashboardComponents/ReportsTable";
@@ -8,6 +10,29 @@ import { ActionCenter } from "./DashboardComponents/ActionCenter";
 import "./DashboardPage.css";
 
 const DashboardPage: React.FC = () => {
+  const [stats, setStats] = useState<{
+    active_users: number;
+    total_reports: number;
+    unassigned_reports: number;
+    high_critical_reports: number;
+  } | null>(null);
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        const res = await fetch("/api/admin/stats/", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+        if (!res.ok) throw new Error("Failed to fetch dashboard stats");
+        const data = await res.json();
+        setStats(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchDashboardStats();
+  }, []);
   return (
     <div className="dashboard-page">
       {/* Header */}
@@ -22,30 +47,26 @@ const DashboardPage: React.FC = () => {
       <section className="stats-grid">
         <StatsCard
           title="Active Users"
-          value="1,245"
+          value={stats ? stats.active_users.toLocaleString() : "..."}
           icon={Users}
-          trend={{ value: 12.5, isPositive: true }}
         />
 
         <StatsCard
           title="Total Reports"
-          value="3,428"
+          value={stats ? stats.total_reports.toLocaleString() : "..."}
           icon={FileText}
-          trend={{ value: 8.2, isPositive: true }}
         />
 
         <StatsCard
           title="Unassigned Reports"
-          value="127"
+          value={stats ? stats.unassigned_reports.toLocaleString() : "..."}
           icon={Clock}
-          trend={{ value: 3.1, isPositive: false }}
         />
 
         <StatsCard
-          title="High/Critical Reports"
-          value="18"
+          title="High / Critical Reports"
+          value={stats ? stats.high_critical_reports.toLocaleString() : "..."}
           icon={AlertTriangle}
-          trend={{ value: 15.3, isPositive: false }}
         />
       </section>
 
@@ -55,7 +76,9 @@ const DashboardPage: React.FC = () => {
         <div className="span-2 panel">
           <div className="panel-head">
             <div className="panel-title">Reports Needing Action</div>
-            <button className="panel-link">View all reports</button>
+            <Link to="/main/admin/manage-reports" className="panel-link">
+              View all reports
+            </Link>
           </div>
 
           <ReportsTable />

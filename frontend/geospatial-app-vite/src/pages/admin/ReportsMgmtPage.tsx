@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import "./ReportsMgmtPage.css";
 
 import { getIncidentCategories } from "../../constants";
-console.log("IT IS WORKING ", getIncidentCategories())
+import Pagination from "../../components/ui/Pagination";
 
 type ReportStatus =
   | "Pending"
@@ -126,6 +126,9 @@ const normalizeStatus = (raw: any): ReportStatus => {
 
 
 const ReportsMgmtPage: React.FC = () => {
+  const pageSize = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
   const [viewArchived, setViewArchived] = useState(false);
   const [confirmArchiveId, setConfirmArchiveId] = useState<number | null>(null);
   const [officers, setOfficers] = useState<Officer[]>([]);
@@ -138,7 +141,6 @@ const ReportsMgmtPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string | 'All'>('All');
   const [statusFilter, setStatusFilter] = useState<ReportStatus | 'All'>('All');
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
-
 
   const categories = useMemo(() => getIncidentCategories(), []);
 
@@ -194,8 +196,6 @@ const ReportsMgmtPage: React.FC = () => {
     setSelectedReport(latest);
   };
 
-
-
   const archiveReport = async (reportId: number) => {
     try {
       const updated = await patchReport(reportId, { status: "archived" });
@@ -223,6 +223,10 @@ const ReportsMgmtPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, categoryFilter, statusFilter, sortOrder, viewArchived]);
+
+  useEffect(() => {
     const fetchReports = async () => {
       const token = localStorage.getItem("access_token");
       if (!token) {
@@ -242,6 +246,7 @@ const ReportsMgmtPage: React.FC = () => {
 
         const data = await res.json();
         setReports(Array.isArray(data) ? data : []);
+        setCurrentPage(1);
       } catch (err) {
         toast.error("Unable to load reports");
         console.error(err);
@@ -270,7 +275,6 @@ const ReportsMgmtPage: React.FC = () => {
     return res.json();
   }
 
-
   const assignOfficer = async (reportId: number, officerId: number) => {
     try {
       const updated = await patchReport(reportId, { officer_id: officerId });
@@ -291,8 +295,6 @@ const ReportsMgmtPage: React.FC = () => {
       toast.error(err?.message || "Failed to assign officer");
     }
   };
-
-
 
   const toggleSort = () => {
     setSortOrder((prev) => {
@@ -339,7 +341,15 @@ const ReportsMgmtPage: React.FC = () => {
         ? aTime - bTime
         : bTime - aTime;
     });
+  const totalPages = Math.ceil(filteredReports.length / pageSize);
 
+  const paginatedReports = filteredReports.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  /* PAGINATION */
+  const handlePageChange = (page: number) => { if (page < 1 || page > totalPages) return; setCurrentPage(page); };
 
   return (
     <div className="reportsmgmt-page">
@@ -413,16 +423,16 @@ const ReportsMgmtPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="card">
+      <div className="reports-table-wrapper">
         <table className="reports-table">
           <thead>
             <tr>
-              <th>Report ID</th>
-              <th>Reporter</th>
-              <th>Category</th>
-              <th>Critical Level</th>
-              <th>Location</th>
-              <th onClick={toggleSort} className="sort-header">
+              <th className="center">Report ID</th>
+              <th className="center">Reporter</th>
+              <th className="center">Category</th>
+              <th className="center">Critical Level</th>
+              <th className="center">Location</th>
+              <th onClick={toggleSort} className="sort-header center">
                 Submitted{" "}
                 {sortOrder === "asc" ? (
                   <HiChevronUp />
@@ -432,9 +442,9 @@ const ReportsMgmtPage: React.FC = () => {
                   <HiChevronUpDown />
                 )}
               </th>
-              <th>Status</th>
-              <th>Assigned Officer</th>
-              <th className="th-actions">Actions</th>
+              <th className="center">Status</th>
+              <th className="center">Assigned Officer</th>
+              <th className="th-actions center">Actions</th>
             </tr>
           </thead>
 
@@ -446,17 +456,17 @@ const ReportsMgmtPage: React.FC = () => {
                 </td>
               </tr>
             ) : (
-              filteredReports.map((report) => {
+              paginatedReports.map((report) => {
                 const status = normalizeStatus(report.status);
                 const isArchived = normalizeStatus(report.status) === "Archived";
                 const { date, time } = formatDateTime(report.created_at);
 
                 return (
                   <tr key={report.id}>
-                    <td className="table-id">#R-0{report.id}</td>
-                    <td>{report.user_label}</td>
-                    <td className="table-category">{reportCategoryLabel(report)}</td>
-                    <td>
+                    <td className="table-id center">#R-0{report.id}</td>
+                    <td className="center">{report.user_label}</td>
+                    <td className="table-category center muted">{reportCategoryLabel(report)}</td>
+                    <td className="center">
                       {report.verified_critical_level ? (
                         <span className={criticalBadgeClass(report.verified_critical_level)}>
                           {report.verified_critical_level}
@@ -465,19 +475,19 @@ const ReportsMgmtPage: React.FC = () => {
                         <span className="muted">—</span>
                       )}
                     </td>
-                    <td className="location-cell" title={report.location_display}>
+                    <td className="location-cell center" title={report.location_display}>
                       {report.location_display || "-"}
                     </td>
                     <td>
-                      <div className="dt">
+                      <div className="dt center">
                         <div className="dt-date">{date}</div>
-                        <div className="dt-time">{time}</div>
+                        <div className="dt-time muted">{time}</div>
                       </div>
                     </td>
-                    <td>
+                    <td className="center">
                       <span className={badgeClass(status)}>{status}</span>
                     </td>
-                    <td className="assigned">
+                    <td className="assigned center">
                       {report.assigned_officer_label ? (
                         <span className="assigned-chip">{report.assigned_officer_label}</span>
                       ) : (
@@ -485,7 +495,7 @@ const ReportsMgmtPage: React.FC = () => {
                       )}
                     </td>
 
-                    <td>
+                    <td className="center">
                       <div className="row-menu" onClick={(e) => e.stopPropagation()}>
                         <button
                           type="button"
@@ -539,6 +549,12 @@ const ReportsMgmtPage: React.FC = () => {
         </table>
       </div>
 
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
+
       {confirmArchiveId !== null && (
         <div className="modal-overlay" onClick={() => setConfirmArchiveId(null)}>
           <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
@@ -571,7 +587,6 @@ const ReportsMgmtPage: React.FC = () => {
           </div>
         </div>
       )}
-
 
       {/* Drawer / Modal */}
       {selectedReport && (

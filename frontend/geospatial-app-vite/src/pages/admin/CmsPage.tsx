@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Edit, Eye, Trash2, Send } from 'lucide-react';
+import { Plus, Edit, Eye, Trash2, Send, ArchiveRestore } from 'lucide-react';
 import './CmsPage.css';
 import RichTextEditor from './TextEditor/RichTextEditor';
 
@@ -15,7 +15,7 @@ interface Guide {
   postTitle: string;
   postType: string;
   postBody?: string;
-  status: 'Published' | 'Draft';
+  status: 'Published' | 'Draft' | 'Archived';
   isPinned: boolean;
   createdAt: string;
   updatedAt: string;
@@ -38,11 +38,14 @@ const CmsPage: React.FC = () => {
     imageFile?: File;
   }>({
     postTitle: "",
-    postType: "safety",
+    postType: "advisory",
     postBody: "",
   });
   const [showNotificationDialog, setShowNotificationDialog] = useState(false);
   const [notification, setNotification] = useState({ type: 'alert', message: '' });
+  const [viewArchived, setViewArchived] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
+  const [guideToPublish, setGuideToPublish] = useState<Guide | null>(null);
 
   useEffect(() => {
     fetch("/api/cms/guides/", {
@@ -57,7 +60,7 @@ const CmsPage: React.FC = () => {
           postTitle: g.post_title,
           postType: g.post_type,
           postBody: g.post_body,
-          status: g.status === "published" ? "Published" : "Draft",
+          status: g.status === "published"? "Published" : g.status === "archived" ? "Archived": "Draft",
           isPinned: g.is_pinned,
           createdAt: g.created_at,
           updatedAt: g.updated_at,
@@ -97,6 +100,22 @@ const CmsPage: React.FC = () => {
     setGuides(g => g.filter(item => item.postId !== postId));
   };
 
+  const restoreGuide = async (postId: number) => {
+    await fetch(`/api/cms/guides/${postId}/restore/`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
+
+    // Remove restored guide from Archived list
+    setGuides(prev => 
+      prev.map(g => 
+        g.postId === postId ? { ...g, status: "Draft" } : g
+      )
+    );
+  };
+
   const permanentDeleteGuide = async (postId: number) => {
     await fetch(`/api/cms/guides/${postId}/permanent-delete/`, {
       method: "DELETE",
@@ -108,7 +127,7 @@ const CmsPage: React.FC = () => {
     setGuides(g => g.filter(item => item.postId !== postId));
   };
 
-const createGuide = async () => {
+const createGuide = async (publishImmediately = false) => {
   const res = await fetch("/api/cms/guides/create/", {
     method: "POST",
     headers: {
@@ -130,25 +149,38 @@ const createGuide = async () => {
     uploadedImage = await uploadImage(created.id, newGuide.imageFile);
   }
 
+  if (publishImmediately) {
+    await fetch(`/api/cms/guides/${created.id}/publish/`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
+  }
+
   setGuides(prev => [
     {
       postId: created.id,
       postTitle: created.post_title,
       postType: created.post_type,
       postBody: created.post_body,
-      status: "Draft",
+      status: publishImmediately ? "Published" : "Draft",
       isPinned: false,
       createdAt: created.created_at,
       updatedAt: created.updated_at,
-      publishedAt: created.published_at,
+      publishedAt: publishImmediately
+        ? new Date().toISOString()
+        : undefined,
       attachments: uploadedImage ? [uploadedImage] : [],
     },
     ...prev,
   ]);
 
-  setNewGuide({ postTitle: "", postType: "safety", postBody: "" });
+
+  setNewGuide({ postTitle: "", postType: "advisory", postBody: "" });
   setShowCreateModal(false);
 };
+
 
 
   const updateGuide = async () => {
@@ -215,17 +247,40 @@ const createGuide = async () => {
 
     return await res.json();
   };
+  const filteredGuides = guides.filter(g => {
+    const isArchived = g.status === "Archived";
+    return viewArchived ? isArchived : !isArchived;
+  });
 
   return (
     <div className="cms-page">
       {/* Header */}
       <div className="cms-header">
         <h1>Content Management System</h1>
+
         <div className="cms-actions">
+          <div className="page-actions">
+            <button
+              type="button"
+              className={`tab-btn ${!viewArchived ? "active" : ""}`}
+              onClick={() => setViewArchived(false)}
+            >
+              Active
+            </button>
+
+            <button
+              type="button"
+              className={`tab-btn ${viewArchived ? "active" : ""}`}
+              onClick={() => setViewArchived(true)}
+            >
+              Archived
+            </button>
+          </div>
+
           <button
             className="btn primary"
             onClick={() => {
-              setNewGuide({ postTitle: "", postType: "safety", postBody: "" });
+              setNewGuide({ postTitle: "", postType: "advisory", postBody: "" });
               setShowCreateModal(true);
             }}
           >
@@ -233,6 +288,7 @@ const createGuide = async () => {
           </button>
         </div>
       </div>
+
 
     {/* Table */}
     <div className="card">
@@ -248,7 +304,7 @@ const createGuide = async () => {
           </tr>
         </thead>
         <tbody>
-          {guides.map(guide => (
+          {filteredGuides.map(guide => (
             <tr key={guide.postId}>
               <td>{guide.postTitle}</td>
               <td>{guide.postType.charAt(0).toUpperCase() + guide.postType.slice(1)}</td>
@@ -260,29 +316,41 @@ const createGuide = async () => {
               <td>{new Date(guide.updatedAt).toLocaleDateString()}</td>
               <td>
                 <div className="table-actions">
-                  <button
-                    className="icon-btn"
-                    onClick={() => {
-                      setEditingGuide({ ...guide });
-                      setShowEditModal(true);
-                    }}
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button className="icon-btn" onClick={() => togglePublish(guide.postId)}>
-                    <Eye size={16} />
-                  </button>
-                  <button
-                    className="icon-btn danger"
-                    onClick={() => {
-                      setGuideToDelete(guide);
-                      setShowDeleteModal(true);
-                    }}
+                  {!viewArchived ? (
+                    <>
+                      <button className="icon-btn" onClick={() => { setEditingGuide({ ...guide }); setShowEditModal(true); }}>
+                        <Edit size={16} />
+                      </button>
+
+                      <button
+                        className="icon-btn"
+                        onClick={() => {
+                          setGuideToPublish(guide);
+                          setShowPublishModal(true);
+                        }}
+                      >
+                        <Eye size={16} />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        className="icon-btn primary"
+                        onClick={() => restoreGuide(guide.postId)}
+                      >
+                        <ArchiveRestore size={16} />
+                      </button>
+                    </>
+                  )}
+
+                  <button className="icon-btn danger" onClick={() => {setGuideToDelete(guide);setShowDeleteModal(true);}}
                   >
                     <Trash2 size={16} />
                   </button>
+
                 </div>
               </td>
+
             </tr>
           ))}
         </tbody>
@@ -341,10 +409,11 @@ const createGuide = async () => {
                 value={newGuide.postType}
                 onChange={e => setNewGuide({ ...newGuide, postType: e.target.value })}
               >
-                <option value="safety">Safety</option>
-                <option value="protocol">Protocol</option>
-                <option value="preparedness">Preparedness</option>
+                <option value="advisory">Advisory</option>
+                <option value="announcement">Announcement</option>
+                <option value="guide">Guide</option>
               </select>
+
 
               <label>Body</label>
               <RichTextEditor
@@ -363,11 +432,25 @@ const createGuide = async () => {
                 }}
               />
               <div className="modal-actions">
-                <button className="btn secondary" onClick={() => setShowCreateModal(false)}>
+                <button
+                  className="btn secondary"
+                  onClick={() => setShowCreateModal(false)}
+                >
                   Cancel
                 </button>
-                <button className="btn primary" onClick={createGuide}>
-                  Create
+
+                <button
+                  className="btn secondary"
+                  onClick={() => createGuide(false)}
+                >
+                  Save Draft
+                </button>
+
+                <button
+                  className="btn primary"
+                  onClick={() => createGuide(true)}
+                >
+                  Publish Content
                 </button>
               </div>
             </div>
@@ -395,10 +478,11 @@ const createGuide = async () => {
                   setEditingGuide({ ...editingGuide, postType: e.target.value })
                 }
               >
-                <option value="safety">Safety</option>
-                <option value="protocol">Protocol</option>
-                <option value="preparedness">Preparedness</option>
+                <option value="advisory">Advisory</option>
+                <option value="announcement">Announcement</option>
+                <option value="guide">Guide</option>
               </select>
+
 
               <label>Body</label>
               <RichTextEditor
@@ -509,6 +593,55 @@ const createGuide = async () => {
             </div>
           </div>
         )}
+
+        {/* Publish Confirmation Modal */}
+        {showPublishModal && guideToPublish && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h2>
+                {guideToPublish.status === "Published"
+                  ? "Unpublish Content"
+                  : "Publish Content"}
+              </h2>
+
+              <p>
+                Are you sure you want to{" "}
+                <strong>
+                  {guideToPublish.status === "Published"
+                    ? "unpublish"
+                    : "publish"}
+                </strong>{" "}
+                <strong>"{guideToPublish.postTitle}"</strong>?
+              </p>
+
+              <div className="modal-actions">
+                <button
+                  className="btn secondary"
+                  onClick={() => {
+                    setShowPublishModal(false);
+                    setGuideToPublish(null);
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="btn primary"
+                  onClick={async () => {
+                    await togglePublish(guideToPublish.postId);
+                    setShowPublishModal(false);
+                    setGuideToPublish(null);
+                  }}
+                >
+                  {guideToPublish.status === "Published"
+                    ? "Unpublish"
+                    : "Publish"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
 
       </div>
   );

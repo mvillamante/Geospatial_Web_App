@@ -37,6 +37,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
       if (!res.ok) throw new Error("Failed to fetch requests");
 
       const data = await res.json();
+      console.log("ASAN KA NA", data)
 
       const mapped: ResearcherRequest[] = data.results.map((r: any) => ({
         id: r.id,
@@ -47,6 +48,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
       }));
 
       setRequests(mapped);
+      console.log("eto pi req", mapped)
       setCurrentPage(page);
       setTotalPages(Math.ceil(data.count / pageSize));
 

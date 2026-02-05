@@ -9,6 +9,7 @@ import { getUserRoleAndDisplayName } from "../../libr/auth";
 
 import ResearcherRequestsTab, { type ResearcherRequest } from "../../components/ui/ResearcherRequestsTab";
 import CreateUserModal from '../../components/ui/Modals/CreateUserModal';
+import Pagination from "../../components/ui/Pagination";
 
 type Role = 'Researcher' | 'Officer' | 'Admin';
 type Status = 'Active' | 'Inactive';
@@ -17,6 +18,7 @@ interface User {
   id: number;
   staff_id: string;
   username: string;
+  name: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -174,18 +176,6 @@ const UserMgmtPage: React.FC = () => {
   };
 
   /* PAGINATION */
-  const renderPagination = (currentPage: number, totalPages: number, onPageChange: (page: number) => void) => {
-    if (totalPages === 0) return null;
-    return (
-      <div className="pagination">
-        <button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1}>Prev</button>
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
-          <button key={n} onClick={() => onPageChange(n)} className={n === currentPage ? "active" : ""}>{n}</button>
-        ))}
-        <button onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages}>Next</button>
-      </div>
-    );
-  };
   const handlePageChange = (page: number) => { if (page < 1 || page > totalPages) return; fetchUsers(page); };
 
   /* USER ACTIONS */
@@ -263,7 +253,13 @@ const UserMgmtPage: React.FC = () => {
             <div className="filters-left">
               <div className="select-wrapper">
                 <FiUser className="select-icon" />
-                <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value as Role | 'All')} className="role-select">
+                <select 
+                  value={roleFilter} 
+                  onChange={(e) => {
+                    setRoleFilter(e.target.value as Role | "All");
+                  }}
+                  className="role-select"
+                >
                   <option value="All">All Roles</option>
                   <option value="Researcher">Researcher</option>
                   <option value="Officer">Officer</option>
@@ -301,7 +297,7 @@ const UserMgmtPage: React.FC = () => {
                   <th className="center">Staff ID</th>
                   <th className="center">User</th>
                   <th className="center">Role</th>
-                  <th className="center">Department</th>
+                  {/*<th className="center">Department</th>*/}
                   <th className="center">Status</th>
                   <th className="center">
                     <span className="sort-header" onClick={() => handleSortClick("dateJoined")}>
@@ -329,12 +325,29 @@ const UserMgmtPage: React.FC = () => {
                       <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td>
                       <td className="center staff-id">{user.staff_id}</td>
                       <td>
-                        <div className={`user-details role-${roleClass}`}><strong className="user-name">{user.name}</strong></div>
+                        <div className={`user-details role-${roleClass}`}>
+                          <strong className="user-name">{user.name}</strong>
+                          <span className="user-email muted">{user.email}</span>
+                        </div>
                       </td>
                       <td className="center">
                         <div className="role-cell">
                           <div className="role-field">
-                            <select className={`role-select ${displayRole}`} value={displayRole} onChange={(e) => updateRole(user.id, e.target.value as Role)} aria-label={`Change role for ${user.name}`} disabled={userRole !== 'Admin' || user.role?.toLowerCase() === 'citizen' || (user.role?.toLowerCase() === 'citizen' && user.extra_roles?.some(r => r.toLowerCase() === 'researcher'))}>
+                            <select className={`role-select ${displayRole}`} 
+                              value={displayRole} 
+                              onChange={(e) => {
+                                const newRole = e.target.value as Role;
+
+                                if (!window.confirm(`Are you sure you want to change this user’s role to ${newRole}?`)) {
+                                  e.target.value = displayRole;
+                                  return;
+                                }
+
+                                updateRole(user.id, newRole);
+                              }}
+                              aria-label={`Change role for ${user.name}`} 
+                              disabled={userRole !== 'Admin' || user.role?.toLowerCase() === 'citizen' || (user.role?.toLowerCase() === 'citizen' && user.extra_roles?.some(r => r.toLowerCase() === 'researcher'))}
+                            >
                               <option value="Researcher">Researcher</option>
                               <option value="Officer">Officer</option>
                               <option value="Admin">Admin</option>
@@ -344,7 +357,7 @@ const UserMgmtPage: React.FC = () => {
                           {userRole !== 'Admin' && <span className="role-hint">Admin only</span>}
                         </div>
                       </td>
-                      <td className="center muted">{user.department}</td>
+                      {/*<td className="center muted">{user.department}</td>*/}
                       <td className="center"><span className={`badge ${user.status}`}>{user.status}</span></td>
                       <td className="center muted">{user.dateJoined}</td>
                       <td className="center muted">{user.lastLoginDisplay}</td>
@@ -374,8 +387,12 @@ const UserMgmtPage: React.FC = () => {
               </tbody>
             </table>
           </div>
-
-          {renderPagination(currentPage, totalPages, handlePageChange)}
+          
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </>
       )}
 

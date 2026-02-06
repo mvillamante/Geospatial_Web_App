@@ -210,3 +210,85 @@
   font-size: 11px;
   text-transform: uppercase;
 }
+
+
+/* =============================================
+   Verified Report Marker Styles
+   ============================================= */
+.verified-report-marker {
+  position: relative;
+  width: 44px;
+  height: 44px;
+}
+
+.verified-report-marker .pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  animation: verified-pulse 2s infinite;
+}
+
+.verified-report-marker .pin {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: white;
+  z-index: 1;
+}
+
+@keyframes verified-pulse {
+  0% { transform: scale(0.5); opacity: 0.6; }
+  50% { transform: scale(1); opacity: 0.3; }
+  100% { transform: scale(0.5); opacity: 0.6; }
+}
+
+/* =============================================
+   Selected / Highlighted Report Marker Styles
+   ============================================= */
+.report-marker-container {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+
+.report-marker-pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  animation: report-pulse 1.5s infinite;
+  z-index: 0;
+}
+
+.report-marker-pin {
+  position: absolute;
+  top: 13px;
+  left: 13px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: white;
+  z-index: 1;
+}
+
+@keyframes report-pulse {
+  0% { transform: scale(0.5); opacity: 0.7; }
+  70% { transform: scale(1); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
+}

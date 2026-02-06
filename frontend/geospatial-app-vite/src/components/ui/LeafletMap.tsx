@@ -312,6 +312,7 @@ export default function LeafletMap({
 
         const data = await res.json() as OverpassResponse;
         onSuccess(data);
+        return;
       } catch (err) {
         console.error("Overpass fetch failed:", err);
       }
@@ -450,96 +451,6 @@ export default function LeafletMap({
     }
   }, [searchedBarangay, searchedSeverity]);
 
-  // Handle clicking on a verified report - zoom to exact report location
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    // If no selected report, clear report marker and return
-    if (!selectedReport) {
-      if (reportMarkerRef.current) {
-        reportMarkerRef.current.remove();
-        reportMarkerRef.current = null;
-      }
-      return;
-    }
-
-    const { title, location, risk, lat, lng, category } = selectedReport;
-    
-    // Validate coordinates
-    if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
-      console.error('Invalid report coordinates:', { lat, lng });
-      return;
-    }
-    
-    // Clear search marker when a report is selected (to avoid conflicts)
-    if (searchMarkerRef.current) {
-      searchMarkerRef.current.remove();
-      searchMarkerRef.current = null;
-    }
-
-    // Remove previous report marker if exists
-    if (reportMarkerRef.current) {
-      reportMarkerRef.current.remove();
-      reportMarkerRef.current = null;
-    }
-    
-    // Get severity colors
-    const colors = severityColors[risk] ?? severityColors.low;
-    
-    // Category icons
-    const categoryIcons: Record<string, string> = {
-      Fire: "🔥",
-      Flood: "🌊",
-      Landslide: "⛰️",
-      Accident: "⚠️"
-    };
-    const icon = categoryIcons[category] || "📍";
-    
-    // Create a highlighted report marker with severity-based colors
-    const reportIcon = L.divIcon({
-      html: `
-        <div class="report-marker-container">
-          <div class="report-marker-pulse" style="background: ${colors.secondary}40;"></div>
-          <div class="report-marker-pin" style="background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary}); box-shadow: 0 6px 20px ${colors.primary}80;">
-            <span class="report-marker-icon">${icon}</span>
-          </div>
-        </div>
-      `,
-      className: "report-marker-wrapper",
-      iconSize: [50, 50],
-      iconAnchor: [25, 50],
-    });
-
-    // Add the report marker
-    reportMarkerRef.current = L.marker([lat, lng], { icon: reportIcon })
-      .addTo(map)
-      .bindPopup(`
-        <div style="text-align: center; min-width: 200px;">
-          <div style="font-size: 24px; margin-bottom: 8px;">${icon}</div>
-          <h3 style="margin: 0 0 8px 0; color: ${colors.primary}; font-size: 16px;">${title}</h3>
-          <p style="margin: 0 0 8px 0; font-size: 13px; color: #555;">${location}</p>
-          <span style="display: inline-block; padding: 4px 14px; border-radius: 20px; background: ${colors.primary}; color: white; font-weight: bold; font-size: 11px; text-transform: uppercase;">
-            ${colors.text} RISK
-          </span>
-        </div>
-      `);
-
-    // Use flyTo for smooth animated navigation to the exact report location
-    // Ensure we navigate to the exact coordinates, not just the barangay center
-    map.flyTo([lat, lng], 16, {
-      duration: 1.0
-    });
-
-    // Open popup after fly animation completes
-    setTimeout(() => {
-      if (reportMarkerRef.current) {
-        reportMarkerRef.current.openPopup();
-      }
-    }, 1100);
-    
-  }, [selectedReport, reportClickTimestamp]);
-
   // Handle Fault Lines layer toggle
   useEffect(() => {
     const map = mapRef.current;
@@ -670,7 +581,139 @@ export default function LeafletMap({
     }
   }, [activeLayers, ndviOpacity, ndviYear, ndviMonth, ndviFromDate, ndviToDate, ndviMaxCloud]);
 
-  // Handle Verified Reports layer toggle
+  // Handle Verified Reports layer 
+  const reportMarkersMap = useRef<Map<number, L.Marker>>(new Map());
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const showVerifiedReports = activeLayers.includes("Verified Reports");
+    console.log("[VerifiedReports] Active layer?", showVerifiedReports);
+
+    // Remove previous layer
+    if (verifiedReportsLayerRef.current) {
+      verifiedReportsLayerRef.current.clearLayers(); // remove all markers
+    }
+
+    // Map of report ID → marker
+    if (!reportMarkersMap.current) reportMarkersMap.current = new Map();
+
+    reportMarkersMap.current.clear();
+
+    if (!showVerifiedReports) return;
+
+    const token = localStorage.getItem("access_token");
+    const layerGroup = L.layerGroup().addTo(map);
+    verifiedReportsLayerRef.current = layerGroup;
+
+    fetch("/api/incident-reports/verified/", {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `HTTP ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        const reports = data.results || [];
+        console.log("[VerifiedReports] Number of reports:", reports.length);
+        //console.log("[VerifiedReports] List:", reports); @here
+
+        reports.forEach((r: any, idx: number) => {
+          let lat = r.lat ?? r.latitude;
+          let lng = r.lng ?? r.longitude;
+
+          // fallback to barangay center if missing
+          if ((lat === undefined || lng === undefined) && r.location_display) {
+            const barangay = barangayDataRef.current.find(b => b.name === r.location_display);
+            if (barangay) {
+              lat = barangay.lat;
+              lng = barangay.lon;
+            }
+          }
+
+          if (lat == null || lng == null) return; // skip invalid
+
+          const severity = (r.verified_critical_level || "low").toLowerCase();
+          const colors = severityColors[severity as keyof typeof severityColors] ?? severityColors.low;
+
+          const categoryIcons: Record<string, string> = {
+            fire: "🔥",
+            flood: "🌊",
+            landslide: "⛰️",
+            accident: "⚠️",
+          };
+          const icon = categoryIcons[r.category_display] || "📍";
+
+          const reportIcon = L.divIcon({
+            html: `
+              <div class="verified-report-marker">
+                <div class="pulse" style="background: ${colors.secondary}40;"></div>
+                <div class="pin" style="background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});">
+                  <span>${icon}</span>
+                </div>
+              </div>
+            `,
+            className: "",
+            iconSize: [44, 44],
+            iconAnchor: [22, 44],
+          });
+
+          const marker = L.marker([lat, lng], { icon: reportIcon })
+            .addTo(layerGroup)
+            .bindPopup(`
+              <div style="text-align:center; min-width:220px;">
+                <div style="font-size:26px;">${icon}</div>
+                <h3 style="margin:4px 0; color:${colors.primary}; font-size:15px;">
+                  ${(r.title || r.category_display || "")
+                    .toString()
+                    .charAt(0).toUpperCase() + (r.title || r.category_display || "").toString().slice(1)}
+                </h3>
+                <p style="margin:0; font-size:12px; color:#555;">
+                  ${r.location_display || "Cabuyao, Laguna"}
+                </p>
+                <span style="
+                  display:inline-block;
+                  margin-top:8px;
+                  padding:4px 14px;
+                  border-radius:20px;
+                  background:${colors.primary};
+                  color:white;
+                  font-size:11px;
+                  font-weight:bold;
+                ">
+                  ${colors.text} RISK
+                </span>
+              </div>
+            `);
+
+          // Save marker for later click highlight
+          reportMarkersMap.current.set(r.id, marker);
+        });
+
+        // If a report is selected, fly to it and open popup
+        if (selectedReport) {
+          const marker = reportMarkersMap.current.get(selectedReport.id);
+          if (marker) {
+            const latLng = marker.getLatLng();
+            map.flyTo(latLng, 16, { duration: 0.5 });
+            marker.openPopup();
+            marker.setZIndexOffset(1000); // bring to front
+          } else {
+            console.warn("[VerifiedReports] Selected report marker not found:", selectedReport.id);
+          }
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load verified reports layer:", err.message);
+      });
+  }, [activeLayers, selectedReport]);
+
 
   return (
     <div id="map" style={{ height: height, width: width }}></div>

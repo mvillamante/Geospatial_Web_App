@@ -276,6 +276,8 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
             "category_display",
             "description",
             "location_display",
+            "latitude",
+            "longitude",
             "status",
             "created_at",
             "suggested_critical_level",

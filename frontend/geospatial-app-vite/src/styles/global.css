@@ -166,6 +166,11 @@ body {
     color: var(--text-slate-black);
 }
 
+.cms-page .badge.Archived{
+    background: var(--off-white-bg);
+    color: #4b5563;
+}
+
 /* Actions */
 .cms-page .table-actions,
 .reportsmgmt-page .table-actions {

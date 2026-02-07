@@ -1,5 +1,5 @@
 from django.utils import timezone
-from api.models import CustomUser, ResearcherRequest, CmsGuide, IncidentReport, EvacuationCenter, CmsGuideAttachment
+from api.models import CustomUser, ResearcherRequest, CmsGuide, IncidentReport, EvacuationCenter, CmsGuideAttachment, QuickContact, QuickContactPhone
 from api.supabase_storage import upload_private_photo, create_signed_url, upload_cms_photo
 from django.utils.timesince import timesince
 from django.utils.crypto import get_random_string
@@ -562,3 +562,44 @@ class EvacuationCenterSerializer(serializers.ModelSerializer):
 
     def get_coordinates(self, obj):
         return [float(obj.latitude), float(obj.longitude)]
+
+class QuickContactPhoneSerializer(serializers.ModelSerializer):
+    label = serializers.CharField(allow_blank=True)  
+    number = serializers.CharField(allow_blank=True)
+    class Meta:
+        model = QuickContactPhone
+        fields = ["type", "label", "number"]
+
+
+class QuickContactSerializer(serializers.ModelSerializer):
+    phones = QuickContactPhoneSerializer(many=True)
+
+    class Meta:
+        model = QuickContact
+        fields = [
+            "id",
+            "name",
+            "description",
+            "email",
+            "facebook_url",
+            "website_url",
+            "office_hours",
+            "address",
+            "map_url",
+            "phones",
+        ]
+
+    def update(self, instance, validated_data):
+        phones_data = validated_data.pop('phones', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        if phones_data is not None:
+            instance.phones.all().delete()
+
+            for phone in phones_data:
+                QuickContactPhone.objects.create(contact=instance, **phone)
+
+        return instance

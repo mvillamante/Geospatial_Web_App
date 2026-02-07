@@ -74,6 +74,13 @@ urlpatterns = [
     path("cms/guides/<int:pk>/attachments/", upload_guide_attachment),
     path("cms/guides/<int:pk>/restore/", restore_guide),
 
+    # Quick_Contact_Views
+    path("cms/quick-contacts/", quick_contacts, name="quick_contacts"),
+    path("cms/quick-contacts/<int:pk>/", update_quick_contact, name="update_quick_contact"),
+    path("cms/quick-contacts/<int:pk>/phones/", add_quick_contact_phone),
+    path("cms/quick-contact-phones/<int:phone_id>/", update_quick_contact_phone),
+    path("cms/quick-contact-phones/<int:phone_id>/delete/", delete_quick_contact_phone),
+
 
     # Community_Feed_Views
     path("community-feed/", community_feed, name="community-feed"),

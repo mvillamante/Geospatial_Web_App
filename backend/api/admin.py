@@ -1,5 +1,5 @@
 from django.contrib import admin
-from api.models import CustomUser, IncidentReport, ResearcherRequest, CmsGuide, EvacuationCenter, CmsGuideAttachment
+from api.models import CustomUser, IncidentReport, ResearcherRequest, CmsGuide, EvacuationCenter, CmsGuideAttachment, QuickContactPhone, QuickContact
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ['username', 'staff_id', 'email', 'role', 'extra_roles', 'last_login', 'is_active']
@@ -62,3 +62,17 @@ class EvacuationCenterAdmin(admin.ModelAdmin):
     ordering = ['name']
 
 admin.site.register(EvacuationCenter, EvacuationCenterAdmin)
+
+class QuickContactPhoneInline(admin.TabularInline):
+    model = QuickContactPhone
+    extra = 1
+    fields = ('type', 'label', 'number', 'priority')
+    ordering = ('priority',)
+
+class QuickContactAdmin(admin.ModelAdmin):
+    inlines = [QuickContactPhoneInline]
+    list_display = ('name', 'description', 'email', 'facebook_url', 'website_url', 'is_active')
+    list_filter = ('is_active',)
+    search_fields = ('name', 'description', 'email')
+
+admin.site.register(QuickContact, QuickContactAdmin)

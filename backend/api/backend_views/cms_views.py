@@ -1,12 +1,12 @@
 from django.utils.timezone import now
 
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 
-from api.models import CmsGuide, CmsGuideAttachment
-from api.serializer import CmsGuideSerializer, CmsGuideAttachmentSerializer, CmsGuideAttachmentCreateSerializer
+from api.models import CmsGuide, CmsGuideAttachment, QuickContact, QuickContactPhone
+from api.serializer import CmsGuideSerializer, CmsGuideAttachmentSerializer, CmsGuideAttachmentCreateSerializer,QuickContactSerializer, QuickContactPhoneSerializer
 from api.supabase_storage import upload_cms_photo
 
 def admin_only(user):
@@ -178,3 +178,112 @@ def upload_guide_attachment(request, pk):
         CmsGuideAttachmentSerializer(attachment).data,
         status=201
     )
+
+#Quick Contacts View
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def quick_contacts(request):
+    contact = QuickContact.objects.filter(is_active=True).first()
+    if not contact:
+        return Response({}, status=status.HTTP_200_OK)
+    serializer = QuickContactSerializer(contact)
+    return Response(serializer.data)
+
+
+@api_view(["PUT", "PATCH"])
+@permission_classes([IsAuthenticated])
+def update_quick_contact(request, pk):
+    if not admin_only(request.user):
+        return Response({"detail": "Forbidden"}, status=403)
+
+    try:
+        contact = QuickContact.objects.get(pk=pk)
+    except QuickContact.DoesNotExist:
+        return Response({"error": "QuickContact not found"}, status=404)
+
+    # Extract phones from request, default to empty list
+    phones_data = request.data.pop("phones", [])
+
+    # Update main contact info
+    serializer = QuickContactSerializer(contact, data=request.data, partial=True)
+    if serializer.is_valid():
+        contact = serializer.save()
+
+        # Track IDs of phones sent in the request
+        sent_ids = []
+
+        for phone in phones_data:
+            phone_id = phone.get("id")
+            if phone_id:
+                # Update existing phone
+                try:
+                    phone_obj = QuickContactPhone.objects.get(pk=phone_id, contact=contact)
+                    phone_serializer = QuickContactPhoneSerializer(phone_obj, data=phone, partial=True)
+                    if phone_serializer.is_valid():
+                        phone_serializer.save()
+                        sent_ids.append(phone_obj.id)
+                except QuickContactPhone.DoesNotExist:
+                    continue
+            else:
+                # Create new phone
+                phone_serializer = QuickContactPhoneSerializer(data=phone)
+                if phone_serializer.is_valid():
+                    new_phone = phone_serializer.save(contact=contact)
+                    sent_ids.append(new_phone.id)
+
+        # Delete phones that were removed from the frontend
+        QuickContactPhone.objects.filter(contact=contact).exclude(id__in=sent_ids).delete()
+
+        # Return updated contact with current phones
+        return Response(QuickContactSerializer(contact).data)
+
+    return Response(serializer.errors, status=400)
+
+
+
+
+#Quick Contact Phone CRUD
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def add_quick_contact_phone(request, pk):
+    if not admin_only(request.user):
+        return Response({"detail": "Forbidden"}, status=403)
+    try:
+        contact = QuickContact.objects.get(pk=pk)
+    except QuickContact.DoesNotExist:
+        return Response({"error": "QuickContact not found"}, status=404)
+
+    serializer = QuickContactPhoneSerializer(data=request.data)
+    if serializer.is_valid():
+        phone = serializer.save(contact=contact)
+        return Response(QuickContactPhoneSerializer(phone).data, status=201)
+    return Response(serializer.errors, status=400)
+
+@api_view(["PUT", "PATCH"])
+@permission_classes([IsAuthenticated])
+def update_quick_contact_phone(request, phone_id):
+    if not admin_only(request.user):
+        return Response({"detail": "Forbidden"}, status=403)
+    try:
+        phone = QuickContactPhone.objects.get(pk=phone_id)
+    except QuickContactPhone.DoesNotExist:
+        return Response({"error": "Phone not found"}, status=404)
+
+    serializer = QuickContactPhoneSerializer(phone, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_quick_contact_phone(request, phone_id):
+    if not admin_only(request.user):
+        return Response({"detail": "Forbidden"}, status=403)
+    try:
+        phone = QuickContactPhone.objects.get(pk=phone_id)
+    except QuickContactPhone.DoesNotExist:
+        return Response({"error": "Phone not found"}, status=404)
+    phone.delete()
+    return Response(status=204)

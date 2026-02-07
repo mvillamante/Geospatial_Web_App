@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Edit, Eye, Trash2, Send, ArchiveRestore } from 'lucide-react';
+import { Plus, Edit, Eye, Trash2, Send, ArchiveRestore, Phone } from 'lucide-react';
 import './CmsPage.css';
 import RichTextEditor from './TextEditor/RichTextEditor';
 
@@ -21,6 +21,27 @@ interface Guide {
   updatedAt: string;
   publishedAt?: string;
   attachments?: Attachment[];
+}
+
+interface ContactPhone {
+  id?: number;
+  type: "hotline" | "landline" | "mobile";
+  label: string;
+  number: string;
+  is_24_7?: boolean;
+}
+
+interface QuickContact {
+  id: number;
+  name: string;
+  description: string;
+  email?: string;
+  facebook_url?: string;
+  website_url?: string;
+  office_hours?: string;
+  address?: string;
+  map_url?: string;
+  phones: ContactPhone[];
 }
 
 
@@ -46,6 +67,18 @@ const CmsPage: React.FC = () => {
   const [viewArchived, setViewArchived] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [guideToPublish, setGuideToPublish] = useState<Guide | null>(null);
+  const [contact, setContact] = useState<QuickContact | null>(null);
+  const [showContactModal, setShowContactModal] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/cms/quick-contacts/", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    })
+      .then(res => res.json())
+      .then(setContact);
+  }, []);
 
   useEffect(() => {
     fetch("/api/cms/guides/", {
@@ -276,6 +309,13 @@ const createGuide = async (publishImmediately = false) => {
               Archived
             </button>
           </div>
+
+          <button
+            className="btn secondary"
+            onClick={() => setShowContactModal(true)}
+          >
+            <Edit size={16} /> Manage Quick Contacts
+          </button>
 
           <button
             className="btn primary"
@@ -641,7 +681,159 @@ const createGuide = async (publishImmediately = false) => {
             </div>
           </div>
         )}
+        
+        {/* Quick Contact Modal */}
+        {showContactModal && contact && (
+          <div className="modal-overlay">
+            <div className="modal large">
+              <h2>Edit Quick Contact</h2>
 
+              <label>Name</label>
+              <input
+                value={contact.name}
+                onChange={e => setContact({ ...contact, name: e.target.value })}
+              />
+
+              <label>Description</label>
+              <input
+                value={contact.description}
+                onChange={e => setContact({ ...contact, description: e.target.value })}
+              />
+
+              <label>Email</label>
+              <input
+                value={contact.email || ""}
+                onChange={e => setContact({ ...contact, email: e.target.value })}
+              />
+
+              <label>Facebook URL</label>
+              <input
+                value={contact.facebook_url || ""}
+                onChange={e => setContact({ ...contact, facebook_url: e.target.value })}
+              />
+
+              <label>Website URL</label>
+              <input
+                value={contact.website_url || ""}
+                onChange={e => setContact({ ...contact, website_url: e.target.value })}
+              />
+
+              <label>Office Hours</label>
+              <input
+                value={contact.office_hours || ""}
+                onChange={e => setContact({ ...contact, office_hours: e.target.value })}
+              />
+
+              <label>Address</label>
+              <input
+                value={contact.address || ""}
+                onChange={e => setContact({ ...contact, address: e.target.value })}
+              />
+
+              <label>Map URL</label>
+              <input
+                value={contact.map_url || ""}
+                onChange={e => setContact({ ...contact, map_url: e.target.value })}
+              />
+
+              <hr />
+              <h3>Contact Numbers</h3>
+
+              {contact.phones.map((p, idx) => (
+                <div key={p.id || idx} className="phone-row">
+                  <select
+                    value={p.type}
+                    onChange={e => {
+                      const updated = [...contact.phones];
+                      updated[idx].type = e.target.value as "hotline" | "landline" | "mobile";
+                      setContact({ ...contact, phones: updated });
+                    }}
+                  >
+                    <option value="hotline">Hotline</option>
+                    <option value="landline">Landline</option>
+                    <option value="mobile">Mobile</option>
+                  </select>
+
+                  <input
+                    placeholder="Label"
+                    value={p.label}
+                    onChange={e => {
+                      const updated = [...contact.phones];
+                      updated[idx].label = e.target.value;
+                      setContact({ ...contact, phones: updated });
+                    }}
+                  />
+
+                  <input
+                    placeholder="Number"
+                    value={p.number}
+                    onChange={e => {
+                      const updated = [...contact.phones];
+                      updated[idx].number = e.target.value;
+                      setContact({ ...contact, phones: updated });
+                    }}
+                  />
+
+                  <button
+                    className="icon-btn danger"
+                    onClick={() => {
+                      setContact({
+                        ...contact,
+                        phones: contact.phones.filter((_, i) => i !== idx),
+                      });
+                    }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+
+              <button
+                className="btn secondary"
+                onClick={() =>
+                  setContact({
+                    ...contact,
+                    phones: [...contact.phones, { type: "hotline", label: "", number: "" }],
+                  })
+                }
+              >
+                <Plus size={14} /> Add Phone
+              </button>
+
+              <div className="modal-actions">
+                <button className="btn secondary" onClick={() => setShowContactModal(false)}>
+                  Cancel
+                </button>
+
+                <button
+                  className="btn primary"
+                  onClick={async () => {
+                    // Send the whole contact including phones to the backend
+                    const res = await fetch(`/api/cms/quick-contacts/${contact.id}/`, {
+                      method: "PUT",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+                      },
+                      body: JSON.stringify(contact),
+                    });
+
+                    if (!res.ok) {
+                      alert("Failed to save contact");
+                      return;
+                    }
+
+                    const updatedContact = await res.json();
+                    setContact(updatedContact);
+                    setShowContactModal(false);
+                  }}
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
   );

@@ -26,41 +26,6 @@ interface AlertsPanelProps {
     onBarangaySearch?: (barangay: string, severity: string | null) => void;
 }
 
-/*
-const mockReports: Report[] = [
-    {
-        id: 1,
-        title: "Residential Fire",
-        category: "Fire",
-        risk: "high",
-        location: "Barangay San Isidro",
-        time: "2025-12-29T08:00:00Z",
-        lat: 14.2715,
-        lng: 121.1240,
-    },
-    {
-        id: 2,
-        title: "River Overflow",
-        category: "Flood",
-        risk: "moderate",
-        location: "Barangay Banay-Banay",
-        time: "2025-12-29T07:45:00Z",
-        lat: 14.2456,
-        lng: 121.1158,
-    },
-    {
-        id: 3,
-        title: "Landslide Warning",
-        category: "Landslide",
-        risk: "critical",
-        location: "Barangay Pulo",
-        time: "2025-12-29T07:30:00Z",
-        lat: 14.2280,
-        lng: 121.1320,
-    },
-];
-*/
-
 export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch }: AlertsPanelProps) {
     const [selectedCategory, setSelectedCategory] = useState<string>("");
     const [selectedBarangay, setSelectedBarangay] = useState("");
@@ -93,15 +58,30 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
         .then((data) => {
             console.log("Fetched verified reports:", data);
 
-            const mappedReports: Report[] = (data.results || []).map(r => ({
-                id: r.id,
-                incident_type: r.category_display ?? r.category ?? "others",
-                verified_critical_level: r.suggested_critical_level ?? "low",
-                barangay: r.location_display?.split(",")[0].replace("Barangay ", "").trim() ?? "",
-                created_at: r.created_at,
-                latitude: r.lat ?? 0,
-                longitude: r.lng ?? 0,
-            }));
+            const mappedReports: Report[] = (data.results || []).map(r => {
+                // Prefer r.lat / r.lng, fallback to r.latitude / r.longitude
+                let lat = r.lat ?? r.latitude;
+                let lng = r.lng ?? r.longitude;
+
+                // If still missing, fallback to barangay center
+                if ((lat === undefined || lng === undefined || lat === null || lng === null) && r.location_display) {
+                    const barangay = barangayDataRef.current.find(b => b.name === r.location_display);
+                    if (barangay) {
+                    lat = barangay.lat;
+                    lng = barangay.lon;
+                    }
+                }
+
+                return {
+                    id: r.id,
+                    incident_type: r.category_display ?? r.category ?? "others",
+                    verified_critical_level: r.suggested_critical_level ?? "low",
+                    barangay: r.location_display?.split(",")[0].replace("Barangay ", "").trim() ?? "",
+                    created_at: r.created_at,
+                    latitude: lat ?? 0,   // fallback just in case
+                    longitude: lng ?? 0,
+                };
+                });
 
             setReports(mappedReports);
         })

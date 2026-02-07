@@ -49,6 +49,7 @@ const AlertsMapPage: React.FC = () => {
             searchedSeverity={searchedSeverity}
             selectedReport={selectedReportData?.report || null}
             reportClickTimestamp={selectedReportData?.clickedAt || null}
+            activeLayers={["Verified Reports"]}
           />
         </div>
 

@@ -95,7 +95,7 @@ const NavigationMenu: React.FC = () => {
       { label: "Dashboard", path: "admin/dashboard", icon: MdOutlineDashboard },
       { label: "User Management", path: "admin/manage-user", icon: PiUsersBold },
       { label: "Reports Management", path: "admin/manage-reports", icon: TbFileReport },
-      { label: "System Monitoring", path: "admin/system-monitoring", icon: MdOutlineMonitorHeart },
+      // { label: "System Monitoring", path: "admin/system-monitoring", icon: MdOutlineMonitorHeart },
       { label: "Content Management System", path: "admin/cms", icon: FiEdit },
     ],
     Officer: [

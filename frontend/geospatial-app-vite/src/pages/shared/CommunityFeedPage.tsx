@@ -26,6 +26,23 @@ type FeedPost = {
     attachments?: string[];
 };
 
+type QuickContact = {
+  name: string;
+  description: string;
+  email?: string;
+  facebook_url?: string;
+  website_url?: string;
+  office_hours?: string;
+  address?: string;
+  map_url?: string;
+  phones: {
+    type: "hotline" | "landline" | "mobile";
+    label: string;
+    number: string;
+  }[];
+};
+
+
 const labelForType = (type: PostType) =>
     type === "advisory" ? "Advisory" : type === "announcement" ? "Announcement" : "Guide";
 
@@ -67,6 +84,18 @@ export default function CommunityFeedPage() {
     const [query, setQuery] = useState("");
     const [filter, setFilter] = useState<"all" | PostType>("all");
     const [selected, setSelected] = useState<FeedPost | null>(null);
+    const [contact, setContact] = useState<QuickContact | null>(null);
+
+    useEffect(() => {
+        fetch("/api/cms/quick-contacts/", {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        })
+        .then(res => res.json())
+        .then(setContact);
+    }, []);
+
 
     useEffect(() => {
         const fetchFeed = async () => {
@@ -164,55 +193,57 @@ export default function CommunityFeedPage() {
                     <div className="rail-card">
                         <div className="rail-title">Quick Contacts</div>
 
+                        {contact && (
                         <div className="contact-card">
                             <div className="contact-top">
-                                <div className="contact-name">Cabuyao CDRRMO</div>
-                                <div className="contact-sub">Official channels</div>
+                            <div className="contact-name">{contact.name}</div>
+                            <div className="contact-sub">{contact.description}</div>
                             </div>
 
                             <div className="contact-actions">
-                                <a
-                                    className="contact-btn"
-                                    href="https://facebook.com/YOUR_LGU_PAGE"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    Facebook Page
+                            {contact.facebook_url && (
+                                <a className="contact-btn" href={contact.facebook_url} target="_blank" rel="noreferrer">
+                                Facebook Page
                                 </a>
-
-                                <a className="contact-btn" href="mailto:info@lgu.gov.ph">
-                                    Email
+                            )}
+                            {contact.email && (
+                                <a className="contact-btn" href={`mailto:${contact.email}`}>
+                                Email
                                 </a>
+                            )}
                             </div>
 
                             <div className="contact-meta">
-                                <div className="contact-line">
-                                    <span className="k">Hotline:</span>
-                                    <span className="v">+63 9XX XXX XXXX</span>
+                            {contact.phones.map((p, i) => (
+                                <div className="contact-line" key={i}>
+                                <span className="k">{p.label}:</span>
+                                <span className="v">{p.number}</span>
                                 </div>
-                                <div className="contact-line">
-                                    <span className="k">Landline:</span>
-                                    <span className="v">(0XX) XXX-XXXX</span>
-                                </div>
-                                <div className="contact-line">
-                                    <span className="k">Office Hours:</span>
-                                    <span className="v">Mon–Fri, 8:00 AM–5:00 PM</span>
-                                </div>
-                                <div className="contact-line">
-                                    <span className="k">Address:</span>
-                                    <span className="v">City Hall, Main St.</span>
-                                </div>
+                            ))}
 
-                                <a
-                                    className="contact-link"
-                                    href="https://maps.google.com/?q=City+Hall"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    View on map →
+                            {contact.office_hours && (
+                                <div className="contact-line">
+                                <span className="k">Office Hours:</span>
+                                <span className="v">{contact.office_hours}</span>
+                                </div>
+                            )}
+
+                            {contact.address && (
+                                <div className="contact-line">
+                                <span className="k">Address:</span>
+                                <span className="v">{contact.address}</span>
+                                </div>
+                            )}
+
+                            {contact.map_url && (
+                                <a className="contact-link" href={contact.map_url} target="_blank" rel="noreferrer">
+                                View on map →
                                 </a>
+                            )}
                             </div>
                         </div>
+                        )}
+
                     </div>
 
                 </aside>

@@ -8,8 +8,6 @@ from django.db.models.functions import Lower
 from api.serializer import *
 
 from api.supabase_storage import create_signed_url
-
-from api.serializer import IncidentReportCreateSerializer
 from api.models import IncidentReport
 
 class IncidentReportCreateView(APIView):

@@ -12,6 +12,7 @@ from .backend_views.satellite import *
 from .backend_views.password_reset_views import *
 from .backend_views.tomtom_views import tomtom_roads_tile, tomtom_traffic_tile
 from .backend_views.community_feed_views import *
+from .backend_views.public_views import *
 
 urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
@@ -56,6 +57,9 @@ urlpatterns = [
     path('incident-reports/verified/', VerifiedIncidentReportsView.as_view(), name='verified-reports'),
     path("reports/<int:report_id>/", IncidentReportPatchView.as_view(), name="report-patch"),
     path("reports/list/officers/", OfficerListView.as_view(), name="officer-list"),
+    
+    # Public Views
+    path("public/landing-page/", PublicLandingPageView.as_view(), name="public-landing-page"),
     
     # Satellite_Views
     path("satellite/ndvi/", get_ndvi_image, name="satellite_ndvi"),

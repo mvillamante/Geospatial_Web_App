@@ -445,6 +445,11 @@ class IncidentReportUpdateSerializer(serializers.ModelSerializer):
             return None
         return (u.get_full_name().strip() or u.username or f"Citizen #{u.id}")
 
+class PublicLandingPageSerializer(serializers.Serializer):
+    activeHazards = serializers.IntegerField()
+    criticalAlerts = serializers.IntegerField()
+    reportsToday = serializers.IntegerField()
+    avgResponseTimeMinutes = serializers.FloatField()
     
 class ResearcherRequestSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
@@ -540,7 +545,6 @@ class CreateStaffUserSerializer(serializers.ModelSerializer):
 
         return user
 
-
 class EvacuationCenterSerializer(serializers.ModelSerializer):
     coordinates = serializers.SerializerMethodField()
 
@@ -569,7 +573,6 @@ class QuickContactPhoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuickContactPhone
         fields = ["type", "label", "number"]
-
 
 class QuickContactSerializer(serializers.ModelSerializer):
     phones = QuickContactPhoneSerializer(many=True)

@@ -4,14 +4,14 @@
 .main-layout-map {
   flex: 1;
   background: var(--off-white-bg);
-  min-height: 100vh;
+  min-height: 80vh;
   position: relative;
 }
 
 .dashboard-container {
   position: relative;
   display: flex;
-  height: 100vh;
+  height: 93.4vh;
   gap: 20px;
   padding: 20px;
   max-width: 100%;
@@ -378,8 +378,8 @@
 ========================= */
 .map-legend-box {
   position: absolute;
-  bottom: 70px;
-  right: 24px;
+  bottom: 30px;
+  right: 30px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   padding: 16px;

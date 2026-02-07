@@ -21,6 +21,7 @@
   border-bottom: 1px solid var(--light-gray-border);
   background: rgba(255,255,255,0.9);
   backdrop-filter: blur(10px);
+  overflow: hidden;
 }
 
 .topbar-left {
@@ -55,7 +56,7 @@
 .main-content {
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .notif-btn {

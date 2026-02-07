@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./LeafletMap.css";
 import type { Report } from "../../pages/citizen-guest/AlertsComponents/AlertsPanel";
+import type { EvacuationCenterData } from "../ui/mapLayers/evacuationCenters/evacuationCentersTypes";
 
 // Import layer creation functions from organized modules
 import {
@@ -124,6 +125,8 @@ interface LeafletMapProps {
   ndviFromDate?: string;
   ndviToDate?: string;
   ndviMaxCloud?: number;
+  showPopupOnMap?: boolean;
+  onSelectEvacuationCenter?: (center: EvacuationCenterData) => void;
 }
 
 export default function LeafletMap({ 
@@ -141,7 +144,9 @@ export default function LeafletMap({
   ndviMonth,
   ndviFromDate,
   ndviToDate,
-  ndviMaxCloud,  // Let ndviLayer use smart defaults based on month selection
+  ndviMaxCloud,
+  showPopupOnMap = true,
+  onSelectEvacuationCenter, // Let ndviLayer use smart defaults based on month selection
 }: LeafletMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -161,6 +166,8 @@ export default function LeafletMap({
   const trafficLayerRef = useRef<L.Layer | null>(null);
   const ndviLayerRef = useRef<L.LayerGroup | null>(null);
   const verifiedReportsLayerRef = useRef<L.LayerGroup | null>(null);
+  
+  const [selectedCenter, setSelectedCenter] = useState<EvacuationCenterData | null>(null);
 
   // Initialize map
   useEffect(() => {
@@ -517,7 +524,11 @@ export default function LeafletMap({
 
     // Add evacuation centers if layer is active
     if (showEvacuationCenters) {
-      evacuationCentersLayerRef.current = createEvacuationCentersLayer(map);
+      evacuationCentersLayerRef.current = createEvacuationCentersLayer(map, {
+        showOnMap: true,
+        showPopupOnMap,
+        onSelectCenter: onSelectEvacuationCenter,
+      });
     }
   }, [activeLayers]);
 

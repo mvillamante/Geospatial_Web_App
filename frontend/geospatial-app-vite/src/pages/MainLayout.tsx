@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Bell } from "lucide-react";
 import { NavigationMenu } from "../components";
+import { getUserRoleAndDisplayName } from "../libr/auth";
 import "./MainLayout.css";
 
 type AppNotifType = "post" | "verified_incident" | "my_report" | "evac_center";
@@ -44,6 +45,9 @@ const MainLayout: React.FC = () => {
 
   const unreadCount = notifs.filter((n) => !n.read).length;
 
+  const { userRole, userRole2 } = getUserRoleAndDisplayName();
+  console.log("test", userRole)
+
   return (
     <div className="main-layout">
       {/* Navigation */}
@@ -52,25 +56,27 @@ const MainLayout: React.FC = () => {
       {/* App column */}
       <div className="main-layout-app">
         {/* Topbar */}
-        <div className="main-topbar">
-          <div className="topbar-left">
-            {/* <img src="/hazspot-logo.png" alt="HazSpot" className="topbar-logo-img" /> */}
-            <span className="topbar-logo-text">HazSpot</span>
-          </div>
-          <div className="main-topbar-spacer" />
+        {userRole === "Citizen" && (
+          <div className="main-topbar">
+            <div className="topbar-left">
+              {/* <img src="/hazspot-logo.png" alt="HazSpot" className="topbar-logo-img" /> */}
+              <span className="topbar-logo-text">HazSpot</span>
+            </div>
+            <div className="main-topbar-spacer" />
 
-          <div className="topbar-right">
-            <button
-              className="notif-btn"
-              onClick={() => setNotifOpen((v) => !v)}
-              aria-label="Notifications"
-              type="button"
-            >
-              <Bell size={18} />
-              {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
-            </button>
+            <div className="topbar-right">
+              <button
+                className="notif-btn"
+                onClick={() => setNotifOpen((v) => !v)}
+                aria-label="Notifications"
+                type="button"
+              >
+                <Bell size={18} />
+                {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Content */}
         <div className="main-content">

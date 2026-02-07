@@ -35,6 +35,14 @@
     align-items: center;
 }
 
+.feed-page {
+    overflow-y: scroll;
+    width: 100%;
+    height: 93.4vh;
+    background: #f8fafc;
+    padding: 1.5rem;
+}
+
 .feed-page .search,
 .feed-page .filter {
     display: flex;

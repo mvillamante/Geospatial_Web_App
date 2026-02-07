@@ -80,8 +80,10 @@ const ReportVerifyPage: React.FC = () => {
     if (s === "low" || s === "moderate" || s === "high" || s === "critical") {
       return s as RiskLevel;
     }
-    return "low"; 
+    return "low";
   };
+
+  const [scopeFilter, setScopeFilter] = useState<"all" | "mine" | "unassigned">("all");
 
   const { displayName, currentUserId } = getUserRoleAndDisplayName();
   const myOfficerId = currentUserId != null ? Number(currentUserId) : null;
@@ -146,7 +148,14 @@ const ReportVerifyPage: React.FC = () => {
       const matchesStatus = statusFilter === "all" || r.status === statusFilter;
       const matchesCategory = categoryFilter === "all" || r.category === categoryFilter;
 
-      return matchesQ && matchesStatus && matchesCategory;
+      const matchesScope =
+        scopeFilter === "all"
+          ? true
+          : scopeFilter === "mine"
+            ? myOfficerId != null && r.assignedOfficerId != null && Number(r.assignedOfficerId) === Number(myOfficerId)
+            : r.assignedOfficerId == null;
+
+      return matchesQ && matchesStatus && matchesCategory && matchesScope;
     });
 
     list = [...list].sort((a, b) => {
@@ -165,7 +174,7 @@ const ReportVerifyPage: React.FC = () => {
     });
 
     return list;
-  }, [reports, query, statusFilter, categoryFilter, sortMode]);
+  }, [reports, query, statusFilter, categoryFilter, sortMode, scopeFilter, myOfficerId]);
 
   const updateReport = (id: number, patch: Partial<CitizenReport>) => {
     setReports((prev) =>
@@ -253,12 +262,6 @@ const ReportVerifyPage: React.FC = () => {
 
   useEffect(() => {
     if (!selected) return;
-    console.log("ASSIGN DEBUG", {
-      currentUserId,
-      myOfficerId,
-      assignedOfficerId: selected.assignedOfficerId,
-      isAssignedToMe,
-    });
   }, [selectedId, selected?.assignedOfficerId, currentUserId]);
 
 
@@ -519,42 +522,48 @@ const ReportVerifyPage: React.FC = () => {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search title, barangay, location, reporter..."
+                placeholder="Search title, barangay, location..."
               />
               <Search className="queue-search-icon" />
             </div>
 
-            <div className="queue-filters">
-              <div className="queue-filter">
-                <Filter className="queue-filter-icon" />
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)}>
-                  <option value="all">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="resolved">Resolved</option>
-                  <option value="needs_info">Needs Info</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-              </div>
-
-              <div className="queue-filter">
-                <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as any)}>
-                  <option value="all">All Categories</option>
-                  <option value="Fire">Fire</option>
-                  <option value="Flood">Flood</option>
-                  <option value="Landslide">Landslide</option>
-                  <option value="Accident">Accident</option>
-                </select>
-              </div>
-
-              <div className="queue-filter">
-                <select value={sortMode} onChange={(e) => setSortMode(e.target.value as any)}>
-                  <option value="effectiveRisk">Sort: Effective Risk (True)</option>
-                  <option value="citizenRisk">Sort: Citizen Suggested Risk</option>
-                  <option value="newest">Sort: Newest</option>
-                </select>
-              </div>
+            <div className="queue-filter has-icon">
+              <Filter className="queue-filter-icon" />
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)}>
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="in_progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="needs_info">Needs Info</option>
+                <option value="rejected">Rejected</option>
+              </select>
             </div>
+
+            <div className="queue-filter">
+              <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as any)}>
+                <option value="all">All Categories</option>
+                <option value="Fire">Fire</option>
+                <option value="Flood">Flood</option>
+                <option value="Landslide">Landslide</option>
+                <option value="Accident">Accident</option>
+              </select>
+            </div>
+
+            <div className="queue-filter">
+              <select value={sortMode} onChange={(e) => setSortMode(e.target.value as any)}>
+                <option value="effectiveRisk">Sort: Effective Risk (True)</option>
+                <option value="citizenRisk">Sort: Citizen Suggested Risk</option>
+                <option value="newest">Sort: Newest</option>
+              </select>
+            </div>
+
+              <div className="queue-filter">
+                <select value={scopeFilter} onChange={(e) => setScopeFilter(e.target.value as any)}>
+                  <option value="all">All Reports</option>
+                  <option value="mine">My Reports</option>
+                  <option value="unassigned">Unassigned</option>
+                </select>
+              </div>
           </div>
 
           <ul className="queue-list">

@@ -430,11 +430,10 @@ const ReportsMgmtPage: React.FC = () => {
               <th className="center">Report ID</th>
               <th className="center">Reporter</th>
               <th className="center">Category</th>
-              <th className="center">Critical Level</th>
               <th className="center">Location</th>
               <th onClick={toggleSort} className="sort-header center">
                 Submitted{" "}
-                {sortOrder === "asc" ? (
+               {sortOrder === "asc" ? (
                   <HiChevronUp />
                 ) : sortOrder === "desc" ? (
                   <HiChevronDown />
@@ -466,15 +465,6 @@ const ReportsMgmtPage: React.FC = () => {
                     <td className="table-id center">#R-0{report.id}</td>
                     <td className="center">{report.user_label}</td>
                     <td className="table-category center muted">{reportCategoryLabel(report)}</td>
-                    <td className="center">
-                      {report.verified_critical_level ? (
-                        <span className={criticalBadgeClass(report.verified_critical_level)}>
-                          {report.verified_critical_level}
-                        </span>
-                      ) : (
-                        <span className="muted">—</span>
-                      )}
-                    </td>
                     <td className="location-cell center" title={report.location_display}>
                       {report.location_display || "-"}
                     </td>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { GraduationCap } from "lucide-react";
 import ReportCard from './ReportCard';
 import "./ProfilePage.css";
@@ -41,6 +42,7 @@ function toProgressStatus(raw: string | undefined | null): ProgressStatus {
   return "Pending";
 }
 const ProfilePage: React.FC = () => {
+  const navigate = useNavigate();
   const { displayName, userRole, userRole2 } = getUserRoleAndDisplayName();
 
   const normalizedRole = (userRole || "").toLowerCase();
@@ -74,6 +76,11 @@ const ProfilePage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+
+  const logout = () => {
+    localStorage.removeItem("access_token");
+    navigate("/login");
+  }
 
   const categoryTitleMap: Record<string, string> = {
     fire: "Fire Incident",
@@ -368,6 +375,7 @@ const ProfilePage: React.FC = () => {
                   </>
                 )}
               </div>
+
             </div>
             {!isStaff && (
               <>
@@ -487,7 +495,15 @@ const ProfilePage: React.FC = () => {
           </div>
         </>
       )}
+
+      <div className="logout-section">
+        <span className="logout-label">Session</span>
+        <button className="logout-btn" onClick={logout} type="button">
+          Logout
+        </button>
+      </div>
     </div>
+
   );
 };
 

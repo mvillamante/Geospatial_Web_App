@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect  } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
     Pin,
     Search,
@@ -96,8 +96,9 @@ export default function CommunityFeedPage() {
             .sort((a, b) => b.created_at.localeCompare(a.created_at));
     }, [posts, query, filter]);
 
-    const pinned = filtered.filter((p) => p.pinned);
-    const normal = filtered.filter((p) => !p.pinned);
+    const pinned = filtered.filter(p => p.pinned).sort((a, b) => b.created_at.localeCompare(a.created_at));
+    const normal = filtered.filter(p => !p.pinned).sort((a, b) => b.created_at.localeCompare(a.created_at));
+
 
     return (
         <div className="feed-page">
@@ -145,17 +146,17 @@ export default function CommunityFeedPage() {
                         </section>
                     )}
 
-                        <section className="feed-list">
-                            {loading ? (
-                                <div className="empty-state">Loading updates…</div>
-                            ) : error ? (
-                                <div className="empty-state error">{error}</div>
-                            ) : normal.length === 0 && pinned.length === 0 ? (
-                                <div className="empty-state">No updates yet.</div>
-                            ) : (
-                                normal.map((p) => <PostRow key={p.id} post={p} onOpen={() => setSelected(p)} />)
-                            )}
-                        </section>
+                    <section className="feed-list">
+                        {loading ? (
+                            <div className="empty-state">Loading updates…</div>
+                        ) : error ? (
+                            <div className="empty-state error">{error}</div>
+                        ) : normal.length === 0 && pinned.length === 0 ? (
+                            <div className="empty-state">No updates yet.</div>
+                        ) : (
+                            normal.map((p) => <PostRow key={p.id} post={p} onOpen={() => setSelected(p)} />)
+                        )}
+                    </section>
 
                 </main>
 
@@ -257,15 +258,15 @@ export default function CommunityFeedPage() {
                             </div>
                         </div>
 
-                        <p className="modal-body" 
-                        dangerouslySetInnerHTML={{ __html: selected.body }} 
+                        <p className="modal-body"
+                            dangerouslySetInnerHTML={{ __html: selected.body }}
                         />
 
 
                         {selected.attachments?.map((url, i) => (
-                        <div className="modal-photo-wrap" key={i}>
-                            <img className="modal-photo" src={url} alt={`Attachment ${i + 1}`} />
-                        </div>
+                            <div className="modal-photo-wrap" key={i}>
+                                <img className="modal-photo" src={url} alt={`Attachment ${i + 1}`} />
+                            </div>
                         ))}
 
                     </div>
@@ -322,15 +323,15 @@ function PostRow({ post, onOpen }: { post: FeedPost; onOpen: () => void }) {
                 </div>
 
                 <div className="post-title">{post.title}</div>
-                <div className="post-preview" 
-                    dangerouslySetInnerHTML={{ __html: post.body }} 
+                <div className="post-preview"
+                    dangerouslySetInnerHTML={{ __html: post.body }}
                 />
 
 
                 {post.attachments?.map((url, i) => (
-                <div className="post-photo-wrap" key={i}>
-                    <img className="post-photo" src={url} alt={`Post attachment ${i + 1}`} />
-                </div>
+                    <div className="post-photo-wrap" key={i}>
+                        <img className="post-photo" src={url} alt={`Post attachment ${i + 1}`} />
+                    </div>
                 ))}
 
             </div>

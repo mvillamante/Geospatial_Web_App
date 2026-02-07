@@ -9,7 +9,7 @@
   overflow-y: auto;
 }
 
-.profile-page > * {
+.profile-page>* {
   max-width: 1180px;
   margin: 0 auto;
 }
@@ -32,9 +32,9 @@
 }
 
 .profile-page .profile-left {
-  display: flex;            
-  align-items: center;       
-  gap: 1.4rem;             
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
   flex: 1;
   min-width: 0;
 }
@@ -57,10 +57,10 @@
   width: 110px;
   height: 110px;
   border-radius: 50%;
-  object-fit: cover;             
+  object-fit: cover;
   border: 4px solid white;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-  background: #e2e8f0;      
+  background: #e2e8f0;
 }
 
 .online-indicator {
@@ -643,7 +643,7 @@
     padding-bottom: 90px;
   }
 
-  .profile-page > * {
+  .profile-page>* {
     max-width: 520px;
   }
 
@@ -739,7 +739,8 @@
   }
 
   .profile-page .report-card {
-    padding: 14px;       /* fixed typo */
+    padding: 14px;
+    /* fixed typo */
     border-radius: 16px;
     gap: 10px;
   }
@@ -775,6 +776,47 @@
   .profile-page .dots-btn {
     padding: 8px 10px;
     border-radius: 12px;
+  }
+}
+
+.logout-section {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .logout-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-text);
+    margin-bottom: 10px;
+  }
+
+  .logout-section {
+    display: block;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .logout-btn {
+    width: 100%;
+    height: 48px;
+    border-radius: 16px;
+    border: 1px solid rgba(220, 38, 38, 0.35);
+    background: rgba(220, 38, 38, 0.10);
+    color: #991b1b;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .logout-btn:hover {
+    background: rgba(220, 38, 38, 0.15);
+    transform: translateY(-1px);
   }
 }
 

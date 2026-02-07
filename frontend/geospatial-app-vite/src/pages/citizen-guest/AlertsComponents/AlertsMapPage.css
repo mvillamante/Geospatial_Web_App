@@ -128,18 +128,19 @@
 }
 
 .filter-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
+  margin-top: 10px;
 }
 
 .filter-row select {
-  flex: 1;
-  padding: 10px 14px;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 13px;
-  border: 2px solid var(--border-light);
-  background: var(--secondary-color);
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  padding: 0 12px;
+  font-weight: 700;
+  background: #fff;
 }
 
 .dashboard-alerts label {
@@ -175,6 +176,45 @@
   border-color: var(--primary-btn-color);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
+
+/* Alerts Summary */
+.alerts-summary {
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  border-radius: 16px;
+  padding: 12px;
+  margin: 10px 0 12px;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+}
+
+.alerts-summary-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.alerts-summary-title {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.summary-pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid rgba(148,183,184,0.5);
+  background: rgba(148,163,184,0.12);
+}
+
+.summary-pill.critical{ background: rgba(220,38,38,0.12); border-color: rgba(220,38,38,0.25); }
+.summary-pill.high{ background: rgba(249,115,22,0.12); border-color: rgba(249,115,22,0.25); }
+.summary-pill.moderate{ background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.25); }
+.summary-pill.low{ background: rgba(22,163,74,0.10); border-color: rgba(22,163,74,0.25); }
 
 /* =========================
    Report List
@@ -338,7 +378,7 @@
 ========================= */
 .map-legend-box {
   position: absolute;
-  bottom: 24px;
+  bottom: 70px;
   right: 24px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);

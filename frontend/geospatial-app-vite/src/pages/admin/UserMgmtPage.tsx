@@ -294,7 +294,6 @@ const UserMgmtPage: React.FC = () => {
               <thead>
                 <tr>
                   <th></th>
-                  <th className="center">Staff ID</th>
                   <th className="center">User</th>
                   <th className="center">Role</th>
                   {/*<th className="center">Department</th>*/}
@@ -323,7 +322,6 @@ const UserMgmtPage: React.FC = () => {
                   return (
                     <tr key={user.id}>
                       <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td>
-                      <td className="center staff-id">{user.staff_id}</td>
                       <td>
                         <div className={`user-details role-${roleClass}`}>
                           <strong className="user-name">{user.name}</strong>

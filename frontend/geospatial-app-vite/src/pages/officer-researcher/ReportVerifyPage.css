@@ -213,7 +213,7 @@
 }
 
 /* ===== Modals ===== */
-.modal-backdrop {
+.reportverify-page .modal-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(2, 6, 23, 0.55);
@@ -223,7 +223,7 @@
   padding: 16px;
 }
 
-.modal-card {
+.reportverify-page .modal-card {
   width: min(640px, 100%);
   background: #fff;
   border-radius: 16px;
@@ -232,21 +232,21 @@
   padding: 16px;
 }
 
-.modal-title {
+.reportverify-page .modal-title {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.01em;
 }
 
-.modal-sub {
+.reportverify-page .modal-sub {
   margin-top: 6px;
   color: var(--subtext);
   font-weight: 650;
   font-size: 13px;
 }
 
-.modal-label {
+.reportverify-page .modal-label {
   display: block;
   margin-top: 12px;
   margin-bottom: 6px;
@@ -257,7 +257,7 @@
   text-transform: uppercase;
 }
 
-.modal-input {
+.reportverify-page .modal-input {
   width: 100%;
   height: 42px;
   border-radius: 12px;
@@ -267,7 +267,7 @@
   outline: none;
 }
 
-.modal-textarea {
+.reportverify-page .modal-textarea {
   width: 100%;
   min-height: 160px;
   border-radius: 12px;
@@ -278,13 +278,13 @@
   resize: vertical;
 }
 
-.modal-input:focus,
-.modal-textarea:focus {
+.reportverify-page .modal-input:focus,
+.reportverify-page .modal-textarea:focus {
   border-color: rgba(37,99,235,0.45);
   box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
 }
 
-.modal-actions {
+.reportverify-page .modal-actions {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
@@ -292,7 +292,7 @@
 }
 
 @media (max-width: 520px) {
-  .modal-actions {
+  .reportverify-page .modal-actions {
     flex-direction: column;
   }
 }
@@ -300,9 +300,9 @@
 .queue-toolbar {
   padding: 14px;
   border-bottom: 1px solid var(--border);
-  display: grid;
-  gap: 10px;
   background: var(--surface-2);
+  display: grid;
+  gap: 12px;
 }
 
 .queue-search {
@@ -312,7 +312,7 @@
 .queue-search input {
   width: 100%;
   height: 44px;
-  border-radius: 999px;
+  border-radius: 14px;
   padding: 0 44px 0 14px;
   border: 1px solid var(--border);
   background: #fff;
@@ -346,7 +346,7 @@
 
 .queue-filters {
   display: grid;
-  grid-template-columns: 1.1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fe;
   gap: 10px;
 }
 
@@ -357,12 +357,12 @@
 .queue-filter select {
   width: 100%;
   height: 42px;
-  border-radius: 999px;
+  border-radius: 14px;
   border: 1px solid var(--border);
   background: #fff;
   font-weight: 700;
   font-size: 13px;
-  padding: 0 14px;
+  padding: 0 12px;
   cursor: pointer;
   outline: none;
   transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
@@ -391,6 +391,10 @@
 }
 
 .queue-filter:first-child select {
+  padding-left: 34px;
+}
+
+.queue-filter.has-icon select {
   padding-left: 34px;
 }
 
@@ -737,13 +741,13 @@
   transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
-.reportverify-page btn:hover {
+.reportverify-page .btn:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
   border-color: var(--border-strong);
 }
 
-.reportverify-page btn:disabled {
+.reportverify-page .btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
   transform: none;

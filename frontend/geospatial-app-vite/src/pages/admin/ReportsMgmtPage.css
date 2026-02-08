@@ -512,20 +512,20 @@
   gap: 10px;
 }
 
-.btn.secondary {
+.reportsmgmt-page .btn.secondary {
   background: #f3f4f6;
   color: #111827;
 }
 
-.btn.secondary:hover {
+.reportsmgmt-page .btn.secondary:hover {
   background: #e5e7eb;
 }
 
-.btn.danger {
+.reportsmgmt-page .btn.danger {
   background: #b42318;
 }
 
-.btn.danger:hover {
+.reportsmgmt-page .btn.danger:hover {
   background: #991b1b;
   color: #ffffff;
 }

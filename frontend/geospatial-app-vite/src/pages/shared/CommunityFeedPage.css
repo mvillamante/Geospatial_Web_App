@@ -248,10 +248,10 @@
 .feed-page .post-photo {
     display: block;
     width: 100%;
-    height: 260px;
-    object-fit: cover;
+    height: auto;
+    max-height: 520px;
+    object-fit: contain;
 }
-
 
 .feed-page .empty-state {
     margin: 14px;
@@ -492,11 +492,28 @@
 @media (max-width: 980px) {
   .feed-layout {
     grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
   }
   .feed-rail {
+    width: 100%;
+    order: -1;
+    margin-top: 12px; 
     position: static;
-    top: auto;
-    display: block; 
+    height: auto;
+    align-self: stretch;
+  }
+  .feed-page .contact-card {
+    width: 100%;
+  }
+  .feed-main {
+    overflow: visible;
+  }
+}
+
+@media (max-width: 768px) {
+  .feed-page {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
   }
 }
 

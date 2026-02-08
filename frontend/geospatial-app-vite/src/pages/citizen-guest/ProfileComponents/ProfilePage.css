@@ -1,18 +1,6 @@
 /* =========================
    Page Layout
 ========================= */
-.profile-page {
-  width: 100%;
-  min-height: 100vh;
-  background: linear-gradient(180deg, #f8fafc, #eef2f7);
-  padding: 3rem 10%;
-  overflow-y: auto;
-}
-
-.profile-page>* {
-  max-width: 1180px;
-  margin: 0 auto;
-}
 
 /* =========================
    Header Card

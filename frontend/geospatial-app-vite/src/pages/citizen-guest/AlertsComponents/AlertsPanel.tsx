@@ -1,14 +1,6 @@
 import { useState, useEffect } from "react";
 import { Search } from 'lucide-react';
 
-/*const barangays = {
-    Poblacion: ["Uno", "Dos", "Tres"],
-    Lakeside: ["Marinig", "Pulo", "Sala"],
-    Others: [
-        "Baclaran", "Banay-banay", "Banlic", "Bigaa", "Butong", "Casile",
-        "Diezmo", "Gulod", "Mamatid", "Niugan", "Pittland", "San Isidro"
-    ]
-};*/
 
 export interface Report {
     id: number;
@@ -18,6 +10,14 @@ export interface Report {
     created_at: string;
     latitude: number;
     longitude: number;
+    status?: string;
+    assigned_officer_id?: number | null;
+    lgu_post?: {
+        what_happened?: string;
+        action_taken?: string;
+        advisory?: string;
+        updated_at?: string;
+    } | null;
 }
 
 interface AlertsPanelProps {
@@ -27,93 +27,134 @@ interface AlertsPanelProps {
 }
 
 export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch }: AlertsPanelProps) {
-    const [selectedCategory, setSelectedCategory] = useState<string>("");
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+    const chipClass = (active: boolean) => `chip ${active ? "chip-active" : ""}`;
+
+    const [selectedCategory, setSelectedCategory] = useState<string>("all");
+    const [selectedSeverity, setSelectedSeverity] =
+        useState<"all" | "low" | "moderate" | "high" | "critical">("all");
+    const [selectedStatus, setSelectedStatus] = useState<"all" | "in_progress" | "resolved">("all");
+
     const [selectedBarangay, setSelectedBarangay] = useState("");
     const [sortNewest, setSortNewest] = useState<boolean>(true);
     const [reports, setReports] = useState<Report[]>([]);
-    const severityPriority: Record<string, number> = {
+
+    const normalizeIncident = (v: any): Report["incident_type"] => {
+        const s = String(v ?? "").toLowerCase();
+        if (s.includes("fire")) return "fire";
+        if (s.includes("flood")) return "flood";
+        if (s.includes("landslide")) return "landslide";
+        if (s.includes("accident")) return "accident";
+        return "accident";
+    };
+
+
+    const severityPriority: Record<Report["verified_critical_level"], number> = {
         critical: 4,
         high: 3,
         moderate: 2,
-        low: 1
+        low: 1,
     };
 
-    useEffect(() => {
+    const fetchReports = async () => {
         const token = localStorage.getItem("access_token");
         if (!token) return;
 
-        fetch("/api/incident-reports/verified/", {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
-            },
-        })
-        .then(async (res) => {
+        setIsLoading(true);
+        try {
+            const res = await fetch("/api/incident-reports/verified/", {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
+
             if (!res.ok) {
                 const errData = await res.json().catch(() => ({}));
                 throw new Error(errData.detail || `HTTP error ${res.status}`);
             }
-            return res.json();
-        })
-        .then((data) => {
-            console.log("Fetched verified reports:", data);
 
-            const mappedReports: Report[] = (data.results || []).map(r => {
-                // Prefer r.lat / r.lng, fallback to r.latitude / r.longitude
+            const data = await res.json();
+
+            const mappedReports: Report[] = (data.results || []).map((r: any) => {
                 let lat = r.lat ?? r.latitude;
                 let lng = r.lng ?? r.longitude;
 
-                // If still missing, fallback to barangay center
-                if ((lat === undefined || lng === undefined || lat === null || lng === null) && r.location_display) {
-                    const barangay = barangayDataRef.current.find(b => b.name === r.location_display);
-                    if (barangay) {
-                    lat = barangay.lat;
-                    lng = barangay.lon;
-                    }
-                }
-
                 return {
                     id: r.id,
-                    incident_type: r.category_display ?? r.category ?? "others",
-                    verified_critical_level: r.suggested_critical_level ?? "low",
-                    barangay: r.location_display?.split(",")[0].replace("Barangay ", "").trim() ?? "",
+                    incident_type: normalizeIncident(r.category_display ?? r.category),
+                    verified_critical_level: r.verified_critical_level ?? "low",
+                    barangay: r.location_display?.split(",")[0].replace(/^Barangay\s+/i, "").trim() ?? "",
                     created_at: r.created_at,
-                    latitude: lat ?? 0,   // fallback just in case
+                    latitude: lat ?? 0,
                     longitude: lng ?? 0,
+
+                    assigned_officer_id: r.assigned_officer_id ?? r.assignedOfficerId ?? null,
+
+                    // to check
+                    status: normalizeUiStatus(r.status),
+
+                    lgu_post: r.officer_note ? { advisory: r.officer_note } : undefined,
+                    lastUpdatedAt: r.lastUpdatedAt ?? r.createdAt,
                 };
-                });
+            });
+
+            console.log("verified endpoint payload:", data);
+            console.log("count:", data.count, "results:", data.results?.length);
+
+
 
             setReports(mappedReports);
-        })
-        .catch((err) => {
+            setLastUpdated(new Date());
+        } catch (err: any) {
             console.error("Failed to fetch verified reports:", err.message);
             setReports([]);
-        });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchReports();
     }, []);
 
-
+    useEffect(() => {
+        const onResize = () => {
+            const mobile = window.innerWidth <= 768;
+            setFiltersOpen(!mobile);
+        };
+        onResize();
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, []);
 
     const handleBarangaySearch = (value: string) => {
         setSelectedBarangay(value);
         if (onBarangaySearch) {
-            const matchingReports = reports.filter(r => 
+            const matchingReports = reports.filter(r =>
                 r.barangay.toLowerCase().includes(value.toLowerCase())
             );
-            
+
             let highestSeverity: string | null = null;
             if (matchingReports.length > 0) {
-                const sorted = matchingReports.sort((a, b) => 
+                const sorted = matchingReports.sort((a, b) =>
                     severityPriority[b.verified_critical_level] - severityPriority[a.verified_critical_level]
                 );
                 highestSeverity = sorted[0].verified_critical_level;
             }
-            
+
             onBarangaySearch(value, highestSeverity);
         }
     };
 
     const filteredReports = reports
-        .filter(r => selectedCategory === "" || r.incident_type.toLowerCase() === selectedCategory.toLowerCase())
+        .filter(r => (r.assigned_officer_id != null) || (r.status === "resolved"))
+        .filter(r => selectedCategory === "all" || r.incident_type.toLowerCase() === selectedCategory)
+        .filter(r => selectedSeverity === "all" || r.verified_critical_level === selectedSeverity.toLowerCase())
+        .filter(r => selectedStatus === "all" || (r.status ?? "in_progress") === selectedStatus)
         .filter(r => selectedBarangay === "" || r.barangay.toLowerCase().includes(selectedBarangay.toLowerCase()));
 
 
@@ -122,26 +163,183 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
         return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     });
 
+    const timeAgo = (iso: string) => {
+        const diffMs = Date.now() - new Date(iso).getTime();
+        const mins = Math.floor(diffMs / 60000);
+        if (mins < 1) return "Just now";
+        if (mins < 60) return `${mins}m ago`;
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return `${hrs}h ago`;
+        const days = Math.floor(hrs / 24);
+        return `${days}d ago`;
+    };
+
+    const normalizeUiStatus = (rawStatus: any): "in_progress" | "resolved" => {
+        const s = String(rawStatus ?? "").toLowerCase();
+        return s === "resolved" ? "resolved" : "in_progress";
+    };
+
+    function renderLguPost(note: string) {
+        const lines = note.split("\n");
+        const blocks: { title?: string; body: string[] }[] = [];
+        let current: { title?: string; body: string[] } = { title: undefined, body: [] };
+
+        const isHeader = (l: string) =>
+            /^(status|what happened|action taken|advisory to citizens|advisory)\s*:/i.test(l.trim());
+
+        for (const raw of lines) {
+            const line = raw.replace(/\r/g, "");
+
+            if (isHeader(line)) {
+                // push previous
+                if (current.title || current.body.length) blocks.push(current);
+                current = { title: line.replace(/:$/, "").trim(), body: [] };
+            } else {
+                current.body.push(line);
+            }
+        }
+        if (current.title || current.body.length) blocks.push(current);
+
+        return (
+            <div className="lgu-post">
+                {blocks.map((b, idx) => (
+                    <div className="lgu-post-block" key={idx}>
+                        {b.title && <div className="lgu-post-title">{b.title}</div>}
+                        <div className="lgu-post-body">{b.body.join("\n").trim()}</div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+
     return (
         <aside className="dashboard-alerts">
             <div className="sheet-handle" />
+            <div className="alerts-controls">
+                <div className="alerts-header">
+                    <div className="alerts-header-left">
+                        <h3 className="alerts-title">Verified Reports</h3>
+                        <span className="alerts-subtitle">
+                            {lastUpdated ? `Last updated ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Not updated yet"}
+                        </span>
+                    </div>
 
+                    <div className="alerts-header-right">
+                        <button
+                            type="button"
+                            className="filters-toggle-btn"
+                            onClick={() => setFiltersOpen((v) => !v)}
+                            aria-expanded={filtersOpen}
+                        >
+                            Filters <span className={`chev ${filtersOpen ? "open" : ""}`}>▾</span>
+                        </button>
 
-            {/* SEARCH */}
-            <div className="alerts-search-wrapper">
-                <div className="search-box">
-                    <input
-                        type="text"
-                        placeholder="Search barangay..."
-                        value={selectedBarangay}
-                        onChange={(e) => handleBarangaySearch(e.target.value)}
-                    />
+                        <button
+                            className="alerts-refresh-btn"
+                            onClick={fetchReports}
+                            disabled={isLoading}
+                            aria-label="Refresh"
+                            title="refresh"
+                        >
+                            {isLoading ? "..." : "↻"}
+                        </button>
+                    </div>
                 </div>
-                <Search className="alerts-search-icon" />
-            </div>
 
-            {/* FILTERS ROW */}
-            <div className="filter-row">
+
+                {/* SEARCH */}
+                <div className="alerts-search-wrapper">
+                    <div className="search-box">
+                        <input
+                            type="text"
+                            placeholder="Search barangay..."
+                            value={selectedBarangay}
+                            onChange={(e) => handleBarangaySearch(e.target.value)}
+                        />
+                        {selectedBarangay && (
+                            <button
+                                type="button"
+                                className="search-clear-btn"
+                                onClick={() => handleBarangaySearch("")}
+                                aria-label="Clear search"
+                                title="Clear"
+                            >
+                                x
+                            </button>
+                        )}
+                    </div>
+                    <Search className="alerts-search-icon" />
+                </div>
+
+
+                <div className={`filters-collapse ${filtersOpen ? "open" : ""}`}>
+                    {/* CHIPS ROW */}
+                    <div className="chip-row">
+                        <span className="chip-label">Category</span>
+                        {["all", "fire", "flood", "landslide", "accident"].map((c) => (
+                            <button
+                                key={c}
+                                type="button"
+                                className={chipClass(selectedCategory === c)}
+                                onClick={() => setSelectedCategory(c)}
+                            >
+                                {c === "all" ? "All" : c[0].toUpperCase() + c.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="chip-row">
+                        <span className="chip-label">Severity</span>
+                        {(["all", "low", "moderate", "high", "critical"] as const).map((s) => (
+                            <button
+                                key={s}
+                                type="button"
+                                className={`${chipClass(selectedSeverity === s)} ${s !== "all" ? s : ""}`}
+                                onClick={() => setSelectedSeverity(s)}
+                            >
+                                {s === "all" ? "All" : s.toUpperCase()}
+                            </button>
+                        ))}
+                    </div>
+
+
+                    <div className="chip-row">
+                        <span className="chip-label">Sort</span>
+                        <button
+                            type="button"
+                            className={chipClass(sortNewest)}
+                            onClick={() => setSortNewest(true)}
+                        >
+                            Newest
+                        </button>
+                        <button
+                            type="button"
+                            className={chipClass(!sortNewest)}
+                            onClick={() => setSortNewest(false)}
+                        >
+                            Oldest
+                        </button>
+                    </div>
+
+                    <div className="chip-row">
+                        <span className="chip-label">Status</span>
+                        {(["all", "in_progress", "resolved"] as const).map((st) => (
+                            <button
+                                key={st}
+                                type="button"
+                                className={chipClass(selectedStatus === st)}
+                                onClick={() => setSelectedStatus(st)}
+                            >
+                                {st === "all" ? "All" : st === "in_progress" ? "In progress" : "Resolved"}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+
+                {/* FILTERS ROW */}
+                {/* <div className="filter-row">
                 <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
@@ -161,42 +359,77 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
                     <option value="newest">Newest</option>
                     <option value="oldest">Oldest</option>
                 </select>
+            </div> */}
+
+                {/* CTA */}
+                <button className="report-btn" onClick={onReport}>
+                    + Report Incident
+                </button>
             </div>
 
-            {/* CTA */}
-            <button className="report-btn" onClick={onReport}>
-                + Report Incident
-            </button>
+            <div className="alerts-list-area">
+                {isLoading && reports.length === 0 ? (
+                    <div className="empty-state">Loading reports...</div>
+                ) : sortedReports.length === 0 ? (
+                    <div className="empty-state">
+                        <p>No reports found matching your filters.</p>
+                        <button className="clear-filters-btn" onClick={() => {
+                            setSelectedCategory("all");
+                            setSelectedSeverity("all");
+                            setSelectedBarangay("");
+                        }}>Clear Filters</button>
+                    </div>
+                ) : (
+                    <ul className="report-list">
+                        {sortedReports.map((report) => (
+                            <li
+                                key={report.id}
+                                className={`report-card ${report.verified_critical_level}`}
+                                onClick={() => onSelectReport?.(report)}
+                            >
+                                <div className="report-header">
+                                    <span className="report-title">
+                                        {report.incident_type.toUpperCase()}
+                                    </span>
+                                    <span className={`risk-badge ${report.verified_critical_level}`}>
+                                        {report.verified_critical_level.toUpperCase()}
+                                    </span>
+                                </div>
 
-            <h3>Verified Reports</h3>
-            <ul className="report-list">
-                {sortedReports.map((report) => (
-                    <li
-                        key={report.id}
-                        className={`report-card ${report.verified_critical_level}`}
-                        onClick={() => onSelectReport?.(report)}
-                        >
-                        <div className="report-header">
-                            <span className="report-title">
-                            {report.incident_type.toUpperCase()}
-                            </span>
-                            <span className={`risk-badge ${report.verified_critical_level}`}>
-                            {report.verified_critical_level.toUpperCase()}
-                            </span>
-                        </div>
+                                <span className="report-location">
+                                    Barangay {report.barangay}
+                                </span>
 
-                        <span className="report-location">
-                            Barangay {report.barangay}
-                        </span>
+                                <div className="report-meta">
+                                    {(() => {
+                                        const st = (report.status ?? "in_progress") as "in_progress" | "resolved";
+                                        return (
+                                            <span className={`meta-pill ${st}`}>
+                                                {st === "in_progress" ? "IN PROGRESS" : "RESOLVED"}
+                                            </span>
+                                        );
+                                    })()}
 
-                        <div className="report-footer">
-                            <span>
-                            {new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                        </div>
-                    </li>
-                ))}
-            </ul>
+                                    <span className="meta-pill">{timeAgo(report.created_at)}</span>
+                                    <span className="meta-pill">
+                                        {new Date(report.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                    </span>
+                                </div>
+
+
+                                {(report.status ?? "pending") === "resolved" && report.lgu_post && (
+                                    <div className="lgu-preview">
+                                        <h5>LGU Update</h5>
+                                        {renderLguPost(report.lgu_post?.advisory || "")}
+                                    </div>
+
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
+
         </aside >
     );
 }

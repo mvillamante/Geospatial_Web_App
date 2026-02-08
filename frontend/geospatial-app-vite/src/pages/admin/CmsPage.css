@@ -135,7 +135,7 @@
     flex-wrap: wrap;
     margin-top: 1rem;
 }
-.btn.danger {
+.cms-page .btn.danger {
   background: #dc2626;
   color: var(--text-white);
 }

@@ -127,6 +127,17 @@ const NavigationMenu: React.FC = () => {
 
   return (
     <div className={`navigation ${effectiveRole === "Admin" ? "admin-nav" : ""}`}>
+      {/* <div
+        className={`nav-logo ${effectiveRole === "Admin" ? "admin-logo" : ""}`}
+        onClick={() => navigate("/main/" + (effectiveRole === "Admin" ? "admin/dashboard" : "citizen/community-feed"))}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Enter" && navigate("/main/" + (effectiveRole === "Admin" ? "admin/dashboard" : "citizen/community-feed"))}
+      >
+        <img src="/test-hazspot.png" alt="HazSpot logo" className="nav-logo-img" /> 
+        <span className="nav-logo-text">H<span>S</span></span>
+      </div> */}
+
       <nav>
         {navItems.map(({ label, path, icon: Icon }, index) => (
           <div className={`nav-item ${effectiveRole === "Admin" ? "admin-layout" : ""}`} key={index}>

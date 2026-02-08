@@ -18,38 +18,46 @@ const LandingPage: React.FC = () => {
   const closeModal = () => setModalType(null);
   const switchModal = (type: "login" | "signup" | "forgotPassword" | "verifyOtp") => setModalType(type);
 
-  // Fetch user info on mount
   useEffect(() => {
     refreshUser().finally(() => setLoading(false));
   }, [refreshUser]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const sections = ["home", "about", "howitworks"];
-      let current = "home";
+    const sections = ["home", "about", "howitworks"];
 
-      for (let id of sections) {
-        const section = document.getElementById(id);
-        if (section) {
-          const rect = section.getBoundingClientRect();
-          if (rect.top <= window.innerHeight / 2) {
-            current = id;
-          }
+    const handleScroll = () => {
+      const navHeight = 64; // your fixed navbar height
+
+      let bestId = "home";
+      let bestDistance = Number.POSITIVE_INFINITY;
+
+      for (const id of sections) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+
+        // distance of section top from under the navbar
+        const distance = Math.abs(el.getBoundingClientRect().top - navHeight);
+
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestId = id;
         }
       }
-      setActiveSection(current);
+
+      setActiveSection(bestId);
     };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Show loading until auth is fetched
+
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
 
-  // ===== Get user role and display name from localStorage =====
   const { userRole, userRole2 } = getUserRoleAndDisplayName();
 
   return (
@@ -65,13 +73,18 @@ const LandingPage: React.FC = () => {
         />
       )}
 
+
       {/* Navigation */}
       <div className="content">
         <nav className="nav">
           <div className="logo">
-            <div className="logo-icon"></div>
-            <span>HazSpot</span>
+            <img
+              src="/hazspot-logo.png"
+              alt="HazSpot Logo"
+              className="logo-img"
+            />
           </div>
+
           <div className="nav-links">
             <a
               href="#home"
@@ -155,9 +168,9 @@ const LandingPage: React.FC = () => {
               textAlign: "center",
             }}
           >
-            <p
+            <p className="about-text"
               style={{
-                fontSize: "1.1rem",
+                fontSize: "1rem",
                 lineHeight: "1.8",
                 color: "#64748b",
               }}
@@ -169,9 +182,6 @@ const LandingPage: React.FC = () => {
 
         {/* how it works */}
         <section id="howitworks"
-          style={{
-            background: "linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(239, 68, 68, 0.03))",
-          }}
         >
           <div className="section-header">
             <h2>

@@ -266,14 +266,14 @@ export default function CommunityFeedPage() {
 
                         <div className="modal-header">
                             <div className="avatar avatar-lg" aria-hidden="true">
-                                {initials(selected.author)}
+                                {"CC"}
                             </div>
 
                             <div className="modal-header-text">
                                 <div className="modal-title">{selected.title}</div>
 
                                 <div className="modal-meta">
-                                    <span className="meta-strong">{selected.author}</span>
+                                    <span className="meta-strong">Cabuyao CDRRMO</span>
                                     <span className="dot">•</span>
                                     <span>{timeAgo(selected.created_at)}</span>
                                     {selected.area ? (
@@ -311,13 +311,13 @@ function PostRow({ post, onOpen }: { post: FeedPost; onOpen: () => void }) {
     return (
         <button className="post-row" onClick={onOpen} type="button">
             <div className="avatar" aria-hidden="true">
-                {initials(post.author)}
+                {"CC"}
             </div>
 
             <div className="post-content">
                 <div className="post-head">
                     <div className="post-author">
-                        <span className="meta-strong">{post.author}</span>
+                        <span className="meta-strong">Cabuyao CDRRMO</span>
                         <span className="dot">•</span>
                         <span className="muted">{timeAgo(post.created_at)}</span>
                         {post.area ? (

@@ -54,8 +54,7 @@ const MainLayout: React.FC = () => {
         {/* Topbar */}
         <div className="main-topbar">
           <div className="topbar-left">
-            {/* <img src="/hazspot-logo.png" alt="HazSpot" className="topbar-logo-img" /> */}
-            <span className="topbar-logo-text">HazSpot</span>
+            <img src="/hazspot-logo(2).png" alt="HazSpot" className="topbar-logo-img" />
           </div>
           <div className="main-topbar-spacer" />
 

@@ -288,7 +288,7 @@
   display: flex;
   gap: 10px;
   justify-content: flex-end;
-  margin-top: 14px;
+  margin-top: 10px;
 }
 
 @media (max-width: 520px) {
@@ -766,19 +766,19 @@
   color: #fff;
 }
 
-.btn.warn {
+.reportverify-page .btn.warn {
   background: rgba(245, 158, 11, 0.16);
   border-color: rgba(245, 158, 11, 0.30);
   color: #92400e;
 }
 
-.btn.danger {
+.reportverify-page .btn.danger {
   background: rgba(220, 38, 38, 0.14);
   border-color: rgba(220, 38, 38, 0.28);
   color: #991b1b;
 }
 
-.btn.ghost {
+.reportverify-page .btn.ghost {
   background: var(--surface-2);
 }
 

@@ -41,12 +41,13 @@ body {
 .cms-page,
 .feed-page,
 .reportsmgmt-page,
+.profile-page,
 .reportverify-page,
 .sys-page {
     width: 100%;
     min-height: 100%;
     background: #f8fafc;
-    padding: 1.5rem;
+    padding: 2rem;
     overflow-y: auto;
     min-height: 100vh;
 }
@@ -57,7 +58,8 @@ body {
 .reportverify-page h1,
 .reportsmgmt-page h1,
 .feed-page h1,
-.sys-page h1 {
+.sys-page h1,
+.alerts-title {
     font-size: 1.8rem;
     color: #0f172a;
 }

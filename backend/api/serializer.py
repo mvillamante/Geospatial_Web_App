@@ -284,6 +284,8 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
             "verified_critical_level",
             "photo_url",
             "assigned_officer_label",
+            "officer_note",
+            "rejection_reason",
             "assigned_officer_id",
         ]
         
@@ -345,6 +347,7 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
     assignedOfficerId = serializers.IntegerField(source="assigned_officer_id", allow_null=True)
     verifiedRisk = serializers.CharField(source="verified_critical_level", required=False, allow_null=True)
     assignedTo = serializers.SerializerMethodField()
+    lgu_post = serializers.SerializerMethodField()
 
 
     class Meta:
@@ -367,8 +370,19 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
             "lng",
             "status",
             "photo_path",
+            "lgu_post",
         ]
-    
+
+    def get_lgu_post(self, obj):
+        if (obj.status or "").lower() != "resolved":
+            return None
+        if not obj.officer_note:
+            return None
+        return {
+            "advisory": obj.officer_note,
+            "updated_at": obj.last_updated_at,
+    }
+
     def get_assignedOfficerId(self, obj):
         return obj.assigned_officer_id 
 

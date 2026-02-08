@@ -1,4 +1,7 @@
-
+.evac-page {
+  overflow-y: auto;
+  height: 100vh;
+}
 
 /* =========================
    Search
@@ -134,7 +137,6 @@
   min-width: 0;
 }
 
-
 .evac-card-name span {
   flex-shrink: 1;
   overflow: hidden;
@@ -215,87 +217,31 @@
 .selected-evac-card {
   width: 100%;
   padding: 15px;
-  position: sticky;
-  top: 1rem;
+  position: relative;
   max-height: calc(80vh - 2rem);
   overflow-y: auto;
+  flex: 1;
+}
+
+.saving-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  z-index: 10;
 }
 
 .selected-evac-card h2 {
   margin-bottom: 8px;
 }
-
-.selected-evac-card .small-editor {
-  border-radius: 12px;
-  font-size: 0.9rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
-.selected-evac-card .small-editor .form-group,
-.selected-evac-card .small-editor .form-row {
-  margin-bottom: 0.2rem; /* tighter spacing */
-}
-
-.selected-evac-card .small-editor input,
-.selected-evac-card .small-editor select {
-  font-size: 0.85rem;
-  padding: 0.3rem 0.5rem;
-}
-
-.selected-evac-card .small-editor .modal-actions button {
-  padding: 0.3rem 0.6rem;
-  font-size: 0.8rem;
-}
-
-/* =========================
-   Editor Card
-========================= */
-
-.editor-card {
-  background: var(--white-bg);
-  border-radius: 16px;
-  padding: 1.2rem;
-  border: 1px solid var(--light-gray-border);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-  transition: transform 0.35s ease, opacity 0.35s ease;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  gap: 1rem;
-}
-
-.editor-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.12);
-}
-
-.editor-card .form-group label {
-  display: block;
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-  color: var(--text-slate-black);
-}
-
-.editor-card input,
-.editor-card select {
-  width: 100%;
-  padding: 0.65rem 0.9rem;
-  font-size: 0.9rem;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-.editor-card input:focus,
-.editor-card select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-}
-
-
-
 
 .animate-card {
   opacity: 0;
@@ -370,11 +316,12 @@
 ========================= */
 .evac-reminders {
   margin: 1.5rem;
-  margin-top: 5px;
+  margin-top: 15px;
   background: #fff7d6;
   border: 1px solid #ffe8a3;
   padding: 1.5rem;
   border-radius: 12px;
+  height: 100%;
 }
 
 .evac-reminders-title {
@@ -452,21 +399,6 @@
     padding: 0.7rem;
     font-size: 0.9rem;
   }
-
-  .evac-reminders {
-    margin-top: 1.5rem;
-    padding: 1rem;
-    border-radius: 14px;
-  }
-
-  .evac-reminders-title {
-    font-size: 0.95rem;
-  }
-
-  .evac-reminders-list {
-    font-size: 0.85rem;
-    gap: 4px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -512,27 +444,30 @@
 .evac-map-wrapper {
   display: flex;
   justify-content: justify;
-  align-items: flex-start;
-  background-color: var(--white-bg);
-  padding: 15px;
-  border-radius: 15px;
-  box-shadow: 0 6px 16px rgba(163, 169, 182, 0.18);
+  align-items: flex-start; 
 }
 
 .evac-side-content {
-  width: 350px;
   display: flex;
-  flex: 1;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: right;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  background-color: var(--white-bg);
+  border-radius: 15px;
+  box-shadow: 0 6px 16px rgba(163, 169, 182, 0.18);
+  padding: 15px;
 }
 
 .evac-stat-container {
-  display: grid;
-  flex: 1;
-  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
-  margin-left: 1rem;
-}
+  width: 30%;
+  height: 100%;
+  padding: 15px;
+} 
 
 .evac-stat-card {
   background: var(--white-bg);
@@ -726,52 +661,6 @@
   text-align: center;
 }
 
-/* Form Labels */
-.evac-page .form-group label {
-  display: block;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-slate-black);
-  margin-bottom: 0.5rem;
-}
-
-/* Form Inputs & Selects */
-.form-group input,
-.form-group select {
-  width: 100%;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  padding: 0.85rem 1rem;
-  font-size: 0.95rem;
-  outline: none;
-  transition: 0.25s ease;
-  background: #f9fafb;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-  background: #fff;
-}
-
-/* Form Rows */
-.form-row {
-  display: grid;
-  gap: 1rem;
-}
-
-.form-row.two {
-  grid-template-columns: 1fr 1fr;
-}
-
-.form-row.three {
-  grid-template-columns: 1fr 1fr 1fr;
-}
-
-.form-group.small {
-  margin-bottom: 1rem;
-}
 
 /* Modal Actions */
 .evac-page .modal-actions {
@@ -911,12 +800,6 @@
   font-size: 0.9rem;
 }
 
-.map-wrap {
-  border-radius: 14px;
-  overflow: hidden;
-  border: 1px solid var(--light-gray-border);
-}
-
 .leaflet-map {
   height: 420px;
   width: 100%;
@@ -1025,3 +908,124 @@
     grid-template-columns: 1fr;
   }
 }
+
+.empty-evac-state {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  background-color: #f3f4f6;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  color: #6b7280;
+  text-align: center;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+
+.empty-evac-state .icon {
+  font-size: 3rem;
+  color: #9ca3af; /* gray icon */
+}
+
+.empty-evac-state .title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.empty-evac-state .subtitle {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  max-width: 220px;
+}
+
+
+/* =========================
+   Map & Side Content Responsiveness
+========================= */
+@media (max-width: 1024px) {
+  .evac-map-wrapper {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .evac-side-content {
+    width: 60%;
+    height: auto;
+    flex-direction: column;
+  }
+
+  .evac-stat-container {
+    width: 35%;
+    height: auto;
+  }
+
+  .leaflet-map {
+    height: 45vh;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .evac-page {
+    height: 60vh;
+    margin-bottom: 100px; /* space for PWA bottom nav */
+  }
+
+  .evac-map-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .evac-side-content {
+    width: 100%;
+    padding: 0;
+  }
+
+  .selected-evac-card {
+    max-height: none;
+    width: 100%;
+  }
+
+  .evac-reminders {
+    flex-direction: row;
+    gap: 0.75rem;
+    padding: 25px;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .evac-reminders-title {
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 0;
+  }
+
+  .evac-stat-card {
+    flex: 1;
+  }
+
+  .leaflet-map {
+    height: 50vh !important;
+    width: 100% !important;
+  }
+
+  .evac-grid.officer {
+    display: grid;
+    grid-template-columns: 1fr;
+    overflow-x: visible;
+    padding-bottom: 0;
+    gap: 1rem;
+  }
+
+  .scroll-btn {
+    display: none;
+  }
+}
+

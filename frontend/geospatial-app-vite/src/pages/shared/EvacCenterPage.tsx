@@ -10,11 +10,13 @@ import { MdOutlineModeEdit, MdAdd } from "react-icons/md";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { RiDeleteBinFill, RiBuilding4Fill } from "react-icons/ri";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
+import type { EvacuationCenterData } from "../../components/ui/mapLayers/evacuationCenters";
 import './EvacCenterPage.css';
 
 import AddEvacCenterModal from "../../components/ui/Modals/AddEvacCenterModal";
 import MapPickerModal from '../../components/ui/Modals/MapPickerModal';
 import { getEvacuationPopupHTML } from "../../components/ui/mapLayers/evacuationCenters";
+import EvacCenterEditor from '../../components/ui/Modals/EvacCenterEditor';
 
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -51,7 +53,8 @@ const mapApiToCenter = (api: any): EvacuationCenter => ({
   contact: api.contact || "",
   coordinates: api.coordinates
     ? `${api.coordinates[0]}, ${api.coordinates[1]}`
-    : "",
+    : "", 
+  facilities: api.facilities || [],
 });
 
 
@@ -65,132 +68,6 @@ interface EvacCenterEditorProps {
   onPickCoordinates?: () => void;
 }
 
-function EvacCenterEditor({
-  center,
-  onChange,
-  onSave,
-  onCancel,
-  readOnly = false,
-  showCoordinatesPicker = false,
-  onPickCoordinates,
-}: EvacCenterEditorProps) {
-  return (
-    <div className="evac-card editor-card">
-      <div>
-        <div className="form-group">
-          <label>Name</label>
-          <input
-            value={center.name}
-            onChange={(e) => onChange({ ...center, name: e.target.value })}
-            readOnly={readOnly}
-          />
-        </div>
-
-        <div className="form-row three">
-          {/* Barangay */}
-          <div className="form-group small">
-            <label>Barangay</label>
-            {readOnly ? (
-              <input value={center.barangay} readOnly />
-            ) : (
-              <select
-                value={center.barangay}
-                onChange={(e) => onChange({ ...center, barangay: e.target.value })}
-              >
-                {getCabuyaoBarangays().map((barangay) => (
-                  <option key={barangay} value={barangay}>
-                    Barangay {barangay}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-
-          {/* Type */}
-          <div className="form-group small">
-            <label>Type</label>
-            {readOnly ? (
-              <input value={center.type} readOnly />
-            ) : (
-              <select
-                value={center.type}
-                onChange={(e) => onChange({ ...center, type: e.target.value })}
-              >
-                <option value="school">School</option>
-                <option value="gymnasium">Gymnasium</option>
-                <option value="barangay hall">Barangay Hall</option>
-              </select>
-            )}
-          </div>
-
-          {/* Capacity */}
-          <div className="form-group small">
-            <label>Capacity</label>
-            <input
-              type="number"
-              value={center.capacity}
-              onChange={(e) =>
-                onChange({ ...center, capacity: Number(e.target.value) })
-              }
-              readOnly={readOnly}
-            />
-          </div>
-        </div>
-
-        {/* Address */}
-        <div className="form-group">
-          <label>Address</label>
-          <input
-            value={center.address}
-            onChange={(e) => onChange({ ...center, address: e.target.value })}
-            readOnly={readOnly}
-          />
-        </div>
-          
-        <div className="form-row two">
-          {/* Contact */}
-          <div className="form-group">
-            <label>Contact</label>
-            <input
-              value={center.contact}
-              onChange={(e) => onChange({ ...center, contact: e.target.value })}
-              readOnly={readOnly}
-            />
-          </div>
-
-          {/* Coordinates */}
-          <div className="form-group small">
-            <label>Coordinates</label>
-            <div className="coord-row">
-              <input value={center.coordinates} readOnly />
-              {showCoordinatesPicker && onPickCoordinates && (
-                <button
-                  type="button"
-                  className="pick-map-btn"
-                  onClick={onPickCoordinates}
-                >
-                  Pick on Map
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {!readOnly && (
-          <div className="modal-actions">
-            <button type="button" onClick={onSave}>
-              Save
-            </button>
-            <button type="button" onClick={onCancel}>
-              Cancel
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 /* EVAC CENTER PAGE ----------------------------------------------------- */
 function EvacCenterPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -199,6 +76,7 @@ function EvacCenterPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
   const [selectedEvacuationCenter, setSelectedEvacuationCenter] = useState<EvacuationCenter | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   //get user role
   const { userRole, displayName, profilePath } = getUserRoleAndDisplayName();
@@ -245,44 +123,69 @@ function EvacCenterPage() {
   });
 
   // Manage Evacuation Center Cards ----------------------------------------
+  const [mapRefreshKey, setMapRefreshKey] = useState(0);
+  const handleSelectCenter = (centerData: EvacuationCenterData) => {
+    const center = mapApiToCenter(centerData);
+    setSelectedEvacuationCenter(center);
+    console.log("zibai", center)
+
+    if (userRole === "Officer") {
+      setEditingCenter(center);
+    }
+  };
+
   const handleEditCenter = (center: EvacuationCenter) => {
     setClosingId(center.id);
 
     setTimeout(() => {
+      setSelectedEvacuationCenter(center);
       setEditingCenter(center);
       setClosingId(null);
       setShowAddModal(false);
     }, 250);
   };
   
-  const handleSaveEdit = async (updatedCenter: EvacuationCenter) => {
-    const [lat, lng] = updatedCenter.coordinates
-      .split(",")
-      .map((s) => Number(s.trim()));
+  const handleSaveEdit = async (updatedCenter: EvacuationCenter | null) => {
+    if (!updatedCenter || updatedCenter.id === undefined) {
+      console.error("Cannot save: missing center or ID", updatedCenter);
+      return;
+    }
 
-    const payload = {
-      name: updatedCenter.name,
-      type: updatedCenter.type,
-      latitude: lat,
-      longitude: lng,
-      capacity: updatedCenter.capacity,
-      address: updatedCenter.address,
-      contact: updatedCenter.contact,
-      barangay: updatedCenter.barangay,
-      facilities: (updatedCenter as any).facilities,
-    };
+    setIsSaving(true);
+    try {
+      const [lat, lng] = updatedCenter.coordinates
+        .split(",")
+        .map((s) => Number(s.trim()));
 
-    const saved = await updateEvacCenter(updatedCenter.id, payload);
+      const payload = {
+        id: updatedCenter.id,
+        name: updatedCenter.name,
+        type: updatedCenter.type,
+        latitude: lat,
+        longitude: lng,
+        capacity: updatedCenter.capacity,
+        address: updatedCenter.address,
+        contact: updatedCenter.contact,
+        barangay: updatedCenter.barangay,
+        facilities: updatedCenter.facilities,
+      };
 
-    setCenters((prev) =>
-      prev.map((c) =>
-        c.id === saved.id ? mapApiToCenter(saved) : c
-      )
-    );
+      const saved = await updateEvacCenter(updatedCenter.id, payload);
 
-    setEditingCenter(null);
+      setCenters((prev) =>
+        prev.map((c) =>
+          c.id === saved.id ? mapApiToCenter(saved) : c
+        )
+      );
+      setEditingCenter(null); // close editor
+      setMapRefreshKey(prev => prev + 1);
+    } catch (err) {
+      console.error("Error updating center:", err);
+      alert("Failed to save changes. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
-
 
   const handleDeleteCenter = async (id: number) => {
     if (!confirm("Are you sure you want to delete this center?")) return;
@@ -293,11 +196,12 @@ function EvacCenterPage() {
       await deleteEvacCenter(id);
       setCenters((prev) => prev.filter((c) => c.id !== id));
       setClosingId(null);
+      setMapRefreshKey(prev => prev + 1);
     }, 250);
   };
 
   /* Evacuation Center Map */
-  const activeLayers = useMemo(() => ["Evacuation Centers"], []);
+  const activeLayers = useMemo(() => ["Evacuation Centers",], []); /* "Barangay Boundaries" */
   const [isClosing, setIsClosing] = useState(false);
   const [closingId, setClosingId] = useState<number | null>(null);
 
@@ -305,6 +209,7 @@ function EvacCenterPage() {
     setIsClosing(true);
     setTimeout(() => {
       setEditingCenter(null);
+      setSelectedEvacuationCenter(null);
       setIsClosing(false);
     }, 250);
   };
@@ -339,41 +244,69 @@ function EvacCenterPage() {
       </div>
 
       <div className="evac-map-wrapper">
-        {/* Interactive Map Component */}
-        <LeafletMap
-          height="44vh"
-          width="45%"
-          mapView="interactive"
-          mapType="basic"
-          activeLayers={activeLayers}
-          showPopupOnMap={false}
-          onSelectEvacuationCenter={(center) => {
-            setSelectedEvacuationCenter(center);
-          }}
-        />
-
         <div className="evac-side-content">
-          {/*{userRole === "Officer" && (
-            <div className="evac-stat-container">
-              <div className="evac-stat-card evac-stat-primary">
-                <div className="evac-stat-text">
-                  <h3>Total Centers</h3>
-                  <p className="evac-card-value">{totalCenters}</p>
-                </div>
-                <MapPin className="evac-card-icon" />
-              </div>
+          {/* Interactive Map Component */}
+          <LeafletMap
+            key={mapRefreshKey}
+            height="43vh"
+            width="50%"
+            mapView="interactive"
+            mapType="basic"
+            activeLayers={activeLayers}
+            showPopupOnMap={false}
+            onSelectEvacuationCenter={handleSelectCenter}
+          />
 
-              <div className="evac-stat-card evac-stat-secondary">
-                <div className="evac-stat-text">
-                  <h3>Barangays Covered</h3>
-                  <p className="evac-card-value">{barangaysCovered}</p>
-                </div>
-                <Users className="evac-card-icon" />
+          {/* Selected Evacuation Center */}
+          <div className="selected-evac-card">
+            {userRole === "Officer" && editingCenter ? (
+              <EvacCenterEditor
+                center={editingCenter}
+                onChange={setEditingCenter}
+                onSave={() => handleSaveEdit(editingCenter)}
+                onCancel={handleCloseEditor}
+                readOnly={false}
+                showCoordinatesPicker={true}
+                onPickCoordinates={() => setMapOpen(true)}
+                isSaving={isSaving}
+              />
+            ) : userRole === "Citizen" && selectedEvacuationCenter ? (
+              <EvacCenterEditor
+                center={selectedEvacuationCenter}
+                readOnly={true}
+              />
+            ) : (
+              <div className="empty-evac-state">
+                <span className="icon">🗺️</span>
+                <p className="title">No Evacuation Center Selected</p>
+                <p className="subtitle">
+                  Click an evacuation center on the map to view details.
+                </p>
               </div>
+            )}
+          </div>
+        </div>
+
+        {/* STATUS CONTAINER */}
+        {userRole === "Officer" ? (
+          <div className="evac-stat-container">
+            <div className="evac-stat-card evac-stat-primary">
+              <div className="evac-stat-text">
+                <h3>Total Centers</h3>
+                <p className="evac-card-value">{totalCenters}</p>
+              </div>
+              <MapPin className="evac-card-icon" />
             </div>
-          )}*/}
 
-          { userRole === "Citizen" && (
+            <div className="evac-stat-card evac-stat-secondary">
+              <div className="evac-stat-text">
+                <h3>Barangays Covered</h3>
+                <p className="evac-card-value">{barangaysCovered}</p>
+              </div>
+              <Users className="evac-card-icon" />
+            </div>
+          </div>
+        ) : userRole === "Citizen" ? (
             <div className="evac-reminders">
               <h3 className="evac-reminders-title">
                 <span>⚠️</span> Important Reminders
@@ -385,82 +318,7 @@ function EvacCenterPage() {
                 <li>Keep your mobile phone charged for emergency communications</li>
               </ul>
             </div>
-          )}
-
-          {userRole === "Officer" && (
-            <div className="selected-evac-card">
-              <h2>Selected Evacuation Center</h2>
-              {editingCenter && (
-                <div className={`small-editor animate-card ${isClosing ? "exit" : ""}`}>
-                  <EvacCenterEditor
-                    center={editingCenter}
-                    onChange={setEditingCenter}
-                    onSave={() => handleSaveEdit(editingCenter)}
-                    onCancel={handleCloseEditor}
-                    showCoordinatesPicker={true}
-                    onPickCoordinates={() => setMapOpen(true)}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Selected Content */}
-          <div className="selected-evac-card">
-            {selectedEvacuationCenter ? (
-              <> {/* PLACEHOLDER MUNA :D */}
-                <div style={{
-                  padding: "16px",
-                  background: "#f9fafb",
-                  borderRadius: "8px",
-                  maxWidth: "320px",
-                  fontFamily: "Arial, sans-serif",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
-                }}>
-                  <h3 style={{ margin: 0, fontSize: "18px", color: "#1f2937" }}>
-                    {selectedEvacuationCenter.name}
-                  </h3>
-                  <p style={{ margin: "4px 0", fontSize: "14px", color: "#374151" }}>
-                    📍 {selectedEvacuationCenter.address}
-                  </p>
-                  <p style={{ margin: "4px 0", fontSize: "14px", color: "#374151" }}>
-                    🏘️ Barangay: {selectedEvacuationCenter.barangay}
-                  </p>
-                  <p style={{ margin: "4px 0", fontSize: "14px", color: "#374151" }}>
-                    👥 Capacity: {selectedEvacuationCenter.capacity} persons
-                  </p>
-                  {selectedEvacuationCenter.contact && (
-                    <p style={{ margin: "4px 0", fontSize: "14px", color: "#374151" }}>
-                      📞 Contact: {selectedEvacuationCenter.contact}
-                    </p>
-                  )}
-                  {selectedEvacuationCenter.facilities && selectedEvacuationCenter.facilities.length > 0 && (
-                    <div style={{ marginTop: "8px" }}>
-                      <p style={{ margin: "4px 0", fontWeight: 600 }}>🏗️ Facilities:</p>
-                      <ul style={{ paddingLeft: "20px", margin: 0 }}>
-                        {selectedEvacuationCenter.facilities.map((f, idx) => (
-                          <li key={idx} style={{ fontSize: "13px", color: "#4b5563", marginBottom: "2px" }}>
-                            {f}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-                
-                {/*<div
-                  className="selected-evac-card"
-                  dangerouslySetInnerHTML={{
-                    __html: getEvacuationPopupHTML(selectedEvacuationCenter, true),
-                  }}
-                />*/}
-              </>
-            ) : (
-              <p>Select an evacuation center on the map</p>
-            )}
-          </div>
-
-        </div>
+        ) : null }
       </div>
 
       <hr className="evac-hr-divider" />
@@ -497,29 +355,13 @@ function EvacCenterPage() {
         </button>
 
         <div className="evac-grid officer" ref={gridRef} style={{ overflowX: "hidden" }}>
-          {filteredCenters
-          .filter(center => editingCenter?.id !== center.id)
-          .map(center => {
+          {filteredCenters.map(center => {
             const isExiting = closingId === center.id;
-
-            if (userRole === "Officer" && editingCenter?.id === center.id && !isExiting) {
-              return (
-                <div key={center.id} className="small-editor animate-card">
-                  <EvacCenterEditor
-                    center={editingCenter}
-                    onChange={setEditingCenter}
-                    onSave={() => handleSaveEdit(editingCenter)}
-                    onCancel={handleCloseEditor}
-                  />
-                </div>
-              );
-            }
-
             return (
               <div
                 key={center.id}
                 className={`evac-card ${userRole === "Officer" ? "officer" : ""} animate-card ${
-                  closingId === center.id ? "exit" : ""
+                  isExiting ? "exit" : ""
                 }`}
               >
                 <h2 className="evac-card-name">
@@ -619,36 +461,47 @@ function EvacCenterPage() {
           })}
         </div>
 
+
         {/* Right Arrow */}
         <button className="scroll-btn right" onClick={() => scrollGrid(300)}>
           <HiChevronRight size={24} />
         </button>
       </div>
 
-
       {/* Officer Add/Edit Modal */}
       <AddEvacCenterModal
         open={showAddModal}
         onClose={() => setShowAddModal(false)}
         onAdd={async (newCenter) => {
-          const [lat, lng] = newCenter.coordinates
-            .split(",")
-            .map((s: string) => Number(s.trim()));
+          if (!newCenter.coordinates) return;
 
-          const payload = {
-            name: newCenter.name,
-            type: newCenter.type,
-            latitude: lat,
-            longitude: lng,
-            capacity: newCenter.capacity,
-            address: newCenter.address,
-            contact: newCenter.contact,
-            barangay: newCenter.barangay,
-            facilities: newCenter.facilities,
-          };
+          setIsSaving(true);
+          try {
+            const [lat, lng] = newCenter.coordinates
+              .split(",")
+              .map((s: string) => Number(s.trim()));
 
-          const saved = await createEvacCenter(payload);
-          setCenters((prev) => [...prev, mapApiToCenter(saved)]);
+            const payload = {
+              name: newCenter.name,
+              type: newCenter.type,
+              latitude: lat,
+              longitude: lng,
+              capacity: newCenter.capacity,
+              address: newCenter.address,
+              contact: newCenter.contact,
+              barangay: newCenter.barangay,
+              facilities: newCenter.facilities,
+            };
+
+            const saved = await createEvacCenter(payload);
+            setCenters((prev) => [...prev, mapApiToCenter(saved)]);
+            setShowAddModal(false);
+          } catch (err) {
+            console.error("Error creating center:", err);
+            alert("Failed to save. Please try again.");
+          } finally {
+            setIsSaving(false);
+          }
         }}
         barangays={getCabuyaoBarangays()}
       />

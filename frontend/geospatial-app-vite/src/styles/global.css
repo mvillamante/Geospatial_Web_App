@@ -43,13 +43,11 @@ body {
 .reportverify-page,
 .sys-page {
     width: 100%;
-    min-height: 100%;
     background: #f8fafc;
-    padding: 2rem;
-    height: 100vh;
-    overflow-y: auto;
-    min-height: 100vh;
+    padding: 1.5rem;
+    min-height: 50vh;
 }
+
 
 .user-page h1,
 .cms-page h1,
@@ -248,4 +246,44 @@ body {
   left: 10px;
   color: #3b82f6;
   pointer-events: none;
+}
+
+/* Form */
+
+/* Form Inputs & Selects */
+.form-group input,
+.form-group select {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+  outline: none;
+  transition: 0.25s ease;
+  background: #f9fafb;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  background: #fff;
+}
+
+/* Form Rows */
+.form-row {
+  display: grid;
+  gap: 1rem;
+}
+
+.form-row.two {
+  grid-template-columns: 1fr 1fr;
+}
+
+.form-row.three {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.form-group.small {
+  margin-bottom: 1rem;
 }

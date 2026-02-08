@@ -9,9 +9,11 @@ interface EvacuationCenterAPI {
   id: number;
   name: string;
   type: EvacuationCenterType;
+  barangay: string;
   latitude: string | number;
   longitude: string | number;
   capacity: number;
+  contact: string;
   address: string;
   facilities: string[];
 }
@@ -39,10 +41,13 @@ async function fetchEvacuationCenters(): Promise<EvacuationCenterData[]> {
   const results: EvacuationCenterAPI[] = Array.isArray(data) ? data : data.results;
 
   return results.map(center => ({
+    id: center.id,
     name: center.name,
     type: center.type,
+    barangay: center.barangay,
     coordinates: [parseFloat(center.latitude as any), parseFloat(center.longitude as any)] as [number, number],
     capacity: center.capacity,
+    contact: center.contact,
     address: center.address,
     facilities: center.facilities || [],
   }));

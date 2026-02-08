@@ -46,7 +46,6 @@ const MainLayout: React.FC = () => {
   const unreadCount = notifs.filter((n) => !n.read).length;
 
   const { userRole, userRole2 } = getUserRoleAndDisplayName();
-  console.log("test", userRole)
 
   return (
     <div className="main-layout">

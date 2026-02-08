@@ -85,6 +85,7 @@ interface OverpassElement {
   tags?: { name?: string };
   members?: Array<{
     type: string;
+    role?: "outer" | "inner";
     geometry?: Array<{ lat: number; lon: number }>;
   }>;
 }
@@ -155,6 +156,7 @@ export default function LeafletMap({
   const searchMarkerRef = useRef<L.Marker | null>(null);
   const reportMarkerRef = useRef<L.Marker | null>(null);
   const barangayDataRef = useRef<BarangayData[]>([]);
+  const barangayBoundariesLayerRef = useRef<L.LayerGroup | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
   
   // Layer refs for toggle functionality
@@ -167,7 +169,6 @@ export default function LeafletMap({
   const ndviLayerRef = useRef<L.LayerGroup | null>(null);
   const verifiedReportsLayerRef = useRef<L.LayerGroup | null>(null);
   
-  const [selectedCenter, setSelectedCenter] = useState<EvacuationCenterData | null>(null);
 
   // Initialize map
   useEffect(() => {
@@ -286,7 +287,6 @@ export default function LeafletMap({
     };
   }, [mapView]);
 
-
   // Load data
   useEffect(() => {
     const map = mapRef.current;
@@ -325,77 +325,88 @@ export default function LeafletMap({
       }
     };
 
-    if (mapView === "interactive") {
-      fetchData(
-        `
-          [out:json][timeout:25];
-          area["name"="Cabuyao"]["boundary"="administrative"]->.a;
-          relation["admin_level"="10"](area.a);
-          out center qt;
-        `,
-        (data) => {
-          // Store barangay data for search functionality
-          const barangayList: BarangayData[] = [];
-          
-          data.elements.forEach((el) => {
-            const lat = el.center?.lat;
-            const lon = el.center?.lon;
-            if (!lat || !lon) return;
-
-            const name = el.tags?.name || "Unnamed";
-            const risk = barangayRisk[name] || "Low";
-            
-            // Store barangay data for later search
-            barangayList.push({ name, lat, lon, risk });
-
-            L.marker([lat, lon], { icon: riskIcons[risk] }).addTo(map)
-              .bindPopup(`<b>Barangay:</b> ${name}<br><b>Risk:</b> ${risk}`)
-              .bindTooltip(name, {
-                permanent: true,
-                direction: "top",
-                offset: [0, -10],
-                className: "barangay-label",
-              });
-          });
-          
-          barangayDataRef.current = barangayList;
-        }
-      );
-    } else if (mapView === "choropleth") {
-      fetchData(
-        `
-          [out:json];
-          area["name"="Cabuyao"]["boundary"="administrative"]->.a;
-          relation["admin_level"="10"](area.a);
-          out geom;
-        `,
-        (data) => {
-          const layerGroup = L.layerGroup().addTo(map);
-          choroplethLayerRef.current = layerGroup;
-
-          data.elements.forEach((el) => {
-            if (!el.members) return;
-
-            const coords = el.members
-              .filter((m) => m.type === "way" && m.geometry)
-              .map((m) => m.geometry!.map((g) => [g.lat, g.lon] as [number, number]))
-              .flat();
-
-            const name = el.tags?.name || "Unnamed";
-            const value = barangayRiskValue[name] || 0;
-
-            const polygon = L.polygon(coords, {
-              color: getColor(value),
-              weight: 2,
-              fillOpacity: 0.6,
-            }).addTo(layerGroup);
-
-            polygon.bindTooltip(`<b>${name}</b><br>Risk: ${value}`, { permanent: false, direction: "top" });
-          });
-        }
-      );
-    }
   }, [mapView]);
+
+  // Handle Barangay Boundaries layer toggle
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const showBarangays = activeLayers.includes("Barangay Boundaries");
+
+    // Remove existing layer
+    if (barangayBoundariesLayerRef.current) {
+      barangayBoundariesLayerRef.current.remove();
+      barangayBoundariesLayerRef.current = null;
+    }
+
+    if (!showBarangays) return;
+
+    const layerGroup = L.layerGroup().addTo(map);
+    barangayBoundariesLayerRef.current = layerGroup;
+
+    const fetchBarangayBoundaries = async () => {
+      try {
+        const res = await fetch("https://overpass-api.de/api/interpreter", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `
+            [out:json][timeout:25];
+            area["name"="Cabuyao"]["boundary"="administrative"]->.a;
+            relation["admin_level"="10"](area.a);
+            out geom;
+          `,
+        });
+
+        if (!res.ok) throw new Error("Overpass failed");
+        const data: OverpassResponse = await res.json();
+
+        data.elements.forEach((el) => {
+          if (!el.members) return;
+
+          const outers: [number, number][][] = [];
+          const inners: [number, number][][] = [];
+
+          el.members.forEach((m) => {
+            if (m.type !== "way" || !m.geometry) return;
+
+            const ring = m.geometry.map(g => [g.lat, g.lon] as [number, number]);
+
+            if (m.role === "outer") {
+              outers.push(ring);
+            } else if (m.role === "inner") {
+              inners.push(ring);
+            }
+          });
+
+          if (!outers.length) return;
+
+          const name = el.tags?.name || "Unnamed Barangay";
+
+          const polygon = L.polygon(
+            outers.map(outer => [outer, ...inners]),
+            {
+              color: "#1e40af",
+              weight: 2,
+              fillColor: "#60a5fa",
+              fillOpacity: 0.45,
+            }
+          ).addTo(layerGroup);
+
+          polygon.bindTooltip(name, {
+            sticky: true,
+            direction: "center",
+            className: "barangay-boundary-tooltip",
+          });
+        });
+        console.log("[Barangay Boundaries] toggle ON");
+      } catch (err) {
+        console.error("Failed to load barangay boundaries:", err);
+      }
+    };
+
+    fetchBarangayBoundaries();
+  }, [activeLayers]);
 
   // Handle barangay search - highlight and zoom to searched barangay
   useEffect(() => {

@@ -12,8 +12,8 @@
   min-width: 0;
 }
 
-.main-topbar {
-  display: none;
+.main-layout .main-topbar {
+  display: none !important;
 }
 
 .topbar-left {
@@ -23,7 +23,7 @@
 }
 
 .topbar-logo-img {
-  height: 90px;
+  height: 100px;
   width: auto;
   object-fit: contain;
 }
@@ -202,9 +202,9 @@
 }
 
 @media (max-width: 768px) {
-  .main-topbar {
+  .main-layout .main-topbar {
     height: 60px;
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: space-between;
     padding: 0 12px;

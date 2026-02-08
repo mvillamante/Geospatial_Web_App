@@ -38,6 +38,7 @@ interface CitizenReport {
   officerNote?: string;
   rejectionReason?: string;
   lastUpdatedAt: string;
+  photo_url?: string | null;
 }
 
 // Report status
@@ -125,6 +126,8 @@ const ReportVerifyPage: React.FC = () => {
   const isAssignedToSomeone = !!selected && !!selected.assignedTo;
 
   const effectiveRisk = (r: CitizenReport) => r.verifiedRisk ?? r.citizenRisk;
+
+  const isVerifiedSet = !!selected?.verifiedRisk;
 
   const stats = useMemo(() => {
     const total = reports.length;
@@ -246,6 +249,7 @@ const ReportVerifyPage: React.FC = () => {
           lng: r.lng != null ? Number(r.lng) : 0,
           barangay: r.barangay ?? r.location ?? "",
           lastUpdatedAt: r.lastUpdatedAt ?? r.createdAt,
+          photo_url: r.photo_url ?? r.photoUrl ?? r.photo ?? null,
         }));
 
 
@@ -300,7 +304,6 @@ const ReportVerifyPage: React.FC = () => {
     updateReport(selected.id, {
       assignedOfficerId: Number(myOfficerId),
       assignedTo: officerName,
-      status: "in_progress",
     });
 
     try {
@@ -313,8 +316,7 @@ const ReportVerifyPage: React.FC = () => {
               ...r,
               ...updated,
               assignedOfficerId: Number(myOfficerId),
-              assignedTo: updated.assignedTo ?? officerName,
-              status: (updated.status ?? "in_progress") as ReportStatus,
+              assignedTo: updated.assignedTo ?? officerName
             }
             : r
         )
@@ -557,13 +559,13 @@ const ReportVerifyPage: React.FC = () => {
               </select>
             </div>
 
-              <div className="queue-filter">
-                <select value={scopeFilter} onChange={(e) => setScopeFilter(e.target.value as any)}>
-                  <option value="all">All Reports</option>
-                  <option value="mine">My Reports</option>
-                  <option value="unassigned">Unassigned</option>
-                </select>
-              </div>
+            <div className="queue-filter">
+              <select value={scopeFilter} onChange={(e) => setScopeFilter(e.target.value as any)}>
+                <option value="all">All Reports</option>
+                <option value="mine">My Reports</option>
+                <option value="unassigned">Unassigned</option>
+              </select>
+            </div>
           </div>
 
           <ul className="queue-list">
@@ -654,23 +656,27 @@ const ReportVerifyPage: React.FC = () => {
 
               {/* officer verified risk control */}
               <div className="detail-block">
-                <div className="detail-label-block">Verified Criticality (Actual Level)</div>
                 <div className="risk-control">
                   <ShieldCheck className="risk-control-icon" />
                   <select
                     value={selected.verifiedRisk ?? ""}
                     onChange={(e) => setVerifiedRisk(e.target.value as RiskLevel)}
                   >
-                    <option value="">Not yet verified</option>
+                    <option value="" disabled>
+                      Not yet verified
+                    </option>
                     <option value="low">Low</option>
                     <option value="moderate">Moderate</option>
                     <option value="high">High</option>
                     <option value="critical">Critical</option>
                   </select>
                 </div>
-                <div className="risk-hint">
-                  Sorting uses <b>Effective Risk</b> = verified (if set) otherwise citizen suggestion.
-                </div>
+
+                {!isVerifiedSet && (
+                  <div className="risk-required-hint">
+                    Please set <b>Verified Criticality</b> before taking action.
+                  </div>
+                )}
               </div>
 
               <div className="detail-block">
@@ -696,6 +702,19 @@ const ReportVerifyPage: React.FC = () => {
                 <div className="detail-label-block">Citizen Description</div>
                 <p className="detail-desc">{selected.description}</p>
               </div>
+
+              {selected.photo_url && (
+                <div className="detail-block">
+                  <div className="detail-label-block">Photo Evidence</div>
+                  <img
+                    className="detail-photo"
+                    src={selected.photo_url}
+                    alt={`Report #${selected.id} photo`}
+                    loading="lazy"
+                  />
+                </div>
+              )}
+
 
               {/* assignment + workflow */}
               <div className="detail-block">
@@ -762,7 +781,7 @@ const ReportVerifyPage: React.FC = () => {
                   <button
                     className="btn primary"
                     onClick={() => setStatus("in_progress")}
-                    disabled={!isAssignedToMe || selected.status === "in_progress" || selected.status === "resolved"}
+                    disabled={!isAssignedToMe || !isVerifiedSet || selected.status === "in_progress" || selected.status === "resolved"}
                   >
                     Mark In Progress
                   </button>
@@ -770,7 +789,7 @@ const ReportVerifyPage: React.FC = () => {
                   <button
                     className="btn warn"
                     onClick={() => setNeedsInfoMode(true)}
-                    disabled={!isAssignedToMe || selected.status === "resolved"}
+                    disabled={!isAssignedToMe || !isVerifiedSet || selected.status === "resolved"}
                   >
                     Needs Info
                   </button>
@@ -780,7 +799,7 @@ const ReportVerifyPage: React.FC = () => {
                   <button
                     className="btn success"
                     onClick={openResolveModal}
-                    disabled={!isAssignedToMe || selected.status === "resolved"}
+                    disabled={!isAssignedToMe || !isVerifiedSet || selected.status === "resolved"}
                   >
                     Mark Resolved
                   </button>
@@ -788,7 +807,7 @@ const ReportVerifyPage: React.FC = () => {
                   <button
                     className="btn danger"
                     onClick={openRejectModal}
-                    disabled={!isAssignedToMe || selected.status === "resolved"}
+                    disabled={!isAssignedToMe || !isVerifiedSet || selected.status === "resolved"}
                   >
                     Reject / Fake
                   </button>
@@ -846,7 +865,7 @@ const ReportVerifyPage: React.FC = () => {
                   </div>
                 )}
 
-                
+
               </div>
 
             </>

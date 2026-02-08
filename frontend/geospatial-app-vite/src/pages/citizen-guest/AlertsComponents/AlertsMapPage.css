@@ -697,48 +697,42 @@ li.critical::before {
 .location-mode {
   display: flex;
   gap: 10px;
-  align-items: center;
   width: 100%;
 }
 
 .location-mode button {
   flex: 1;
   height: 44px;
-  border-radius: 12px;
+  border-radius: 14px;
   border: 1px solid #e2e8f0;
-  background: #f1f5f9;
+  background: #f8fafc;
   color: #334155;
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease,
-    transform 0.08s ease;
 }
 
 .location-mode button:hover:not(:disabled) {
-  background: #e2e8f0;
+  background: #f1f5f9;
   border-color: #cbd5e1;
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.06);
   transform: translateY(-1px);
-  box-shadow: 0 10px 14px -10px rgba(0, 0, 0, 0.25);
 }
 
 .location-mode button.active {
-  background: #1e293b;
-  border-color: #1e293b;
-  color: #ffffff;
-  box-shadow: 0 10px 18px -12px rgba(30, 41, 59, 0.55);
+  background: rgba(244, 88, 37, 0.12); 
+  border-color: rgba(244, 88, 37, 0.55);
+  color: #0f172a;
 }
 
 .location-mode button:active:not(:disabled) {
-  transform: translateY(0px);
+  transform: translateY(0);
   box-shadow: none;
 }
 
 .location-mode button:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
 }
 
 .drawer-header {
@@ -781,7 +775,7 @@ li.critical::before {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 24px;
+  padding: 15px;
   flex: 1;
   overflow-y: auto;
 }

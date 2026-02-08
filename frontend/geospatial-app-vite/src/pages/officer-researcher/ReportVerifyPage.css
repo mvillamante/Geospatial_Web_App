@@ -73,11 +73,53 @@
   align-items: start;
 }
 
+.detail-photo{
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,0.10);
+  background: #f8fafc;
+}
+
 .detail-riskLine {
   display: flex;
   align-items: center;
   gap: 8px;
   justify-content: flex-end;
+}
+
+.risk-required-hint {
+  margin-top: 15px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  background: rgba(220, 38, 38, 0.08);
+  color: #991b1b;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.risk-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.risk-control select {
+  width: 100%;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+  font-weight: 800;
+  padding: 0 12px;
+  outline: none;
+}
+
+.risk-control select:focus {
+  border-color: rgba(37, 99, 235, 0.45);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
 }
 
 .detail-riskLabel {
@@ -288,7 +330,7 @@
   display: flex;
   gap: 10px;
   justify-content: flex-end;
-  margin-top: 10px;
+  margin-top: 14px;
 }
 
 @media (max-width: 520px) {
@@ -346,7 +388,7 @@
 
 .queue-filters {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fe;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 10px;
 }
 
@@ -731,14 +773,28 @@
 }
 
 .reportverify-page .btn {
+  appearance: none;
+  -webkit-appearance: none;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+  white-space: nowrap;
+
   height: 42px;
+  padding: 0 14px;
+
   border-radius: 999px;
   border: 1px solid var(--border);
   background: #fff;
-  font-weight: 700;
-  color: var(--text);
+
+  font-weight: 800;
+  font-size: 13px;
+  line-height: 1;
+
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
 .reportverify-page .btn:hover {
@@ -783,7 +839,7 @@
 }
 
 /* Assignment line */
-.assign-line {
+.reportverify-page .assign-line {
   margin-top: 10px;
   display: flex;
   justify-content: space-between;
@@ -793,13 +849,13 @@
   font-size: 13px;
 }
 
-.assign-label {
+.reportverify-page .assign-label {
   color: var(--muted-text);
   font-weight: 700;
 }
 
 /* Officer note */
-.note-area {
+.reportverify-page .note-area {
   width: 100%;
   min-height: 110px;
   resize: vertical;
@@ -813,7 +869,7 @@
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.note-area:focus {
+.reportverify-page .note-area:focus {
   border-color: rgba(37, 99, 235, 0.45);
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
 }

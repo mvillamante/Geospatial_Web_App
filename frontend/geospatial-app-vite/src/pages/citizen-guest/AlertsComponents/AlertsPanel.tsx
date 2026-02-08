@@ -83,11 +83,21 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
                 let lat = r.lat ?? r.latitude;
                 let lng = r.lng ?? r.longitude;
 
+                const extractBarangay = (locationDisplay?: string): string => {
+                    const s = String(locationDisplay ?? "").trim();
+                    if (!s) return "";
+
+                    const m = s.match(/\b(?:barangay|brgy\.?)\s+([^,|\-]+)\b/i);
+                    if (m?.[1]) return m[1].trim();
+
+                    return s.split(",")[0].trim();
+                };
+
                 return {
                     id: r.id,
                     incident_type: normalizeIncident(r.category_display ?? r.category),
                     verified_critical_level: r.verified_critical_level ?? "low",
-                    barangay: r.location_display?.split(",")[0].replace(/^Barangay\s+/i, "").trim() ?? "",
+                    barangay: extractBarangay(r.location_display),
                     created_at: r.created_at,
                     latitude: lat ?? 0,
                     longitude: lng ?? 0,

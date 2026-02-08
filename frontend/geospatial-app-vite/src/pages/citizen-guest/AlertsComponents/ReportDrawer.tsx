@@ -9,6 +9,7 @@ interface ReportDrawerProps {
 const PROFANITY_LIST = [
   "puta",
   "tanga",
+  "tangina",
   "gago",
   "ulol",
   "bobo",

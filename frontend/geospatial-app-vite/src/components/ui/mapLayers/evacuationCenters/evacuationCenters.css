@@ -74,12 +74,12 @@
   border: 2px solid #2563eb;
 }
 
-.evac-tooltip.covered_court {
+.evac-tooltip.court {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(209, 250, 229, 0.95));
   border: 2px solid #059669;
 }
 
-.evac-tooltip.multi_purpose_hall {
+.evac-tooltip.hall {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(237, 233, 254, 0.95));
   border: 2px solid #7c3aed;
 }

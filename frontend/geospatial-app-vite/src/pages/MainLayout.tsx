@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Bell } from "lucide-react";
 import { NavigationMenu } from "../components";
+import { getUserRoleAndDisplayName } from "../libr/auth";
 import "./MainLayout.css";
 
 type AppNotifType = "post" | "verified_incident" | "my_report" | "evac_center";
@@ -44,6 +45,9 @@ const MainLayout: React.FC = () => {
 
   const unreadCount = notifs.filter((n) => !n.read).length;
 
+  const { userRole, userRole2 } = getUserRoleAndDisplayName();
+  console.log("test", userRole)
+
   return (
     <div className="main-layout">
       {/* Navigation */}
@@ -70,6 +74,7 @@ const MainLayout: React.FC = () => {
             </button>
           </div>
         </div>
+        
 
         {/* Content */}
         <div className="main-content">

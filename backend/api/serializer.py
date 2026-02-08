@@ -348,6 +348,7 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
     verifiedRisk = serializers.CharField(source="verified_critical_level", required=False, allow_null=True)
     assignedTo = serializers.SerializerMethodField()
     lgu_post = serializers.SerializerMethodField()
+    photo_url = serializers.SerializerMethodField()
 
 
     class Meta:
@@ -369,9 +370,14 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
             "lat",
             "lng",
             "status",
-            "photo_path",
+            "photo_url",
             "lgu_post",
         ]
+    
+    def get_photo_url(self, obj):
+        if not obj.photo_path:
+            return None
+        return create_signed_url(obj.photo_path, expires_in_seconds=3600)
 
     def get_lgu_post(self, obj):
         if (obj.status or "").lower() != "resolved":

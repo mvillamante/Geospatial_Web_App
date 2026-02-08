@@ -86,7 +86,6 @@ class IncidentReportPatchView(generics.UpdateAPIView):
 
         if data.get("assignToMe") is True:
             report.assigned_officer = request.user
-            report.status = "in_progress"
             report.save(update_fields=["assigned_officer", "status"])
             return Response(IncidentReportQueueSerializer(report).data)
 
@@ -100,14 +99,18 @@ class IncidentReportPatchView(generics.UpdateAPIView):
             officer = get_object_or_404(CustomUser, id=officer_id, role__iexact="officer")
             report.assigned_officer = officer
 
-            if report.status in [None, "", "pending"]:
-                report.status = "in_progress"
-
             report.save(update_fields=["assigned_officer", "status"])
             return Response(IncidentReportQueueSerializer(report).data, status=status.HTTP_200_OK)
 
         if "status" in data and isinstance(data["status"], str):
             data["status"] = data["status"].lower()
+        
+        new_status = data.get("status")
+        if isinstance(new_status, str):
+            new_status = new_status.lower()
+
+        if new_status in ["in_progress", "resolved"] and not report.verified_critical_level:
+            raise ValidationError({"verifiedRisk": "Verified critical level is required before setting this status."})
 
         serializer = self.get_serializer(report, data=data, partial=True)
         serializer.is_valid(raise_exception=True)

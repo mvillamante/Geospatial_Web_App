@@ -1,6 +1,19 @@
 /* =========================
    Page Layout
 ========================= */
+.profile-page {
+  width: 100%;
+  height: 100vh;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f8fafc, #eef2f7);
+  padding: 3rem 10%;
+  overflow-y: auto;
+}
+
+.profile-page>* {
+  max-width: 1180px;
+  margin: 0 auto;
+}
 
 /* =========================
    Header Card
@@ -628,7 +641,7 @@
 @media (max-width: 768px) {
   .profile-page {
     padding: 16px 20px;
-    padding-bottom: 90px;
+    padding-bottom: calc(140px + env(safe-area-inset-bottom));
   }
 
   .profile-page>* {

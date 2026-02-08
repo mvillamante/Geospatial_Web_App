@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef  } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import LeafletMap from "../../components/ui/LeafletMap";
@@ -8,12 +8,13 @@ import { Search, MapPin, Phone, Navigation, Users } from 'lucide-react';
 import { GrLocationPin } from "react-icons/gr";
 import { MdOutlineModeEdit, MdAdd } from "react-icons/md";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
-import { RiDeleteBinFill } from "react-icons/ri";
+import { RiDeleteBinFill, RiBuilding4Fill } from "react-icons/ri";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
 import './EvacCenterPage.css';
 
 import AddEvacCenterModal from "../../components/ui/Modals/AddEvacCenterModal";
 import MapPickerModal from '../../components/ui/Modals/MapPickerModal';
+import { getEvacuationPopupHTML } from "../../components/ui/mapLayers/evacuationCenters";
 
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -197,6 +198,7 @@ function EvacCenterPage() {
   const [editingCenter, setEditingCenter] = useState<EvacuationCenter | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
+  const [selectedEvacuationCenter, setSelectedEvacuationCenter] = useState<EvacuationCenter | null>(null);
 
   //get user role
   const { userRole, displayName, profilePath } = getUserRoleAndDisplayName();
@@ -295,7 +297,7 @@ function EvacCenterPage() {
   };
 
   /* Evacuation Center Map */
-  const [activeLayers] = useState<string[]>([]);
+  const activeLayers = useMemo(() => ["Evacuation Centers"], []);
   const [isClosing, setIsClosing] = useState(false);
   const [closingId, setClosingId] = useState<number | null>(null);
 
@@ -343,7 +345,11 @@ function EvacCenterPage() {
           width="45%"
           mapView="interactive"
           mapType="basic"
-          activeLayers={["Evacuation Centers"]}
+          activeLayers={activeLayers}
+          showPopupOnMap={false}
+          onSelectEvacuationCenter={(center) => {
+            setSelectedEvacuationCenter(center);
+          }}
         />
 
         <div className="evac-side-content">
@@ -398,6 +404,62 @@ function EvacCenterPage() {
               )}
             </div>
           )}
+
+          {/* Selected Content */}
+          <div className="selected-evac-card">
+            {selectedEvacuationCenter ? (
+              <> {/* PLACEHOLDER MUNA :D */}
+                <div style={{
+                  padding: "16px",
+                  background: "#f9fafb",
+                  borderRadius: "8px",
+                  maxWidth: "320px",
+                  fontFamily: "Arial, sans-serif",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.1)"
+                }}>
+                  <h3 style={{ margin: 0, fontSize: "18px", color: "#1f2937" }}>
+                    {selectedEvacuationCenter.name}
+                  </h3>
+                  <p style={{ margin: "4px 0", fontSize: "14px", color: "#374151" }}>
+                    📍 {selectedEvacuationCenter.address}
+                  </p>
+                  <p style={{ margin: "4px 0", fontSize: "14px", color: "#374151" }}>
+                    🏘️ Barangay: {selectedEvacuationCenter.barangay}
+                  </p>
+                  <p style={{ margin: "4px 0", fontSize: "14px", color: "#374151" }}>
+                    👥 Capacity: {selectedEvacuationCenter.capacity} persons
+                  </p>
+                  {selectedEvacuationCenter.contact && (
+                    <p style={{ margin: "4px 0", fontSize: "14px", color: "#374151" }}>
+                      📞 Contact: {selectedEvacuationCenter.contact}
+                    </p>
+                  )}
+                  {selectedEvacuationCenter.facilities && selectedEvacuationCenter.facilities.length > 0 && (
+                    <div style={{ marginTop: "8px" }}>
+                      <p style={{ margin: "4px 0", fontWeight: 600 }}>🏗️ Facilities:</p>
+                      <ul style={{ paddingLeft: "20px", margin: 0 }}>
+                        {selectedEvacuationCenter.facilities.map((f, idx) => (
+                          <li key={idx} style={{ fontSize: "13px", color: "#4b5563", marginBottom: "2px" }}>
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+                
+                {/*<div
+                  className="selected-evac-card"
+                  dangerouslySetInnerHTML={{
+                    __html: getEvacuationPopupHTML(selectedEvacuationCenter, true),
+                  }}
+                />*/}
+              </>
+            ) : (
+              <p>Select an evacuation center on the map</p>
+            )}
+          </div>
+
         </div>
       </div>
 
@@ -461,7 +523,14 @@ function EvacCenterPage() {
                 }`}
               >
                 <h2 className="evac-card-name">
-                  {center.name}
+                  <span
+                    ref={(el) => {
+                      if (!el) return;
+                      el.title = el.scrollWidth > el.clientWidth ? center.name : "";
+                    }}
+                  >
+                    {center.name}
+                  </span>
                   {userRole === "Officer" && (
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <span
@@ -511,14 +580,6 @@ function EvacCenterPage() {
                       <div className="evac-info-row">
                         <Phone className="evac-info-icon" />
                         <span>{center.contact}</span>
-                      </div>
-                      <div className="evac-info-row">
-                        <Phone className="evac-info-icon" />
-                        <div className="evac-facilities">
-                          {center.facilities?.map((facility, index) => (
-                            <span key={index}>{facility}</span>
-                          ))}
-                        </div>
                       </div>
                     </>
                   )}

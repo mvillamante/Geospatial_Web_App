@@ -4,14 +4,14 @@
 .main-layout-map {
   flex: 1;
   background: var(--off-white-bg);
-  min-height: 100vh;
+  min-height: 80vh;
   position: relative;
 }
 
 .dashboard-container {
   position: relative;
   display: flex;
-  height: 100vh;
+  height: 93.4vh;
   gap: 20px;
   padding: 20px;
   max-width: 100%;

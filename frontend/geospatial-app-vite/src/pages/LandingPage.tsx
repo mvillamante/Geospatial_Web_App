@@ -7,6 +7,13 @@ import { getUserRoleAndDisplayName } from "../libr/auth";
 import AuthModal from "../components/ui/Modals/AuthModal";
 import LeafletMap from "../components/ui/LeafletMap";
 
+type LandingStats = {
+  activeHazards: number;
+  criticalAlerts: number;
+  reportsToday: number;
+  avgResponseTimeMinutes: number;
+};
+
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, refreshUser } = useAuth(); // Get current user from context
@@ -53,7 +60,26 @@ const LandingPage: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const fetchLandingStats = async () => {
+      try {
+        const res = await fetch(
+          `/api/public/landing-page/`
+        );
 
+        if (!res.ok) throw new Error("Failed to fetch landing stats");
+
+        const data = await res.json();
+        setStats(data);
+      } catch (err) {
+        console.error("Landing stats error:", err);
+      }
+    };
+
+    fetchLandingStats();
+  }, []);
+
+  // Show loading until auth is fetched
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
@@ -135,22 +161,30 @@ const LandingPage: React.FC = () => {
             <div className="stats-grid">
               <div className="stat-card">
                 <div className="stat-label">Active Hazards</div>
-                <div className="stat-value">23</div>
+                 <div className="stat-value">
+                  {stats ? stats.activeHazards : "—"}
+                </div>
               </div>
 
               <div className="stat-card red">
                 <div className="stat-label">Critical Alerts</div>
-                <div className="stat-value">7</div>
+                <div className="stat-value">
+                  {stats ? stats.criticalAlerts : "—"}
+                </div>
               </div>
 
               <div className="stat-card">
                 <div className="stat-label">Reports Today</div>
-                <div className="stat-value">142</div>
+                <div className="stat-value">
+                  {stats ? stats.reportsToday : "—"}
+                </div>
               </div>
 
               <div className="stat-card">
                 <div className="stat-label">Response Time</div>
-                <div className="stat-value">12m</div>
+                <div className="stat-value">
+                  {stats ? `${stats.avgResponseTimeMinutes}m` : "—"}
+                </div>
               </div>
             </div>
           </div>

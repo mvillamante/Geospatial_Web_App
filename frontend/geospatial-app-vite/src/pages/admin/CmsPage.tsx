@@ -69,6 +69,17 @@ const CmsPage: React.FC = () => {
   const [guideToPublish, setGuideToPublish] = useState<Guide | null>(null);
   const [contact, setContact] = useState<QuickContact | null>(null);
   const [showContactModal, setShowContactModal] = useState(false);
+  const formatDateTime = (iso: string) => {
+    const d = new Date(iso);
+
+    return {
+      date: d.toLocaleDateString(),
+      time: d.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+  };
 
   useEffect(() => {
     fetch("/api/cms/quick-contacts/", {
@@ -352,16 +363,45 @@ const createGuide = async (publishImmediately = false) => {
               <td>
                 <span className={`badge ${guide.status}`}>{guide.status}</span>
               </td>
-              <td>{new Date(guide.createdAt).toLocaleDateString()}</td>
-              <td>{new Date(guide.updatedAt).toLocaleDateString()}</td>
+              <td>
+                {(() => {
+                  const { date, time } = formatDateTime(guide.createdAt);
+                  return (
+                    <>
+                      <div>{date}</div>
+                      <div className="sub-time">{time}</div>
+                    </>
+                  );
+                })()}
+              </td>
+
+              <td>
+                {(() => {
+                  const { date, time } = formatDateTime(guide.updatedAt);
+                  return (
+                    <>
+                      <div>{date}</div>
+                      <div className="sub-time">{time}</div>
+                    </>
+                  );
+                })()}
+              </td>
               <td>
                 <div className="table-actions">
                   {!viewArchived ? (
                     <>
-                      <button className="icon-btn" onClick={() => { setEditingGuide({ ...guide }); setShowEditModal(true); }}>
+                      <button
+                        className="icon-btn"
+                        disabled={guide.status === "Published"}
+                        title={guide.status === "Published" ? "Unpublish to edit" : "Edit"}
+                        onClick={() => {
+                          if (guide.status === "Published") return;
+                          setEditingGuide({ ...guide });
+                          setShowEditModal(true);
+                        }}
+                      >
                         <Edit size={16} />
                       </button>
-
                       <button
                         className="icon-btn"
                         onClick={() => {
@@ -593,8 +633,10 @@ const createGuide = async (publishImmediately = false) => {
               <h2>Delete Guide</h2>
 
               <p>
-                What would you like to do with
-                <strong> "{guideToDelete.postTitle}"</strong>?
+                {viewArchived
+                  ? "This guide is already archived. You may permanently delete it."
+                  : "What would you like to do with "}
+                <strong>"{guideToDelete.postTitle}"</strong>?
               </p>
 
               <div className="modal-actions">
@@ -608,6 +650,7 @@ const createGuide = async (publishImmediately = false) => {
                   Cancel
                 </button>
 
+              {!viewArchived && (
                 <button
                   className="btn secondary"
                   onClick={() => {
@@ -618,6 +661,7 @@ const createGuide = async (publishImmediately = false) => {
                 >
                   Archive
                 </button>
+              )}
 
                 <button
                   className="btn danger"
@@ -687,109 +731,116 @@ const createGuide = async (publishImmediately = false) => {
           <div className="modal-overlay">
             <div className="modal large">
               <h2>Edit Quick Contact</h2>
+                <div className="contact-section">
+                  <h3>Basic Information</h3>
+                    <label>Name</label>
+                    <input
+                      value={contact.name}
+                      onChange={e => setContact({ ...contact, name: e.target.value })}
+                    />
 
-              <label>Name</label>
-              <input
-                value={contact.name}
-                onChange={e => setContact({ ...contact, name: e.target.value })}
-              />
+                    <label>Description</label>
+                    <input
+                      value={contact.description}
+                      onChange={e => setContact({ ...contact, description: e.target.value })}
+                    />
 
-              <label>Description</label>
-              <input
-                value={contact.description}
-                onChange={e => setContact({ ...contact, description: e.target.value })}
-              />
+                    <label>Email</label>
+                    <input
+                      value={contact.email || ""}
+                      onChange={e => setContact({ ...contact, email: e.target.value })}
+                    />
+                </div>
+                <div className="contact-section">
+                  <h3>Online Links</h3>
+                    <label>Facebook URL</label>
+                    <input
+                      value={contact.facebook_url || ""}
+                      onChange={e => setContact({ ...contact, facebook_url: e.target.value })}
+                    />
 
-              <label>Email</label>
-              <input
-                value={contact.email || ""}
-                onChange={e => setContact({ ...contact, email: e.target.value })}
-              />
+                    <label>Website URL</label>
+                    <input
+                      value={contact.website_url || ""}
+                      onChange={e => setContact({ ...contact, website_url: e.target.value })}
+                    />
 
-              <label>Facebook URL</label>
-              <input
-                value={contact.facebook_url || ""}
-                onChange={e => setContact({ ...contact, facebook_url: e.target.value })}
-              />
+                    <label>Map URL</label>
+                    <input
+                      value={contact.map_url || ""}
+                      onChange={e => setContact({ ...contact, map_url: e.target.value })}
+                    />
+                </div>
+                <div className="contact-section">
+                  <h3>Location and Time</h3>
+                    <label>Office Hours</label>
+                    <input
+                      value={contact.office_hours || ""}
+                      onChange={e => setContact({ ...contact, office_hours: e.target.value })}
+                    />
 
-              <label>Website URL</label>
-              <input
-                value={contact.website_url || ""}
-                onChange={e => setContact({ ...contact, website_url: e.target.value })}
-              />
-
-              <label>Office Hours</label>
-              <input
-                value={contact.office_hours || ""}
-                onChange={e => setContact({ ...contact, office_hours: e.target.value })}
-              />
-
-              <label>Address</label>
-              <input
-                value={contact.address || ""}
-                onChange={e => setContact({ ...contact, address: e.target.value })}
-              />
-
-              <label>Map URL</label>
-              <input
-                value={contact.map_url || ""}
-                onChange={e => setContact({ ...contact, map_url: e.target.value })}
-              />
-
+                    <label>Address</label>
+                    <input
+                      value={contact.address || ""}
+                      onChange={e => setContact({ ...contact, address: e.target.value })}
+                    />
+                </div>
               <hr />
               <h3>Contact Numbers</h3>
 
               {contact.phones.map((p, idx) => (
-                <div key={p.id || idx} className="phone-row">
-                  <select
-                    value={p.type}
-                    onChange={e => {
-                      const updated = [...contact.phones];
-                      updated[idx].type = e.target.value as "hotline" | "landline" | "mobile";
-                      setContact({ ...contact, phones: updated });
-                    }}
-                  >
-                    <option value="hotline">Hotline</option>
-                    <option value="landline">Landline</option>
-                    <option value="mobile">Mobile</option>
-                  </select>
+                <div className="phone-card">
+                  <div key={p.id || idx} className="phone-row-top">
+                    <select
+                      value={p.type}
+                      onChange={e => {
+                        const updated = [...contact.phones];
+                        updated[idx].type = e.target.value as "hotline" | "landline" | "mobile";
+                        setContact({ ...contact, phones: updated });
+                      }}
+                    >
+                      <option value="hotline">Hotline</option>
+                      <option value="landline">Landline</option>
+                      <option value="mobile">Mobile</option>
+                    </select>
 
-                  <input
-                    placeholder="Label"
-                    value={p.label}
-                    onChange={e => {
-                      const updated = [...contact.phones];
-                      updated[idx].label = e.target.value;
-                      setContact({ ...contact, phones: updated });
-                    }}
-                  />
+                    <input
+                      placeholder="Label"
+                      value={p.label}
+                      onChange={e => {
+                        const updated = [...contact.phones];
+                        updated[idx].label = e.target.value;
+                        setContact({ ...contact, phones: updated });
+                      }}
+                    />
 
-                  <input
-                    placeholder="Number"
-                    value={p.number}
-                    onChange={e => {
-                      const updated = [...contact.phones];
-                      updated[idx].number = e.target.value;
-                      setContact({ ...contact, phones: updated });
-                    }}
-                  />
+                    <input
+                      placeholder="Number"
+                      value={p.number}
+                      onChange={e => {
+                        const updated = [...contact.phones];
+                        updated[idx].number = e.target.value;
+                        setContact({ ...contact, phones: updated });
+                      }}
+                    />
 
-                  <button
-                    className="icon-btn danger"
-                    onClick={() => {
-                      setContact({
-                        ...contact,
-                        phones: contact.phones.filter((_, i) => i !== idx),
-                      });
-                    }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                    <button
+                      className="icon-btn danger"
+                      onClick={() => {
+                        setContact({
+                          ...contact,
+                          phones: contact.phones.filter((_, i) => i !== idx),
+                        });
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
               ))}
 
               <button
-                className="btn secondary"
+                className="btn secondary add-phone-btn"
                 onClick={() =>
                   setContact({
                     ...contact,
@@ -808,7 +859,6 @@ const createGuide = async (publishImmediately = false) => {
                 <button
                   className="btn primary"
                   onClick={async () => {
-                    // Send the whole contact including phones to the backend
                     const res = await fetch(`/api/cms/quick-contacts/${contact.id}/`, {
                       method: "PUT",
                       headers: {

@@ -7,13 +7,35 @@
 }
 
 .toolbar button {
-  padding: 4px 8px;
-  font-weight: bold;
+  padding: 6px 10px;
   border: 1px solid #ccc;
-  background: var(--white-bg);
+  background: #fff;
   cursor: pointer;
 }
 
+.toolbar button.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
 .toolbar button:hover {
-  background: #eee;
+  background: #f1f5f9;
+}
+
+
+.editor-bold {
+  font-weight: bold;
+}
+
+.editor-italic {
+  font-style: italic;
+}
+
+.editor-underline {
+  text-decoration: underline;
+}
+
+.editor-strikethrough {
+  text-decoration: line-through;
 }

@@ -4,7 +4,7 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $getRoot, EditorState, TextNode } from 'lexical';
+import { $getRoot, EditorState, TextNode, ParagraphNode } from 'lexical';
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
 
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
@@ -12,8 +12,8 @@ import { ListNode, ListItemNode } from '@lexical/list';
 import { CodeNode } from '@lexical/code';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 
-
 import ToolbarPlugin from './ToolbarPlugin';
+import IndentPlugin from './IndentPlugin';
 
 interface Props {
   initialHtml?: string;
@@ -36,12 +36,34 @@ function HtmlChangePlugin({ onChange }: { onChange?: (html: string) => void }) {
   );
 }
 
-const RichTextEditor: React.FC<Props> = ({ initialHtml = '', onChange }) => {
+const RichTextEditor: React.FC<Props> = ({
+  initialHtml = '',
+  onChange,
+}) => {
   const initialConfig = {
     namespace: 'CMS_Editor',
-    theme: {},
+
+    theme: {
+      text: {
+        bold: 'editor-bold',
+        italic: 'editor-italic',
+        underline: 'editor-underline',
+        strikethrough: 'editor-strikethrough',
+      },
+    },
+
     onError: console.error,
-    nodes: [TextNode, HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode],
+
+    nodes: [
+      ParagraphNode,
+      TextNode,
+      HeadingNode,
+      QuoteNode,
+      ListNode,
+      ListItemNode,
+      CodeNode,
+    ],
+
     editorState: (editor: any) => {
       if (!initialHtml) return;
 
@@ -58,14 +80,18 @@ const RichTextEditor: React.FC<Props> = ({ initialHtml = '', onChange }) => {
     },
   };
 
-
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <ToolbarPlugin />
       <ListPlugin />
+      <IndentPlugin />
       <RichTextPlugin
-        contentEditable={<ContentEditable className="editor-input" />}
+        contentEditable={
+          <ContentEditable className="editor-input" />
+        }
+        placeholder={null}
       />
+
       <HtmlChangePlugin onChange={onChange} />
     </LexicalComposer>
   );

@@ -12,30 +12,53 @@ export default function ReportModal({ report, onClose }: ReportModalProps) {
   const [isSending, setIsSending] = useState(false);
 
   const handleSendReply = async () => {
-    if (!replyMessage.trim() && !replyImage) return;
+    // Trim message
+    const trimmedMessage = replyMessage.trim();
+
+    // If nothing to send, exit early
+    if (!trimmedMessage && !replyImage) return;
 
     setIsSending(true);
     try {
       const token = localStorage.getItem("access_token");
 
       const formData = new FormData();
-      if (replyMessage.trim()) formData.append("reply_message", replyMessage);
-      if (replyImage) formData.append("reply_image", replyImage);
-      console.log("HELT ME", formData)
 
-      const res = await fetch(`http://localhost:8000/api/reports/${report.id}/reply/`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      if (trimmedMessage) formData.append("reply_message", trimmedMessage);
 
-      if (!res.ok) throw new Error("Failed to send reply");
+      // Only append if file exists and has size > 0
+      if (replyImage && replyImage.size > 0) {
+        formData.append("reply_image", replyImage);
+      }
+
+      // If both are empty after filtering, do nothing
+      if (!formData.has("reply_message") && !formData.has("reply_image")) {
+        alert("Cannot send empty reply.");
+        setIsSending(false);
+        return;
+      }
+
+      console.log("Form Data: ", formData)
+
+      const res = await fetch(
+        `http://localhost:8000/api/reports/${report.id}/reply/`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      console.log("Fetch response:", res);
+
+      if (!res.ok) throw new Error("Failed to send reply.");
 
       const data = await res.json();
       setReplyMessage("");
       setReplyImage(null);
+
       report.reply_message = data.reply_message;
       report.reply_image_url = data.reply_image_url;
     } catch (err) {
@@ -45,6 +68,7 @@ export default function ReportModal({ report, onClose }: ReportModalProps) {
       setIsSending(false);
     }
   };
+
 
   const displayCategory =
     report.category === "others" && report.other_category?.trim()

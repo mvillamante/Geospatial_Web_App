@@ -91,14 +91,14 @@
 }
 
 /* Quick Contacts */
-.contact-section {
+.cms-page .contact-section {
   margin-bottom: 20px;
   padding: 14px;
   border-radius: 10px;
   background: #f9fafb;
 }
 
-.contact-section h3 {
+.cms-page .contact-section h3 {
   margin-bottom: 12px;
   font-size: 15px;
   font-weight: 600;

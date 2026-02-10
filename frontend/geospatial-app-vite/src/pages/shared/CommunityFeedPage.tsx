@@ -9,6 +9,7 @@ import {
     Image as ImageIcon,
     MapPin,
 } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import "./CommunityFeedPage.css";
 
 type PostType = "advisory" | "announcement" | "guide";
@@ -27,19 +28,19 @@ type FeedPost = {
 };
 
 type QuickContact = {
-  name: string;
-  description: string;
-  email?: string;
-  facebook_url?: string;
-  website_url?: string;
-  office_hours?: string;
-  address?: string;
-  map_url?: string;
-  phones: {
-    type: "hotline" | "landline" | "mobile";
-    label: string;
-    number: string;
-  }[];
+    name: string;
+    description: string;
+    email?: string;
+    facebook_url?: string;
+    website_url?: string;
+    office_hours?: string;
+    address?: string;
+    map_url?: string;
+    phones: {
+        type: "hotline" | "landline" | "mobile";
+        label: string;
+        number: string;
+    }[];
 };
 
 
@@ -76,6 +77,7 @@ function initials(name: string) {
     return (first + last).toUpperCase();
 }
 
+
 export default function CommunityFeedPage() {
     const [posts, setPosts] = useState<FeedPost[]>([]);
     const [loading, setLoading] = useState(true);
@@ -85,15 +87,25 @@ export default function CommunityFeedPage() {
     const [filter, setFilter] = useState<"all" | PostType>("all");
     const [selected, setSelected] = useState<FeedPost | null>(null);
     const [contact, setContact] = useState<QuickContact | null>(null);
+    const location = useLocation() as any;
+
+    useEffect(() => {
+        const openId = location.state?.openPostId;
+        if (!openId || posts.length === 0) return;
+
+        const found = posts.find(p => p.id === openId)
+        if (found) setSelected(found);
+
+    }, [location.state, posts])
 
     useEffect(() => {
         fetch("/api/cms/quick-contacts/", {
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
         })
-        .then(res => res.json())
-        .then(setContact);
+            .then(res => res.json())
+            .then(setContact);
     }, []);
 
 
@@ -194,54 +206,54 @@ export default function CommunityFeedPage() {
                         <div className="rail-title">Quick Contacts</div>
 
                         {contact && (
-                        <div className="contact-card">
-                            <div className="contact-top">
-                            <div className="contact-name">{contact.name}</div>
-                            <div className="contact-sub">{contact.description}</div>
-                            </div>
-
-                            <div className="contact-actions">
-                            {contact.facebook_url && (
-                                <a className="contact-btn" href={contact.facebook_url} target="_blank" rel="noreferrer">
-                                Facebook Page
-                                </a>
-                            )}
-                            {contact.email && (
-                                <a className="contact-btn" href={`mailto:${contact.email}`}>
-                                Email
-                                </a>
-                            )}
-                            </div>
-
-                            <div className="contact-meta">
-                            {contact.phones.map((p, i) => (
-                                <div className="contact-line" key={i}>
-                                <span className="k">{p.label}:</span>
-                                <span className="v">{p.number}</span>
+                            <div className="contact-card">
+                                <div className="contact-top">
+                                    <div className="contact-name">{contact.name}</div>
+                                    <div className="contact-sub">{contact.description}</div>
                                 </div>
-                            ))}
 
-                            {contact.office_hours && (
-                                <div className="contact-line">
-                                <span className="k">Office Hours:</span>
-                                <span className="v">{contact.office_hours}</span>
+                                <div className="contact-actions">
+                                    {contact.facebook_url && (
+                                        <a className="contact-btn" href={contact.facebook_url} target="_blank" rel="noreferrer">
+                                            Facebook Page
+                                        </a>
+                                    )}
+                                    {contact.email && (
+                                        <a className="contact-btn" href={`mailto:${contact.email}`}>
+                                            Email
+                                        </a>
+                                    )}
                                 </div>
-                            )}
 
-                            {contact.address && (
-                                <div className="contact-line">
-                                <span className="k">Address:</span>
-                                <span className="v">{contact.address}</span>
+                                <div className="contact-meta">
+                                    {contact.phones.map((p, i) => (
+                                        <div className="contact-line" key={i}>
+                                            <span className="k">{p.label}:</span>
+                                            <span className="v">{p.number}</span>
+                                        </div>
+                                    ))}
+
+                                    {contact.office_hours && (
+                                        <div className="contact-line">
+                                            <span className="k">Office Hours:</span>
+                                            <span className="v">{contact.office_hours}</span>
+                                        </div>
+                                    )}
+
+                                    {contact.address && (
+                                        <div className="contact-line">
+                                            <span className="k">Address:</span>
+                                            <span className="v">{contact.address}</span>
+                                        </div>
+                                    )}
+
+                                    {contact.map_url && (
+                                        <a className="contact-link" href={contact.map_url} target="_blank" rel="noreferrer">
+                                            View on map →
+                                        </a>
+                                    )}
                                 </div>
-                            )}
-
-                            {contact.map_url && (
-                                <a className="contact-link" href={contact.map_url} target="_blank" rel="noreferrer">
-                                View on map →
-                                </a>
-                            )}
                             </div>
-                        </div>
                         )}
 
                     </div>

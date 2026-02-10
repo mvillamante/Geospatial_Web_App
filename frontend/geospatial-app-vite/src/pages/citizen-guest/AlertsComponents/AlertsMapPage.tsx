@@ -13,6 +13,8 @@ interface SelectedReportWithTimestamp {
 
 const AlertsMapPage: React.FC = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [panelCollapsed, setPanelCollapsed] = useState(true);
+
   const [searchedBarangay, setSearchedBarangay] = useState("");
   const [searchedSeverity, setSearchedSeverity] = useState<string | null>(null);
   const [selectedReportData, setSelectedReportData] = useState<SelectedReportWithTimestamp | null>(null);
@@ -35,21 +37,47 @@ const AlertsMapPage: React.FC = () => {
   return (
     <div className="main-layout-map">
       <div className="dashboard-container">
-        {/* Alerts Panel */}
-        <AlertsPanel 
-          onReport={() => setIsDrawerOpen(true)} 
-          onBarangaySearch={handleBarangaySearch}
-          onSelectReport={handleSelectReport}
-        />
 
         <div className="alerts-map">
-          <LeafletMap 
-            height="100vh" 
-            searchedBarangay={searchedBarangay} 
+          <LeafletMap
+            height="100vh"
+            searchedBarangay={searchedBarangay}
             searchedSeverity={searchedSeverity}
             selectedReport={selectedReportData?.report || null}
             reportClickTimestamp={selectedReportData?.clickedAt || null}
             activeLayers={["Verified Reports"]}
+          />
+        </div>
+
+        <div
+          className={`alerts-panel ${panelCollapsed ? "collapsed" : ""}`}
+          onClick={() => panelCollapsed && setPanelCollapsed(false)}
+        >
+          <button
+            type="button"
+            className="sheet-handle-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              setPanelCollapsed((v) => !v);
+            }}
+            aria-expanded={!panelCollapsed}
+            aria-label={panelCollapsed ? "Expand reports panel" : "Collapse reports panel"}
+          >
+            <div className="sheet-handle" />
+          </button>
+
+
+          {/* Alerts Panel */}
+          <AlertsPanel
+            onReport={() => setIsDrawerOpen(true)}
+            onBarangaySearch={(b, s) => {
+              setPanelCollapsed(false);
+              handleBarangaySearch(b, s);
+            }}
+            onSelectReport={(r) => {
+              setPanelCollapsed(false);
+              handleSelectReport(r);
+            }}
           />
         </div>
 
@@ -70,7 +98,8 @@ const AlertsMapPage: React.FC = () => {
           onClose={() => setIsDrawerOpen(false)}
         />
       </div>
-    </div>
+    </div >
+
   );
 };
 

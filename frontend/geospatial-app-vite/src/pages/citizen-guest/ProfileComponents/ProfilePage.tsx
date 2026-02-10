@@ -79,7 +79,7 @@ const ProfilePage: React.FC = () => {
 
   const logout = () => {
     localStorage.removeItem("access_token");
-    navigate("/login");
+    navigate("/");
   }
 
   const categoryTitleMap: Record<string, string> = {

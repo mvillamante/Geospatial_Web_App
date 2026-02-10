@@ -5,7 +5,7 @@ import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { getUserRoleAndDisplayName, clearUserSession } from "../../libr/auth";
 
 import type { IconType } from "react-icons";
-import { FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt, FaMapMarked } from "react-icons/fa";
+import { FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt, FaMapMarked, FaBell } from "react-icons/fa";
 import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdOutlineMonitorHeart, MdKeyboardArrowUp } from "react-icons/md";
 import { PiUsersBold } from "react-icons/pi";
 import { TbFileReport } from "react-icons/tb";
@@ -22,12 +22,30 @@ const NavigationMenu: React.FC = () => {
   const location = useLocation();
   const { user } = useAuth();
 
+  const [notificationCount, setNotificationCount] = useState(0);
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
 
   const { userRole, userRole2, displayName, profilePath } = getUserRoleAndDisplayName();
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/api/notifications/unread-count/", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}`},
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        setNotificationCount(data.unread_count ?? 0);
+      } catch {
+
+      }
+    };
+    fetchUnreadCount();
+  }, []);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -72,6 +90,20 @@ const NavigationMenu: React.FC = () => {
         </NavLink>
 
         <NavLink
+          to="/main/citizen/notifications"
+          className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
+        >
+          <span className="pwa-icon-wrap">
+            <FaBell size={22} />
+            {notificationCount > 0 && (
+              <span className="pwa-badge">{notificationCount > 99 ? "99+" : notificationCount}</span>
+            )}
+          </span>
+          <span>Alerts</span>
+        </NavLink>
+
+
+        <NavLink
           to="/main/citizen/evac-center"
           className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
         >
@@ -107,6 +139,7 @@ const NavigationMenu: React.FC = () => {
     Citizen: [
       { label: "Community Feed", path: "citizen/community-feed", icon: FaBullhorn },
       { label: "Reports & Map", path: "citizen/alerts-map", icon: FaMapMarkedAlt },
+      { label: "Notifications", path: "citizen/notifications", icon: FaBell },
       { label: "Evacuation Center", path: "citizen/evac-center", icon: MdPlace },
     ],
     Guest: [
@@ -142,7 +175,13 @@ const NavigationMenu: React.FC = () => {
         {navItems.map(({ label, path, icon: Icon }, index) => (
           <div className={`nav-item ${effectiveRole === "Admin" ? "admin-layout" : ""}`} key={index}>
             <NavLink to={`/main/${path}`} className={({ isActive }) => (isActive ? "active" : "")}>
-              {Icon && <Icon className="nav-icon" />}
+              <span className="nav-icon-wrap">
+                {Icon && <Icon className="nav-icon" />}
+                {label === "Notifications" && notificationCount > 0 && (
+                  <span className="nav-badge">{notificationCount > 99 ? "99+" : notificationCount}</span>
+                )}
+              </span>
+
               <span className="nav-label">{label}</span>
             </NavLink>
           </div>

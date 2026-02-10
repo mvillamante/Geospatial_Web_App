@@ -4,7 +4,7 @@ import {
   MainLayout, LandingPage,
   EvacCenterPage, CommunityFeedPage,
   CmsPage, DashboardPage, ReportsMgmtPage, SysMonitoringPage, UserMgmtPage,
-  AlertsMapPage, ProfilePage, 
+  AlertsMapPage, ProfilePage, NotificationPage,
   DashboardMapPage, ReportVerifyPage,
   PwaAuthPage
  } from "./pages";
@@ -111,6 +111,7 @@ const App: React.FC = () => {
           <Route path="citizen/evac-center" element={<EvacCenterPage />} />
           <Route path="citizen/community-feed" element={<CommunityFeedPage />} />
           <Route path="citizen/profile" element={<ProfilePage />} />
+          <Route path="citizen/notifications" element={<NotificationPage />} />
 
           <Route path="citizen-pwa/login" element={<PwaAuthPage />} />
 

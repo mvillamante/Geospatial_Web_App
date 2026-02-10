@@ -15,6 +15,7 @@ export { default as UserMgmtPage } from "./admin/UserMgmtPage";
 // citizen and guest
 export { default as AlertsMapPage } from "./citizen-guest/AlertsComponents/AlertsMapPage";
 export { default as ProfilePage } from "./citizen-guest/ProfileComponents/ProfilePage";
+export { default as NotificationPage } from "./citizen-guest/NotificationPage";
 export { default as PwaLandingPage } from "./citizen-pwa/LandingPage";
 export { default as PwaAuthPage } from "./citizen-pwa/AuthPage";
 

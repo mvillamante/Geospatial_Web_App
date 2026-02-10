@@ -53,27 +53,7 @@ const MainLayout: React.FC = () => {
       <NavigationMenu />
 
       {/* App column */}
-      <div className="main-layout-app">
-        {/* Topbar */}
-        <div className="main-topbar">
-          <div className="topbar-left">
-            <img src="/hazspot-logo(2).png" alt="HazSpot" className="topbar-logo-img" />
-          </div>
-          <div className="main-topbar-spacer" />
-
-          <div className="topbar-right">
-            <button
-              className="notif-btn"
-              onClick={() => setNotifOpen((v) => !v)}
-              aria-label="Notifications"
-              type="button"
-            >
-              <Bell size={18} />
-              {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
-            </button>
-          </div>
-        </div>
-        
+      <div className="main-layout-app"> 
 
         {/* Content */}
         <div className="main-content">

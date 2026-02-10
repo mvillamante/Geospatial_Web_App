@@ -355,7 +355,8 @@
     background: var(--off-white-bg);
     min-height: 100vh;
     padding: 2rem;
-    padding-bottom: 90px;
+    padding-bottom: calc(140px + env(safe-area-inset-bottom));
+  }
   }
 
   .evac-search-wrapper {

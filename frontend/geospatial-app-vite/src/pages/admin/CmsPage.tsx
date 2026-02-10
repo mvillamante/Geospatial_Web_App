@@ -81,6 +81,11 @@ const CmsPage: React.FC = () => {
     };
   };
 
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [deletedAttachments, setDeletedAttachments] = useState<number[]>([]);
+  const [originalAttachments, setOriginalAttachments] = useState<Attachment[]>([]);
+  const [tempEditImages, setTempEditImages] = useState<Attachment[]>([]);
+
   useEffect(() => {
     fetch("/api/cms/quick-contacts/", {
       headers: {
@@ -250,6 +255,14 @@ const createGuide = async (publishImmediately = false) => {
 
     const updated = await res.json();
 
+    for (const attachmentId of deletedAttachments) {
+      await fetch(`/api/cms/attachments/${attachmentId}/`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
+    }
     setGuides(prev =>
       prev.map(g =>
         g.postId === updated.id
@@ -260,11 +273,12 @@ const createGuide = async (publishImmediately = false) => {
               postBody: updated.post_body,
               updatedAt: updated.updated_at,
               publishedAt: updated.published_at,
+              attachments: g.attachments?.filter(a => !deletedAttachments.includes(a.id)),
             }
           : g
       )
     );
-
+    setDeletedAttachments([]);
     setEditingGuide(null);
     setShowEditModal(false);
   };
@@ -332,6 +346,7 @@ const createGuide = async (publishImmediately = false) => {
             className="btn primary"
             onClick={() => {
               setNewGuide({ postTitle: "", postType: "advisory", postBody: "" });
+              setImagePreview(null);
               setShowCreateModal(true);
             }}
           >
@@ -396,8 +411,11 @@ const createGuide = async (publishImmediately = false) => {
                         title={guide.status === "Published" ? "Unpublish to edit" : "Edit"}
                         onClick={() => {
                           if (guide.status === "Published") return;
-                          setEditingGuide({ ...guide });
-                          setShowEditModal(true);
+                              setEditingGuide({ ...guide });
+                              setOriginalAttachments(guide.attachments || []);
+                              setTempEditImages([]);
+                              setDeletedAttachments([]);
+                              setShowEditModal(true);
                         }}
                       >
                         <Edit size={16} />
@@ -427,8 +445,8 @@ const createGuide = async (publishImmediately = false) => {
                   >
                     <Trash2 size={16} />
                   </button>
-
                 </div>
+
               </td>
 
             </tr>
@@ -504,17 +522,37 @@ const createGuide = async (publishImmediately = false) => {
               <input
                 type="file"
                 accept="image/*"
-                onChange={async e => {
-                  if (!e.target.files?.[0]) return;
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
 
-                  // temporarily store the file in state for later upload
-                  setNewGuide(prev => ({ ...prev, imageFile: e.target.files![0] }));
+                  setNewGuide(prev => ({ ...prev, imageFile: file }));
+                  setImagePreview(URL.createObjectURL(file));
                 }}
               />
+              {imagePreview && (
+                <div className="image-preview-wrapper">
+                  <img src={imagePreview} alt="Preview" />
+
+                  <button
+                    className="remove-image-btn"
+                    onClick={() => {
+                      setNewGuide(prev => ({ ...prev, imageFile: undefined }));
+                      URL.revokeObjectURL(imagePreview);
+                      setImagePreview(null);
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
               <div className="modal-actions">
                 <button
                   className="btn secondary"
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setImagePreview(null);
+                  }}
                 >
                   Cancel
                 </button>
@@ -579,43 +617,49 @@ const createGuide = async (publishImmediately = false) => {
                   const uploaded = await uploadImage(editingGuide.postId, e.target.files[0]);
                   if (!uploaded) return;
 
-                  setEditingGuide(prev =>
-                    prev
-                      ? { ...prev, attachments: [...(prev.attachments || []), uploaded] }
-                      : prev
-                  );
-
-                  setGuides(prev =>
-                    prev.map(g =>
-                      g.postId === editingGuide.postId
-                        ? { ...g, attachments: [...(g.attachments || []), uploaded] }
-                        : g
-                    )
-                  );
+                  setTempEditImages(prev => [...prev, uploaded]);
                 }}
               />
 
-              {editingGuide.attachments && editingGuide.attachments.length > 0 && (
+              {(editingGuide.attachments?.length || tempEditImages.length) > 0 && (
                 <div className="attachment-preview">
-                  {editingGuide.attachments.map(img => (
-                    <img
-                      key={img.id}
-                      src={img.file_url}
-                      alt="attachment"
-                      style={{
-                        width: "120px",
-                        borderRadius: "8px",
-                        marginRight: "8px",
-                        marginTop: "8px",
-                      }}
-                    />
+                  {[...(editingGuide.attachments || []), ...tempEditImages].map(img => (
+                    <div key={img.id} className="attachment-wrapper">
+                      <img src={img.file_url} alt="attachment" style={{ width: "120px", borderRadius: "8px", marginRight: "8px", marginTop: "8px" }} />
+
+                      <button
+                        className="remove-image-btn"
+                        onClick={() => {
+                          // Remove from tempEditImages first
+                          setTempEditImages(prev => prev.filter(a => a.id !== img.id));
+
+                          // If it's from existing attachments, mark for deletion
+                          if (editingGuide.attachments?.some(a => a.id === img.id)) {
+                            setDeletedAttachments(prev => [...prev, img.id]);
+                            setEditingGuide(prev =>
+                              prev
+                                ? { ...prev, attachments: prev.attachments?.filter(a => a.id !== img.id) }
+                                : prev
+                            );
+                          }
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}
 
-
               <div className="modal-actions">
-                <button className="btn secondary" onClick={() => setShowEditModal(false)}>
+                <button className="btn secondary" onClick={() =>{
+                    setEditingGuide(prev =>
+                      prev ? { ...prev, attachments: originalAttachments } : null
+                    );
+                    setTempEditImages([]);
+                    setDeletedAttachments([]);
+                    setShowEditModal(false);}
+                  }>
                   Cancel
                 </button>
                 <button className="btn primary" onClick={updateGuide}>
@@ -731,6 +775,7 @@ const createGuide = async (publishImmediately = false) => {
           <div className="modal-overlay">
             <div className="modal large">
               <h2>Edit Quick Contact</h2>
+              <div className="contact-grid">
                 <div className="contact-section">
                   <h3>Basic Information</h3>
                     <label>Name</label>
@@ -739,11 +784,11 @@ const createGuide = async (publishImmediately = false) => {
                       onChange={e => setContact({ ...contact, name: e.target.value })}
                     />
 
-                    <label>Description</label>
+                    {/* <label>Description</label>
                     <input
                       value={contact.description}
                       onChange={e => setContact({ ...contact, description: e.target.value })}
-                    />
+                    /> */}
 
                     <label>Email</label>
                     <input
@@ -785,6 +830,9 @@ const createGuide = async (publishImmediately = false) => {
                       onChange={e => setContact({ ...contact, address: e.target.value })}
                     />
                 </div>
+
+              </div>
+
               <hr />
               <h3>Contact Numbers</h3>
 

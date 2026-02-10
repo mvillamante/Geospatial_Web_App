@@ -36,9 +36,12 @@ interface CitizenReport {
   assignedTo?: string;
   assignedOfficerId?: number | null;
   officerNote?: string;
+  needs_info_note?: string;
   rejectionReason?: string;
   lastUpdatedAt: string;
   photo_url?: string | null;
+  reply_message?: string | null;
+  reply_image_url?: string | null;
 }
 
 // Report status
@@ -250,6 +253,7 @@ const ReportVerifyPage: React.FC = () => {
           barangay: r.barangay ?? r.location ?? "",
           lastUpdatedAt: r.lastUpdatedAt ?? r.createdAt,
           photo_url: r.photo_url ?? r.photoUrl ?? r.photo ?? null,
+          reply_message: r.reply_message ?? null,
         }));
 
 
@@ -466,7 +470,7 @@ const ReportVerifyPage: React.FC = () => {
 
   const saveNeedsInfoNote = (note: string) => {
     if (!selected) return;
-    updateReport(selected.id, { officerNote: note });
+    updateReport(selected.id, { needs_info_note: note });
   };
 
   return (
@@ -482,7 +486,7 @@ const ReportVerifyPage: React.FC = () => {
 
       {/* Stats */}
       <div className="reportverify-stat-container">
-        <div className="reportverify-stat-card">
+        <div className="reportverify-stat-card total">
           <div className="reportverify-stat-text">
             <h3>Total Reports</h3>
             <p className="reportverify-card-value">{stats.total}</p>
@@ -490,7 +494,7 @@ const ReportVerifyPage: React.FC = () => {
           <MapPin className="reportverify-card-icon" />
         </div>
 
-        <div className="reportverify-stat-card">
+        <div className="reportverify-stat-card pending">
           <div className="reportverify-stat-text">
             <h3>Pending Review</h3>
             <p className="reportverify-card-value">{stats.pending}</p>
@@ -498,7 +502,7 @@ const ReportVerifyPage: React.FC = () => {
           <Users className="reportverify-card-icon" />
         </div>
 
-        <div className="reportverify-stat-card">
+        <div className="reportverify-stat-card progress">
           <div className="reportverify-stat-text">
             <h3>In Progress</h3>
             <p className="reportverify-card-value">{stats.inProgress}</p>
@@ -506,7 +510,7 @@ const ReportVerifyPage: React.FC = () => {
           <Users className="reportverify-card-icon" />
         </div>
 
-        <div className="reportverify-stat-card">
+        <div className="reportverify-stat-card resolved">
           <div className="reportverify-stat-text">
             <h3>Resolved</h3>
             <p className="reportverify-card-value">{stats.resolved}</p>
@@ -823,51 +827,116 @@ const ReportVerifyPage: React.FC = () => {
                 )}
               </div>
 
+              {/* Needs Info Conversation Container */}
+              {selected.needs_info_note && !needsInfoMode && (
+                <div className="needsinfo-container">
+                  
+                  {/* Officer Note */}
+                  {selected.needs_info_note && (
+                    <div className="detail-block">
+                      <div className="detail-label-block">Officer Note (Needs Info)</div>
+                      <div className="needsinfo-note">
+                        {selected.needs_info_note}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Citizen Reply */}
+                  {(selected.reply_message || selected.reply_image_url) && (
+                    <div className="detail-block">
+                      <div className="detail-label-block">Citizen Reply</div>
+
+                      <div className="citizen-reply-wrapper">
+                        <div className="citizen-reply-box">
+                          {selected.reply_message && <p className="reply-text">{selected.reply_message}</p>}
+                          {selected.reply_image_url && (
+                            <div className="reply-image-container">
+                              <img src={selected.reply_image_url} alt="Reply" className="reply-image" />
+                              <button
+                                className="view-full-btn"
+                                onClick={() => window.open(selected.reply_image_url!, "_blank")}
+                              >
+                                View Full
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+              )}
+
               {/* Needs info message / update to citizen */}
-              <div className="detail-block">
-                <div className="detail-label-block">
-                  Update / Message to Citizen {selected.status === "needs_info" ? "(Needs Info Sent)" : ""}
-                </div>
-
-                <textarea
-                  className="note-area"
-                  value={selected.officerNote ?? ""}
-                  onChange={(e) => saveNeedsInfoNote(e.target.value)}
-                  placeholder="Type an update for the citizen..."
-                  disabled={!isAssignedToMe || (!needsInfoMode && selected.status !== "needs_info")}
-                />
-
-                <div className="note-hint">
-                  Use this for guidance (e.g., “Please send a clearer photo and confirm exact location.”) or for public updates.
-                </div>
-
-                {/* Show Send button only when composing Needs Info */}
-                {isAssignedToMe && needsInfoMode && selected.status !== "resolved" && (
-                  <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
-                    <button className="btn ghost" onClick={() => setNeedsInfoMode(false)}>
-                      Cancel
-                    </button>
-
-                    <button
-                      className="btn warn"
-                      onClick={() => {
-                        if (!selected.officerNote || selected.officerNote.trim().length < 3) {
-                          alert("Please type an update/request first (Needs Info message).");
-                          return;
-                        }
-                        setStatus("needs_info");
-                        setNeedsInfoMode(false);
-                      }}
-                      disabled={!selected.officerNote || selected.officerNote.trim().length < 3}
-                    >
-                      Send Needs Info
-                    </button>
+              {(needsInfoMode) && (
+                <div className="detail-block">
+                  <div className="detail-label-block">
+                    Update / Message to Citizen {selected.status === "needs_info" ? "(Needs Info Sent)" : ""}
                   </div>
-                )}
+
+                  {/* Officer note textarea */} 
+                  <textarea
+                    className="note-area"
+                    value={selected.needs_info_note ?? ""}
+                    onChange={(e) => saveNeedsInfoNote(e.target.value)}
+                    placeholder="Type an update for the citizen..."
+                    disabled={!isAssignedToMe || (!needsInfoMode && selected.status !== "needs_info")}
+                  />
+
+                  <div className="note-hint">
+                    Use this for guidance (e.g., “Please send a clearer photo and confirm exact location.”) or for public updates.
+                  </div>
+
+                  {/* Show Send button only when composing Needs Info */}
+                  {isAssignedToMe && needsInfoMode && selected.status !== "resolved" && (
+                    <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+                      <button className="btn ghost" onClick={() => setNeedsInfoMode(false)}>
+                        Cancel
+                      </button>
+
+                      <button
+                        className="btn warn"
+                        onClick={async () => {
+                          if (!selected.needs_info_note || selected.needs_info_note.trim().length < 3) {
+                            alert("Please type an update/request first (Needs Info message).");
+                            return;
+                          }
+
+                          try {
+                            const updated = await patchReport(selected.id, {
+                              status: "needs_info",
+                              needs_info_note: selected.needs_info_note,
+                            });
+
+                            setReports(prev =>
+                              prev.map(r =>
+                                r.id === selected.id
+                                  ? {
+                                      ...r,
+                                      ...updated,
+                                      status: "needs_info",
+                                      needs_info_note: updated.needs_info_note ?? selected.needs_info_note,
+                                      lastUpdatedAt: updated.lastUpdatedAt ?? r.lastUpdatedAt,
+                                    }
+                                  : r
+                              )
+                            );
+
+                            setNeedsInfoMode(false);
+                          } catch (e: any) {
+                            alert(e.message);
+                          }
+                        }}
+                      >
+                        Send Needs Info
+                      </button>
+                    </div>
+                  )}
 
 
-              </div>
-
+                </div>
+              )}
             </>
           ) : (
             <div className="empty-detail">Select a report to review.</div>

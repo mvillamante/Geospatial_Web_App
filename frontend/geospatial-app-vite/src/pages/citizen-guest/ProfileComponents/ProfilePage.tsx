@@ -17,6 +17,10 @@ type ReportCardModel = {
   status: string;
   progress: number;
   photo?: string | null;
+  officer_note: string | null;
+  needs_info_note?: string;
+  reply_message?: string | null;
+  reply_image_url?: string | null;
 };
 
 type IncidentReportAPI = {
@@ -29,6 +33,10 @@ type IncidentReportAPI = {
   status?: string;
   suggested_critical_level?: string;
   photo_url?: string | null;
+  officer_note: string | null;
+  needs_info_note?: string;
+  reply_message?: string | null;
+  reply_image_url?: string | null;
 };
 
 type ProgressStatus = "Pending" | "In Progress" | "Resolved";
@@ -178,6 +186,10 @@ const ProfilePage: React.FC = () => {
             progressStatus,
             progress,
             photo: r.photo_url || null,
+            officer_note: r.officer_note || null,
+            needs_info_note: r.needs_info_note || null,
+            reply_message: r.reply_message || null,
+            reply_image_url: r.reply_image_url || null,
           };
 
         });

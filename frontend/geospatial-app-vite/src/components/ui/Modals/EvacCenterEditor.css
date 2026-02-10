@@ -10,15 +10,40 @@
   flex-direction: column;
   width: 100%;
   gap: 0.6rem;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform .3s cubic-bezier(.4,0,.2,1), box-shadow .3s cubic-bezier(.4,0,.2,1), border-color .3s ease;
+  transform-origin: center;
 }
 
-.editor-card.edit-mode {
-  border-color: #3b82f6;
-  background: #f0f9ff;
-  max-height: 435px;
-  height: 400px;
-  width: 600px;
+/* Enter animation: zoom in */
+@keyframes zoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.editor-card.enter {
+  animation: zoomIn 0.35s cubic-bezier(.4,0,.2,1) forwards;
+}
+
+/* Exit animation: slide left */
+@keyframes slideLeft {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+}
+
+.editor-card.exit {
+  animation: slideLeft 0.3s ease forwards;
 }
 
 .editor-card.view-only {
@@ -270,6 +295,10 @@
 .editor-card.edit-mode {
   padding: 0.6rem 0.75rem;
   gap: 0.45rem;
+  border-color: #3b82f6;
+  background: #f0f9ff;
+  max-height: 435px;
+  height: 400px;
 }
 
 /* Header tighter */

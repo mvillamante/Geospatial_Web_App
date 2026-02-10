@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { useState } from "react";
 import type { Report } from "../../../../types/report";
 
 interface ReportModalProps {
@@ -7,21 +7,79 @@ interface ReportModalProps {
 }
 
 export default function ReportModal({ report, onClose }: ReportModalProps) {
+  const [replyMessage, setReplyMessage] = useState("");
+  const [replyImage, setReplyImage] = useState<File | null>(null);
+  const [isSending, setIsSending] = useState(false);
+
+  const handleSendReply = async () => {
+    if (!replyMessage.trim() && !replyImage) return;
+
+    setIsSending(true);
+    try {
+      const token = localStorage.getItem("access_token");
+
+      const formData = new FormData();
+      if (replyMessage.trim()) formData.append("reply_message", replyMessage);
+      if (replyImage) formData.append("reply_image", replyImage);
+      console.log("HELT ME", formData)
+
+      const res = await fetch(`http://localhost:8000/api/reports/${report.id}/reply/`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Failed to send reply");
+
+      const data = await res.json();
+      setReplyMessage("");
+      setReplyImage(null);
+      report.reply_message = data.reply_message;
+      report.reply_image_url = data.reply_image_url;
+    } catch (err) {
+      console.error(err);
+      alert("Failed to send reply");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const displayCategory =
     report.category === "others" && report.other_category?.trim()
       ? report.other_category.trim()
       : report.category;
 
+  function formatStatus(status: string | undefined | null) {
+    if (!status) return "";
+
+    const s = status.toLowerCase();
+    switch (s) {
+      case "needs_info":
+        return "Needs Info";
+      case "in_progress":
+        return "In Progress";
+      case "pending":
+        return "Pending";
+      case "resolved":
+        return "Resolved";
+      case "archived":
+        return "Archived";
+      default:
+        return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+  }
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-handle" />
-
         <h2>{displayCategory}</h2>
 
         <div className="modal-meta">
           <div className="modal-row">
-            <strong>Status:</strong> <span>{report.status}</span>
+            <strong>Status:</strong> <span>{formatStatus(report.status)}</span>
           </div>
           <div className="modal-row">
             <strong>Location:</strong> <span>{report.location}</span>
@@ -33,7 +91,78 @@ export default function ReportModal({ report, onClose }: ReportModalProps) {
 
         <p className="modal-desc">{report.description}</p>
 
-        {report.photo && <img src={report.photo} alt="report" />}
+        {report.photo && <img src={report.photo} alt="report" className="report-photo" />}
+
+        {/* Officer Note for Resolved */}
+        {report.status === "resolved" && report.officer_note && (
+          <div className="note-card lgu-post-card">
+            <div className="note-header">LGU Post</div>
+            <div className="note-content">{report.officer_note}</div>
+            {report.reply_image_url && (
+              <img src={report.reply_image_url} alt="Reply" className="reply-image" />
+            )}
+          </div>
+        )}
+
+        {/* Reply Section */}
+        {report.status === "needs_info" && report.needs_info_note && (
+          <div className="note-card needs-info-card">
+            <div className="note-header">Officer Note</div>
+            <div className="note-content">{report.needs_info_note}</div>
+
+            {!report.reply_message && !report.reply_image_url ? (
+              // Show input if no reply exists yet
+              <div className="reply-card">
+                <div className="note-header">Your Reply</div>
+                <textarea
+                  placeholder="Type your reply here..."
+                  value={replyMessage}
+                  onChange={(e) => setReplyMessage(e.target.value)}
+                  rows={3}
+                  disabled={isSending}
+                />
+                <div className="reply-actions">
+                  <label className="file-upload-btn">
+                    Choose Image
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setReplyImage(e.target.files?.[0] || null)}
+                    />
+                  </label>
+                  {replyImage && <span className="file-name">{replyImage.name}</span>}
+
+                  <button
+                    disabled={(!replyMessage.trim() && !replyImage) || isSending}
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to send this reply? This action cannot be undone.")) {
+                        handleSendReply();
+                      }
+                    }}
+                  >
+                    {isSending ? "Sending..." : "Send Reply"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              // Show read-only reply if it exists
+              <div className="reply-card readonly">
+                <div className="note-header">Your Reply</div>
+                {report.reply_message && (
+                  <textarea
+                    value={report.reply_message}
+                    readOnly
+                    rows={3}
+                    className="readonly-textarea"
+                  />
+                )}
+                {report.reply_image_url && (
+                  <img src={report.reply_image_url} alt="Reply" className="reply-image" />
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         <button className="modal-close-btn" onClick={onClose}>Close</button>
       </div>

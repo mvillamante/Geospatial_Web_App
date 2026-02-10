@@ -498,6 +498,12 @@
   border-color: #ddd6fe;
 }
 
+.status-pill.needs-info {
+  background: #fef9c3;
+  color: #78350f;
+  border-color: #fde68a;
+}
+
 .status-pill.in-progress {
   background: #ecfeff;
   color: #0e7490;
@@ -811,4 +817,200 @@
   .profile-page .progress-bar .step p {
     display: none !important;
   }
+}
+
+/* =====================
+  Notes & Reply Cards
+===================== */
+.note-card {
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 1rem 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.note-card .note-header {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.25rem;
+}
+
+.note-card .note-content {
+  font-size: 0.85rem;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* Needs Info Card */
+.note-card.needs-info-card {
+  background-color: #fff8dc;
+  border: 1px solid #f1c40f;
+}
+.note-card.needs-info-card .note-header {
+  border-bottom: 1px solid #f1c40f;
+}
+
+/* Verified Card */
+.note-card.verified-card {
+  background-color: #e0f7fa;
+  border: 1px solid #26a69a;
+}
+.note-card.verified-card .note-header {
+  border-bottom: 1px solid #26a69a;
+}
+
+/* LGU Post Card */
+.note-card.lgu-post-card {
+  background-color: #dcfce7;
+  border: 1px solid #bbf7d0; 
+  padding: 1rem;
+  border-radius: 12px;
+  margin: 1rem 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.note-card.lgu-post-card .note-header {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #166534;
+  border-bottom: 1px solid #88b698;
+  padding-bottom: 0.25rem;
+}
+.note-card.lgu-post-card .note-content {
+  font-size: 0.85rem;
+  color: #166534;
+  line-height: 1.4;
+}
+
+/* Reply Card */
+.note-card .reply-card {
+  margin-top: 0.8rem;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  background-color: white;
+  border: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.note-card .reply-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.note-card.needs-info-card .reply-card .note-header {
+  border-bottom: 1px solid #d4d3ce;
+}
+
+.reply-card textarea {
+  width: 100%;
+  resize: none;
+  font-size: 0.85rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  outline: none;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reply-card textarea:focus {
+  border-color: #f1c40f;
+  box-shadow: 0 0 0 2px rgba(241, 196, 15, 0.2);
+}
+
+.readonly-textarea {
+  pointer-events: none;
+  background-color: #f5f5f5;
+  color: #333;
+  cursor: default;
+}
+
+/* Reply Image */
+.reply-card img.reply-image {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  object-fit: cover;
+  border: 1px solid #ccc;
+}
+
+/* =====================
+  File Upload Button
+===================== */
+.reply-card .file-upload-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.reply-card .file-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+  background-color: #fffbe6;
+  border: 2px dashed #f1c40f;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+
+.reply-card .file-upload-btn:hover {
+  background-color: #fff3c4;
+  transform: translateY(-1px);
+}
+
+.reply-card input[type="file"] {
+  display: none;  
+}
+
+.reply-card .file-name {
+  font-size: 0.8rem;
+  color: #555;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* Buttons */
+.reply-card button {
+  margin-left: auto;
+  font-size: 0.8rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  border: none;
+  background: #f1c40f;
+  color: #333;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.reply-card button:hover:not(:disabled) {
+  background: #d4ac0d;
+  transform: translateY(-1px);
+}
+
+.reply-card button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

@@ -226,6 +226,20 @@ function EvacCenterPage() {
     }
   };
 
+  /* Leaflet Width Responsiveness */
+  const [mapWidth, setMapWidth] = useState("50%")
+  useEffect(() => {
+    const updateWidth = () => {
+      if (window.innerWidth < 768) setMapWidth("100%");
+      else if (window.innerWidth < 1024) setMapWidth("70%");
+      else setMapWidth("50%");
+    };
+
+    window.addEventListener("resize", updateWidth);
+    updateWidth(); // initial width
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
+
   return (
     <div className="evac-page">
       <div className="evac-header">
@@ -249,7 +263,7 @@ function EvacCenterPage() {
           <LeafletMap
             key={mapRefreshKey}
             height="43vh"
-            width="50%"
+            width={mapWidth}
             mapView="interactive"
             mapType="basic"
             activeLayers={activeLayers}

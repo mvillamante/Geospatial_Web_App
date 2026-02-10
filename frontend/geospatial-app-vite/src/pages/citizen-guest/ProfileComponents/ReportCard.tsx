@@ -9,7 +9,7 @@ function formatStatus(status: string) {
 }
 
 
-export default function ReportCard({ report }) {
+export default function ReportCard({ report, onUpdate }) {
     const [open, setOpen] = useState(false);
 
     return (
@@ -37,7 +37,7 @@ export default function ReportCard({ report }) {
                 </div>
             )}
 
-            {open && <ReportModal report={report} onClose={() => setOpen(false)} />}
+            {open && <ReportModal report={report} onClose={() => setOpen(false)} onUpdate={onUpdate} />}
         </>
     );
 }

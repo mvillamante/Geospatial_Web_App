@@ -4,11 +4,13 @@ import type { Report } from "../../../../types/report";
 interface ReportModalProps {
   report: Report;
   onClose: () => void;
+  onUpdate?: (updatedReport: Report) => void;
 }
 
-export default function ReportModal({ report, onClose }: ReportModalProps) {
+export default function ReportModal({ report, onClose, onUpdate }: ReportModalProps) {
   const [replyMessage, setReplyMessage] = useState("");
   const [replyImage, setReplyImage] = useState<File | null>(null);
+  const [localReport, setLocalReport] = useState(report);
   const [isSending, setIsSending] = useState(false);
 
   const handleSendReply = async () => {
@@ -51,16 +53,23 @@ export default function ReportModal({ report, onClose }: ReportModalProps) {
         }
       );
 
-      console.log("Fetch response:", res);
-
       if (!res.ok) throw new Error("Failed to send reply.");
 
       const data = await res.json();
       setReplyMessage("");
       setReplyImage(null);
 
-      report.reply_message = data.reply_message;
-      report.reply_image_url = data.reply_image_url;
+      // Update Local and UI
+      const updatedReport = {
+        ...localReport,
+        reply_message: data.reply_message,
+        reply_image_url: data.reply_image_url,
+        status: data.status || localReport.status,
+      };
+
+      setLocalReport(updatedReport);
+      if (onUpdate) onUpdate(updatedReport);
+
     } catch (err) {
       console.error(err);
       alert("Failed to send reply");
@@ -188,7 +197,15 @@ export default function ReportModal({ report, onClose }: ReportModalProps) {
           </div>
         )}
 
-        <button className="modal-close-btn" onClick={onClose}>Close</button>
+        <button
+          className="modal-close-btn"
+          onClick={() => {
+            if (onUpdate) onUpdate(localReport);
+            onClose();
+          }}
+        >
+          Close
+        </button>
       </div>
     </div>
   );

@@ -316,6 +316,12 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const updateReport = (updatedReport: ReportCardModel) => {
+    setReports((prev) =>
+      prev.map((r) => (r.id === updatedReport.id ? { ...r, ...updatedReport } : r))
+    );
+  };
+
   const mockAvatarUrl =
     "https://i.pinimg.com/736x/53/ce/e1/53cee1111732dcf17bb5518213ff215a.jpg";
 
@@ -502,7 +508,7 @@ const ProfilePage: React.FC = () => {
             {!loadingReports && !reportsError && reports.length === 0 && <p>No reports yet.</p>}
 
             {reports.map((report) => (
-              <ReportCard key={report.id} report={report} />
+              <ReportCard key={report.id} report={report} onUpdate={updateReport}/>
             ))}
           </div>
         </>

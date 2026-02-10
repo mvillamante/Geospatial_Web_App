@@ -135,8 +135,7 @@ class VerifiedIncidentReportsView(generics.ListAPIView):
             .filter(vcl_lower__in=["low", "moderate", "high", "critical"])
             .order_by("-created_at")
         )
-        
-        print("DEBUG: Verified Reports QuerySet ->", list(qs.values("id", "verified_critical_level", "created_at")))
+    
         return qs
 
 

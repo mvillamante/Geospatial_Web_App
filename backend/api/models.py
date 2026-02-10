@@ -7,6 +7,8 @@ from django.conf import settings
 from django.utils.timezone import now
 from api.supabase_storage import delete_cms_photo
 
+from django.utils.html import strip_tags
+
 import uuid
 import hashlib
 
@@ -243,17 +245,28 @@ class CmsGuide(models.Model):
         if self.pk:
             old_status = CmsGuide.objects.get(pk=self.pk).status
 
-        if self.status == "published" and (old_status != "published"):
-            self.published_at = now()
+        did_just_publish = (self.status == "published" and old_status != "published")
 
-        if self.status != "published":
+        if did_just_publish:
+            self.published_at = now()
+        elif self.status != "published":
             self.published_at = None
 
         super().save(*args, **kwargs)
 
-        if is_new and not self.post_id:
+        if not self.post_id:
             self.post_id = f"POST-{self.id}"
             super().save(update_fields=["post_id"])
+        
+        if did_just_publish:
+            Notification.objects.create(
+                type="official",
+                title=f"{self.get_post_type_display()}: {self.post_title}",
+                body=(strip_tags(self.post_body) or "")[:220],
+                cms_guide_id=self.id,
+                cms_post_id=self.post_id,
+            )
+            
 
     def delete(self, *args, **kwargs):
         for attachment in getattr(self, "attachments", []).all():
@@ -367,3 +380,34 @@ class QuickContactPhone(models.Model):
 
     def __str__(self):
         return f"{self.label} - {self.number}"
+    
+# Notification model ------------------------------------------------------------------
+class Notification(models.Model):
+    TYPE_CHOICES = [
+        ("official", "Official"),
+        ("incident", "Incident"),
+        ("report", "Report"),
+    ]
+
+    id = models.BigAutoField(primary_key=True)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    title = models.CharField(max_length = 255)
+    body = models.TextField(blank=True, null=True)
+
+    cms_guide_id = models.BigIntegerField(null=True, blank=True)
+    cms_post_id = models.CharField(max_length=50, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.type}: {self.title}"
+
+class NotificationRead(models.Model):
+    """Tracks read/unread per user"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    notification = models.ForeignKey(Notification, on_delete=models.CASCADE, related_name="read")
+    is_read = models.BooleanField(default=False)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ("user", "notification")

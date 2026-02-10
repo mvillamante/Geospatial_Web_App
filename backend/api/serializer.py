@@ -1,5 +1,5 @@
 from django.utils import timezone
-from api.models import CustomUser, ResearcherRequest, CmsGuide, IncidentReport, EvacuationCenter, CmsGuideAttachment, QuickContact, QuickContactPhone
+from api.models import *
 from api.supabase_storage import upload_private_photo, create_signed_url, upload_cms_photo
 from django.utils.timesince import timesince
 from django.utils.crypto import get_random_string
@@ -626,3 +626,15 @@ class QuickContactSerializer(serializers.ModelSerializer):
                 QuickContactPhone.objects.create(contact=instance, **phone)
 
         return instance
+
+class NotificationSerializer(serializers.ModelSerializer):
+    is_unread = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Notification
+        fields = ["id", "type", "title", "body", "created_at", "cms_guide_id", "cms_post_id", "is_unread"]
+
+    def get_is_unread(self, obj):
+        user = self.context["request"].user
+        rel = NotificationRead.objects.filter(user=user, notification=obj).first()
+        return not (rel and rel.is_read)

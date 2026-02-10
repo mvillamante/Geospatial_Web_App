@@ -13,6 +13,7 @@ from .backend_views.password_reset_views import *
 from .backend_views.tomtom_views import tomtom_roads_tile, tomtom_traffic_tile
 from .backend_views.community_feed_views import *
 from .backend_views.public_views import *
+from .backend_views.notification_views import *
 
 urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
@@ -84,6 +85,12 @@ urlpatterns = [
     path("cms/quick-contacts/<int:pk>/phones/", add_quick_contact_phone),
     path("cms/quick-contact-phones/<int:phone_id>/", update_quick_contact_phone),
     path("cms/quick-contact-phones/<int:phone_id>/delete/", delete_quick_contact_phone),
+
+    # Notification_Views
+    path("notifications/", NotificationList.as_view(), name="notification-list"),
+    path("notifications/read/", MarkNotificationRead.as_view(), name="notification-read"),
+    path("notifications/read/all/", MarkAllRead.as_view(), name="notification-read-all"),
+    path("notifications/unread-count/", UnreadNotificationCount.as_view(), name="unread-notification"),
 
 
     # Community_Feed_Views

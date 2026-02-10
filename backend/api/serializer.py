@@ -707,7 +707,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = ["id", "type", "title", "body", "created_at", "cms_guide_id", "cms_post_id", "is_unread"]
+        fields = ["id", "type", "title", "body", "created_at", "cms_guide_id", "cms_post_id", "event", "incident_id", "category", "barangay", "severity", "severity_from", "severity_to", "is_unread"]
 
     def get_is_unread(self, obj):
         user = self.context["request"].user

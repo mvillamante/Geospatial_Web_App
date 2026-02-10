@@ -399,15 +399,17 @@ class Notification(models.Model):
     ]
 
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
-    #event = models.CharField(max_length = 30, choices=EVENT_CHOICES, null=True, blank=True)
+    event = models.CharField(max_length = 30, choices=EVENT_CHOICES, null=True, blank=True)
 
     id = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length = 255)
     body = models.TextField(blank=True, null=True)
 
-    # incident_id = models.BigIntegerField(null=True, blank=True)
-    # severity = models.CharField(max_length=20, null=True, blank=True)
-    # barangay = models.CharField(max_length=120, null=True, blank=True)
+    incident_id = models.BigIntegerField(null=True, blank=True)
+    severity = models.CharField(max_length=20, null=True, blank=True)
+    severity_from = models.CharField(max_length=20, null=True, blank=True)
+    severity_to = models.CharField(max_length=20, null=True, blank=True)
+    barangay = models.CharField(max_length=120, null=True, blank=True)
 
     cms_guide_id = models.BigIntegerField(null=True, blank=True)
     cms_post_id = models.CharField(max_length=50, null=True, blank=True)

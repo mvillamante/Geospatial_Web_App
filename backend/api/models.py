@@ -175,10 +175,13 @@ class IncidentReport(models.Model):
     verified_critical_level = models.CharField(max_length=20, null=True, blank=True, choices=SUGGESTED_CRITICAL_LEVEL_CHOICES,)
     assigned_officer = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="assigned_incident_reports",)
     officer_note = models.TextField(null=True, blank=True)
+    needs_info_note = models.TextField(blank=True, null=True)
     rejection_reason = models.TextField(null=True, blank=True)
 
     last_updated_at = models.DateTimeField(auto_now=True)
-
+    
+    reply_message = models.TextField(null=True, blank=True, help_text="Temporary reply from citizen when report needs info")
+    reply_image_url = models.TextField(null=True, blank=True, help_text="Optional URL for reply image (e.g., stored in Supabase)")
 
 
 # CMS Guide model ------------------------------------------------------------------

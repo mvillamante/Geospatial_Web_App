@@ -58,6 +58,7 @@ urlpatterns = [
     path('incident-reports/verified/', VerifiedIncidentReportsView.as_view(), name='verified-reports'),
     path("reports/<int:report_id>/", IncidentReportPatchView.as_view(), name="report-patch"),
     path("reports/list/officers/", OfficerListView.as_view(), name="officer-list"),
+    path("reports/<int:pk>/reply/", send_report_reply, name="report-reply"),
     
     # Public Views
     path("public/landing-page/", PublicLandingPageView.as_view(), name="public-landing-page"),

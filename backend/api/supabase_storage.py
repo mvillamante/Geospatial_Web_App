@@ -53,3 +53,23 @@ def delete_cms_photo(file_url: str, bucket="cms-photos"):
         supabase.storage.from_(bucket).remove([path])
     except IndexError:
         print(f"Failed to extract path from URL: {file_url}")
+
+def upload_reply_photo(file, report_id: str) -> str:
+    ext = os.path.splitext(file.name)[1].lower() or ".jpg"
+    path = f"replies/{report_id}{ext}"
+
+    storage = supabase.storage.from_(settings.SUPABASE_STORAGE_BUCKET)
+
+    try:
+        storage.remove([path])
+    except Exception:
+        pass
+
+    storage.upload(
+        path,
+        file.read(),
+        {"content-type": file.content_type or "image/jpeg"},
+    )
+
+    return path
+

@@ -1,6 +1,6 @@
 from django.utils import timezone
 from api.models import *
-from api.supabase_storage import upload_private_photo, create_signed_url, upload_cms_photo
+from api.supabase_storage import upload_private_photo, upload_reply_photo, create_signed_url, upload_cms_photo
 from django.utils.timesince import timesince
 from django.utils.crypto import get_random_string
 from django.contrib.auth.password_validation import validate_password
@@ -261,10 +261,8 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
     photo_url = serializers.SerializerMethodField()
     category_display = serializers.SerializerMethodField()
     assigned_officer_label = serializers.SerializerMethodField()
-    assigned_officer_id = serializers.IntegerField(
-    allow_null=True,
-    read_only=True
-)
+    assigned_officer_id = serializers.IntegerField(allow_null=True, read_only=True)
+    reply_image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = IncidentReport
@@ -285,9 +283,18 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
             "photo_url",
             "assigned_officer_label",
             "officer_note",
+            "needs_info_note",
+            "reply_message",
+            "reply_image_url",
             "rejection_reason",
             "assigned_officer_id",
         ]
+        
+    def get_reply_image_url(self, obj):
+        if not obj.reply_image_url:
+            return None
+        
+        return create_signed_url(obj.reply_image_url, expires_in_seconds=3600)
         
     def get_category_display(self, obj):
         if obj.category == "others" and obj.other_category:
@@ -349,6 +356,9 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
     assignedTo = serializers.SerializerMethodField()
     lgu_post = serializers.SerializerMethodField()
     photo_url = serializers.SerializerMethodField()
+    reply_message = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    reply_image_url = serializers.SerializerMethodField()
+    needs_info_note = serializers.CharField(required=False, allow_blank=True, allow_null=True )
 
 
     class Meta:
@@ -367,12 +377,24 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
             "assignedOfficerId",
             "lastUpdatedAt",
             "description",
+            "reply_message",
+            "reply_image_url",
+            "needs_info_note"
             "lat",
             "lng",
             "status",
             "photo_url",
             "lgu_post",
         ]
+        
+    def update(self, instance, validated_data):
+        # needsInfoNote
+        note = validated_data.pop("needs_info_note", None)
+        if note is not None and (instance.status or "").lower() == "needs_info":
+            instance.needs_info_note = note
+
+        instance.save()
+        return instance
     
     def get_photo_url(self, obj):
         if not obj.photo_path:
@@ -404,6 +426,8 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
             return "pending"
         if s == "in_progress":
             return "in_progress"
+        if s == "needs_info":
+            return "needs_info"
         if s == "resolved":
             return "resolved"
         if s == "rejected":
@@ -428,12 +452,18 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
     def get_barangay(self, obj):
         return obj.location_display
     
+    def get_reply_image_url(self, obj):
+        return obj.reply_image_url
+    
 class IncidentReportUpdateSerializer(serializers.ModelSerializer):
     verifiedRisk = serializers.CharField(source="verified_critical_level", required=False, allow_null=True)
     assignedTo = serializers.SerializerMethodField()
     officerNote = serializers.CharField(source="officer_note", required=False, allow_blank=True, allow_null=True)
     rejectionReason = serializers.CharField(source="rejection_reason", required=False, allow_blank=True, allow_null=True)
     lastUpdatedAt = serializers.DateTimeField(source="last_updated_at", read_only=True)
+    reply_message = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    reply_image_url = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    needs_info_note = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         model = IncidentReport
@@ -445,6 +475,10 @@ class IncidentReportUpdateSerializer(serializers.ModelSerializer):
             "rejectionReason",
             "assignedTo",
             "lastUpdatedAt",
+            "needs_info_note",
+            "description",
+            "reply_message",
+            "reply_image_url",
         ]
 
     def get_status(self, obj):
@@ -464,6 +498,47 @@ class IncidentReportUpdateSerializer(serializers.ModelSerializer):
         if not u:
             return None
         return (u.get_full_name().strip() or u.username or f"Citizen #{u.id}")
+
+class IncidentReportReplySerializer(serializers.ModelSerializer):
+    reply_message = serializers.CharField(required=False, allow_blank=True)
+    reply_image = serializers.ImageField(write_only=True, required=False) 
+    
+    class Meta:
+        model = IncidentReport
+        fields = ["reply_message", "reply_image_url", "reply_image"]
+
+    def validate(self, attrs):
+        instance = self.instance
+        # Only allow sending reply if report is in 'needs_info' status
+        if instance.status != "needs_info":
+            raise serializers.ValidationError(
+                "Cannot send reply unless report status is 'needs_info'."
+            )
+            
+        # Prevent sending multiple replies if already exists
+        if instance.reply_message or instance.reply_image_url:
+            raise serializers.ValidationError("Reply has already been sent.")
+        if not attrs.get("reply_message") and not attrs.get("reply_image"):
+            raise serializers.ValidationError("Reply cannot be empty.")
+        return attrs
+    
+    def update(self, instance, validated_data):
+        reply_message = validated_data.get("reply_message")
+        reply_image = validated_data.get("reply_image")
+
+        if reply_message:
+            instance.reply_message = reply_message
+
+        if reply_image:
+            path = upload_reply_photo(
+                reply_image,
+                report_id=str(instance.id),
+            )
+            instance.reply_image_url = path
+
+        instance.last_updated_at = timezone.now()
+        instance.save()
+        return instance
 
 class PublicLandingPageSerializer(serializers.Serializer):
     activeHazards = serializers.IntegerField()

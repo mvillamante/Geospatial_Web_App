@@ -4,11 +4,36 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status, generics, permissions
 from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from django.db.models.functions import Lower
+from django.shortcuts import get_object_or_404
+
 from api.serializer import *
 
 from api.supabase_storage import create_signed_url
 from api.models import IncidentReport
+
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser])
+def send_report_reply(request, pk):
+    report = get_object_or_404(IncidentReport, pk=pk, user=request.user)
+
+    data = {}
+    if "reply_message" in request.data:
+        data["reply_message"] = request.data["reply_message"]
+
+    if "reply_image" in request.FILES:
+        data["reply_image"] = request.FILES["reply_image"]  # send the File object
+
+    if not data:
+        return Response({"detail": "No reply message or image provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+    serializer = IncidentReportReplySerializer(report, data=data, partial=True)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 class IncidentReportCreateView(APIView):
 
@@ -120,6 +145,7 @@ class IncidentReportPatchView(generics.UpdateAPIView):
         return Response(IncidentReportQueueSerializer(report).data, status=status.HTTP_200_OK)
 
 
+
 class VerifiedIncidentReportsView(generics.ListAPIView):
     """
     Returns all incident reports where status='verified'.
@@ -135,7 +161,7 @@ class VerifiedIncidentReportsView(generics.ListAPIView):
             .filter(vcl_lower__in=["low", "moderate", "high", "critical"])
             .order_by("-created_at")
         )
-    
+        
         return qs
 
 
@@ -151,5 +177,3 @@ class OfficerListView(APIView):
         print("OFFICER LIST DEBUG:", data) 
 
         return Response(data, status=status.HTTP_200_OK)
-
-

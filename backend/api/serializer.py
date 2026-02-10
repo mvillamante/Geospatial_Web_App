@@ -379,7 +379,7 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
             "description",
             "reply_message",
             "reply_image_url",
-            "needs_info_note"
+            "needs_info_note",
             "lat",
             "lng",
             "status",
@@ -453,7 +453,11 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
         return obj.location_display
     
     def get_reply_image_url(self, obj):
-        return obj.reply_image_url
+        if not obj.reply_image_url:
+            return None
+        
+        return create_signed_url(obj.reply_image_url, expires_in_seconds=3600)
+    
     
 class IncidentReportUpdateSerializer(serializers.ModelSerializer):
     verifiedRisk = serializers.CharField(source="verified_critical_level", required=False, allow_null=True)
@@ -502,6 +506,7 @@ class IncidentReportUpdateSerializer(serializers.ModelSerializer):
 class IncidentReportReplySerializer(serializers.ModelSerializer):
     reply_message = serializers.CharField(required=False, allow_blank=True)
     reply_image = serializers.ImageField(write_only=True, required=False) 
+    reply_image_url = serializers.CharField(read_only=True)
     
     class Meta:
         model = IncidentReport
@@ -535,6 +540,7 @@ class IncidentReportReplySerializer(serializers.ModelSerializer):
                 report_id=str(instance.id),
             )
             instance.reply_image_url = path
+
 
         instance.last_updated_at = timezone.now()
         instance.save()

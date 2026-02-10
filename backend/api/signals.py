@@ -91,4 +91,4 @@ def incidentreport_create_notifications(sender, instance: IncidentReport, create
                         body=body,
                         severity=sev,
                     )
-    transaction.on_commit(on_commit)
+    transaction.on_commit(do_create)

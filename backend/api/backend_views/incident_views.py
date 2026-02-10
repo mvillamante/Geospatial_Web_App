@@ -17,23 +17,30 @@ from api.models import IncidentReport
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser])
 def send_report_reply(request, pk):
-    report = get_object_or_404(IncidentReport, pk=pk, user=request.user)
+    try:
+        report = get_object_or_404(IncidentReport, pk=pk, user=request.user)
 
-    data = {}
-    if "reply_message" in request.data:
-        data["reply_message"] = request.data["reply_message"]
+        data = {}
+        if "reply_message" in request.data:
+            data["reply_message"] = request.data["reply_message"]
 
-    if "reply_image" in request.FILES:
-        data["reply_image"] = request.FILES["reply_image"]  # send the File object
+        if "reply_image" in request.FILES:
+            data["reply_image"] = request.FILES["reply_image"]
 
-    if not data:
-        return Response({"detail": "No reply message or image provided."}, status=status.HTTP_400_BAD_REQUEST)
+        if not data:
+            return Response({"detail": "No reply message or image provided."}, status=status.HTTP_400_BAD_REQUEST)
 
-    serializer = IncidentReportReplySerializer(report, data=data, partial=True)
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
+        serializer = IncidentReportReplySerializer(report, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-    return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        print("DEBUG SEND REPLY ERROR:", e)
+        import traceback
+        traceback.print_exc()
+        return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class IncidentReportCreateView(APIView):
 

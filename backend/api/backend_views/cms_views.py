@@ -178,6 +178,26 @@ def upload_guide_attachment(request, pk):
         CmsGuideAttachmentSerializer(attachment).data,
         status=201
     )
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_guide_attachment(request, attachment_id):
+    if not admin_only(request.user):
+        return Response({"detail": "Forbidden"}, status=403)
+
+    try:
+        attachment = CmsGuideAttachment.objects.get(pk=attachment_id)
+    except CmsGuideAttachment.DoesNotExist:
+        return Response({"error": "Attachment not found"}, status=404)
+
+   
+    from api.supabase_storage import delete_cms_photo
+
+    delete_cms_photo(attachment.file_url) 
+
+    
+    attachment.delete()
+
+    return Response(status=204)
 
 #Quick Contacts View
 @api_view(["GET"])
@@ -201,21 +221,21 @@ def update_quick_contact(request, pk):
     except QuickContact.DoesNotExist:
         return Response({"error": "QuickContact not found"}, status=404)
 
-    # Extract phones from request, default to empty list
+    
     phones_data = request.data.pop("phones", [])
 
-    # Update main contact info
+    
     serializer = QuickContactSerializer(contact, data=request.data, partial=True)
     if serializer.is_valid():
         contact = serializer.save()
 
-        # Track IDs of phones sent in the request
+       
         sent_ids = []
 
         for phone in phones_data:
             phone_id = phone.get("id")
             if phone_id:
-                # Update existing phone
+                
                 try:
                     phone_obj = QuickContactPhone.objects.get(pk=phone_id, contact=contact)
                     phone_serializer = QuickContactPhoneSerializer(phone_obj, data=phone, partial=True)
@@ -225,16 +245,16 @@ def update_quick_contact(request, pk):
                 except QuickContactPhone.DoesNotExist:
                     continue
             else:
-                # Create new phone
+                
                 phone_serializer = QuickContactPhoneSerializer(data=phone)
                 if phone_serializer.is_valid():
                     new_phone = phone_serializer.save(contact=contact)
                     sent_ids.append(new_phone.id)
 
-        # Delete phones that were removed from the frontend
+       
         QuickContactPhone.objects.filter(contact=contact).exclude(id__in=sent_ids).delete()
 
-        # Return updated contact with current phones
+       
         return Response(QuickContactSerializer(contact).data)
 
     return Response(serializer.errors, status=400)

@@ -78,6 +78,7 @@ urlpatterns = [
     path("cms/guides/<int:pk>/archive/", archive_guide),
     path("cms/guides/<int:pk>/permanent-delete/", permanent_delete_guide),
     path("cms/guides/<int:pk>/attachments/", upload_guide_attachment),
+    path("cms/attachments/<int:attachment_id>/", delete_guide_attachment), 
     path("cms/guides/<int:pk>/restore/", restore_guide),
 
     # Quick_Contact_Views

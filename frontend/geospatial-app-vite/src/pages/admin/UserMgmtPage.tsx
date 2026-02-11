@@ -8,6 +8,8 @@ import { HiChevronUpDown, HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
 
 import ResearcherRequestsTab, { type ResearcherRequest } from "../../components/ui/ResearcherRequestsTab";
+import VerificationRequestsTab, { type VerificationRequest } from "../../components/ui/VerificationRequestsTab";
+
 import CreateUserModal from '../../components/ui/Modals/CreateUserModal';
 import Pagination from "../../components/ui/Pagination";
 
@@ -230,7 +232,7 @@ const UserMgmtPage: React.FC = () => {
     if (tab === "users") activeIdx = 0;
     else if (tab === "requests") activeIdx = 1;
     else if (tab === "verification") activeIdx = 2;
-    
+
     const activeTab = tabRefs.current[activeIdx];
     if (activeTab) setUnderlineStyle({ left: activeTab.offsetLeft, width: activeTab.offsetWidth });
   }, [tab, pendingCount]);
@@ -437,6 +439,11 @@ const UserMgmtPage: React.FC = () => {
       {/* Requests Tab */}
       {tab === 'requests' && (
         <ResearcherRequestsTab pageSize={pageSize} onPendingCountChange={setPendingCount} />
+      )}
+
+      {/* verification Tab */}
+      {tab === 'verification' && (
+        <VerificationRequestsTab pageSize={pageSize} onPendingCountChange={setPendingCount} />
       )}
 
       {/* Create User Modal */}

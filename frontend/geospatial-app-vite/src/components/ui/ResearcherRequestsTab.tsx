@@ -169,7 +169,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
           <thead>
             <tr>
               <th>#</th>
-              <th>User</th>
+              <th className="center">User</th>
               <th className="center">Requested At</th>
               <th className="center">Status</th>
               <th className="center">Actions</th>

@@ -244,7 +244,6 @@ function EvacCenterPage() {
     <div className="evac-page">
       <div className="evac-header">
         <div className="evac-header-title">
-          <MapPin className="evac-title-icon" />
           <h1>Evacuation Centers</h1>
         </div>
 

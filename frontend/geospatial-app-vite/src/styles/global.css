@@ -38,7 +38,6 @@ body {
 .evac-page,
 .user-page,
 .dashboard-page,
-.cms-page,
 .reportsmgmt-page,
 .reportverify-page,
 .profile-page,
@@ -91,7 +90,7 @@ body {
 .reportverify-header-desc,
 .feed-header-desc,
 .dashboard-subtitle,
-.notif-header p {
+.notif-header-desc {
   color: #6b7280;
 }
 

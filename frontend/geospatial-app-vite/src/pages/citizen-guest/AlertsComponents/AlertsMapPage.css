@@ -455,7 +455,7 @@
 .dashboard-alerts .report-btn:hover {
   background: #1d4ed8;
   transform: translateY(-1px);
-  box-shadow: 0 18px 30px rgba(37, 99, 235, 0.22);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.22);
 }
 
 .lgu-preview {

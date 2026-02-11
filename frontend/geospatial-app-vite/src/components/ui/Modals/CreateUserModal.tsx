@@ -221,6 +221,7 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
                 <option value="" disabled>Select role</option>
                 <option value="admin">Admin</option>
                 <option value="officer">Officer</option>
+                <option value="researcher">Researcher</option>
               </select>
             </div>
 

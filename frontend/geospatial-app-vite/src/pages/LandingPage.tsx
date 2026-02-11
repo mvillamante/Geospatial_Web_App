@@ -206,11 +206,7 @@ const LandingPage: React.FC = () => {
         </section>
 
         {/* how it works */}
-        <section id="howitworks"
-          style={{
-            background: "linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(239, 68, 68, 0.03))",
-          }}
-        >
+        <section id="howitworks">
           <div className="section-header">
             <h2>
               How <span className="highlight-red">It Works</span>
@@ -224,9 +220,9 @@ const LandingPage: React.FC = () => {
               </div>
               <h3>As a Citizen</h3>
               <p>
-                Submit hazard reports with photos and GPS location directly from your phone. Receive
-                real-time alerts about dangers in your area, locate nearby evacuation centers, and
-                access safety checklists. Track the status of your reports and stay informed about
+                Report incidents anytime and help your community informed. Receive
+                real-time hazard alerts based on your area. Find the closest evacuation center and
+                check Community Feed for official LGU updates. Track the status of your reports and stay informed about
                 community safety.
               </p>
             </div>

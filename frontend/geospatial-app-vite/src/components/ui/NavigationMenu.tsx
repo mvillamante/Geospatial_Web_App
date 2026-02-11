@@ -5,7 +5,7 @@ import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { getUserRoleAndDisplayName, clearUserSession } from "../../libr/auth";
 
 import type { IconType } from "react-icons";
-import { FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt, FaMapMarked, FaBell } from "react-icons/fa";
+import { FaCog, FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt, FaMapMarked, FaBell } from "react-icons/fa";
 import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdOutlineMonitorHeart, MdKeyboardArrowUp } from "react-icons/md";
 import { PiUsersBold } from "react-icons/pi";
 import { TbFileReport } from "react-icons/tb";
@@ -221,6 +221,28 @@ const NavigationMenu: React.FC = () => {
             </div>
 
             <div className="dropdown-divider" />
+            <button
+              className="dropdown-menu-btn"
+              onClick={() => {
+                navigate(profilePath);
+                setIsDropdownOpen(false);
+              }}
+            >
+              <FaUser className="dropdown-menu-icon" />
+              <span>My Profile</span>
+            </button>
+
+            <button
+              className="dropdown-menu-btn"
+              onClick={() => {
+                navigate("");
+                setIsDropdownOpen(false);
+              }}
+            >
+              <FaCog className="dropdown-menu-icon" />
+              <span>Settings</span>
+            </button>
+
             <button className="dropdown-logout-btn" onClick={handleLogout}>
               <MdLogout className="dropdown-logout-icon" />
               <span>Logout</span>

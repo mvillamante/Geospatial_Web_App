@@ -1,5 +1,5 @@
 .feed-layout {
-    max-width: 1500px;
+    max-width: 1200px;
     margin: 0 auto;
     display: grid;
     grid-template-columns: minmax(0, 1fr) 320px;

@@ -199,6 +199,34 @@
   transform: rotate(180deg);
 }
 
+.dropdown-menu-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.dropdown-menu-btn:hover {
+  background: rgb(237, 237, 237);
+}
+
+.dropdown-menu-btn:active {
+  transform: scale(0.99);
+}
+
+.dropdown-menu-icon {
+  font-size: 16px;
+  opacity: 0.9;
+}
+
 /* Dropdown Menu */
 .profile-dropdown-menu {
   position: absolute;

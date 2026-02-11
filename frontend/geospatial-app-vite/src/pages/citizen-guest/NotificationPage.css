@@ -1,8 +1,11 @@
 .notif-page {
     min-height: 100vh;
-    padding: 22px;
     width: 100%;
     overflow-y: auto;
+}
+
+.notif-header h1 {
+    margin-bottom: 10px;
 }
 
 .notif-header {

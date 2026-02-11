@@ -205,7 +205,7 @@ const NotificationPage: React.FC = () => {
             <div className="notif-header">
                 <div>
                     <h1>Notifications</h1>
-                    <p>Updates from LGU, verified hazards, and your report status.</p>
+                    <p className="notif-header-desc">Updates from LGU, verified hazards, and your report status.</p>
                 </div>
 
                 <div className="notif-actions">
@@ -254,7 +254,7 @@ const NotificationPage: React.FC = () => {
                     className={`tab ${activeTab === "report" ? "active" : ""}`}
                     onClick={() => setActiveTab("report")}
                 >
-                    Reports
+                    My Reports
                     {counts.unreadReport > 0 && (
                         <span className="tab-badge">{counts.unreadReport}</span>
                     )}

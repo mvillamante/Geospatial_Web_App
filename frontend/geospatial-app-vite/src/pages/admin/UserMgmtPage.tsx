@@ -297,7 +297,7 @@ const UserMgmtPage: React.FC = () => {
 
           {/* User Table */}
           <div className="user-table-wrapper">
-            {loading && <div className="table-loading-overlay" />}
+            {/*loading && <div className="table-loading-overlay" />*/}
             <table>
               <thead>
                 <tr>
@@ -322,74 +322,82 @@ const UserMgmtPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="user-table-body">
-                {users.map((user, index) => {
-                  const alreadyRequested = allRequests.some(r => r.userId === user.id && r.status === "Pending");
-                  const displayRole = user.extra_roles?.some(r => r.toLowerCase() === "researcher") ? "Researcher" : user.role;
-                  const roleClass = displayRole.charAt(0).toUpperCase() + displayRole.slice(1);
+                {users.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="empty">
+                      Loading Users...
+                    </td>
+                  </tr>
+                ) : (
+                  users.map((user, index) => {
+                    const alreadyRequested = allRequests.some(r => r.userId === user.id && r.status === "Pending");
+                    const displayRole = user.extra_roles?.some(r => r.toLowerCase() === "researcher") ? "Researcher" : user.role;
+                    const roleClass = displayRole.charAt(0).toUpperCase() + displayRole.slice(1);
 
-                  return (
-                    <tr key={user.id}>
-                      <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td>
-                      <td>
-                        <div className={`user-details role-${roleClass}`}>
-                          <strong className="user-name">{user.name}</strong>
-                          <span className="user-email muted">{user.email}</span>
-                        </div>
-                      </td>
-                      <td className="center">
-                        <div className="role-cell">
-                          <div className="role-field">
-                            <select className={`role-select ${displayRole}`} 
-                              value={displayRole} 
-                              onChange={(e) => {
-                                const newRole = e.target.value as Role;
-
-                                if (!window.confirm(`Are you sure you want to change this user’s role to ${newRole}?`)) {
-                                  e.target.value = displayRole;
-                                  return;
-                                }
-
-                                updateRole(user.id, newRole);
-                              }}
-                              aria-label={`Change role for ${user.name}`} 
-                              disabled={userRole !== 'Admin' || user.role?.toLowerCase() === 'citizen' || (user.role?.toLowerCase() === 'citizen' && user.extra_roles?.some(r => r.toLowerCase() === 'researcher'))}
-                            >
-                              <option value="Researcher">Researcher</option>
-                              <option value="Officer">Officer</option>
-                              <option value="Admin">Admin</option>
-                            </select>
-                            {!((user.role?.toLowerCase() === 'citizen') || (user.role?.toLowerCase() === "citizen" && user.extra_roles?.some(r => r.toLowerCase() === "researcher"))) && <CircleChevronDown size={13} className="chev" />}
+                    return (
+                      <tr key={user.id}>
+                        <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td>
+                        <td>
+                          <div className={`user-details role-${roleClass}`}>
+                            <strong className="user-name">{user.name}</strong>
+                            <span className="user-email muted">{user.email}</span>
                           </div>
-                          {userRole !== 'Admin' && <span className="role-hint">Admin only</span>}
-                        </div>
-                      </td>
-                      {/*<td className="center muted">{user.department}</td>*/}
-                      <td className="center"><span className={`badge ${user.status}`}>{user.status}</span></td>
-                      <td className="center muted">{user.dateJoined}</td>
-                      <td className="center muted">{user.lastLoginDisplay}</td>
-                      <td className="right actions">
-                        <div className="action-menu">
-                          <button className="menu-button" onClick={() => setOpenMenu(openMenu === user.id ? null : user.id)}>
-                            <LuEllipsis size={20} />
-                          </button>
-                          {openMenu === user.id && (
-                            <div className="menu-dropdown">
-                              {alreadyRequested && <div className="menu-item disabled">Pending request</div>}
-                              <button className="menu-item" onClick={() => { if (!window.confirm("Are you sure you want to deactivate this user?")) return; toggleStatus(user.id); setOpenMenu(null); }}>
-                                {user.status === 'Active' ? <PowerOff size={14} /> : <Power size={14} />} {user.status === 'Active' ? 'Deactivate' : 'Activate'}
-                              </button>
-                              {user.role === "Citizen" && user.extra_roles?.some(r => r.toLowerCase() === "researcher") && (
-                                <button className="menu-item danger" onClick={() => { if (!window.confirm("Are you sure you want to revoke Researcher access from this user?")) return; revokeResearcher(user.id); setOpenMenu(null); }}>
-                                  <FaUserSlash size={14} /> Revoke Researcher
-                                </button>
-                              )}
+                        </td>
+                        <td className="center">
+                          <div className="role-cell">
+                            <div className="role-field">
+                              <select className={`role-select ${displayRole}`} 
+                                value={displayRole} 
+                                onChange={(e) => {
+                                  const newRole = e.target.value as Role;
+
+                                  if (!window.confirm(`Are you sure you want to change this user’s role to ${newRole}?`)) {
+                                    e.target.value = displayRole;
+                                    return;
+                                  }
+
+                                  updateRole(user.id, newRole);
+                                }}
+                                aria-label={`Change role for ${user.name}`} 
+                                disabled={userRole !== 'Admin' || user.role?.toLowerCase() === 'citizen' || (user.role?.toLowerCase() === 'citizen' && user.extra_roles?.some(r => r.toLowerCase() === 'researcher'))}
+                              >
+                                <option value="Researcher">Researcher</option>
+                                <option value="Officer">Officer</option>
+                                <option value="Admin">Admin</option>
+                              </select>
+                              {!((user.role?.toLowerCase() === 'citizen') || (user.role?.toLowerCase() === "citizen" && user.extra_roles?.some(r => r.toLowerCase() === "researcher"))) && <CircleChevronDown size={13} className="chev" />}
                             </div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                            {userRole !== 'Admin' && <span className="role-hint">Admin only</span>}
+                          </div>
+                        </td>
+                        {/*<td className="center muted">{user.department}</td>*/}
+                        <td className="center"><span className={`badge ${user.status}`}>{user.status}</span></td>
+                        <td className="center muted">{user.dateJoined}</td>
+                        <td className="center muted">{user.lastLoginDisplay}</td>
+                        <td className="right actions">
+                          <div className="action-menu">
+                            <button className="menu-button" onClick={() => setOpenMenu(openMenu === user.id ? null : user.id)}>
+                              <LuEllipsis size={20} />
+                            </button>
+                            {openMenu === user.id && (
+                              <div className="menu-dropdown">
+                                {alreadyRequested && <div className="menu-item disabled">Pending request</div>}
+                                <button className="menu-item" onClick={() => { if (!window.confirm("Are you sure you want to deactivate this user?")) return; toggleStatus(user.id); setOpenMenu(null); }}>
+                                  {user.status === 'Active' ? <PowerOff size={14} /> : <Power size={14} />} {user.status === 'Active' ? 'Deactivate' : 'Activate'}
+                                </button>
+                                {user.role === "Citizen" && user.extra_roles?.some(r => r.toLowerCase() === "researcher") && (
+                                  <button className="menu-item danger" onClick={() => { if (!window.confirm("Are you sure you want to revoke Researcher access from this user?")) return; revokeResearcher(user.id); setOpenMenu(null); }}>
+                                    <FaUserSlash size={14} /> Revoke Researcher
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                })
+              )}
               </tbody>
             </table>
           </div>

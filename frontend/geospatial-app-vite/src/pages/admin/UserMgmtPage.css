@@ -59,6 +59,7 @@
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 }
 
+/*
 .table-loading-overlay {
   position: absolute;
   top: 0;
@@ -68,7 +69,7 @@
   background: rgba(255, 255, 255, 0.4);
   z-index: 10;
   pointer-events: all;
-}
+}*/
 
 .user-page .user-table-wrapper,
 .user-page .requests-table-wrapper {
@@ -165,6 +166,15 @@
   font-weight: 800;
   font-size: 0.8rem;
   line-height: 1;
+}
+
+.user-page .user-table-body .empty,
+.requests-table-wrapper .empty { /*here*/
+  font-size: 0.8rem;
+  color: #6b7280;
+  text-align: center;
+  padding: 12px 0;
+  font-weight: 400;
 }
 
 .user-table-body .staff-id {

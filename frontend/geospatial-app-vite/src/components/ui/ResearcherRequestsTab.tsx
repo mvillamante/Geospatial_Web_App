@@ -148,7 +148,6 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
   };
 
   const renderPagination = () => {
-    if (totalPages <= 1) return null;
 
     return (
       <div className="pagination-wrapper">
@@ -164,53 +163,65 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
   };
 
   return (
-    <div className="requests-table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>User</th>
-            <th className="center">Requested At</th>
-            <th className="center">Status</th>
-            <th className="center">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {requests.map((req, index) => (
-            <tr key={req.id}>
-              <td className="cell-number">{index + 1}</td>
-              <td className="user-name">{req.userName}</td>
-              <td className="center muted">{req.date}</td>
-              <td className="center"><span className={`badge ${req.status}`}>{req.status}</span></td>
-              <td className="center actions">
-                {req.status === "Pending" && (
-                  rejectingId !== req.id ? (
-                    <>
-                      <button className="approve-btn" onClick={() => approveRequest(req.id)}>
-                        <CheckCircle size={16} /> Approve
-                      </button>
-                      <button className="reject-btn" onClick={() => handleRejectStart(req.id)}>
-                        <XCircle size={16} /> Reject
-                      </button>
-                    </>
-                  ) : (
-                    <div className="reject-box">
-                      <textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder="Enter reason..." rows={3} autoFocus />
-                      <div className="reject-actions">
-                        <button className="cancel-btn" onClick={handleRejectCancel}>Cancel</button>
-                        <button className="confirm-btn" disabled={!rejectReason.trim()} onClick={() => handleRejectConfirm(req.id)}>Confirm</button>
-                      </div>
-                    </div>
-                  )
-                )}
-              </td>
+    <>
+      <div className="requests-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>User</th>
+              <th className="center">Requested At</th>
+              <th className="center">Status</th>
+              <th className="center">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {requests.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="empty">
+                    Loading Requests...
+                  </td>
+                </tr>
+              ) : (
+              requests.map((req, index) => {
 
+                return (
+                  <tr key={req.id}>
+                    <td className="cell-number">{index + 1}</td>
+                    <td className="user-name">{req.userName}</td>
+                    <td className="center muted">{req.date}</td>
+                    <td className="center"><span className={`badge ${req.status}`}>{req.status}</span></td>
+                    <td className="center actions">
+                      {req.status === "Pending" && (
+                        rejectingId !== req.id ? (
+                          <>
+                            <button className="approve-btn" onClick={() => approveRequest(req.id)}>
+                              <CheckCircle size={16} /> Approve
+                            </button>
+                            <button className="reject-btn" onClick={() => handleRejectStart(req.id)}>
+                              <XCircle size={16} /> Reject
+                            </button>
+                          </>
+                        ) : (
+                          <div className="reject-box">
+                            <textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder="Enter reason..." rows={3} autoFocus />
+                            <div className="reject-actions">
+                              <button className="cancel-btn" onClick={handleRejectCancel}>Cancel</button>
+                              <button className="confirm-btn" disabled={!rejectReason.trim()} onClick={() => handleRejectConfirm(req.id)}>Confirm</button>
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
       {renderPagination()}
-    </div>
+    </>
   );
 };
 

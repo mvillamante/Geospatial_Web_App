@@ -56,7 +56,7 @@ const UserMgmtPage: React.FC = () => {
   const [allRequests, setAllRequests] = useState<ResearcherRequest[]>([]);
 
   const pageSize = 10;
-  const [tab, setTab] = useState<'users' | 'requests'>('users');
+  const [tab, setTab] = useState<'users' | 'requests' | 'verification'>('users');
   const [openMenu, setOpenMenu] = useState<number | null>(null);
   const [roleFilter, setRoleFilter] = useState<Role | 'All'>('All');
   const [statusFilter, setStatusFilter] = useState<Status | 'All'>('All');
@@ -226,7 +226,11 @@ const UserMgmtPage: React.FC = () => {
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0 });
   useEffect(() => {
-    const activeIdx = tab === "users" ? 0 : 1;
+    let activeIdx = 0;
+    if (tab === "users") activeIdx = 0;
+    else if (tab === "requests") activeIdx = 1;
+    else if (tab === "verification") activeIdx = 2;
+    
     const activeTab = tabRefs.current[activeIdx];
     if (activeTab) setUnderlineStyle({ left: activeTab.offsetLeft, width: activeTab.offsetWidth });
   }, [tab, pendingCount]);
@@ -241,6 +245,10 @@ const UserMgmtPage: React.FC = () => {
         <button ref={el => { tabRefs.current[1] = el; }} onClick={() => setTab('requests')} className={tab === 'requests' ? 'tab active' : 'tab'}>
           Researcher Requests
           {pendingCount > 0 && <span className="request-count">{pendingCount}</span>}
+        </button>
+        <button ref={el => { tabRefs.current[2] = el; }} onClick={() => setTab('verification')} className={tab === 'verification' ? 'tab active' : 'tab'}>
+          Verification Requests
+          {/*pendingCount > 0 && <span className="request-count">{pendingCount}</span>*/}
         </button>
         <span className="tab-underline" style={{ left: underlineStyle.left, width: underlineStyle.width }} />
       </div>
@@ -331,8 +339,13 @@ const UserMgmtPage: React.FC = () => {
                 ) : (
                   users.map((user, index) => {
                     const alreadyRequested = allRequests.some(r => r.userId === user.id && r.status === "Pending");
-                    const displayRole = user.extra_roles?.some(r => r.toLowerCase() === "researcher") ? "Researcher" : user.role;
-                    const roleClass = displayRole.charAt(0).toUpperCase() + displayRole.slice(1);
+                    const displayRole = user.role === "Citizen" && !user.extra_roles?.some(r => r.toLowerCase() === "researcher")
+                    ? "Citizen"
+                    : user.extra_roles?.some(r => r.toLowerCase() === "researcher")
+                      ? "Researcher"
+                      : user.role;
+
+                  const roleClass = displayRole.charAt(0).toUpperCase() + displayRole.slice(1);
 
                     return (
                       <tr key={user.id}>
@@ -346,26 +359,37 @@ const UserMgmtPage: React.FC = () => {
                         <td className="center">
                           <div className="role-cell">
                             <div className="role-field">
-                              <select className={`role-select ${displayRole}`} 
-                                value={displayRole} 
-                                onChange={(e) => {
-                                  const newRole = e.target.value as Role;
-
-                                  if (!window.confirm(`Are you sure you want to change this user’s role to ${newRole}?`)) {
-                                    e.target.value = displayRole;
-                                    return;
+                              {displayRole === "Citizen" && !user.extra_roles?.some(r => r.toLowerCase() === "researcher") ? (
+                                // Display-only span for true citizens (green)
+                                <span className={`role-select ${roleClass}`}>{displayRole}</span>
+                              ) : (
+                                // Disabled select for all others including citizen-researchers
+                                <select
+                                  className={`role-select ${roleClass}`}
+                                  value={displayRole}
+                                  onChange={(e) => {
+                                    const newRole = e.target.value as Role;
+                                    if (!window.confirm(`Are you sure you want to change this user’s role to ${newRole}?`)) {
+                                      e.target.value = displayRole;
+                                      return;
+                                    }
+                                    updateRole(user.id, newRole);
+                                  }}
+                                  aria-label={`Change role for ${user.name}`}
+                                  disabled={
+                                    userRole !== "Admin" || 
+                                    (user.role?.toLowerCase() === "citizen" && user.extra_roles?.some(r => r.toLowerCase() === "researcher"))
                                   }
+                                >
+                                  <option value="Researcher">Researcher</option>
+                                  <option value="Officer">Officer</option>
+                                  <option value="Admin">Admin</option>
+                                </select>
+                              )}
 
-                                  updateRole(user.id, newRole);
-                                }}
-                                aria-label={`Change role for ${user.name}`} 
-                                disabled={userRole !== 'Admin' || user.role?.toLowerCase() === 'citizen' || (user.role?.toLowerCase() === 'citizen' && user.extra_roles?.some(r => r.toLowerCase() === 'researcher'))}
-                              >
-                                <option value="Researcher">Researcher</option>
-                                <option value="Officer">Officer</option>
-                                <option value="Admin">Admin</option>
-                              </select>
-                              {!((user.role?.toLowerCase() === 'citizen') || (user.role?.toLowerCase() === "citizen" && user.extra_roles?.some(r => r.toLowerCase() === "researcher"))) && <CircleChevronDown size={13} className="chev" />}
+                              {/* Show dropdown arrow only if select is NOT disabled */}
+                              {!(userRole !== "Admin" || (user.role?.toLowerCase() === "citizen" && user.extra_roles?.some(r => r.toLowerCase() === "researcher"))) &&
+                                displayRole !== "Citizen" && <CircleChevronDown size={13} className="chev" />}
                             </div>
                             {userRole !== 'Admin' && <span className="role-hint">Admin only</span>}
                           </div>
@@ -376,7 +400,7 @@ const UserMgmtPage: React.FC = () => {
                         <td className="center muted">{user.lastLoginDisplay}</td>
                         <td className="right actions">
                           <div className="action-menu">
-                            <button className="menu-button" onClick={() => setOpenMenu(openMenu === user.id ? null : user.id)}>
+                            <button className="menu-button" onClick={ () => setOpenMenu(openMenu === user.id ? null : user.id)}>
                               <LuEllipsis size={20} />
                             </button>
                             {openMenu === user.id && (

@@ -212,7 +212,7 @@
 }
 
 .role-field .role-select {
-  padding: 0.35rem 1.6rem 0.35rem 0.75rem;
+  padding: 0.35rem 1.4rem 0.35rem 0.85rem;
   font-size: 0.75rem;
   border-radius: 999px;
   border: 1px solid var(--light-gray-border);
@@ -226,15 +226,16 @@
 .role-field .role-select.Researcher { background: #ede9fe; color: #7c3aed; border: 1px solid #c4b5fd; }
 .role-field .role-select.Officer { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
 .role-field .role-select.Admin { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+.role-field .role-select.Citizen { background: #ffe5b4; color: #b35f00; border: 1px solid #ffb347; padding: 0.35rem 0.75rem; }
 
 .role-field .role-select:disabled {
   opacity: 0.6;
+  padding: 0.35rem 1.1rem;
   cursor: not-allowed;
   background: #fef3c7;
   color: #b45309;
   border: 1px solid #fcd34d;
 }
-
 
 .user-table-body .role-field .chev {
   position: absolute;

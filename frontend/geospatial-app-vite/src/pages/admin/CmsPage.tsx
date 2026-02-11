@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Plus, Edit, Eye, Trash2, Send, ArchiveRestore, Phone } from 'lucide-react';
 import { FiCheckCircle, FiSearch } from "react-icons/fi";
+import { LuEllipsis } from "react-icons/lu";
 import './CmsPage.css';
 import RichTextEditor from './TextEditor/RichTextEditor';
 
@@ -94,6 +95,15 @@ const CmsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<cmsStatuses | 'All'>('All');
   const [typeFilter, setTypeFilter] = useState<cmsTypes | 'All'>('All');
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const onDocClick = () => setOpenMenuId(null);
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, []);
+
 
   useEffect(() => {
     fetch("/api/cms/quick-contacts/", {
@@ -532,49 +542,75 @@ const CmsPage: React.FC = () => {
                       })()}
                     </td>
                     <td className="center">
-                      <div className="table-actions">
-                        {!viewArchived ? (
-                          <>
-                            <button
-                              className="icon-btn"
-                              disabled={guide.status === "Published"}
-                              title={guide.status === "Published" ? "Unpublish to edit" : "Edit"}
-                              onClick={() => {
-                                if (guide.status === "Published") return;
-                                    setEditingGuide({ ...guide });
-                                    setOriginalAttachments(guide.attachments || []);
-                                    setTempEditImages([]);
-                                    setDeletedAttachments([]);
-                                    setShowEditModal(true);
-                              }}
-                            >
-                              <Edit size={16} />
-                            </button>
-                            <button
-                              className="icon-btn"
-                              onClick={() => {
-                                setGuideToPublish(guide);
-                                setShowPublishModal(true);
-                              }}
-                            >
-                              <Eye size={16} />
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              className="icon-btn primary"
-                              onClick={() => restoreGuide(guide.postId)}
-                            >
-                              <ArchiveRestore size={16} />
-                            </button>
-                          </>
-                        )}
+                      <div className="row-menu" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          className="kebab-btn"
+                          aria-label="Actions"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuId((prev) => (prev === guide.postId  ? null : guide.postId ));
+                          }}
+                        ><LuEllipsis size={20} /></button>
 
-                        <button className="icon-btn danger" onClick={() => {setGuideToDelete(guide);setShowDeleteModal(true);}}
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        {/* Dropdown */}
+    {openMenuId === guide.postId && (
+      <div className="dropdown-menu">
+        {!viewArchived ? (
+          <>
+            <button
+              className="dropdown-item"
+              disabled={guide.status === "Published"}
+              title={guide.status === "Published" ? "Unpublish to edit" : "Edit"}
+              onClick={() => {
+                if (guide.status === "Published") return;
+                setEditingGuide({ ...guide });
+                setOriginalAttachments(guide.attachments || []);
+                setTempEditImages([]);
+                setDeletedAttachments([]);
+                setShowEditModal(true);
+                setOpenMenuId(null);
+              }}
+            >
+              <Edit size={16} /> Edit
+            </button>
+
+            <button
+              className="dropdown-item"
+              onClick={() => {
+                setGuideToPublish(guide);
+                setShowPublishModal(true);
+                setOpenMenuId(null);
+              }}
+            >
+              <Eye size={16} /> View
+            </button>
+          </>
+        ) : (
+          <button
+            className="dropdown-item"
+            onClick={() => {
+              restoreGuide(guide.postId);
+              setOpenMenuId(null);
+            }}
+          >
+            <ArchiveRestore size={16} /> Restore
+          </button>
+        )}
+
+        <button
+          className="dropdown-item danger"
+          onClick={() => {
+            setGuideToDelete(guide);
+            setShowDeleteModal(true);
+            setOpenMenuId(null);
+          }}
+        >
+          <Trash2 size={16} /> Delete
+        </button>
+      </div>
+    )}
+
                       </div>
                     </td>
 
@@ -676,7 +712,7 @@ const CmsPage: React.FC = () => {
                 </button>
               </div>
             )}
-            <div className="modal-actions">
+            <div className="modal-actions space-between">
               <button
                 className="btn-secondary"
                 onClick={() => {
@@ -840,7 +876,7 @@ const CmsPage: React.FC = () => {
             )}
 
               <button
-                className="btn danger"
+                className="btn-secondary danger"
                 onClick={() => {
                   permanentDeleteGuide(guideToDelete.postId);
                   setShowDeleteModal(false);
@@ -886,7 +922,7 @@ const CmsPage: React.FC = () => {
               </button>
 
               <button
-                className="btn-primary"
+                className="btn-secondary danger"
                 onClick={async () => {
                   await togglePublish(guideToPublish.postId);
                   setShowPublishModal(false);

@@ -196,12 +196,80 @@ body {
     color: #4b5563;
 }
 
-/* Actions */
-.cms-page .table-actions,
-.reportsmgmt-page .table-actions {
+/* Kebab Dropdown + Btn */
+.kebab-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0 ,0 ,0.12);
+  padding: 6px;
+  z-index: 50;
+}
+
+.cms-page .dropdown-item {
   display: flex;
-  justify-content: center;
-  gap: 0.4rem;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.reportsmgmt-page .kebab-btn,
+.cms-page .kebab-btn {
+  width: 34px;
+  height: 34px;
+  border:none;
+  background: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  display: grid;
+}
+
+.reportsmgmt-page .kebab-btn:hover,
+.cms-page .kebab-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.reportsmgmt-page .kebab-item{
+  width: 100%;
+  text-align: left;
+  padding: 10px 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cms-page .dropdown-item:hover:not(:disabled) {
+  background: #f5f5f5;
+}
+
+.reportsmgmt-page.kebab-item:hover {
+  background: #ebe8e8;
+}
+
+.reportsmgmt-page.kebab-item.danger,
+.cms-page .dropdown-item.danger {
+  color: #b42318;
+}
+
+.reportsmgmt-page.kebab-item:disabled,
+.cms-page .dropdown-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Card */

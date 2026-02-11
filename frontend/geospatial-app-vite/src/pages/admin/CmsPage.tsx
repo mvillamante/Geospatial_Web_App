@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Plus, Edit, Eye, Trash2, Send, ArchiveRestore, Phone } from 'lucide-react';
+import { FiCheckCircle, FiSearch } from "react-icons/fi";
 import './CmsPage.css';
 import RichTextEditor from './TextEditor/RichTextEditor';
 
@@ -44,6 +45,8 @@ interface QuickContact {
   phones: ContactPhone[];
 }
 
+type cmsStatuses = 'All' | 'Published' | 'Draft' | 'Archived';
+type cmsTypes = 'All' | 'advisory' | 'announcement' | 'guide';
 
 const CmsPage: React.FC = () => {
   const [guides, setGuides] = useState<Guide[]>([]);
@@ -85,6 +88,12 @@ const CmsPage: React.FC = () => {
   const [deletedAttachments, setDeletedAttachments] = useState<number[]>([]);
   const [originalAttachments, setOriginalAttachments] = useState<Attachment[]>([]);
   const [tempEditImages, setTempEditImages] = useState<Attachment[]>([]);
+
+  const cmsStatuses: Array<'Published' | 'Draft' | 'Archived'> = ['Published', 'Draft', 'Archived'];
+  const cmsTypes: Array<'advisory' | 'announcement' | 'guide'> = ['advisory', 'announcement', 'guide'];
+  const [statusFilter, setStatusFilter] = useState<cmsStatuses | 'All'>('All');
+  const [typeFilter, setTypeFilter] = useState<cmsTypes | 'All'>('All');
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetch("/api/cms/quick-contacts/", {
@@ -303,10 +312,29 @@ const CmsPage: React.FC = () => {
 
     return await res.json();
   };
-  const filteredGuides = guides.filter(g => {
-    const isArchived = g.status === "Archived";
-    return viewArchived ? isArchived : !isArchived;
-  });
+  const filteredGuides = guides
+    .filter(g => {
+      const isArchived = g.status === "Archived";
+      return viewArchived ? isArchived : !isArchived;
+    })
+    .filter(g => {
+      if (statusFilter === 'All') return true;
+      return g.status === statusFilter;
+    })
+    .filter(g => {
+      if (typeFilter === 'All') return true;
+      return g.postType === typeFilter;
+    })
+    .filter(g => {
+      const query = searchQuery.toLowerCase().trim();
+      if (!query) return true;
+      return (
+        g.postTitle.toLowerCase().includes(query) ||
+        g.postType.toLowerCase().includes(query) ||
+        g.postId.toString().includes(query)
+      );
+    });
+
 
   /* Tab */
   const indicatorRef = useRef<HTMLDivElement>(null);
@@ -329,6 +357,9 @@ const CmsPage: React.FC = () => {
       setIndicatorOffset(rect.left - parentLeft);
     }
   }, [viewArchived]);
+
+  const capitalize = (str: string) =>
+    str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
   return (
     <div className="cms-page">
@@ -366,25 +397,82 @@ const CmsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* CMS ACTIONS */}
-      <div className="cms-actions">
-        <button
-          className="btn secondary"
-          onClick={() => setShowContactModal(true)}
-        >
-          <Edit size={16} /> Manage Quick Contacts
-        </button>
+      {/* Filters + Search + Create User */}
+      <div className="filters">
+        <div className="filters-left">
+          {/* Filter Status */}
+          <div className="select-wrapper">
+            <FiCheckCircle className="select-icon" />
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as ReportStatus | 'All')} className="status-select">
+              <option value="All">All Status</option>
+              {cmsStatuses.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <button
-          className="btn primary"
-          onClick={() => {
-            setNewGuide({ postTitle: "", postType: "advisory", postBody: "" });
-            setImagePreview(null);
-            setShowCreateModal(true);
-          }}
-        >
-          <Plus size={16} /> Create Content
-        </button>
+          {/* Filter Type */}
+          <div className="select-wrapper">
+            <FiCheckCircle className="select-icon" />
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value as cmsTypes | 'All')}
+              className="type-select"
+            >
+              <option value="All">All Types</option>
+              {cmsTypes.map((t) => (
+                <option key={t} value={t}>
+                  {capitalize(t)}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="filters-right">
+          <div className="search-wrapper">
+            <FiSearch className="search-icon" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+              placeholder="Search title..."
+            />
+            {searchQuery.trim() && (
+              <button
+                className="search-clear"
+                onClick={() => setSearchQuery("")}
+                title="Clear"
+                type="button"
+              >x</button>
+            )}
+          </div>
+          
+          {/* CMS ACTIONS */}
+          <div className="cms-actions">
+            <button
+              className="btn secondary icon-btn"
+              onClick={() => setShowContactModal(true)}
+            >
+              <Edit size={19} />
+              <span className="btn-text">Manage Quick Contacts</span>
+            </button>
+
+            <button
+              className="btn primary icon-btn"
+              onClick={() => {
+                setNewGuide({ postTitle: "", postType: "advisory", postBody: "" });
+                setImagePreview(null);
+                setShowCreateModal(true);
+              }}
+            >
+              <Plus size={19} />
+              <span className="btn-text">Create Content</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Table */}
@@ -521,10 +609,10 @@ const CmsPage: React.FC = () => {
               onChange={e => setNotification({ ...notification, message: e.target.value })} />
 
             <div className="modal-actions">
-              <button className="btn secondary" onClick={() => setShowNotificationDialog(false)}>
+              <button className="btn-secondary" onClick={() => setShowNotificationDialog(false)}>
                 Cancel
               </button>
-              <button className="btn primary">
+              <button className="btn-primary">
                 <Send size={16} /> Send
               </button>
             </div>
@@ -590,7 +678,7 @@ const CmsPage: React.FC = () => {
             )}
             <div className="modal-actions">
               <button
-                className="btn secondary"
+                className="btn-secondary"
                 onClick={() => {
                   setShowCreateModal(false);
                   setImagePreview(null);
@@ -599,19 +687,21 @@ const CmsPage: React.FC = () => {
                 Cancel
               </button>
 
-              <button
-                className="btn secondary"
-                onClick={() => createGuide(false)}
-              >
-                Save Draft
-              </button>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button
+                  className="btn-tertiary"
+                  onClick={() => createGuide(false)}
+                >
+                  Save Draft
+                </button>
 
-              <button
-                className="btn primary"
-                onClick={() => createGuide(true)}
-              >
-                Publish Content
-              </button>
+                <button
+                  className="btn-primary"
+                  onClick={() => createGuide(true)}
+                >
+                  Publish Content
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -694,7 +784,7 @@ const CmsPage: React.FC = () => {
             )}
 
             <div className="modal-actions">
-              <button className="btn secondary" onClick={() =>{
+              <button className="btn-secondary" onClick={() =>{
                   setEditingGuide(prev =>
                     prev ? { ...prev, attachments: originalAttachments } : null
                   );
@@ -704,7 +794,7 @@ const CmsPage: React.FC = () => {
                 }>
                 Cancel
               </button>
-              <button className="btn primary" onClick={updateGuide}>
+              <button className="btn-primary" onClick={updateGuide}>
                 Update
               </button>
             </div>
@@ -727,7 +817,7 @@ const CmsPage: React.FC = () => {
 
             <div className="modal-actions">
               <button
-                className="btn secondary"
+                className="btn-secondary"
                 onClick={() => {
                   setShowDeleteModal(false);
                   setGuideToDelete(null);
@@ -738,7 +828,7 @@ const CmsPage: React.FC = () => {
 
             {!viewArchived && (
               <button
-                className="btn secondary"
+                className="btn-secondary"
                 onClick={() => {
                   archiveGuide(guideToDelete.postId);
                   setShowDeleteModal(false);
@@ -786,7 +876,7 @@ const CmsPage: React.FC = () => {
 
             <div className="modal-actions">
               <button
-                className="btn secondary"
+                className="btn-secondary"
                 onClick={() => {
                   setShowPublishModal(false);
                   setGuideToPublish(null);
@@ -796,7 +886,7 @@ const CmsPage: React.FC = () => {
               </button>
 
               <button
-                className="btn primary"
+                className="btn-primary"
                 onClick={async () => {
                   await togglePublish(guideToPublish.postId);
                   setShowPublishModal(false);
@@ -930,7 +1020,7 @@ const CmsPage: React.FC = () => {
             ))}
 
             <button
-              className="btn secondary add-phone-btn"
+              className="btn-secondary add-phone-btn"
               onClick={() =>
                 setContact({
                   ...contact,
@@ -942,12 +1032,12 @@ const CmsPage: React.FC = () => {
             </button>
 
             <div className="modal-actions">
-              <button className="btn secondary" onClick={() => setShowContactModal(false)}>
+              <button className="btn-secondary" onClick={() => setShowContactModal(false)}>
                 Cancel
               </button>
 
               <button
-                className="btn primary"
+                className="btn-primary"
                 onClick={async () => {
                   const res = await fetch(`/api/cms/quick-contacts/${contact.id}/`, {
                     method: "PUT",

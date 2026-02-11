@@ -256,13 +256,13 @@
 }
 
 /* Modal Actions (Save / Cancel) */
-.modal-actions {
+.editor-card .modal-actions {
   display: flex;
   gap: 6px;
   margin-top: 0.5rem;
 }
 
-.modal-actions button {
+.editor-card .modal-actions button {
   font-size: 0.75rem;
   font-weight: 600;
   padding: 0.35rem 0.6rem;
@@ -271,21 +271,21 @@
   cursor: pointer;
 }
 
-.modal-actions button:first-child {
+.editor-card .modal-actions button:first-child {
   background: #3b82f6;
   color: white;
 }
 
-.modal-actions button:first-child:hover {
+.editor-card .modal-actions button:first-child:hover {
   background: #2563eb;
 }
 
-.modal-actions button:last-child {
+.editor-card .modal-actions button:last-child {
   background: #e5e7eb;
   color: #374151;
 }
 
-.modal-actions button:last-child:hover {
+.editor-card .modal-actions button:last-child:hover {
   background: #d1d5db;
 }
 

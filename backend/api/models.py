@@ -400,7 +400,7 @@ class Notification(models.Model):
 
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     event = models.CharField(max_length = 30, choices=EVENT_CHOICES, null=True, blank=True)
-
+    category = models.CharField(max_length=40, null=True, blank=True)
     id = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length = 255)
     body = models.TextField(blank=True, null=True)

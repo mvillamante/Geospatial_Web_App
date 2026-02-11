@@ -22,18 +22,20 @@ class UserListView(ListAPIView):
     def get_queryset(self):
         qs = CustomUser.objects.all()
 
-        # Exclude citizens with empty extra_roles
-        qs = CustomUser.objects.exclude(
-            role__iexact='citizen',
-            extra_roles=[]
-        )
-        
-        # Filters
+        # Get query params
         role = self.request.query_params.get('role')
         status = self.request.query_params.get('status')
         search = self.request.query_params.get('search')
         ordering = self.request.query_params.get('ordering')
 
+        # Default view: exclude citizens without extra_roles
+        if not search:  # only exclude when not searching
+            qs = qs.exclude(
+                role__iexact='citizen',
+                extra_roles=[]
+            )
+
+        # Apply role filter
         if role and role.lower() != "all":
             role_lower = role.lower()
             if role_lower == "researcher":
@@ -41,13 +43,16 @@ class UserListView(ListAPIView):
             else:
                 qs = qs.filter(role__iexact=role)
 
+        # Apply status filter
         if status and status.lower() != "all":
             is_active = status.lower() == "active"
             qs = qs.filter(is_active=is_active)
 
+        # Apply search filter (include citizens if they match)
         if search:
             qs = qs.filter(username__icontains=search)
 
+        # Ordering
         if ordering:
             qs = qs.order_by(ordering)
         else:

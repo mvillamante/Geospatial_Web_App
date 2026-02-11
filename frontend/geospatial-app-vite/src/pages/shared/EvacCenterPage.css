@@ -166,7 +166,15 @@
   margin: 0.25rem 0 1rem;
   color: var(--clr-blue);
   font-weight: 500;
+  font-size: small;
 }
+
+.evac-barangay.muted {
+  color: #9ca3af;
+  font-style: italic;
+  font-size: small;
+}
+
 
 .evac-info {
   display: flex;
@@ -190,9 +198,24 @@
   color: #6b7280;
 }
 
+.evac-contact-link {
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.evac-contact-link:hover {
+  text-decoration: underline;
+}
+
+.evac-contact-muted {
+  color: #9ca3af;
+  font-style: italic;
+}
+
 .evac-btn {
   width: 100%;
-  margin-top: auto;
+  margin-top: 15px;
   padding: 0.5rem;
   background: var(--primary-btn-color);
   color: var(--text-white);
@@ -356,7 +379,6 @@
     min-height: 100vh;
     padding: 2rem;
     padding-bottom: calc(140px + env(safe-area-inset-bottom));
-  }
   }
 
   .evac-search-wrapper {

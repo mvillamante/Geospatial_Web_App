@@ -280,6 +280,14 @@ const UserMgmtPage: React.FC = () => {
               <div className="search-wrapper">
                 <FiSearch className="search-icon" />
                 <input type="text" placeholder="Search by name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="search-input" />
+                {searchTerm.trim() && (
+                  <button
+                    className="search-clear"
+                    onClick={() => setSearchTerm("")}
+                    title="Clear"
+                    type="button"
+                  >x</button>
+                )}
               </div>
               <button className="create-user-btn" onClick={() => setShowCreateModal(true)}>
                 <FiPlus size={16} /> Create User

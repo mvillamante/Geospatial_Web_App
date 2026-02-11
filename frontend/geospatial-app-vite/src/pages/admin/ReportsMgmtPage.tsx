@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Eye, UserPlus, RefreshCcw, X } from "lucide-react";
-import { FiUser, FiCheckCircle } from "react-icons/fi";
+import { FiUser, FiCheckCircle, FiSearch } from "react-icons/fi";
 import { HiChevronUpDown, HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { toast } from "sonner";
 import "./ReportsMgmtPage.css";
@@ -351,6 +351,29 @@ const ReportsMgmtPage: React.FC = () => {
   /* PAGINATION */
   const handlePageChange = (page: number) => { if (page < 1 || page > totalPages) return; setCurrentPage(page); };
 
+  /* Tabs */
+  const indicatorRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<{[key: string]: HTMLButtonElement | null}>({});
+
+  const activeTabRef = (isArchived: boolean) => (el: HTMLButtonElement | null) => {
+    tabRefs.current[isArchived ? "archived" : "active"] = el;
+  };
+
+  const [indicatorWidth, setIndicatorWidth] = useState(0);
+  const [indicatorOffset, setIndicatorOffset] = useState(0);
+
+  useEffect(() => {
+    const activeKey = viewArchived ? "archived" : "active";
+    const el = tabRefs.current[activeKey];
+    if (el) {
+      const parentLeft = el.parentElement?.getBoundingClientRect().left || 0;
+      const rect = el.getBoundingClientRect();
+      setIndicatorWidth(rect.width);
+      setIndicatorOffset(rect.left - parentLeft);
+    }
+  }, [viewArchived]);
+
+
   return (
     <div className="reportsmgmt-page">
       <div className="page-head">
@@ -359,10 +382,19 @@ const ReportsMgmtPage: React.FC = () => {
         </div>
 
         <div className="page-actions">
+          <div
+            className="tab-indicator"
+            ref={indicatorRef}
+            style={{
+              width: indicatorWidth,
+              transform: `translateX(${indicatorOffset}px)`
+            }}
+          />
           <button
             type="button"
             className={`tab-btn ${!viewArchived ? "active" : ""}`}
             onClick={() => setViewArchived(false)}
+            ref={activeTabRef(false)}
           >
             Active
           </button>
@@ -370,6 +402,7 @@ const ReportsMgmtPage: React.FC = () => {
             type="button"
             className={`tab-btn ${viewArchived ? "active" : ""}`}
             onClick={() => setViewArchived(true)}
+            ref={activeTabRef(true)}
           >
             Archived
           </button>
@@ -404,7 +437,8 @@ const ReportsMgmtPage: React.FC = () => {
         </div>
 
         <div className="filters-right">
-          <div className="search-box">
+          <div className="search-wrapper">
+            <FiSearch className="search-icon" />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

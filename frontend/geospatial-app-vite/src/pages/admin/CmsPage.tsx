@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Plus, Edit, Eye, Trash2, Send, ArchiveRestore, Phone } from 'lucide-react';
 import './CmsPage.css';
 import RichTextEditor from './TextEditor/RichTextEditor';
@@ -176,7 +176,7 @@ const CmsPage: React.FC = () => {
     setGuides(g => g.filter(item => item.postId !== postId));
   };
 
-const createGuide = async (publishImmediately = false) => {
+  const createGuide = async (publishImmediately = false) => {
   const res = await fetch("/api/cms/guides/create/", {
     method: "POST",
     headers: {
@@ -228,9 +228,7 @@ const createGuide = async (publishImmediately = false) => {
 
   setNewGuide({ postTitle: "", postType: "advisory", postBody: "" });
   setShowCreateModal(false);
-};
-
-
+  };
 
   const updateGuide = async () => {
     if (!editingGuide) return;
@@ -310,630 +308,674 @@ const createGuide = async (publishImmediately = false) => {
     return viewArchived ? isArchived : !isArchived;
   });
 
+  /* Tab */
+  const indicatorRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<{[key: string]: HTMLButtonElement | null}>({});
+
+  const activeTabRef = (isArchived: boolean) => (el: HTMLButtonElement | null) => {
+    tabRefs.current[isArchived ? "archived" : "active"] = el;
+  };
+
+  const [indicatorWidth, setIndicatorWidth] = useState(0);
+  const [indicatorOffset, setIndicatorOffset] = useState(0);
+
+  useEffect(() => {
+    const activeKey = viewArchived ? "archived" : "active";
+    const el = tabRefs.current[activeKey];
+    if (el) {
+      const parentLeft = el.parentElement?.getBoundingClientRect().left || 0;
+      const rect = el.getBoundingClientRect();
+      setIndicatorWidth(rect.width);
+      setIndicatorOffset(rect.left - parentLeft);
+    }
+  }, [viewArchived]);
+
   return (
     <div className="cms-page">
-      {/* Header */}
-      <div className="cms-header">
+      {/* Page Head */}
+      <div className="page-head">
         <h1>Content Management System</h1>
 
-        <div className="cms-actions">
-          <div className="page-actions">
-            <button
-              type="button"
-              className={`tab-btn ${!viewArchived ? "active" : ""}`}
-              onClick={() => setViewArchived(false)}
-            >
-              Active
-            </button>
-
-            <button
-              type="button"
-              className={`tab-btn ${viewArchived ? "active" : ""}`}
-              onClick={() => setViewArchived(true)}
-            >
-              Archived
-            </button>
-          </div>
-
+        {/* Tab Actions */}
+        <div className="page-actions">
+          <div
+            className="tab-indicator"
+            ref={indicatorRef}
+            style={{
+              width: indicatorWidth,
+              transform: `translateX(${indicatorOffset}px)`
+            }}
+          />
           <button
-            className="btn secondary"
-            onClick={() => setShowContactModal(true)}
+            type="button"
+            className={`tab-btn ${!viewArchived ? "active" : ""}`}
+            onClick={() => setViewArchived(false)}
+            ref={activeTabRef(false)}
           >
-            <Edit size={16} /> Manage Quick Contacts
+            Active
           </button>
 
           <button
-            className="btn primary"
-            onClick={() => {
-              setNewGuide({ postTitle: "", postType: "advisory", postBody: "" });
-              setImagePreview(null);
-              setShowCreateModal(true);
-            }}
+            type="button"
+            className={`tab-btn ${viewArchived ? "active" : ""}`}
+            onClick={() => setViewArchived(true)}
+            ref={activeTabRef(true)}
           >
-            <Plus size={16} /> Create Content
+            Archived
           </button>
         </div>
       </div>
 
+      {/* CMS ACTIONS */}
+      <div className="cms-actions">
+        <button
+          className="btn secondary"
+          onClick={() => setShowContactModal(true)}
+        >
+          <Edit size={16} /> Manage Quick Contacts
+        </button>
 
-    {/* Table */}
-    <div className="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Type</th>
-            <th>Status</th>
-            <th>Created At</th>
-            <th>Updated At</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredGuides.map(guide => (
-            <tr key={guide.postId}>
-              <td>{guide.postTitle}</td>
-              <td>{guide.postType.charAt(0).toUpperCase() + guide.postType.slice(1)}</td>
+        <button
+          className="btn primary"
+          onClick={() => {
+            setNewGuide({ postTitle: "", postType: "advisory", postBody: "" });
+            setImagePreview(null);
+            setShowCreateModal(true);
+          }}
+        >
+          <Plus size={16} /> Create Content
+        </button>
+      </div>
 
-              <td>
-                <span className={`badge ${guide.status}`}>{guide.status}</span>
-              </td>
-              <td>
-                {(() => {
-                  const { date, time } = formatDateTime(guide.createdAt);
-                  return (
-                    <>
-                      <div>{date}</div>
-                      <div className="sub-time">{time}</div>
-                    </>
-                  );
-                })()}
-              </td>
-
-              <td>
-                {(() => {
-                  const { date, time } = formatDateTime(guide.updatedAt);
-                  return (
-                    <>
-                      <div>{date}</div>
-                      <div className="sub-time">{time}</div>
-                    </>
-                  );
-                })()}
-              </td>
-              <td>
-                <div className="table-actions">
-                  {!viewArchived ? (
-                    <>
-                      <button
-                        className="icon-btn"
-                        disabled={guide.status === "Published"}
-                        title={guide.status === "Published" ? "Unpublish to edit" : "Edit"}
-                        onClick={() => {
-                          if (guide.status === "Published") return;
-                              setEditingGuide({ ...guide });
-                              setOriginalAttachments(guide.attachments || []);
-                              setTempEditImages([]);
-                              setDeletedAttachments([]);
-                              setShowEditModal(true);
-                        }}
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        className="icon-btn"
-                        onClick={() => {
-                          setGuideToPublish(guide);
-                          setShowPublishModal(true);
-                        }}
-                      >
-                        <Eye size={16} />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        className="icon-btn primary"
-                        onClick={() => restoreGuide(guide.postId)}
-                      >
-                        <ArchiveRestore size={16} />
-                      </button>
-                    </>
-                  )}
-
-                  <button className="icon-btn danger" onClick={() => {setGuideToDelete(guide);setShowDeleteModal(true);}}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-
-              </td>
-
+      {/* Table */}
+      <div className="cms-table-wrapper">
+        <table className="cms-table">
+          <thead>
+            <tr>
+              <th className="center">Content ID</th>
+              <th className="">Title</th>
+              <th className="center">Type</th>
+              <th className="center">Status</th>
+              <th className="center">Created At</th>
+              <th className="center">Updated At</th>
+              <th className="center">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {filteredGuides.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="empty">
+                  Loading Content...
+                </td>
+              </tr>
+            ) : (
+              filteredGuides.map(guide => {
 
+                return (
+                  <tr key={guide.postId}>
+                    <td className="table-id center">#G-0{guide.postId}</td>
+                    <td className="">{guide.postTitle}</td>
+                    <td className="center muted">{guide.postType.charAt(0).toUpperCase() + guide.postType.slice(1)}</td>
 
-        {/* Notification Modal */}
-        {showNotificationDialog && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <h2>Send Notification</h2>
+                    <td className="center">
+                      <span className={`badge ${guide.status}`}>{guide.status}</span>
+                    </td>
+                    <td className="center">
+                      {(() => {
+                        const { date, time } = formatDateTime(guide.createdAt);
+                        return (
+                          <>
+                            <div>{date}</div>
+                            <div className="sub-time">{time}</div>
+                          </>
+                        );
+                      })()}
+                    </td>
 
-              <label>Type</label>
-              <select
-                value={notification.type}
-                onChange={e => setNotification({ ...notification, type: e.target.value })}>
-                <option value="alert">Alert</option>
-                <option value="warning">Warning</option>
-                <option value="information">Information</option>
-                <option value="emergency">Emergency</option>
-              </select>
+                    <td className="center">
+                      {(() => {
+                        const { date, time } = formatDateTime(guide.updatedAt);
+                        return (
+                          <>
+                            <div>{date}</div>
+                            <div className="sub-time">{time}</div>
+                          </>
+                        );
+                      })()}
+                    </td>
+                    <td className="center">
+                      <div className="table-actions">
+                        {!viewArchived ? (
+                          <>
+                            <button
+                              className="icon-btn"
+                              disabled={guide.status === "Published"}
+                              title={guide.status === "Published" ? "Unpublish to edit" : "Edit"}
+                              onClick={() => {
+                                if (guide.status === "Published") return;
+                                    setEditingGuide({ ...guide });
+                                    setOriginalAttachments(guide.attachments || []);
+                                    setTempEditImages([]);
+                                    setDeletedAttachments([]);
+                                    setShowEditModal(true);
+                              }}
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              className="icon-btn"
+                              onClick={() => {
+                                setGuideToPublish(guide);
+                                setShowPublishModal(true);
+                              }}
+                            >
+                              <Eye size={16} />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="icon-btn primary"
+                              onClick={() => restoreGuide(guide.postId)}
+                            >
+                              <ArchiveRestore size={16} />
+                            </button>
+                          </>
+                        )}
 
-              <label>Message</label>
-              <textarea
-                rows={5}
-                value={notification.message}
-                onChange={e => setNotification({ ...notification, message: e.target.value })} />
+                        <button className="icon-btn danger" onClick={() => {setGuideToDelete(guide);setShowDeleteModal(true);}}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
 
-              <div className="modal-actions">
-                <button className="btn secondary" onClick={() => setShowNotificationDialog(false)}>
-                  Cancel
-                </button>
-                <button className="btn primary">
-                  <Send size={16} /> Send
-                </button>
-              </div>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Notification Modal */}
+      {showNotificationDialog && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Send Notification</h2>
+
+            <label>Type</label>
+            <select
+              value={notification.type}
+              onChange={e => setNotification({ ...notification, type: e.target.value })}>
+              <option value="alert">Alert</option>
+              <option value="warning">Warning</option>
+              <option value="information">Information</option>
+              <option value="emergency">Emergency</option>
+            </select>
+
+            <label>Message</label>
+            <textarea
+              rows={5}
+              value={notification.message}
+              onChange={e => setNotification({ ...notification, message: e.target.value })} />
+
+            <div className="modal-actions">
+              <button className="btn secondary" onClick={() => setShowNotificationDialog(false)}>
+                Cancel
+              </button>
+              <button className="btn primary">
+                <Send size={16} /> Send
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Create Modal */}
-        {showCreateModal && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <h2>Create New Guide</h2>
+      {/* Create Modal */}
+      {showCreateModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Create New Guide</h2>
 
-              <label>Title</label>
-              <input
-                value={newGuide.postTitle}
-                onChange={e => setNewGuide({ ...newGuide, postTitle: e.target.value })}
-              />
+            <label>Title</label>
+            <input
+              value={newGuide.postTitle}
+              onChange={e => setNewGuide({ ...newGuide, postTitle: e.target.value })}
+            />
 
-              <label>Type</label>
-              <select
-                value={newGuide.postType}
-                onChange={e => setNewGuide({ ...newGuide, postType: e.target.value })}
-              >
-                <option value="advisory">Advisory</option>
-                <option value="announcement">Announcement</option>
-                <option value="guide">Guide</option>
-              </select>
+            <label>Type</label>
+            <select
+              value={newGuide.postType}
+              onChange={e => setNewGuide({ ...newGuide, postType: e.target.value })}
+            >
+              <option value="advisory">Advisory</option>
+              <option value="announcement">Announcement</option>
+              <option value="guide">Guide</option>
+            </select>
 
 
-              <label>Body</label>
-              <RichTextEditor
-                initialHtml={newGuide.postBody}
-                onChange={(html) => setNewGuide({ ...newGuide, postBody: html })}
-              />
-              <label>Attach Image</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={e => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
+            <label>Body</label>
+            <RichTextEditor
+              initialHtml={newGuide.postBody}
+              onChange={(html) => setNewGuide({ ...newGuide, postBody: html })}
+            />
+            <label>Attach Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={e => {
+                const file = e.target.files?.[0];
+                if (!file) return;
 
-                  setNewGuide(prev => ({ ...prev, imageFile: file }));
-                  setImagePreview(URL.createObjectURL(file));
-                }}
-              />
-              {imagePreview && (
-                <div className="image-preview-wrapper">
-                  <img src={imagePreview} alt="Preview" />
+                setNewGuide(prev => ({ ...prev, imageFile: file }));
+                setImagePreview(URL.createObjectURL(file));
+              }}
+            />
+            {imagePreview && (
+              <div className="image-preview-wrapper">
+                <img src={imagePreview} alt="Preview" />
 
-                  <button
-                    className="remove-image-btn"
-                    onClick={() => {
-                      setNewGuide(prev => ({ ...prev, imageFile: undefined }));
-                      URL.revokeObjectURL(imagePreview);
-                      setImagePreview(null);
-                    }}
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
-              <div className="modal-actions">
                 <button
-                  className="btn secondary"
+                  className="remove-image-btn"
                   onClick={() => {
-                    setShowCreateModal(false);
+                    setNewGuide(prev => ({ ...prev, imageFile: undefined }));
+                    URL.revokeObjectURL(imagePreview);
                     setImagePreview(null);
                   }}
                 >
-                  Cancel
-                </button>
-
-                <button
-                  className="btn secondary"
-                  onClick={() => createGuide(false)}
-                >
-                  Save Draft
-                </button>
-
-                <button
-                  className="btn primary"
-                  onClick={() => createGuide(true)}
-                >
-                  Publish Content
+                  ✕
                 </button>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Edit Modal */}
-        {showEditModal && editingGuide && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <h2>Edit Guide</h2>
-
-              <label>Title</label>
-              <input
-                value={editingGuide.postTitle}
-                onChange={e =>
-                  setEditingGuide({ ...editingGuide, postTitle: e.target.value })
-                }
-              />
-
-              <label>Type</label>
-              <select
-                value={editingGuide.postType}
-                onChange={e =>
-                  setEditingGuide({ ...editingGuide, postType: e.target.value })
-                }
-              >
-                <option value="advisory">Advisory</option>
-                <option value="announcement">Announcement</option>
-                <option value="guide">Guide</option>
-              </select>
-
-
-              <label>Body</label>
-              <RichTextEditor
-                initialHtml={editingGuide.postBody || ""}
-                onChange={(html) => setEditingGuide({ ...editingGuide, postBody: html })}
-              />
-              <label>Attach Image</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={async e => {
-                  if (!e.target.files?.[0] || !editingGuide) return;
-
-                  const uploaded = await uploadImage(editingGuide.postId, e.target.files[0]);
-                  if (!uploaded) return;
-
-                  setTempEditImages(prev => [...prev, uploaded]);
-                }}
-              />
-
-              {(editingGuide.attachments?.length || tempEditImages.length) > 0 && (
-                <div className="attachment-preview">
-                  {[...(editingGuide.attachments || []), ...tempEditImages].map(img => (
-                    <div key={img.id} className="attachment-wrapper">
-                      <img src={img.file_url} alt="attachment" style={{ width: "120px", borderRadius: "8px", marginRight: "8px", marginTop: "8px" }} />
-
-                      <button
-                        className="remove-image-btn"
-                        onClick={() => {
-                          // Remove from tempEditImages first
-                          setTempEditImages(prev => prev.filter(a => a.id !== img.id));
-
-                          // If it's from existing attachments, mark for deletion
-                          if (editingGuide.attachments?.some(a => a.id === img.id)) {
-                            setDeletedAttachments(prev => [...prev, img.id]);
-                            setEditingGuide(prev =>
-                              prev
-                                ? { ...prev, attachments: prev.attachments?.filter(a => a.id !== img.id) }
-                                : prev
-                            );
-                          }
-                        }}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="modal-actions">
-                <button className="btn secondary" onClick={() =>{
-                    setEditingGuide(prev =>
-                      prev ? { ...prev, attachments: originalAttachments } : null
-                    );
-                    setTempEditImages([]);
-                    setDeletedAttachments([]);
-                    setShowEditModal(false);}
-                  }>
-                  Cancel
-                </button>
-                <button className="btn primary" onClick={updateGuide}>
-                  Update
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Delete Modal */}
-        {showDeleteModal && guideToDelete && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <h2>Delete Guide</h2>
-
-              <p>
-                {viewArchived
-                  ? "This guide is already archived. You may permanently delete it."
-                  : "What would you like to do with "}
-                <strong>"{guideToDelete.postTitle}"</strong>?
-              </p>
-
-              <div className="modal-actions">
-                <button
-                  className="btn secondary"
-                  onClick={() => {
-                    setShowDeleteModal(false);
-                    setGuideToDelete(null);
-                  }}
-                >
-                  Cancel
-                </button>
-
-              {!viewArchived && (
-                <button
-                  className="btn secondary"
-                  onClick={() => {
-                    archiveGuide(guideToDelete.postId);
-                    setShowDeleteModal(false);
-                    setGuideToDelete(null);
-                  }}
-                >
-                  Archive
-                </button>
-              )}
-
-                <button
-                  className="btn danger"
-                  onClick={() => {
-                    permanentDeleteGuide(guideToDelete.postId);
-                    setShowDeleteModal(false);
-                    setGuideToDelete(null);
-                  }}
-                >
-                  Permanent Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Publish Confirmation Modal */}
-        {showPublishModal && guideToPublish && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <h2>
-                {guideToPublish.status === "Published"
-                  ? "Unpublish Content"
-                  : "Publish Content"}
-              </h2>
-
-              <p>
-                Are you sure you want to{" "}
-                <strong>
-                  {guideToPublish.status === "Published"
-                    ? "unpublish"
-                    : "publish"}
-                </strong>{" "}
-                <strong>"{guideToPublish.postTitle}"</strong>?
-              </p>
-
-              <div className="modal-actions">
-                <button
-                  className="btn secondary"
-                  onClick={() => {
-                    setShowPublishModal(false);
-                    setGuideToPublish(null);
-                  }}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  className="btn primary"
-                  onClick={async () => {
-                    await togglePublish(guideToPublish.postId);
-                    setShowPublishModal(false);
-                    setGuideToPublish(null);
-                  }}
-                >
-                  {guideToPublish.status === "Published"
-                    ? "Unpublish"
-                    : "Publish"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Quick Contact Modal */}
-        {showContactModal && contact && (
-          <div className="modal-overlay">
-            <div className="modal large">
-              <h2>Edit Quick Contact</h2>
-              <div className="contact-grid">
-                <div className="contact-section">
-                  <h3>Basic Information</h3>
-                    <label>Name</label>
-                    <input
-                      value={contact.name}
-                      onChange={e => setContact({ ...contact, name: e.target.value })}
-                    />
-
-                    {/* <label>Description</label>
-                    <input
-                      value={contact.description}
-                      onChange={e => setContact({ ...contact, description: e.target.value })}
-                    /> */}
-
-                    <label>Email</label>
-                    <input
-                      value={contact.email || ""}
-                      onChange={e => setContact({ ...contact, email: e.target.value })}
-                    />
-                </div>
-                <div className="contact-section">
-                  <h3>Online Links</h3>
-                    <label>Facebook URL</label>
-                    <input
-                      value={contact.facebook_url || ""}
-                      onChange={e => setContact({ ...contact, facebook_url: e.target.value })}
-                    />
-
-                    <label>Website URL</label>
-                    <input
-                      value={contact.website_url || ""}
-                      onChange={e => setContact({ ...contact, website_url: e.target.value })}
-                    />
-
-                    <label>Map URL</label>
-                    <input
-                      value={contact.map_url || ""}
-                      onChange={e => setContact({ ...contact, map_url: e.target.value })}
-                    />
-                </div>
-                <div className="contact-section">
-                  <h3>Location and Time</h3>
-                    <label>Office Hours</label>
-                    <input
-                      value={contact.office_hours || ""}
-                      onChange={e => setContact({ ...contact, office_hours: e.target.value })}
-                    />
-
-                    <label>Address</label>
-                    <input
-                      value={contact.address || ""}
-                      onChange={e => setContact({ ...contact, address: e.target.value })}
-                    />
-                </div>
-
-              </div>
-
-              <hr />
-              <h3>Contact Numbers</h3>
-
-              {contact.phones.map((p, idx) => (
-                <div className="phone-card">
-                  <div key={p.id || idx} className="phone-row-top">
-                    <select
-                      value={p.type}
-                      onChange={e => {
-                        const updated = [...contact.phones];
-                        updated[idx].type = e.target.value as "hotline" | "landline" | "mobile";
-                        setContact({ ...contact, phones: updated });
-                      }}
-                    >
-                      <option value="hotline">Hotline</option>
-                      <option value="landline">Landline</option>
-                      <option value="mobile">Mobile</option>
-                    </select>
-
-                    <input
-                      placeholder="Label"
-                      value={p.label}
-                      onChange={e => {
-                        const updated = [...contact.phones];
-                        updated[idx].label = e.target.value;
-                        setContact({ ...contact, phones: updated });
-                      }}
-                    />
-
-                    <input
-                      placeholder="Number"
-                      value={p.number}
-                      onChange={e => {
-                        const updated = [...contact.phones];
-                        updated[idx].number = e.target.value;
-                        setContact({ ...contact, phones: updated });
-                      }}
-                    />
-
-                    <button
-                      className="icon-btn danger"
-                      onClick={() => {
-                        setContact({
-                          ...contact,
-                          phones: contact.phones.filter((_, i) => i !== idx),
-                        });
-                      }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-
+            )}
+            <div className="modal-actions">
               <button
-                className="btn secondary add-phone-btn"
-                onClick={() =>
-                  setContact({
-                    ...contact,
-                    phones: [...contact.phones, { type: "hotline", label: "", number: "" }],
-                  })
-                }
+                className="btn secondary"
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setImagePreview(null);
+                }}
               >
-                <Plus size={14} /> Add Phone
+                Cancel
               </button>
 
-              <div className="modal-actions">
-                <button className="btn secondary" onClick={() => setShowContactModal(false)}>
-                  Cancel
-                </button>
+              <button
+                className="btn secondary"
+                onClick={() => createGuide(false)}
+              >
+                Save Draft
+              </button>
 
-                <button
-                  className="btn primary"
-                  onClick={async () => {
-                    const res = await fetch(`/api/cms/quick-contacts/${contact.id}/`, {
-                      method: "PUT",
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-                      },
-                      body: JSON.stringify(contact),
-                    });
-
-                    if (!res.ok) {
-                      alert("Failed to save contact");
-                      return;
-                    }
-
-                    const updatedContact = await res.json();
-                    setContact(updatedContact);
-                    setShowContactModal(false);
-                  }}
-                >
-                  Save Changes
-                </button>
-              </div>
+              <button
+                className="btn primary"
+                onClick={() => createGuide(true)}
+              >
+                Publish Content
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-      </div>
+      {/* Edit Modal */}
+      {showEditModal && editingGuide && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Edit Guide</h2>
+
+            <label>Title</label>
+            <input
+              value={editingGuide.postTitle}
+              onChange={e =>
+                setEditingGuide({ ...editingGuide, postTitle: e.target.value })
+              }
+            />
+
+            <label>Type</label>
+            <select
+              value={editingGuide.postType}
+              onChange={e =>
+                setEditingGuide({ ...editingGuide, postType: e.target.value })
+              }
+            >
+              <option value="advisory">Advisory</option>
+              <option value="announcement">Announcement</option>
+              <option value="guide">Guide</option>
+            </select>
+
+
+            <label>Body</label>
+            <RichTextEditor
+              initialHtml={editingGuide.postBody || ""}
+              onChange={(html) => setEditingGuide({ ...editingGuide, postBody: html })}
+            />
+            <label>Attach Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={async e => {
+                if (!e.target.files?.[0] || !editingGuide) return;
+
+                const uploaded = await uploadImage(editingGuide.postId, e.target.files[0]);
+                if (!uploaded) return;
+
+                setTempEditImages(prev => [...prev, uploaded]);
+              }}
+            />
+
+            {(editingGuide.attachments?.length || tempEditImages.length) > 0 && (
+              <div className="attachment-preview">
+                {[...(editingGuide.attachments || []), ...tempEditImages].map(img => (
+                  <div key={img.id} className="attachment-wrapper">
+                    <img src={img.file_url} alt="attachment" style={{ width: "120px", borderRadius: "8px", marginRight: "8px", marginTop: "8px" }} />
+
+                    <button
+                      className="remove-image-btn"
+                      onClick={() => {
+                        // Remove from tempEditImages first
+                        setTempEditImages(prev => prev.filter(a => a.id !== img.id));
+
+                        // If it's from existing attachments, mark for deletion
+                        if (editingGuide.attachments?.some(a => a.id === img.id)) {
+                          setDeletedAttachments(prev => [...prev, img.id]);
+                          setEditingGuide(prev =>
+                            prev
+                              ? { ...prev, attachments: prev.attachments?.filter(a => a.id !== img.id) }
+                              : prev
+                          );
+                        }
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="modal-actions">
+              <button className="btn secondary" onClick={() =>{
+                  setEditingGuide(prev =>
+                    prev ? { ...prev, attachments: originalAttachments } : null
+                  );
+                  setTempEditImages([]);
+                  setDeletedAttachments([]);
+                  setShowEditModal(false);}
+                }>
+                Cancel
+              </button>
+              <button className="btn primary" onClick={updateGuide}>
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Delete Modal */}
+      {showDeleteModal && guideToDelete && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Delete Guide</h2>
+
+            <p>
+              {viewArchived
+                ? "This guide is already archived. You may permanently delete it."
+                : "What would you like to do with "}
+              <strong>"{guideToDelete.postTitle}"</strong>?
+            </p>
+
+            <div className="modal-actions">
+              <button
+                className="btn secondary"
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setGuideToDelete(null);
+                }}
+              >
+                Cancel
+              </button>
+
+            {!viewArchived && (
+              <button
+                className="btn secondary"
+                onClick={() => {
+                  archiveGuide(guideToDelete.postId);
+                  setShowDeleteModal(false);
+                  setGuideToDelete(null);
+                }}
+              >
+                Archive
+              </button>
+            )}
+
+              <button
+                className="btn danger"
+                onClick={() => {
+                  permanentDeleteGuide(guideToDelete.postId);
+                  setShowDeleteModal(false);
+                  setGuideToDelete(null);
+                }}
+              >
+                Permanent Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Publish Confirmation Modal */}
+      {showPublishModal && guideToPublish && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>
+              {guideToPublish.status === "Published"
+                ? "Unpublish Content"
+                : "Publish Content"}
+            </h2>
+
+            <p>
+              Are you sure you want to{" "}
+              <strong>
+                {guideToPublish.status === "Published"
+                  ? "unpublish"
+                  : "publish"}
+              </strong>{" "}
+              <strong>"{guideToPublish.postTitle}"</strong>?
+            </p>
+
+            <div className="modal-actions">
+              <button
+                className="btn secondary"
+                onClick={() => {
+                  setShowPublishModal(false);
+                  setGuideToPublish(null);
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="btn primary"
+                onClick={async () => {
+                  await togglePublish(guideToPublish.postId);
+                  setShowPublishModal(false);
+                  setGuideToPublish(null);
+                }}
+              >
+                {guideToPublish.status === "Published"
+                  ? "Unpublish"
+                  : "Publish"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Quick Contact Modal */}
+      {showContactModal && contact && (
+        <div className="modal-overlay">
+          <div className="modal large">
+            <h2>Edit Quick Contact</h2>
+            <div className="contact-grid">
+              <div className="contact-section">
+                <h3>Basic Information</h3>
+                  <label>Name</label>
+                  <input
+                    value={contact.name}
+                    onChange={e => setContact({ ...contact, name: e.target.value })}
+                  />
+
+                  {/* <label>Description</label>
+                  <input
+                    value={contact.description}
+                    onChange={e => setContact({ ...contact, description: e.target.value })}
+                  /> */}
+
+                  <label>Email</label>
+                  <input
+                    value={contact.email || ""}
+                    onChange={e => setContact({ ...contact, email: e.target.value })}
+                  />
+              </div>
+              <div className="contact-section">
+                <h3>Online Links</h3>
+                  <label>Facebook URL</label>
+                  <input
+                    value={contact.facebook_url || ""}
+                    onChange={e => setContact({ ...contact, facebook_url: e.target.value })}
+                  />
+
+                  <label>Website URL</label>
+                  <input
+                    value={contact.website_url || ""}
+                    onChange={e => setContact({ ...contact, website_url: e.target.value })}
+                  />
+
+                  <label>Map URL</label>
+                  <input
+                    value={contact.map_url || ""}
+                    onChange={e => setContact({ ...contact, map_url: e.target.value })}
+                  />
+              </div>
+              <div className="contact-section">
+                <h3>Location and Time</h3>
+                  <label>Office Hours</label>
+                  <input
+                    value={contact.office_hours || ""}
+                    onChange={e => setContact({ ...contact, office_hours: e.target.value })}
+                  />
+
+                  <label>Address</label>
+                  <input
+                    value={contact.address || ""}
+                    onChange={e => setContact({ ...contact, address: e.target.value })}
+                  />
+              </div>
+
+            </div>
+
+            <hr />
+            <h3>Contact Numbers</h3>
+
+            {contact.phones.map((p, idx) => (
+              <div className="phone-card">
+                <div key={p.id || idx} className="phone-row-top">
+                  <select
+                    value={p.type}
+                    onChange={e => {
+                      const updated = [...contact.phones];
+                      updated[idx].type = e.target.value as "hotline" | "landline" | "mobile";
+                      setContact({ ...contact, phones: updated });
+                    }}
+                  >
+                    <option value="hotline">Hotline</option>
+                    <option value="landline">Landline</option>
+                    <option value="mobile">Mobile</option>
+                  </select>
+
+                  <input
+                    placeholder="Label"
+                    value={p.label}
+                    onChange={e => {
+                      const updated = [...contact.phones];
+                      updated[idx].label = e.target.value;
+                      setContact({ ...contact, phones: updated });
+                    }}
+                  />
+
+                  <input
+                    placeholder="Number"
+                    value={p.number}
+                    onChange={e => {
+                      const updated = [...contact.phones];
+                      updated[idx].number = e.target.value;
+                      setContact({ ...contact, phones: updated });
+                    }}
+                  />
+
+                  <button
+                    className="icon-btn danger"
+                    onClick={() => {
+                      setContact({
+                        ...contact,
+                        phones: contact.phones.filter((_, i) => i !== idx),
+                      });
+                    }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            <button
+              className="btn secondary add-phone-btn"
+              onClick={() =>
+                setContact({
+                  ...contact,
+                  phones: [...contact.phones, { type: "hotline", label: "", number: "" }],
+                })
+              }
+            >
+              <Plus size={14} /> Add Phone
+            </button>
+
+            <div className="modal-actions">
+              <button className="btn secondary" onClick={() => setShowContactModal(false)}>
+                Cancel
+              </button>
+
+              <button
+                className="btn primary"
+                onClick={async () => {
+                  const res = await fetch(`/api/cms/quick-contacts/${contact.id}/`, {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+                    },
+                    body: JSON.stringify(contact),
+                  });
+
+                  if (!res.ok) {
+                    alert("Failed to save contact");
+                    return;
+                  }
+
+                  const updatedContact = await res.json();
+                  setContact(updatedContact);
+                  setShowContactModal(false);
+                }}
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
   );
 };
 

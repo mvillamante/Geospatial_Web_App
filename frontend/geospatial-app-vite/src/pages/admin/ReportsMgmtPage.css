@@ -2,27 +2,6 @@
     margin-bottom: 2rem;
 }
 
-.reportsmgmt-page .reports-table-wrapper {
-  border-radius: 10px;
-  border: 1px solid var(--light-gray-border);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  margin-top: 1.7rem;
-  margin-bottom: 1.7rem;
-  height: 71vh;
-  overflow-y: auto;
-}
-
-/* =====================
-   ALIGNMENT
-===================== */
-
-.reportsmgmt-page .center {
-  text-align: center;
-}
-
-.reportsmgmt-page .right {
-  text-align: right;
-}
 
 /* Toggle Buttons */
 .reportsmgmt-page .page-head {
@@ -32,42 +11,6 @@
   gap: 12px;
 }
 
-.reportsmgmt-page .page-actions {
-  display: inline-flex;
-  background: #f3f4f6;
-  padding: 4px;
-  border-radius: 14px;
-  gap: 4px;
-}
-
-.reportsmgmt-page .tab-btn {
-  border: none;
-  background: transparent;
-  padding: 8px 16px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: #4b5563;
-  transition: all 0.25s ease;
-  position: relative;
-}
-
-.reportsmgmt-page .tab-btn:hover {
-  color: #111827;
-}
-
-.reportsmgmt-page .tab-btn.active {
-  background: #ffffff;
-  color: #111827;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
-}
-
-.reportsmgmt-page .tab-btn:active {
-  transform: scale(0.97);
-}
-
 .reportsmgmt-page .location-cell {
   color: #8d8a8a;
 }
@@ -75,10 +18,6 @@
 
 .reportsmgmt-page .th-actions {
   width: 120px;
-}
-
-.reportsmgmt-page .table-id {
-  font-weight: 600;
 }
 
 .reportsmgmt-page .location-cell {
@@ -380,48 +319,6 @@
   display: flex;
   justify-content: flex-end;
   flex: 1;
-}
-
-/* Search */
-.search-box {
-  position: relative;
-  width: min(380px, 100%);
-}
-
-.search-input {
-  width: 100%;
-  padding: 10px 36px 10px 12px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 10px;
-  outline: none;
-  font-size: 14px;
-  background: #fff;
-}
-
-.search-input:focus {
-  border-color: rgba(0, 0, 0, 0.25);
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
-}
-
-.search-clear {
-  position: absolute;
-  top: 50%;
-  right: 8px;
-  transform: translateY(-50%);
-  width: 26px;
-  height: 26px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
-  opacity: 0.6;
-}
-
-.search-clear:hover {
-  opacity: 1;
-  background: rgba(0, 0, 0, 0.06);
 }
 
 /* Kebab Menu */

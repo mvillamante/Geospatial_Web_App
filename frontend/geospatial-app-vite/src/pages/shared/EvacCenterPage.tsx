@@ -413,32 +413,40 @@ function EvacCenterPage() {
                   )}
                 </h2>
 
-                <p className="evac-barangay">{center.barangay}</p>
+                <p className={`evac-barangay ${!center.barangay ? "muted" : ""}`}>
+                  {center.barangay || "Barangay not specified"}
+                </p>
 
                 <div className="evac-info">
-                  {userRole === "Officer" ? (
-                    <>
+                  <>
+                    {userRole === "Officer" ? (
                       <div className="evac-info-row">
                         <GrLocationPin className="evac-info-icon location-pin" />
                         {center.coordinates}
                       </div>
-                      <div className="evac-info-row">
-                        <Phone className="evac-info-icon" />
-                        {center.contact}
-                      </div>
-                    </>
-                  ) : (
-                    <>
+                    ) : (
                       <div className="evac-info-row">
                         <MapPin className="evac-info-icon" />
                         <span>{center.address}</span>
                       </div>
-                      <div className="evac-info-row">
-                        <Phone className="evac-info-icon" />
-                        <span>{center.contact}</span>
-                      </div>
-                    </>
-                  )}
+                    )}
+
+                    <div className="evac-info-row">
+                      <Phone className="evac-info-icon" />
+                      {center.contact ? (
+                        <a
+                          href={`tel:${center.contact.replace(/[^0-9+]/g, "")}`}
+                          className="evac-contact-link"
+                        >
+                          {center.contact}
+                        </a>
+                      ) : (
+                        <span className="evac-contact-muted">
+                          No contact available
+                        </span>
+                      )}
+                    </div>
+                  </>
                 </div>
 
                 {userRole === "Officer" && (

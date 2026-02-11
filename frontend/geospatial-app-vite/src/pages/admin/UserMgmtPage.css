@@ -119,26 +119,6 @@
   font-weight: 600;
 }
 
-.search-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-icon {
-  position: absolute;
-  left: 10px;
-  color: #9ca3af;
-}
-
-.search-input {
-  padding: 6px 10px 6px 32px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 0.875rem;
-  min-width: 180px;
-}
-
 /*Create User Function*/
 .create-user-btn {
   display: inline-flex;
@@ -298,18 +278,6 @@
 .Rejected {
   background: #fee2e2;
   color: #991b1b;
-}
-
-/* =====================
-   ALIGNMENT
-===================== */
-
-.user-page .center {
-  text-align: center;
-}
-
-.user-page .right {
-  text-align: right;
 }
 
 /* =====================

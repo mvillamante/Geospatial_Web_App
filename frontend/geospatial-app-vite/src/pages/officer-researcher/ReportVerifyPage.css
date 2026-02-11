@@ -43,10 +43,16 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
-.reportverify-stat-card.total{background:linear-gradient(135deg,#e0b84a,#c89b1e)}
-.reportverify-stat-card.pending{background:linear-gradient(135deg,#d96b9a,#b84f7d)}
-.reportverify-stat-card.progress{background:linear-gradient(135deg,#6f63d8,#4b3fbf)}
-.reportverify-stat-card.resolved{background:linear-gradient(135deg,#3fa79b,#2e8b82)}
+.reportverify-stat-card.total{background:linear-gradient(135deg,#f3d77a 0%,#e0b84a 45%,#b8891a 100%)}
+.reportverify-stat-card.pending{background:linear-gradient(135deg,#f0a1c2 0%,#d96b9a 45%,#a83e6b 100%)}
+.reportverify-stat-card.progress{background:linear-gradient(135deg,#9a8fff 0%,#6f63d8 45%,#3f35a8 100%)}
+.reportverify-stat-card.resolved{background:linear-gradient(135deg,#6ddbcf 0%,#3fa79b 45%,#23796f 100%)}
+
+/*.reportverify-stat-card.total{background:linear-gradient(135deg,#f6e27a 0%,#f1c85b 45%,#e7a96a 100%)}
+.reportverify-stat-card.pending{background:linear-gradient(135deg,#e7a96a 0%,#d9879b 45%,#c96fb1 100%)}
+.reportverify-stat-card.progress{background:linear-gradient(135deg,#c96fb1 0%,#8a78d6 45%,#5b6bd4 100%)}
+.reportverify-stat-card.resolved{background:linear-gradient(135deg,#5b6bd4 0%,#4fa6a1 45%,#2e8b82 100%)}
+@here */
 
 .reportverify-stat-text {
   margin: 0;

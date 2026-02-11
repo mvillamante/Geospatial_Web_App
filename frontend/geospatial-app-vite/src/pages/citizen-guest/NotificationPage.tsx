@@ -7,6 +7,13 @@ import "./NotificationPage.css";
 type NotificationType = "official" | "incident" | "report";
 
 type Severity = "low" | "moderate" | "high" | "critical";
+
+type IncidentEvent =
+    | "verified_created"
+    | "severity_changed"
+    | "resolved";
+
+
 type ReportStatus = "pending" | "in_progress" | "needs_info" | "resolved" | "rejected";
 
 export interface NotificationItem {
@@ -17,13 +24,21 @@ export interface NotificationItem {
     timestamp?: string;
     isUnread: boolean;
 
-    severity?: Severity;
-    barangay?: string;
     statusFrom?: ReportStatus;
     statusTo?: ReportStatus;
     officerMessage?: string;
     resolutionSummary?: string;
     rejectReason?: string;
+
+    // For incident
+    incidentId?: number;
+    barangay?: string;
+    category?: string;
+    severity?: Severity;
+    severityFrom?: Severity;
+    severityTo?: Severity;
+    incidentEvent?: IncidentEvent;
+
 
     cmsGuideId?: number;
     cmsPostId?: string;
@@ -74,8 +89,6 @@ const NotificationPage: React.FC = () => {
                     timestamp: n.created_at ? timeAgo(n.created_at) : "",
                     isUnread: !!n.is_unread,
 
-                    severity: n.severity,
-                    barangay: n.barangay,
                     statusFrom: n.status_from,
                     statusTo: n.status_to,
                     officerMessage: n.officer_message,
@@ -84,6 +97,15 @@ const NotificationPage: React.FC = () => {
 
                     cmsGuideId: n.cms_guide_id,
                     cmsPostId: n.cms_post_id,
+
+                    incidentId: n.incident_id,
+                    incidentEvent: n.event,
+                    category: n.category,
+                    severity: n.severity,
+                    barangay: n.barangay,
+                    severityFrom: n.severity_from,
+                    severityTo: n.severity_to,
+
                 })));
             } finally {
                 setLoading(false);
@@ -122,7 +144,11 @@ const NotificationPage: React.FC = () => {
     };
 
     const incidentOnlyHighCritical = (list: NotificationItem[]) =>
-        list.filter(n => n.type !== "incident" || (n.severity === "high" || n.severity === "critical"));
+        list.filter(n => {
+            if (n.type !== "incident") return true;
+            const current = n.severityTo ?? n.severity;
+            return current === "high" || current === "critical";
+        });
 
     const listForPage = activeTab === "all"
         ? incidentOnlyHighCritical(filtered)
@@ -209,7 +235,9 @@ const NotificationPage: React.FC = () => {
                     onClick={() => setActiveTab("official")}
                 >
                     Official
-                    {counts.unreadOfficial > 0 && <span className="tab-dot" />}
+                    {counts.unreadOfficial > 0 && (
+                        <span className="tab-badge">{counts.unreadOfficial}</span>
+                    )}
                 </button>
 
                 <button
@@ -217,7 +245,9 @@ const NotificationPage: React.FC = () => {
                     onClick={() => setActiveTab("incident")}
                 >
                     Incidents
-                    {counts.unreadIncident > 0 && <span className="tab-dot" />}
+                    {counts.unreadIncident > 0 && (
+                        <span className="tab-badge">{counts.unreadIncident}</span>
+                    )}
                 </button>
 
                 <button
@@ -225,8 +255,11 @@ const NotificationPage: React.FC = () => {
                     onClick={() => setActiveTab("report")}
                 >
                     Reports
-                    {counts.unreadReport > 0 && <span className="tab-dot" />}
+                    {counts.unreadReport > 0 && (
+                        <span className="tab-badge">{counts.unreadReport}</span>
+                    )}
                 </button>
+
             </div>
 
             {/* Content */}
@@ -286,15 +319,44 @@ const NotificationPage: React.FC = () => {
     );
 };
 
+function formatIncidentLine(n: NotificationItem) {
+    const sev = (n.severityTo ?? n.severity)?.toUpperCase();
+    const barangay = n.barangay ? ` • Barangay ${n.barangay}` : "";
+    const cat = n.category ? `${n.category}` : n.title;
+
+    if (n.incidentEvent === "severity_changed" && n.severityFrom && n.severityTo) {
+        return {
+            header: `Severity changed: ${n.severityFrom.toUpperCase()} → ${n.severityTo.toUpperCase()}`,
+            sub: `${cat}${barangay}`,
+            pillSeverity: n.severityTo,
+        };
+    }
+
+    if (n.incidentEvent === "resolved") {
+        return {
+            header: `Resolved: ${cat}`,
+            sub: `${sev ? `${sev}` : ""}${barangay}`.trim(),
+            pillSeverity: n.severity ?? "high",
+        };
+    }
+
+    return {
+        header: `Verified ${cat} — ${sev ?? ""}`.trim(),
+        sub: barangay ? barangay.replace(" • ", "") : "",
+        pillSeverity: n.severity ?? "high",
+    };
+
+}
+
 function NotificationCard({ n, onOpen }: { n: NotificationItem; onOpen?: () => void }) {
+    const isIncident = n.type === "incident";
+    const incidentUI = isIncident ? formatIncidentLine(n) : null;
+
     const pill = (() => {
         if (n.type === "official") return <span className="pill pill-official">Official</span>
         if (n.type === "incident") {
-            return (
-                <span className={`pill pill-${n.severity || "high"}`}>
-                    {n.severity ? n.severity.toUpperCase() : "INCIDENT"}
-                </span>
-            );
+            const sev = incidentUI?.pillSeverity ?? n.severity ?? "high";
+            return <span className={`pill pill-${sev}`}>{sev.toUpperCase()}</span>;
         }
         return <span className="pill pill-report">Report</span>
     })();
@@ -304,23 +366,19 @@ function NotificationCard({ n, onOpen }: { n: NotificationItem; onOpen?: () => v
         if (n.type === "incident") {
             return (
                 <span className="meta">
-                    {n.title}
-                    {n.barangay ? ` • Barangay ${n.barangay}` : ""}
-                </span>
-            );
-        }
-        if (n.type === "report" && n.statusFrom && n.statusTo) {
-            return (
-                <span className="meta">
-                    {statusLabel[n.statusFrom]} → {statusLabel[n.statusTo]}
+                    {incidentUI?.header ?? n.title}
                 </span>
             );
         }
         return <span className="meta">{n.title}</span>
     })();
 
-
-    const detail = n.officerMessage || n.resolutionSummary || n.rejectReason || n.body;
+    const detailLine = (() => {
+        if (n.type == "incident") {
+            return incidentUI?.sub || n.body;
+        }
+        return n.body;
+    })();
 
     return (
         <button
@@ -332,7 +390,7 @@ function NotificationCard({ n, onOpen }: { n: NotificationItem; onOpen?: () => v
                 {pill}
                 <div className="notif-card-main">
                     {metaLine}
-                    {detail && <div className="detail">{detail}</div>}
+                    {detailLine && <div className="detail">{detailLine}</div>}
                     <div className="time">{n.timestamp}</div>
                 </div>
             </div>

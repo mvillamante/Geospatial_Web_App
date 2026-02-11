@@ -280,7 +280,12 @@
 .notif-empty-card h3{
   margin: 0 0 6px;
   color:#0f172a;
+  font-size: 15px;
   font-weight: 700;
+}
+
+.notif-empty-card p{
+  font-size: 14px;
 }
 
 @media (max-width: 768px) {

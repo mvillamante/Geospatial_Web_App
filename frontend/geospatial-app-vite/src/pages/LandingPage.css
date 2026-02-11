@@ -49,6 +49,12 @@
     z-index: 2000;
 }
 
+.landing-logo-img {
+    height: 95px;
+    width: auto;
+    object-fit: contain;
+}
+
 .landing-page .hero {
     padding: 10rem 5% 4rem;
     text-align: center;

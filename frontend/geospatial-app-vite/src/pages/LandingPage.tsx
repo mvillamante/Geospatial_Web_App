@@ -97,8 +97,10 @@ const LandingPage: React.FC = () => {
       <div className="content">
         <nav className="nav">
           <div className="logo">
-            <div className="logo-icon"></div>
-            <span>HazSpot</span>
+            <div className="logo-icon">
+              <img src="./hazspot-logo(2).png" alt="HazSpot logo" className="landing-logo-img" />
+            </div>
+            {/* <span>HazSpot</span> */}
           </div>
           <div className="nav-links">
             <a
@@ -255,7 +257,7 @@ const LandingPage: React.FC = () => {
         {/* Footer */}
         <footer className="footer">
           <div className="footer-bottom">
-            © Copyright 2024. All Rights Reserved by HazSpot
+            © Copyright 2026. All Rights Reserved by HazSpot
           </div>
         </footer>
       </div>

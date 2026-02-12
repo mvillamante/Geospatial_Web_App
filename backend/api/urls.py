@@ -28,6 +28,8 @@ urlpatterns = [
     path('admin/users/<int:pk>/toggle-status/', ToggleUserStatusView.as_view()),
     path('admin/users/<int:pk>/revoke-researcher/', RevokeResearcherView.as_view()),
     path('admin/users/create/', CreateStaffUserView.as_view(), name="create-staff-user"),
+    path('admin/resident-verifications/', ResidentVerificationListView.as_view(), name="admin_resident_verifications",),
+    path('admin/resident-verifications/<int:pk>/', ApproveRejectResidentVerificationView.as_view(), name="admin_resident_verification_detail",),
     path("admin/stats/", dashboard_stats,name="dashboard-stats"),
     
     # Researcher_Views
@@ -36,6 +38,7 @@ urlpatterns = [
     path("admin/researcher_requests/<int:pk>/", ApproveRejectResearcherRequestView.as_view(), name="researcher_request_update"),
 
     path("resident-verification/request/", ResidentVerificationRequestView.as_view(), name="resident_verification"),
+    path('get-signed-url/', get_signed_url, name='get_signed_url'),
 
     # Auth_Views
     path("token/", MyTokenObtainPairView.as_view(), name="token_obtain_pair"),

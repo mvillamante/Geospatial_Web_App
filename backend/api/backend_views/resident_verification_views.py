@@ -1,9 +1,64 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import generics, status
+from rest_framework.decorators import api_view, permission_classes
+
 from api.models import ResidentVerificationRequest
 from api.serializer import ResidentVerificationRequestSerializer
+from api.admin_permissions import IsAdminRole
+
+from api.supabase_storage import create_signed_url
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated, IsAdminRole])
+def get_signed_url(request):
+    path = request.GET.get("path")
+    if not path:
+        return Response({"error": "Missing path"}, status=400)
+    
+    # Remove domain if accidentally included
+    if path.startswith("http://127.0.0.1:8000/"):
+        path = path.replace("http://127.0.0.1:8000/", "")
+    
+    try:
+        url = create_signed_url(path, expires_in_seconds=3600*24)
+        return Response({"url": url})
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+class ResidentVerificationListView(generics.ListAPIView):
+    serializer_class = ResidentVerificationRequestSerializer
+    permission_classes = [IsAuthenticated, IsAdminRole]
+
+    def get_queryset(self):
+        return ResidentVerificationRequest.objects.all().order_by('-created_at')
+
+class ApproveRejectResidentVerificationView(generics.UpdateAPIView):
+    queryset = ResidentVerificationRequest.objects.all()
+    serializer_class = ResidentVerificationRequestSerializer
+    permission_classes = [IsAuthenticated, IsAdminRole]
+
+    def patch(self, request, *args, **kwargs):
+        verification = self.get_object()
+        action = request.data.get("action")  # "approve" or "reject"
+
+        if action not in ["approve", "reject"]:
+            return Response({"detail": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if action == "approve":
+            verification.status = "Approved"
+            verification.reviewed_by = request.user
+            verification.reviewed_at = timezone.now()
+        else:
+            verification.status = "Rejected"
+            verification.rejection_reason = request.data.get("reason", "")
+            verification.reviewed_by = request.user
+            verification.reviewed_at = timezone.now()
+
+        verification.save()
+        serializer = self.get_serializer(verification)
+        return Response(serializer.data)
 
 class ResidentVerificationRequestView(APIView):
     permission_classes = [IsAuthenticated]

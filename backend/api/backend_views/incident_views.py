@@ -42,22 +42,41 @@ def send_report_reply(request, pk):
         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class IncidentReportCreateView(APIView):
+# CABUYAO_LAT_LNG
+CABUYAO_LAT_MIN = 14.23
+CABUYAO_LAT_MAX = 14.30
+CABUYAO_LNG_MIN = 121.11
+CABUYAO_LNG_MAX = 121.16
 
+class IncidentReportCreateView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def post(self, request):
+        try:
+            lat = float(request.data.get("latitude"))
+            lng = float(request.data.get("longitude"))
+        except (TypeError, ValueError):
+            return Response(
+                {"detail": "Latitude and longitude required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not (CABUYAO_LAT_MIN <= lat <= CABUYAO_LAT_MAX and
+                CABUYAO_LNG_MIN <= lng <= CABUYAO_LNG_MAX):
+            return Response(
+                {"detail": "Reports can only be filed within Cabuyao."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # proceed with serializer saving
         serializer = IncidentReportCreateSerializer(
             data=request.data,
             context={"request": request},
         )
         serializer.is_valid(raise_exception=True)
         report = serializer.save()
-        return Response(
-            {"success": True, "id": report.id},
-            status=status.HTTP_201_CREATED
-        )
+        return Response({"success": True, "id": report.id}, status=status.HTTP_201_CREATED)
 
 class IncidentReportPhotoSignedUrlView(APIView):
     permission_classes = [IsAuthenticated]

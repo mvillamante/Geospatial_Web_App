@@ -599,14 +599,36 @@ class PublicLandingPageSerializer(serializers.Serializer):
     avgResponseTimeMinutes = serializers.FloatField()
     
 class ResearcherRequestSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.CharField(source='user.email', read_only=True)
+    
     class Meta:
         model = ResearcherRequest
-        fields = ["purpose", "orgSchool", "attachment"]
+        fields = ['id', 'user', 'username', 'email', 'status','purpose', 'orgSchool', 'attachment','created_at', 'rejection_reason', 'reviewed_at']
+        read_only_fields = ['id', 'user', 'username', 'email', 'created_at', 'reviewed_at']
 
 class ResidentVerificationRequestSerializer(serializers.ModelSerializer):
+    citizen_id = serializers.IntegerField(source='user.id', read_only=True)
+    citizen_name = serializers.SerializerMethodField()
+    
     class Meta:
         model = ResidentVerificationRequest
-        fields = ["barangay", "address", "id_image"]
+        fields = [
+            "id",
+            "citizen_id",
+            "citizen_name",
+            "barangay",
+            "address",
+            "id_image",
+            "status",
+            "rejection_reason",
+            "created_at",
+            "reviewed_at"
+        ]
+        read_only_fields = ["id", "citizen_id", "citizen_name", "created_at", "reviewed_at"]
+
+    def get_citizen_name(self, obj):
+        return f"{obj.user.first_name} {obj.user.last_name}"
 
 class CmsGuideAttachmentSerializer(serializers.ModelSerializer):
     class Meta:

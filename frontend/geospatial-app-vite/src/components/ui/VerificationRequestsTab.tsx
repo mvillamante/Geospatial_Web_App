@@ -1,16 +1,24 @@
 import '../../pages/admin/UserMgmtPage.css';
 import React, { useState, useEffect } from "react";
 import { CheckCircle, XCircle } from "lucide-react";
+import { LuEllipsis } from "react-icons/lu";
+import { FiEye, FiX } from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
 
-export type RequestStatus = 'Pending' | 'Approved' | 'Rejected';
+export type VerificationStatus = "Pending" | "Approved" | "Rejected";
 
-export interface VerificationRequest {
+export interface Verification {
   id: number;
-  userId: number;
-  userName: string;
-  date: string;
-  status: RequestStatus;
+  citizen_id: number;
+  citizen_name: string;
+  barangay: string;
+  barangay_id?: string | null;
+  address: string;
+  id_image: string;
+  status: VerificationStatus;
+  rejection_reason?: string | null;
+  created_at: string;
+  reviewed_at?: string | null;
 }
 
 interface Props {
@@ -18,209 +26,297 @@ interface Props {
   onPendingCountChange?: (count: number) => void;
 }
 
-const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountChange }) => {
-  /*const [requests, setRequests] = useState<ResearcherRequest[]>([]);
+const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCountChange }) => {
+  const [verifications, setVerifications] = useState<Verification[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
-  const [rejectingId, setRejectingId] = useState<number | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [modalVerification, setModalVerification] = useState<Verification | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
-  // Fetch requests
-  const fetchRequests = async (page = 1) => {
+  /* =========================
+     FETCH FROM BACKEND
+  ========================= */
+  const fetchVerifications = async (page = 1) => {
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/researcher_requests/?page=${page}&page_size=${pageSize}`, {
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      });
-
-      if (!res.ok) throw new Error("Failed to fetch requests");
+      const res = await fetch(
+        `http://127.0.0.1:8000/api/admin/resident-verifications/?page=${page}&page_size=${pageSize}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error("Failed to fetch");
 
       const data = await res.json();
-      console.log("ASAN KA NA", data)
-
-      const mapped: ResearcherRequest[] = data.results.map((r: any) => ({
-        id: r.id,
-        userId: r.user,
-        userName: r.username,
-        date: formatDistanceToNow(new Date(r.requested_at), { addSuffix: true }),
-        status: r.status as RequestStatus,
+      const mapped: Verification[] = data.results.map((v: any) => ({
+        id: v.id,
+        citizen_id: v.citizen_id,
+        citizen_name: v.citizen_name,
+        barangay: v.barangay,
+        barangay_id: v.barangay_id,
+        address: v.address,
+        id_image: v.id_image,
+        status: (v.status.charAt(0).toUpperCase() + v.status.slice(1)) as VerificationStatus,
+        rejection_reason: v.rejection_reason,
+        created_at: v.created_at,
+        reviewed_at: v.reviewed_at,
       }));
 
-      setRequests(mapped);
-      console.log("eto pi req", mapped)
+      setVerifications(mapped);
       setCurrentPage(page);
       setTotalPages(Math.ceil(data.count / pageSize));
 
-      // Update parent with pending count
       if (onPendingCountChange) {
-        onPendingCountChange(mapped.filter(r => r.status === "Pending").length);
+        onPendingCountChange(mapped.filter((v) => v.status === "Pending").length);
       }
-
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching verifications:", err);
     }
   };
+
+  useEffect(() => { fetchVerifications(1); }, []);
+
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const load = async () => {
-      await fetchRequests();
+    if (!modalVerification?.id_image) return;
+
+    const fetchSignedUrl = async () => {
+      const token = localStorage.getItem("access_token");
+
+      // Get relative path
+      const relativePath = modalVerification.id_image.replace(
+        /^http:\/\/127\.0\.0\.1:8000\//,
+        ""
+      );
+
+      try {
+        const res = await fetch(
+          `http://127.0.0.1:8000/api/get-signed-url/?path=${encodeURIComponent(relativePath)}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!res.ok) throw new Error("Failed to fetch signed URL");
+        const data = await res.json();
+        setSignedUrl(data.url);
+      } catch (err) {
+        console.error(err);
+      }
     };
-    load();
-  }, []);*/
 
-  // Approve a request
-  /*const approveRequest = async (id: number) => {
-    const req = requests.find(r => r.id === id);
-    if (!req) return;
+    fetchSignedUrl();
+  }, [modalVerification]);
 
-    const confirmed = window.confirm(`Are you sure you want to approve the request from ${req.userName}?`);
-    if (!confirmed) return;
 
+  /* =========================
+    APPROVE / REJECT
+  ========================= */
+  const updateStatus = async (id: number, action: "approve" | "reject", reason?: string) => {
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/researcher_requests/${id}/`, {
+      const res = await fetch(`http://127.0.0.1:8000/api/admin/resident-verifications/${id}/`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "approve" }),
+        body: JSON.stringify({ action, reason }),
       });
+      if (!res.ok) throw new Error("Failed to update status");
 
-      if (!res.ok) throw new Error("Failed to approve request");
+      // Update local state
+      const updated = verifications.map(v =>
+        v.id === id
+          ? { ...v, status: action === "approve" ? "Approved" : "Rejected" }
+          : v
+      );
+      setVerifications(updated);
+      setModalVerification(null); // close modal
 
-      const updated = await res.json();
-      setRequests(prev => prev.map(r => r.id === id ? { ...r, status: updated.status } : r));
-
-      fetchRequests(currentPage);
-      alert(`The request from ${req.userName} has been approved.`);
+      if (onPendingCountChange) {
+        onPendingCountChange(updated.filter(v => v.status === "Pending").length);
+      }
     } catch (err) {
-      console.error(err);
-      alert("Failed to approve request.");
-    }
-  };*/
-
-  // Reject a request
-  /*const rejectRequest = async (id: number, reason: string) => {
-    const req = requests.find(r => r.id === id);
-    if (!req) return;
-
-    try {
-      const token = localStorage.getItem("access_token");
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/researcher_requests/${id}/`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "reject", reason }),
-      });
-
-      if (!res.ok) throw new Error("Failed to reject request");
-
-      const updated = await res.json();
-      setRequests(prev => prev.map(r => r.id === id ? { ...r, status: updated.status } : r));
-
-      fetchRequests(currentPage);
-      alert(`The request from ${req.userName} has been rejected.`);
-
-    } catch (err) {
-      console.error(err);
-      alert("Failed to reject request.");
+      console.error("Error updating verification:", err);
     }
   };
 
-  const handleRejectStart = (id: number) => {
-    setRejectingId(id);
-    setRejectReason("");
+  const approveVerification = (id: number) => updateStatus(id, "approve");
+
+  // Reject function with confirmation popup
+  const rejectVerification = (id: number) => {
+    if (!rejectReason.trim()) {
+      alert("Please provide a rejection reason.");
+      return;
+    }
+
+    const confirmReject = window.confirm(
+      "Are you sure you want to reject this verification request? This action cannot be undone."
+    );
+    if (!confirmReject) return;
+
+    updateStatus(id, "reject", rejectReason);
+    setRejectReason(""); // clear input
   };
 
-  const handleRejectCancel = () => {
-    setRejectingId(null);
-    setRejectReason("");
-  };
-
-  const handleRejectConfirm = (id: number) => {
-    if (!rejectReason.trim()) return;
-    rejectRequest(id, rejectReason);
-    setRejectingId(null);
-    setRejectReason("");
-  };
-
+  /* =========================
+     PAGINATION
+  ========================= */
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
-    fetchRequests(page);
-  };*/
+    fetchVerifications(page);
+  };
 
-  /*const renderPagination = () => {
-
-    return (
-      <div className="pagination-wrapper">
-        <div className="pagination">
-          <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>Prev</button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
-            <button key={n} className={n === currentPage ? "active" : ""} onClick={() => handlePageChange(n)}>{n}</button>
-          ))}
-          <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>Next</button>
-        </div>
+  const renderPagination = () => (
+    <div className="pagination-wrapper">
+      <div className="pagination">
+        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>Prev</button>
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+          <button key={n} className={n === currentPage ? "active" : ""} onClick={() => handlePageChange(n)}>{n}</button>
+        ))}
+        <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>Next</button>
       </div>
-    );
-  };*/
+    </div>
+  );
+  
 
   return (
-    <>verification here
-      {/*<div className="verification-table-wrapper">
+    <>
+      <div className="verification-table-wrapper">
         <table>
           <thead>
             <tr>
               <th>#</th>
-              <th className="center">User</th>
+              <th className="center">Citizen ID</th>
+              <th className="center">Citizen Name</th>
+              <th className="center">Barangay</th>
+              <th className="center">Full Address</th>
+              <th className="center">Barangay ID</th>
               <th className="center">Requested At</th>
               <th className="center">Status</th>
               <th className="center">Actions</th>
             </tr>
           </thead>
+
           <tbody>
-            {requests.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="empty">
-                    Loading Requests...
+            {verifications.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="empty">Loading Verification Requests...</td>
+              </tr>
+            ) : (
+              verifications.map((v, index) => (
+                <tr key={v.id}>
+                  <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td>
+                  <td className="center muted">{v.citizen_id}</td>
+                  <td className="user-name">{v.citizen_name}</td>
+                  <td className="center muted">{v.barangay}</td>
+                  <td className="center muted">{v.address}</td>
+                  <td className="center muted">
+                    {v.id_image ? (
+                      <a
+                        href={`http://127.0.0.1:8000/api/get-signed-url/?path=${encodeURIComponent(v.id_image)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View ID
+                      </a>
+                    ) : "N/A"}
+                  </td>
+                  <td className="center muted">{formatDistanceToNow(new Date(v.created_at), { addSuffix: true })}</td>
+                  <td className="center"><span className={`badge ${v.status}`}>{v.status}</span></td>
+
+                  <td className="center">
+                    <button
+                      className="view-btn"
+                      onClick={() => setModalVerification(v)}
+                      title="View Details"
+                    >
+                      <FiEye size={20} />
+                    </button>
                   </td>
                 </tr>
-              ) : (
-              requests.map((req, index) => {
-
-                return (
-                  <tr key={req.id}>
-                    <td className="cell-number">{index + 1}</td>
-                    <td className="user-name">{req.userName}</td>
-                    <td className="center muted">{req.date}</td>
-                    <td className="center"><span className={`badge ${req.status}`}>{req.status}</span></td>
-                    <td className="center actions">
-                      {req.status === "Pending" && (
-                        rejectingId !== req.id ? (
-                          <>
-                            <button className="approve-btn" onClick={() => approveRequest(req.id)}>
-                              <CheckCircle size={16} /> Approve
-                            </button>
-                            <button className="reject-btn" onClick={() => handleRejectStart(req.id)}>
-                              <XCircle size={16} /> Reject
-                            </button>
-                          </>
-                        ) : (
-                          <div className="reject-box">
-                            <textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder="Enter reason..." rows={3} autoFocus />
-                            <div className="reject-actions">
-                              <button className="cancel-btn" onClick={handleRejectCancel}>Cancel</button>
-                              <button className="confirm-btn" disabled={!rejectReason.trim()} onClick={() => handleRejectConfirm(req.id)}>Confirm</button>
-                            </div>
-                          </div>
-                        )
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
+              ))
             )}
           </tbody>
         </table>
-      </div>*/}
-      {/*renderPagination()*/}
+      </div>
+
+      {renderPagination()}
+
+      {/* =========================
+          VERIFICATION DETAILS MODAL
+      ========================= */}
+      {modalVerification && (
+        <div
+          className="verification-modal-backdrop"
+          onClick={() => setModalVerification(null)}
+        >
+          <div
+            className="verification-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>Resident Verification Details</h2>
+            <p><strong>Citizen Name:</strong> {modalVerification.citizen_name}</p>
+            <p><strong>Citizen ID:</strong> {modalVerification.citizen_id}</p>
+            <p><strong>Barangay:</strong> {modalVerification.barangay}</p>
+            <p><strong>Address:</strong> {modalVerification.address}</p>
+            <p><strong>Status:</strong> {modalVerification.status}</p>
+            {modalVerification.rejection_reason && (
+              <p><strong>Rejection Reason:</strong> {modalVerification.rejection_reason}</p>
+            )}
+            <p><strong>Requested At:</strong> {new Date(modalVerification.created_at).toLocaleString()}</p>
+            <img src={signedUrl || "/placeholder.png"} alt="Barangay ID" style={{ width: "60px" }} />
+
+            {modalVerification.status === "Pending" && (
+              <div className="verification-modal-actions" style={{ display: "flex", gap: "10px", alignItems: "flex-start", marginTop: "10px" }}>
+                
+                {/* Approve Button */}
+                <button
+                  className="approve-btn"
+                  onClick={() => approveVerification(modalVerification.id)}
+                  style={{ flex: "1" }}
+                >
+                  <CheckCircle size={16} /> Approve
+                </button>
+
+                {/* Reject Toggle */}
+                <button
+                  className="reject-btn"
+                  onClick={() => setRejectReason(prev => prev ? prev : "")} // just triggers textarea display
+                  style={{ flex: "1" }}
+                >
+                  <XCircle size={16} /> Reject
+                </button>
+              </div>
+            )}
+
+            {/* Reject textarea + confirm button only show if rejectReason toggle is active */}
+            {rejectReason !== "" && modalVerification.status === "Pending" && (
+              <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "5px" }}>
+                <textarea
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Enter rejection reason..."
+                  rows={3}
+                />
+                <button
+                  className="reject-btn"
+                  onClick={() => rejectVerification(modalVerification.id)}
+                  disabled={!rejectReason.trim()}
+                >
+                  <XCircle size={16} /> Confirm Reject
+                </button>
+              </div>
+            )}
+
+            <button
+              className="close-modal"
+              onClick={() => {
+                setModalVerification(null);
+                setRejectReason(""); // reset reject toggle
+              }}
+              aria-label="Close"
+            >
+              <FiX size={20} />
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { isWithinCabuyao } from '../../../../src/utils/validateCabuyao';
 
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -21,10 +22,18 @@ L.Icon.Default.mergeOptions({
 export type LatLng = { lat: number; lng: number };
 
 // Click-to-pick component
+
 function ClickToPick({ value, onChange }: { value: LatLng | null; onChange: (v: LatLng) => void }) {
   useMapEvents({
     click(e) {
-      onChange({ lat: e.latlng.lat, lng: e.latlng.lng });
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
+
+      if (isWithinCabuyao(lat, lng)) {
+        onChange({ lat, lng });
+      } else {
+        alert("You must pick a location within Cabuyao.");
+      }
     },
   });
   return value ? <Marker position={[value.lat, value.lng]} /> : null;

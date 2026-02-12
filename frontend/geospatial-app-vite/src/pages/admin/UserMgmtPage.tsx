@@ -1,4 +1,6 @@
 import './UserMgmtPage.css';
+import { formatDistanceToNow } from 'date-fns';
+
 import { useEffect, useRef, useState, useCallback  } from "react";
 import { Power, PowerOff, CircleChevronDown } from 'lucide-react';
 import { LuEllipsis } from "react-icons/lu";
@@ -150,14 +152,28 @@ const UserMgmtPage: React.FC = () => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("access_token");
-        const res = await fetch(`http://127.0.0.1:8000/api/admin/researcher_requests/?page=1&page_size=1000`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await fetch(
+          `http://127.0.0.1:8000/api/admin/researcher_requests/?page=1&page_size=1000`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
         if (!res.ok) throw new Error("Failed to fetch requests");
         const data = await res.json();
 
-        setAllRequests(data.results);
-        setPendingCount(data.results.filter((r: any) => r.status === "Pending").length);
+        const mapped: ResearcherRequest[] = data.results.map((r: any) => ({
+          id: r.id,
+          userId: r.user,
+          userName: r.username,
+          date: r.created_at
+            ? formatDistanceToNow(new Date(r.created_at), { addSuffix: true })
+            : "Unknown",
+          status: (r.status.charAt(0).toUpperCase() + r.status.slice(1)) as
+            | "Pending"
+            | "Approved"
+            | "Rejected",
+        }));
+
+        setAllRequests(mapped);
+        setPendingCount(mapped.filter(r => r.status === "Pending").length);
       } catch (err) {
         console.error(err);
       }
@@ -311,7 +327,7 @@ const UserMgmtPage: React.FC = () => {
             <table>
               <thead>
                 <tr>
-                  <th></th>
+                  <th>#</th>
                   <th className="center">User</th>
                   <th className="center">Role</th>
                   {/*<th className="center">Department</th>*/}
@@ -332,10 +348,16 @@ const UserMgmtPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="user-table-body">
-                {users.length === 0 ? (
+                {loading ? (
                   <tr>
                     <td colSpan={9} className="empty">
                       Loading Users...
+                    </td>
+                  </tr>
+                ) : users.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="empty">
+                      No Users Found.
                     </td>
                   </tr>
                 ) : (

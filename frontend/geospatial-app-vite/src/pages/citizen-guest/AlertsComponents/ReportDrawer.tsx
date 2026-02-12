@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import PinLocationPicker from "./PinLocationPicker";
+import { isWithinCabuyao } from '../../../../src/utils/validateCabuyao';
 
 interface ReportDrawerProps {
   open: boolean;
@@ -189,6 +190,7 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
 
     let cancelled = false;
 
+    /* Get Current Position */
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude, accuracy } = pos.coords;
@@ -292,6 +294,12 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
     }
     if (!coords) {
       setError("Location is required. Please enable location or pin on map.");
+      return;
+    }
+
+    console.log(`test ${coords?.lat}, ${coords?.lon}`);
+    if (!isWithinCabuyao(coords.lat, coords.lon)) {
+      setError("You must be within Cabuyao to submit a report.");
       return;
     }
 

@@ -231,10 +231,12 @@ const ReportsMgmtPage: React.FC = () => {
       const token = localStorage.getItem("access_token");
       if (!token) {
         toast.error("Not logged in. Please sign in again.");
+        setLoadingReports(false);
         return;
       }
 
       try {
+        setLoadingReports(true);
         const res = await fetch(`${API_BASE}/api/reports/list/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -250,6 +252,9 @@ const ReportsMgmtPage: React.FC = () => {
       } catch (err) {
         toast.error("Unable to load reports");
         console.error(err);
+        setReports([]);
+      } finally {
+        setLoadingReports(false);
       }
     };
 
@@ -373,6 +378,9 @@ const ReportsMgmtPage: React.FC = () => {
     }
   }, [viewArchived]);
 
+  /* Loading */
+  const [loadingReports, setLoadingReports] = useState(true);
+
 
   return (
     <div className="reportsmgmt-page">
@@ -482,10 +490,16 @@ const ReportsMgmtPage: React.FC = () => {
           </thead>
 
           <tbody>
-            {filteredReports.length === 0 ? (
+            {loadingReports ? (
               <tr>
                 <td colSpan={9} className="empty">
                   Loading Reports...
+                </td>
+              </tr>
+            ) : filteredReports.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="empty">
+                  No Reports Found.
                 </td>
               </tr>
             ) : (

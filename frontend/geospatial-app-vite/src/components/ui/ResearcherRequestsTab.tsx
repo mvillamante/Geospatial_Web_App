@@ -43,8 +43,8 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
         id: r.id,
         userId: r.user,
         userName: r.username,
-        date: formatDistanceToNow(new Date(r.created_at), { addSuffix: true }),
-        status: r.status as RequestStatus,
+        date: r.created_at ? formatDistanceToNow(new Date(r.created_at), { addSuffix: true }) : "Unknown",
+        status: (r.status.charAt(0).toUpperCase() + r.status.slice(1)) as RequestStatus
       }));
 
       setRequests(mapped);
@@ -179,7 +179,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
             {requests.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="empty">
-                    Loading Requests...
+                    Loading Researcher Requests...
                   </td>
                 </tr>
               ) : (
@@ -187,7 +187,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
 
                 return (
                   <tr key={req.id}>
-                    <td className="cell-number">{index + 1}</td>
+                    <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td>
                     <td className="user-name">{req.userName}</td>
                     <td className="center muted">{req.date}</td>
                     <td className="center"><span className={`badge ${req.status}`}>{req.status}</span></td>

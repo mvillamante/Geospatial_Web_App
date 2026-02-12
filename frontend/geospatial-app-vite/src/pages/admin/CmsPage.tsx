@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
-import { Plus, Edit, Eye, Trash2, Send, ArchiveRestore, Phone } from 'lucide-react';
+import { Plus, Edit, Eye, Trash2, Send, ArchiveRestore, Phone, Archive } from 'lucide-react';
 import { FiCheckCircle, FiSearch } from "react-icons/fi";
 import { LuEllipsis } from "react-icons/lu";
 import './CmsPage.css';
 import RichTextEditor from './TextEditor/RichTextEditor';
+import Pagination from "../../components/ui/Pagination";
 
 interface Attachment {
   id: number;
@@ -66,6 +67,7 @@ const CmsPage: React.FC = () => {
     postType: "advisory",
     postBody: "",
   });
+  
   const [showNotificationDialog, setShowNotificationDialog] = useState(false);
   const [notification, setNotification] = useState({ type: 'alert', message: '' });
   const [viewArchived, setViewArchived] = useState(false);
@@ -98,6 +100,16 @@ const CmsPage: React.FC = () => {
 
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, typeFilter, searchQuery, viewArchived]);
+
+
   useEffect(() => {
     const onDocClick = () => setOpenMenuId(null);
     document.addEventListener("click", onDocClick);
@@ -116,19 +128,22 @@ const CmsPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetch("/api/cms/guides/", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-    })
-      .then(res => res.json())
-      .then(data => {
+    const fetchGuides = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch("/api/cms/guides/", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+
+        const data = await res.json();
         const mappedGuide = data.map((g: any) => ({
           postId: g.id,
           postTitle: g.post_title,
           postType: g.post_type,
           postBody: g.post_body,
-          status: g.status === "published"? "Published" : g.status === "archived" ? "Archived": "Draft",
+          status: g.status === "published" ? "Published" : g.status === "archived" ? "Archived" : "Draft",
           isPinned: g.is_pinned,
           createdAt: g.created_at,
           updatedAt: g.updated_at,
@@ -137,8 +152,16 @@ const CmsPage: React.FC = () => {
         }));
 
         setGuides(mappedGuide);
-      });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGuides();
   }, []);
+
 
   const togglePublish = async (postId: number) => {
     await fetch(`/api/cms/guides/${postId}/publish/`, {
@@ -345,6 +368,14 @@ const CmsPage: React.FC = () => {
       );
     });
 
+  /* Pagination */
+  const totalPages = Math.ceil(filteredGuides.length / pageSize);
+  const handlePageChange = (page: number) => { if (page < 1 || page > totalPages) return; setCurrentPage(page); };
+
+  const paginatedGuides = filteredGuides.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   /* Tab */
   const indicatorRef = useRef<HTMLDivElement>(null);
@@ -500,14 +531,20 @@ const CmsPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredGuides.length === 0 ? (
+            {isLoading ? (
               <tr>
                 <td colSpan={9} className="empty">
                   Loading Content...
                 </td>
               </tr>
+            ) : paginatedGuides.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="empty">
+                  No Content Found.
+                </td>
+              </tr>
             ) : (
-              filteredGuides.map(guide => {
+              paginatedGuides.map(guide => {
 
                 return (
                   <tr key={guide.postId}>
@@ -554,63 +591,70 @@ const CmsPage: React.FC = () => {
                         ><LuEllipsis size={20} /></button>
 
                         {/* Dropdown */}
-    {openMenuId === guide.postId && (
-      <div className="dropdown-menu">
-        {!viewArchived ? (
-          <>
-            <button
-              className="dropdown-item"
-              disabled={guide.status === "Published"}
-              title={guide.status === "Published" ? "Unpublish to edit" : "Edit"}
-              onClick={() => {
-                if (guide.status === "Published") return;
-                setEditingGuide({ ...guide });
-                setOriginalAttachments(guide.attachments || []);
-                setTempEditImages([]);
-                setDeletedAttachments([]);
-                setShowEditModal(true);
-                setOpenMenuId(null);
-              }}
-            >
-              <Edit size={16} /> Edit
-            </button>
+                        {openMenuId === guide.postId && (
+                          <div className="dropdown-menu">
+                            {!viewArchived ? (
+                              <>
+                                <button
+                                  className="dropdown-item"
+                                  disabled={guide.status === "Published"}
+                                  title={guide.status === "Published" ? "Unpublish to edit" : "Edit"}
+                                  onClick={() => {
+                                    if (guide.status === "Published") return;
+                                    setEditingGuide({ ...guide });
+                                    setOriginalAttachments(guide.attachments || []);
+                                    setTempEditImages([]);
+                                    setDeletedAttachments([]);
+                                    setShowEditModal(true);
+                                    setOpenMenuId(null);
+                                  }}
+                                >
+                                  <Edit size={16} /> Edit
+                                </button>
 
-            <button
-              className="dropdown-item"
-              onClick={() => {
-                setGuideToPublish(guide);
-                setShowPublishModal(true);
-                setOpenMenuId(null);
-              }}
-            >
-              <Eye size={16} /> View
-            </button>
-          </>
-        ) : (
-          <button
-            className="dropdown-item"
-            onClick={() => {
-              restoreGuide(guide.postId);
-              setOpenMenuId(null);
-            }}
-          >
-            <ArchiveRestore size={16} /> Restore
-          </button>
-        )}
+                                <button
+                                  className="dropdown-item"
+                                  onClick={() => {
+                                    setGuideToPublish(guide);
+                                    setShowPublishModal(true);
+                                    setOpenMenuId(null);
+                                  }}
+                                >
+                                  <Eye size={16} /> View
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                className="dropdown-item"
+                                onClick={() => {
+                                  restoreGuide(guide.postId);
+                                  setOpenMenuId(null);
+                                }}
+                              >
+                                <ArchiveRestore size={16} /> Restore
+                              </button>
+                            )}
 
-        <button
-          className="dropdown-item danger"
-          onClick={() => {
-            setGuideToDelete(guide);
-            setShowDeleteModal(true);
-            setOpenMenuId(null);
-          }}
-        >
-          <Trash2 size={16} /> Delete
-        </button>
-      </div>
-    )}
-
+                              <button
+                                className="dropdown-item danger"
+                                onClick={() => {
+                                  setGuideToDelete(guide);
+                                  setShowDeleteModal(true);
+                                  setOpenMenuId(null);
+                                }}
+                              >
+                                {viewArchived ? (
+                                  <>
+                                    <Trash2 size={16} /> Delete
+                                  </>
+                                ) : (
+                                  <>
+                                    <Archive size={16} /> Archive
+                                  </>
+                                )}
+                              </button>
+                          </div>
+                        )}
                       </div>
                     </td>
 
@@ -838,16 +882,15 @@ const CmsPage: React.FC = () => {
         </div>
       )}
       
-      {/* Delete Modal */}
+      {/* Delete/Archive Modal */}
       {showDeleteModal && guideToDelete && (
         <div className="modal-overlay">
           <div className="modal">
-            <h2>Delete Guide</h2>
-
+            <h2>{viewArchived ? "Delete Guide" : "Archive Guide"}</h2>
             <p>
               {viewArchived
                 ? "This guide is already archived. You may permanently delete it."
-                : "What would you like to do with "}
+                : "Are you sure you want to archive "}
               <strong>"{guideToDelete.postTitle}"</strong>?
             </p>
 
@@ -864,7 +907,7 @@ const CmsPage: React.FC = () => {
 
             {!viewArchived && (
               <button
-                className="btn-secondary"
+                className="btn-secondary archive"
                 onClick={() => {
                   archiveGuide(guideToDelete.postId);
                   setShowDeleteModal(false);
@@ -875,16 +918,18 @@ const CmsPage: React.FC = () => {
               </button>
             )}
 
-              <button
-                className="btn-secondary danger"
-                onClick={() => {
-                  permanentDeleteGuide(guideToDelete.postId);
-                  setShowDeleteModal(false);
-                  setGuideToDelete(null);
-                }}
-              >
-                Permanent Delete
-              </button>
+              {viewArchived && (
+                <button
+                  className="btn-secondary danger"
+                  onClick={() => {
+                    permanentDeleteGuide(guideToDelete.postId);
+                    setShowDeleteModal(false);
+                    setGuideToDelete(null);
+                  }}
+                >
+                  Permanent Delete
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -1101,6 +1146,11 @@ const CmsPage: React.FC = () => {
         </div>
       )}
 
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 };

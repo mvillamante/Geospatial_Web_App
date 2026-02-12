@@ -1,41 +1,66 @@
 .toolbar {
   display: flex;
-  gap: 6px;
-  padding: 8px;
-  border-bottom: 1px solid #ddd;
-  background: #f9f9f9;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+  border-radius: 12px 12px 0 0;
 }
 
-.toolbar button {
-  padding: 6px 10px;
-  border: 1px solid #ccc;
+.toolbar-btn {
+  width: 36px;
+  height: 34px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  color: #374151;
+  font-size: 14px;
+  transition: all 0.15s ease;
 }
 
-.toolbar button.active {
+.toolbar-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.toolbar-btn.active {
   background: #2563eb;
   color: #fff;
   border-color: #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-.toolbar button:hover {
-  background: #f1f5f9;
+.toolbar-btn:active {
+  transform: scale(0.96);
 }
 
-
-.editor-bold {
-  font-weight: bold;
+.toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background: #d1d5db;
+  margin: 0 6px;
 }
 
-.editor-italic {
+/* Text styling */
+.icon-bold {
+  font-weight: 700;
+}
+
+.icon-italic {
   font-style: italic;
 }
 
-.editor-underline {
+.icon-underline {
   text-decoration: underline;
 }
 
-.editor-strikethrough {
-  text-decoration: line-through;
+.toolbar-btn svg {
+  width: 16px;
+  height: 16px;
 }

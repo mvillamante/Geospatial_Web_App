@@ -89,15 +89,106 @@ export default function ToolbarPlugin() {
 
   return (
     <div className="toolbar">
-      <button className={isBold ? 'active' : ''} onMouseDown={e => { e.preventDefault(); editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold'); }}>B</button>
-      <button className={isItalic ? 'active' : ''} onMouseDown={e => { e.preventDefault(); editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic'); }}>I</button>
-      <button className={isUnderline ? 'active' : ''} onMouseDown={e => { e.preventDefault(); editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline'); }}>U</button>
+      {/* Text Formatting */}
+      <button
+        className={`toolbar-btn ${isBold ? 'active' : ''}`}
+        onMouseDown={e => {
+          e.preventDefault();
+          editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold');
+        }}
+      >
+        <span className="icon-bold">B</span>
+      </button>
 
-      <button className={isBulletList ? 'active' : ''} onMouseDown={e => { e.preventDefault(); editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined); }}>• List</button>
-      <button className={isNumberedList ? 'active' : ''} onMouseDown={e => { e.preventDefault(); editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined); }}>1. List</button>
+      <button
+        className={`toolbar-btn ${isItalic ? 'active' : ''}`}
+        onMouseDown={e => {
+          e.preventDefault();
+          editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic');
+        }}
+      >
+        <span className="icon-italic">I</span>
+      </button>
 
-      <button onMouseDown={e => { e.preventDefault(); indent(); }}>➡️</button>
-      <button onMouseDown={e => { e.preventDefault(); outdent(); }}>⬅️</button>
+      {/* <button
+        className={`toolbar-btn ${isUnderline ? 'active' : ''}`}
+        onMouseDown={e => {
+          e.preventDefault();
+          editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline');
+        }}
+      >
+        <span className="icon-underline">U</span>
+      </button> */}
+
+      <div className="toolbar-divider" />
+
+      {/* Lists */}
+      <button
+        className={`toolbar-btn ${isBulletList ? 'active' : ''}`}
+        onMouseDown={e => {
+          e.preventDefault();
+          editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
+        }}
+      >
+        <svg viewBox="0 0 24 24">
+          <circle cx="5" cy="6" r="2" />
+          <circle cx="5" cy="12" r="2" />
+          <circle cx="5" cy="18" r="2" />
+          <line x1="10" y1="6" x2="20" y2="6" stroke="currentColor" strokeWidth="2" />
+          <line x1="10" y1="12" x2="20" y2="12" stroke="currentColor" strokeWidth="2" />
+          <line x1="10" y1="18" x2="20" y2="18" stroke="currentColor" strokeWidth="2" />
+        </svg>
+      </button>
+
+      <button
+        className={`toolbar-btn ${isNumberedList ? 'active' : ''}`}
+        onMouseDown={e => {
+          e.preventDefault();
+          editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
+        }}
+      >
+        <svg viewBox="0 0 24 24">
+          <text x="2" y="8" fontSize="6">1.</text>
+          <text x="2" y="14" fontSize="6">2.</text>
+          <text x="2" y="20" fontSize="6">3.</text>
+          <line x1="10" y1="6" x2="20" y2="6" stroke="currentColor" strokeWidth="2" />
+          <line x1="10" y1="12" x2="20" y2="12" stroke="currentColor" strokeWidth="2" />
+          <line x1="10" y1="18" x2="20" y2="18" stroke="currentColor" strokeWidth="2" />
+        </svg>
+      </button>
+
+      <div className="toolbar-divider" />
+
+      {/* Indent / Outdent */}
+      <button
+        className="toolbar-btn"
+        onMouseDown={e => {
+          e.preventDefault();
+          indent();
+        }}
+      >
+        <svg viewBox="0 0 24 24">
+          <line x1="4" y1="6" x2="20" y2="6" stroke="currentColor" strokeWidth="2"/>
+          <line x1="8" y1="12" x2="20" y2="12" stroke="currentColor" strokeWidth="2"/>
+          <line x1="4" y1="18" x2="20" y2="18" stroke="currentColor" strokeWidth="2"/>
+          <polyline points="6,10 8,12 6,14" fill="none" stroke="currentColor" strokeWidth="2"/>
+        </svg>
+      </button>
+
+      <button
+        className="toolbar-btn"
+        onMouseDown={e => {
+          e.preventDefault();
+          outdent();
+        }}
+      >
+        <svg viewBox="0 0 24 24">
+          <line x1="4" y1="6" x2="20" y2="6" stroke="currentColor" strokeWidth="2"/>
+          <line x1="8" y1="12" x2="20" y2="12" stroke="currentColor" strokeWidth="2"/>
+          <line x1="4" y1="18" x2="20" y2="18" stroke="currentColor" strokeWidth="2"/>
+          <polyline points="4,10 2,12 4,14" fill="none" stroke="currentColor" strokeWidth="2"/>
+        </svg>
+      </button>
     </div>
   );
 }

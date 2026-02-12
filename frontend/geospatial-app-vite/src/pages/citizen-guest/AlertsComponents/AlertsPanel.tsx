@@ -27,7 +27,7 @@ interface AlertsPanelProps {
 }
 
 export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch }: AlertsPanelProps) {
-    const [filtersOpen, setFiltersOpen] = useState(false);
+    const [filtersOpen, setFiltersOpen] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 

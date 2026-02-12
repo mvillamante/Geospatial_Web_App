@@ -93,7 +93,7 @@ const NotificationPage: React.FC = () => {
                     statusTo: n.status_to,
                     officerMessage: n.officer_message,
                     resolutionSummary: n.resolution_summary,
-                    rejectReason: n.reject_reason,
+                    rejectReason: n.rejection_reason,
 
                     cmsGuideId: n.cms_guide_id,
                     cmsPostId: n.cms_post_id,

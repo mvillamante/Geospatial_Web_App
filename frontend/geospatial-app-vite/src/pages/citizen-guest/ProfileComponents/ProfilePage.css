@@ -85,7 +85,8 @@
 }
 
 /* CTA button */
-.research-btn {
+.research-btn,
+.verify-btn {
   margin-top: 10px;
   display: inline-flex;
   align-items: center;
@@ -102,7 +103,8 @@
   transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
-.research-btn:hover {
+.research-btn:hover,
+.verify-btn:hover {
   background: #eef2ff;
   transform: translateY(-1px);
   box-shadow: 0 12px 24px rgba(15, 23, 42, 0.10);
@@ -606,6 +608,95 @@
   color: var(--text-white);
   font-weight: 800;
   cursor: pointer;
+}
+
+/* Verification */
+.profile-page .verification-block {
+  margin-top: 12px;
+}
+
+.profile-page .verification-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.verification-label {
+  font-weight: 600;
+}
+
+.verification-badge {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.verification-badge.verified { background: #e8fff0; }
+.verification-badge.pending { background: #fff6df; }
+.verification-badge.rejected { background: #ffe7e7; }
+.verification-badge.unverified { background: #f0f0f0; }
+
+.verification-reason {
+  margin-top: 6px;
+  color: #b00020;
+  font-size: 13px;
+}
+
+
+/* Verification Modal */
+.profile-page .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+}
+
+.profile-page .modal-card {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.profile-page .modal-subtext {
+  margin-top: 6px;
+  opacity: 0.8;
+  font-size: 14px;
+}
+
+.profile-page .modal-field {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-page .modal-field textarea {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+}
+
+
+.profile-page .modal-field input,
+.profile-page .modal-field select {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.profile-page .modal-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
 }
 
 /* =========================

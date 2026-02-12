@@ -43,7 +43,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
         id: r.id,
         userId: r.user,
         userName: r.username,
-        date: formatDistanceToNow(new Date(r.requested_at), { addSuffix: true }),
+        date: formatDistanceToNow(new Date(r.created_at), { addSuffix: true }),
         status: r.status as RequestStatus,
       }));
 

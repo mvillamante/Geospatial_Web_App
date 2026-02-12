@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Rss } from "lucide-react";
 import ReportCard from './ReportCard';
 import "./ProfilePage.css";
 import { getUserRoleAndDisplayName } from "../../../libr/auth";
@@ -39,6 +39,9 @@ type IncidentReportAPI = {
   reply_image_url?: string | null;
 };
 
+type VerificationStatus = "unverified" | "pending" | "verified" | "rejected";
+type ResearcherStatus = "none" | "pending" | "approved" | "rejected";
+
 type ProgressStatus = "Pending" | "In Progress" | "Resolved";
 
 function toProgressStatus(raw: string | undefined | null): ProgressStatus {
@@ -50,6 +53,46 @@ function toProgressStatus(raw: string | undefined | null): ProgressStatus {
   return "Pending";
 }
 const ProfilePage: React.FC = () => {
+  const [researcherStatus, setResearcherStatus] = useState<ResearcherStatus>("none");
+  const [researcherReason, setResearcherReason] = useState("");
+
+  const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>("unverified");
+  const [verificationReason, setVerificationReason] = useState<string>("");
+
+  const [showResearcherModal, setShowResearcherModal] = useState(false);
+  const [researchPurpose, setResearchPurpose] = useState("");
+  const [researchOrgSchool, setResearchOrgSchool] = useState("");
+  const [researchAttachment, setResearchAttachment] = useState<File | null>(null);
+  const [researchLoading, setResearchLoading] = useState(false);
+
+
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [barangay, setBarangay] = useState("");
+  const [address, setAddress] = useState("");
+  const [barangayIdFile, setBarangayIdFile] = useState<File | null>(null);
+
+  const [verifyLoading, setVerifyLoading] = useState(false);
+
+  const CABUYAO_BARANGAYS = [
+    "Banaybanay",
+    "Bigaa",
+    "Butong",
+    "Casile",
+    "Diezmo",
+    "Gulod",
+    "Mamatid",
+    "Marinig",
+    "Niugan",
+    "Pittland",
+    "Pulo",
+    "Sala",
+    "San Isidro",
+    "Baclaran",
+    "Barangay Dos",
+    "Barangay Tres",
+    "Barangay Uno"
+  ]
+
   const navigate = useNavigate();
   const { displayName, userRole, userRole2 } = getUserRoleAndDisplayName();
 
@@ -114,6 +157,27 @@ const ProfilePage: React.FC = () => {
         }
 
         const data = await res.json();
+
+        const rStatus = (data.researcher_status || "none").toLowerCase();
+        setResearcherStatus(
+          rStatus === "pending" || rStatus === "approved" || rStatus === "rejected"
+            ? rStatus
+            : "none"
+        );
+
+        setResearcherReason(data.researcher_rejection_reason || "");
+
+        const vStatus = (data.verification_status || "unverified").toLowerCase();
+        setVerificationStatus(
+          vStatus === "pending" || vStatus === "verified" || vStatus === "rejected"
+            ? vStatus
+            : "unverified"
+        );
+
+        const fixedV = vStatus === "approved" ? "verified" : vStatus
+
+        setVerificationReason(data.verification_rejection_reason || "");
+
         const e = data.email ?? "";
         const p = data.phone ?? "";
 
@@ -129,6 +193,8 @@ const ProfilePage: React.FC = () => {
     }
 
     fetchProfile();
+
+
 
     const fetchMyReports = async () => {
       setLoadingReports(true);
@@ -291,28 +357,105 @@ const ProfilePage: React.FC = () => {
 
 
   const sendResearcherRequest = async () => {
+
+    if (!researchPurpose.trim()) return alert("Please enter your purpose.");
+    if (!researchOrgSchool.trim()) return alert("Please enter your organization/school.");
+
+    setResearchLoading(true);
+
     try {
       const token = localStorage.getItem("access_token");
 
-      const res = await fetch("http://127.0.0.1:8000/api/researcher/request/", {
+      const formData = new FormData();
+      formData.append("purpose", researchPurpose.trim());
+      formData.append("orgSchool", researchOrgSchool.trim());
+      if (researchAttachment) formData.append("attachment", researchAttachment)
+
+      const res = await fetch("http://localhost:8000/api/researcher/request/", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
+        body: formData,
       });
 
+      const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        const err = await res.json();
-        alert(err.detail || "Failed to send request");
+        const msg =
+          data.detail ||
+          (typeof data === "object" ? JSON.stringify(data) : "Failed to send request");
+        alert(msg);
         return;
       }
 
       // Success
-      setIsRequested(true);
+      setResearcherStatus("pending");
+      setResearcherReason("");
+      setIsRequested(true)
+
+      setShowResearcherModal(false);
+
+      setResearchPurpose("");
+      setResearchOrgSchool("");
+      setResearchAttachment(null);
+
       alert("Researcher request sent!");
     } catch (err) {
       console.error("Request failed:", err);
+      alert("Request failed.");
+    }
+  };
+
+  const submitVerificationRequest = async () => {
+    if (!barangay.trim()) {
+      alert("Please select your barangay.");
+      return;
+    }
+    if (!address.trim()) {
+      alert("Please enter your address.");
+      return;
+    }
+    if (!barangayIdFile) {
+      alert("Please upload your Barangay ID.");
+      return;
+    }
+
+    setVerifyLoading(true);
+    try {
+      const token = localStorage.getItem("access_token");
+
+      const formData = new FormData();
+      formData.append("barangay", barangay.trim()),
+        formData.append("address", address.trim()),
+        formData.append("id_image", barangayIdFile);
+
+      const res = await fetch("http://127.0.0.1:8000/api/resident-verification/request/", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(data.detail || "Failed to submit verification request.");
+        return;
+      }
+
+      setVerificationStatus("pending");
+      setVerificationReason("");
+      setShowVerifyModal(false);
+
+      setBarangay("");
+      setAddress("");
+      setBarangayIdFile(null);
+
+      alert("Verification request submitted!");
+    } catch (e: any) {
+      alert(e?.message || "Verification request failed");
+    } finally {
+      setVerifyLoading(false);
     }
   };
 
@@ -329,19 +472,15 @@ const ProfilePage: React.FC = () => {
     <div className="profile-page">
       {/* Profile Header */}
       <div className="profile-card">
-
         <div className="profile-left">
           <div className="avatar-wrapper">
-
-            <img
-              className="avatar"
-              src={mockAvatarUrl}
-              alt={`${displayName} avatar`}
-            />
+            <img className="avatar" src={mockAvatarUrl} alt={`${displayName} avatar`} />
             <div className="online-indicator" />
           </div>
+
           <div className="profile-info">
             <h2>{displayName}</h2>
+
             <p className="role-tag">
               {userRole}
               {userRole2?.[0] ? ` & ${userRole2[0]}` : ""}
@@ -362,6 +501,7 @@ const ProfilePage: React.FC = () => {
                   <span className="contact-value">{email || "—"}</span>
                 )}
               </div>
+
               <div className="contact-row">
                 <span className="contact-label">Phone</span>
                 {isEditingProfile ? (
@@ -379,7 +519,11 @@ const ProfilePage: React.FC = () => {
 
               <div className="contact-actions">
                 {!isEditingProfile ? (
-                  <button className="edit-btn" onClick={() => setIsEditingProfile(true)} disabled={profileLoading}>
+                  <button
+                    className="edit-btn"
+                    onClick={() => setIsEditingProfile(true)}
+                    disabled={profileLoading}
+                  >
                     Edit
                   </button>
                 ) : (
@@ -393,25 +537,86 @@ const ProfilePage: React.FC = () => {
                   </>
                 )}
               </div>
-
             </div>
+
+            {/* Verification + Researcher - only for non-staff */}
             {!isStaff && (
               <>
-                {(!userRole2?.length || userRole2[0] === "") && userRole !== "Researcher" && (
-                  <button
-                    className={`research-btn ${isRequested ? 'requested' : ''}`}
-                    onClick={sendResearcherRequest}
-                    disabled={isRequested}
-                  >
-                    <GraduationCap size={16} className="cap-icon" />
-                    {isRequested ? "Request Sent" : "Request Researcher Access"}
-                  </button>
+                {/* Verification */}
+                <div className="verification-block">
+                  <div className="verification-row">
+                    <span className="verification-label">Resident Verification</span>
+
+                    {verificationStatus === "verified" && (
+                      <span className="verification-badge verified">Verified Resident</span>
+                    )}
+                    {verificationStatus === "pending" && (
+                      <span className="verification-badge pending">Pending</span>
+                    )}
+                    {verificationStatus === "rejected" && (
+                      <span className="verification-badge rejected">Rejected</span>
+                    )}
+                    {verificationStatus === "unverified" && (
+                      <span className="verification-badge unverified">Unverified</span>
+                    )}
+                  </div>
+
+                  {verificationStatus === "rejected" && verificationReason && (
+                    <p className="verification-reason">Reason: {verificationReason}</p>
+                  )}
+
+                  {(verificationStatus === "unverified" || verificationStatus === "rejected") && (
+                    <button className="verify-btn" onClick={() => setShowVerifyModal(true)}>
+                      {verificationStatus === "rejected" ? "Resubmit Verification" : "Get Verified"}
+                    </button>
+                  )}
+
+                  {verificationStatus === "pending" && (
+                    <button className="verify-btn" disabled>
+                      Verification Pending
+                    </button>
+                  )}
+                </div>
+
+                {/* Researcher Access */}
+                {userRole !== "Researcher" && (
+                  <div style={{ marginTop: 10 }}>
+                    {researcherStatus === "rejected" && researcherReason && (
+                      <p className="verification-reason">Reason: {researcherReason}</p>
+                    )}
+
+                    {(researcherStatus === "none" || researcherStatus === "rejected") && (
+                      <button
+                        className={`research-btn ${isRequested ? "requested" : ""}`}
+                        onClick={() => setShowResearcherModal(true)}
+                        disabled={isRequested}
+                      >
+                        <GraduationCap size={16} className="cap-icon" />
+                        {isRequested ? "Request Sent" : "Request Researcher Access"}
+                      </button>
+                    )}
+
+                    {researcherStatus === "pending" && (
+                      <button className="research-btn requested" disabled>
+                        <GraduationCap size={16} className="cap-icon" />
+                        Researcher Request Pending
+                      </button>
+                    )}
+
+                    {researcherStatus === "approved" && (
+                      <button className="research-btn requested" disabled>
+                        <GraduationCap size={16} className="cap-icon" />
+                        Researcher Access Approved
+                      </button>
+                    )}
+                  </div>
                 )}
               </>
             )}
           </div>
         </div>
 
+        {/* Stats on the right */}
         {!isStaff && (
           <div className="stats">
             <div className="stat-item">
@@ -433,7 +638,7 @@ const ProfilePage: React.FC = () => {
         )}
       </div>
 
-
+      {/* Security */}
       <div className="section-header section-header-row">
         <h3 className="section-title">Security</h3>
 
@@ -496,6 +701,7 @@ const ProfilePage: React.FC = () => {
         </div>
       )}
 
+      {/* Report history */}
       {!isStaff && (
         <>
           <div className="section-header">
@@ -508,12 +714,136 @@ const ProfilePage: React.FC = () => {
             {!loadingReports && !reportsError && reports.length === 0 && <p>No reports yet.</p>}
 
             {reports.map((report) => (
-              <ReportCard key={report.id} report={report} onUpdate={updateReport}/>
+              <ReportCard key={report.id} report={report} onUpdate={updateReport} />
             ))}
           </div>
         </>
       )}
 
+      {/* Verify Modal */}
+      {showVerifyModal && (
+        <div className="modal-overlay" role="dialog" aria-modal="true">
+          <div className="modal-card">
+            <h3>Verify as Cabuyao Resident</h3>
+            <p className="modal-subtext">
+              Submit your barangay details and a clear photo of your Barangay ID. Your request will be reviewed by an admin.
+            </p>
+
+            <div className="modal-field">
+              <label>Barangay</label>
+              <select value={barangay} onChange={(e) => setBarangay(e.target.value)}>
+                <option value="">Select barangay</option>
+                {CABUYAO_BARANGAYS.map((b) => (
+                  <option key={b} value={b}>
+                    {b}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="modal-field">
+              <label>Address</label>
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="House no., street, purok/subdivision"
+              />
+            </div>
+
+            <div className="modal-field">
+              <label>Barangay ID</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setBarangayIdFile(e.target.files?.[0] || null)}
+              />
+              {barangayIdFile && <small>Selected: {barangayIdFile.name}</small>}
+            </div>
+
+            <div className="modal-actions">
+              <button className="save-btn" onClick={submitVerificationRequest} disabled={verifyLoading}>
+                {verifyLoading ? "Submitting..." : "Submit"}
+              </button>
+
+              <button
+                className="cancel-btn"
+                onClick={() => {
+                  setShowVerifyModal(false);
+                  setBarangay("");
+                  setAddress("");
+                  setBarangayIdFile(null);
+                }}
+                disabled={verifyLoading}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showResearcherModal && (
+  <div className="modal-overlay" role="dialog" aria-modal="true">
+    <div className="modal-card">
+      <h3>Request Researcher Access</h3>
+      <p className="modal-subtext">
+        Provide your purpose and organization/school. Your request will be reviewed by an admin.
+      </p>
+
+      <div className="modal-field">
+        <label>Purpose</label>
+        <textarea
+          value={researchPurpose}
+          onChange={(e) => setResearchPurpose(e.target.value)}
+          placeholder="Explain why you need researcher access (e.g., thesis study, data analysis, etc.)"
+          rows={4}
+        />
+      </div>
+
+      <div className="modal-field">
+        <label>Organization / School</label>
+        <input
+          type="text"
+          value={researchOrgSchool}
+          onChange={(e) => setResearchOrgSchool(e.target.value)}
+          placeholder="e.g., --- University"
+        />
+      </div>
+
+      <div className="modal-field">
+        <label>Attachment/Proof (optional)</label>
+        <input
+          type="file"
+          onChange={(e) => setResearchAttachment(e.target.files?.[0] || null)}
+        />
+        {researchAttachment && <small>Selected: {researchAttachment.name}</small>}
+      </div>
+
+      <div className="modal-actions">
+        <button className="save-btn" onClick={sendResearcherRequest} disabled={researchLoading}>
+          {researchLoading ? "Submitting..." : "Submit"}
+        </button>
+
+        <button
+          className="cancel-btn"
+          onClick={() => {
+            setShowResearcherModal(false);
+            setResearchPurpose("");
+            setResearchOrgSchool("");
+            setResearchAttachment(null);
+          }}
+          disabled={researchLoading}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
+      {/* Logout */}
       <div className="logout-section">
         <span className="logout-label">Session</span>
         <button className="logout-btn" onClick={logout} type="button">
@@ -521,8 +851,8 @@ const ProfilePage: React.FC = () => {
         </button>
       </div>
     </div>
-
-  );
+  )
 };
+
 
 export default ProfilePage;

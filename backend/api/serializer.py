@@ -19,6 +19,12 @@ class UserSerializer(serializers.ModelSerializer):
 class MeSerializer(serializers.ModelSerializer):
     staff_id = serializers.ReadOnlyField()
 
+    verification_status = serializers.SerializerMethodField()
+    verification_rejection_reason = serializers.SerializerMethodField()
+
+    researcher_status = serializers.SerializerMethodField()
+    researcher_rejection_reason = serializers.SerializerMethodField()
+
     class Meta:
         model = CustomUser
         fields = (
@@ -31,32 +37,72 @@ class MeSerializer(serializers.ModelSerializer):
             "role",
             "extra_roles",
             "staff_id",
-        )
-        read_only_fields = ("id", "username", "role", "extra_roles", "staff_id")
 
-        def validate_email(self, value):
-            value = (value or "").strip()
-            if not value:
-                return value
-            
-            qs = CustomUser.objects.filter(email_iexact=value)
-            if self.instance:
-                qs = qs.exclude(pk=self.instance.pk)
-            if qs.exists():
-                raise serializers.ValidationError("This email is already in use.")
+            "verification_status",
+            "verification_rejection_reason",
+            "researcher_status",
+            "researcher_rejection_reason",
+        )
+        read_only_fields = ("id", 
+                            "username", 
+                            "role", 
+                            "extra_roles", 
+                            "staff_id",
+                            "verification_status",
+                            "verification_rejection_reason",
+                            "researcher_status",
+                            "researcher_rejection_reason",
+                            )
+
+    def validate_email(self, value):
+        value = (value or "").strip()
+        if not value:
             return value
         
-        def validate_phone(self, value):
-            value = (value or "").strip()
-            if value == "":
-                return None
+        qs = CustomUser.objects.filter(email_iexact=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("This email is already in use.")
+        return value
+    
+    def validate_phone(self, value):
+        value = (value or "").strip()
+        if value == "":
+            return None
             
-            qs = CustomUser.objects.filter(phone=value)
-            if self.instance:
-                qs = qs.exclude(pk=self.instance.pk)
-            if qs.exists():
-                raise serializers.ValidationError("This phone number is already in use.")
-            return value
+        qs = CustomUser.objects.filter(phone=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("This phone number is already in use.")
+        return value
+    
+    def get_verification_status(self, obj):
+        req = ResidentVerificationRequest.objects.filter(user=obj).order_by("-created_at").first()
+        return req.status if req else "unverified"
+    
+    def get_verification_rejection_reason(self, obj):
+        req = ResidentVerificationRequest.objects.filter(user=obj).order_by("-created_at").first()
+        if req and req.status == "rejected":
+            return req.rejection_reason or ""
+        return ""
+    
+    def get_researcher_status(self, obj):
+        req = ResearcherRequest.objects.filter(user=obj).order_by("-created_at").first()
+        return req.status if req else "none"
+
+    def get_researcher_rejection_reason(self, obj):
+        req = ResearcherRequest.objects.filter(user=obj).order_by("-created_at").first()
+        if req and req.status == "rejected":
+            return req.rejection_reason or ""
+        return ""
+
+    def get_researcher_rejection_reason(self, obj):
+        req = ResearcherRequest.objects.filter(user=obj).order_by("-created_at").first()
+        if req and req.status == "rejected":
+            return req.rejection_reason or ""
+        return ""
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -553,13 +599,14 @@ class PublicLandingPageSerializer(serializers.Serializer):
     avgResponseTimeMinutes = serializers.FloatField()
     
 class ResearcherRequestSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username', read_only=True)
-    email = serializers.CharField(source='user.email', read_only=True)
-
     class Meta:
         model = ResearcherRequest
-        fields = ['id', 'user', 'username', 'email', 'status', 'requested_at', 'reject_reason', 'rejected_at']
-        read_only_fields = ['id', 'user', 'username', 'email', 'requested_at', 'rejected_at']
+        fields = ["purpose", "orgSchool", "attachment"]
+
+class ResidentVerificationRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResidentVerificationRequest
+        fields = ["barangay", "address", "id_image"]
 
 class CmsGuideAttachmentSerializer(serializers.ModelSerializer):
     class Meta:

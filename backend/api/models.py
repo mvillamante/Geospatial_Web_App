@@ -93,36 +93,6 @@ def sync_user_groups(sender, instance: CustomUser, **kwargs):
     for r in instance.extra_roles or []:
         instance.add_group(r.capitalize()) 
         
-        
-        
-        
-    
-    
-# Researcher Request model -----------------------------------------------------------
-class ResearcherRequest(models.Model):
-    STATUS_CHOICES = [
-        ('Pending', 'Pending'),
-        ('Approved', 'Approved'),
-        ('Rejected', 'Rejected'),
-    ]
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='researcher_requests'
-    )
-    requested_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    reject_reason = models.TextField(blank=True, null=True)
-    rejected_at = models.DateTimeField(blank=True, null=True)
-    
-    def __str__(self):
-        return f"{self.user.username} - {self.status}"
-
-
-
-
-
 # Incident Report model ------------------------------------------------------------------
 class IncidentReport(models.Model):
     CATEGORY_CHOICES = [
@@ -428,3 +398,56 @@ class NotificationRead(models.Model):
 
     class Meta:
         unique_together = ("user", "notification")
+
+# Resident Verification Model ========================================================
+class ResidentVerificationRequest(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="resident_verification_requests")
+    barangay = models.CharField(max_length=120)
+    address = models.TextField()
+    id_image = models.ImageField(upload_to="verification_ids/")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    rejection_reason = models.TextField(blank=True, null=True)
+
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="reviewed_resident_verifications")
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+# Researcher Request model -----------------------------------------------------------
+class ResearcherRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='researcher_requests'
+    )
+    purpose = models.TextField(blank=True, null=True)
+    orgSchool = models.CharField(max_length=255, blank=True, null=True)
+    attachment = models.FileField(upload_to="researcher_attachments/", blank=True, null=True)
+
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    rejection_reason = models.TextField(blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]

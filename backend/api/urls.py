@@ -1,4 +1,6 @@
 from django.urls import path
+from django.conf.urls.static import static
+from django.conf import settings
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .backend_views.admin_views import *
@@ -8,6 +10,7 @@ from .backend_views.geocoding_views import *
 from .backend_views.incident_views import *
 from .backend_views.misc_views import *
 from .backend_views.researcher_views import *
+from .backend_views.resident_verification_views import *
 from .backend_views.satellite import *
 from .backend_views.password_reset_views import *
 from .backend_views.tomtom_views import tomtom_roads_tile, tomtom_traffic_tile
@@ -31,6 +34,8 @@ urlpatterns = [
     path("researcher/request/", CreateResearcherRequestView.as_view(), name="researcher_request_create"),
     path("admin/researcher_requests/", ResearcherRequestListView.as_view(), name="researcher_requests_list"),
     path("admin/researcher_requests/<int:pk>/", ApproveRejectResearcherRequestView.as_view(), name="researcher_request_update"),
+
+    path("resident-verification/request/", ResidentVerificationRequestView.as_view(), name="resident_verification"),
 
     # Auth_Views
     path("token/", MyTokenObtainPairView.as_view(), name="token_obtain_pair"),
@@ -101,4 +106,7 @@ urlpatterns = [
     # Misc_Views
     path("test/", testEndPoint, name="test"),
     path("", getRoutes, name="routes"),  
-]
+] 
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

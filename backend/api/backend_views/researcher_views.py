@@ -8,27 +8,28 @@ from django.utils import timezone
 
 # Citizen Requesting Researcher Role
 class CreateResearcherRequestView(generics.CreateAPIView):
-    queryset = ResearcherRequest.objects.all()
-    serializer_class = ResearcherRequestSerializer
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
-        # Check if user is already a researcher or admin
-        if request.user.role in ["researcher", "admin"]:
-            return Response({"detail": "You already have researcher access."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        existing = ResearcherRequest.objects.filter(user=request.user, status="Pending").first()
+    def post(self, request):
+        existing = ResearcherRequest.objects.filter(user=request.user, status="pending").first()
+
+        serializer = ResearcherRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         if existing:
-            return Response({"detail": "You already have a pending request."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        req = ResearcherRequest.objects.create(user=request.user, status="Pending")
-        serializer = self.get_serializer(req)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            for k,v in serializer.validated_data.items():
+                setattr(existing, k, v)
+            existing.save()
+            return Response({"detail": "Updated pending researcher request."}, status=status.HTTP_200_OK)
+
+        ResearcherRequest.objects.create(user=request.user, **serializer.validated_data, status="pending")
+        return Response({"detail": "Researcher request submitted"}, status=status.HTTP_201_CREATED)
+
 
 
 # Admin (list all pending requests)
 class ResearcherRequestListView(generics.ListAPIView):
-    queryset = ResearcherRequest.objects.filter(status="Pending").order_by('-requested_at')
+    queryset = ResearcherRequest.objects.filter(status="Pending").order_by('-created_at')
     serializer_class = ResearcherRequestSerializer
     permission_classes = [IsAuthenticated, IsAdminRole]
 
@@ -64,9 +65,8 @@ class ApproveRejectResearcherRequestView(generics.UpdateAPIView):
         else:
             req_obj.status = "Rejected"
             
-            reject_reason = request.data.get("reason", "")
-            req_obj.reject_reason = reject_reason
-            req_obj.rejected_at = timezone.now()
+            rejection_reason = request.data.get("reason", "")
+            req_obj.rejection_reason = rejection_reason
 
         req_obj.save()
         serializer = self.get_serializer(req_obj)

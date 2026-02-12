@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0012_researcherrequest_reject_reason_and_more'),
+        ('api', '0011_alter_customuser_role'),
     ]
 
     operations = [

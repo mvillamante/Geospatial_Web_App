@@ -1,0 +1,2114 @@
+{
+  "2020": {
+    "Baclaran": {
+      "hazard_index": 40.59,
+      "hazard_index_raw": 0.4059,
+      "hazard_class": "Moderate",
+      "flood_risk": 2.4,
+      "landslide_risk": 55.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Banay-Banay": {
+      "hazard_index": 41.76,
+      "hazard_index_raw": 0.4176,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 64.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Banlic": {
+      "hazard_index": 42.71,
+      "hazard_index_raw": 0.4271,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Barangay Dos": {
+      "hazard_index": 41.1,
+      "hazard_index_raw": 0.411,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 61.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Barangay Tres": {
+      "hazard_index": 43.99,
+      "hazard_index_raw": 0.4399,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Barangay Uno": {
+      "hazard_index": 42.17,
+      "hazard_index_raw": 0.4217,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 66.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Bigaa": {
+      "hazard_index": 42.71,
+      "hazard_index_raw": 0.4271,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Butong": {
+      "hazard_index": 57.22,
+      "hazard_index_raw": 0.5722,
+      "hazard_class": "Moderate",
+      "flood_risk": 100.0,
+      "landslide_risk": 16.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Casile": {
+      "hazard_index": 28.91,
+      "hazard_index_raw": 0.2891,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Diezmo": {
+      "hazard_index": 28.91,
+      "hazard_index_raw": 0.2891,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Gulod": {
+      "hazard_index": 46.08,
+      "hazard_index_raw": 0.4608,
+      "hazard_class": "Moderate",
+      "flood_risk": 39.9,
+      "landslide_risk": 36.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Mamatid": {
+      "hazard_index": 43.43,
+      "hazard_index_raw": 0.4343,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 72.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Marinig": {
+      "hazard_index": 51.85,
+      "hazard_index_raw": 0.5185,
+      "hazard_class": "Moderate",
+      "flood_risk": 61.2,
+      "landslide_risk": 38.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Niugan": {
+      "hazard_index": 42.3,
+      "hazard_index_raw": 0.423,
+      "hazard_class": "Moderate",
+      "flood_risk": 1.3,
+      "landslide_risk": 65.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Pittland": {
+      "hazard_index": 48.91,
+      "hazard_index_raw": 0.4891,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 100.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Pulo": {
+      "hazard_index": 44.04,
+      "hazard_index_raw": 0.4404,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.7,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Sala": {
+      "hazard_index": 28.91,
+      "hazard_index_raw": 0.2891,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "San Isidro": {
+      "hazard_index": 43.75,
+      "hazard_index_raw": 0.4375,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 74.2,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    },
+    "Poblacion": {
+      "hazard_index": 42.42,
+      "hazard_index_raw": 0.4242,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 67.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 59.4
+    }
+  },
+  "2021": {
+    "Baclaran": {
+      "hazard_index": 36.0,
+      "hazard_index_raw": 0.36,
+      "hazard_class": "Low",
+      "flood_risk": 2.4,
+      "landslide_risk": 55.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Banay-Banay": {
+      "hazard_index": 37.16,
+      "hazard_index_raw": 0.3716,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 64.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Banlic": {
+      "hazard_index": 38.12,
+      "hazard_index_raw": 0.3812,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Barangay Dos": {
+      "hazard_index": 36.51,
+      "hazard_index_raw": 0.3651,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 61.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Barangay Tres": {
+      "hazard_index": 39.4,
+      "hazard_index_raw": 0.394,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Barangay Uno": {
+      "hazard_index": 37.58,
+      "hazard_index_raw": 0.3758,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 66.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Bigaa": {
+      "hazard_index": 38.11,
+      "hazard_index_raw": 0.3811,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Butong": {
+      "hazard_index": 52.63,
+      "hazard_index_raw": 0.5263,
+      "hazard_class": "Moderate",
+      "flood_risk": 100.0,
+      "landslide_risk": 16.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Casile": {
+      "hazard_index": 24.31,
+      "hazard_index_raw": 0.2431,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Diezmo": {
+      "hazard_index": 24.31,
+      "hazard_index_raw": 0.2431,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Gulod": {
+      "hazard_index": 41.49,
+      "hazard_index_raw": 0.4149,
+      "hazard_class": "Moderate",
+      "flood_risk": 39.9,
+      "landslide_risk": 36.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Mamatid": {
+      "hazard_index": 38.84,
+      "hazard_index_raw": 0.3884,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 72.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Marinig": {
+      "hazard_index": 47.26,
+      "hazard_index_raw": 0.4726,
+      "hazard_class": "Moderate",
+      "flood_risk": 61.2,
+      "landslide_risk": 38.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Niugan": {
+      "hazard_index": 37.71,
+      "hazard_index_raw": 0.3771,
+      "hazard_class": "Low",
+      "flood_risk": 1.3,
+      "landslide_risk": 65.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Pittland": {
+      "hazard_index": 44.31,
+      "hazard_index_raw": 0.4431,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 100.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Pulo": {
+      "hazard_index": 39.45,
+      "hazard_index_raw": 0.3945,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.7,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Sala": {
+      "hazard_index": 24.31,
+      "hazard_index_raw": 0.2431,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "San Isidro": {
+      "hazard_index": 39.16,
+      "hazard_index_raw": 0.3916,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 74.2,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    },
+    "Poblacion": {
+      "hazard_index": 37.83,
+      "hazard_index_raw": 0.3783,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 67.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.8
+    }
+  },
+  "2022": {
+    "Baclaran": {
+      "hazard_index": 37.15,
+      "hazard_index_raw": 0.3715,
+      "hazard_class": "Low",
+      "flood_risk": 2.4,
+      "landslide_risk": 55.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Banay-Banay": {
+      "hazard_index": 38.32,
+      "hazard_index_raw": 0.3832,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 64.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Banlic": {
+      "hazard_index": 39.27,
+      "hazard_index_raw": 0.3927,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Barangay Dos": {
+      "hazard_index": 37.67,
+      "hazard_index_raw": 0.3767,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 61.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Barangay Tres": {
+      "hazard_index": 40.55,
+      "hazard_index_raw": 0.4055,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Barangay Uno": {
+      "hazard_index": 38.73,
+      "hazard_index_raw": 0.3873,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 66.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Bigaa": {
+      "hazard_index": 39.27,
+      "hazard_index_raw": 0.3927,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Butong": {
+      "hazard_index": 53.78,
+      "hazard_index_raw": 0.5378,
+      "hazard_class": "Moderate",
+      "flood_risk": 100.0,
+      "landslide_risk": 16.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Casile": {
+      "hazard_index": 25.47,
+      "hazard_index_raw": 0.2547,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Diezmo": {
+      "hazard_index": 25.47,
+      "hazard_index_raw": 0.2547,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Gulod": {
+      "hazard_index": 42.64,
+      "hazard_index_raw": 0.4264,
+      "hazard_class": "Moderate",
+      "flood_risk": 39.9,
+      "landslide_risk": 36.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Mamatid": {
+      "hazard_index": 40.0,
+      "hazard_index_raw": 0.4,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 72.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Marinig": {
+      "hazard_index": 48.41,
+      "hazard_index_raw": 0.4841,
+      "hazard_class": "Moderate",
+      "flood_risk": 61.2,
+      "landslide_risk": 38.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Niugan": {
+      "hazard_index": 38.87,
+      "hazard_index_raw": 0.3887,
+      "hazard_class": "Low",
+      "flood_risk": 1.3,
+      "landslide_risk": 65.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Pittland": {
+      "hazard_index": 45.47,
+      "hazard_index_raw": 0.4547,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 100.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Pulo": {
+      "hazard_index": 40.61,
+      "hazard_index_raw": 0.4061,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.7,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Sala": {
+      "hazard_index": 25.47,
+      "hazard_index_raw": 0.2547,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "San Isidro": {
+      "hazard_index": 40.31,
+      "hazard_index_raw": 0.4031,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 74.2,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    },
+    "Poblacion": {
+      "hazard_index": 38.98,
+      "hazard_index_raw": 0.3898,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 67.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.4
+    }
+  },
+  "2023": {
+    "Baclaran": {
+      "hazard_index": 35.94,
+      "hazard_index_raw": 0.3594,
+      "hazard_class": "Low",
+      "flood_risk": 2.4,
+      "landslide_risk": 55.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Banay-Banay": {
+      "hazard_index": 37.11,
+      "hazard_index_raw": 0.3711,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 64.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Banlic": {
+      "hazard_index": 38.06,
+      "hazard_index_raw": 0.3806,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Barangay Dos": {
+      "hazard_index": 36.46,
+      "hazard_index_raw": 0.3646,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 61.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Barangay Tres": {
+      "hazard_index": 39.34,
+      "hazard_index_raw": 0.3934,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Barangay Uno": {
+      "hazard_index": 37.52,
+      "hazard_index_raw": 0.3752,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 66.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Bigaa": {
+      "hazard_index": 38.06,
+      "hazard_index_raw": 0.3806,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Butong": {
+      "hazard_index": 52.57,
+      "hazard_index_raw": 0.5257,
+      "hazard_class": "Moderate",
+      "flood_risk": 100.0,
+      "landslide_risk": 16.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Casile": {
+      "hazard_index": 24.26,
+      "hazard_index_raw": 0.2426,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Diezmo": {
+      "hazard_index": 24.26,
+      "hazard_index_raw": 0.2426,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Gulod": {
+      "hazard_index": 41.43,
+      "hazard_index_raw": 0.4143,
+      "hazard_class": "Moderate",
+      "flood_risk": 39.9,
+      "landslide_risk": 36.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Mamatid": {
+      "hazard_index": 38.79,
+      "hazard_index_raw": 0.3879,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 72.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Marinig": {
+      "hazard_index": 47.2,
+      "hazard_index_raw": 0.472,
+      "hazard_class": "Moderate",
+      "flood_risk": 61.2,
+      "landslide_risk": 38.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Niugan": {
+      "hazard_index": 37.66,
+      "hazard_index_raw": 0.3766,
+      "hazard_class": "Low",
+      "flood_risk": 1.3,
+      "landslide_risk": 65.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Pittland": {
+      "hazard_index": 44.26,
+      "hazard_index_raw": 0.4426,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 100.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Pulo": {
+      "hazard_index": 39.4,
+      "hazard_index_raw": 0.394,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.7,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Sala": {
+      "hazard_index": 24.26,
+      "hazard_index_raw": 0.2426,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "San Isidro": {
+      "hazard_index": 39.1,
+      "hazard_index_raw": 0.391,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 74.2,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    },
+    "Poblacion": {
+      "hazard_index": 37.77,
+      "hazard_index_raw": 0.3777,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 67.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 28.4
+    }
+  },
+  "2024": {
+    "Baclaran": {
+      "hazard_index": 37.24,
+      "hazard_index_raw": 0.3724,
+      "hazard_class": "Low",
+      "flood_risk": 2.4,
+      "landslide_risk": 55.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Banay-Banay": {
+      "hazard_index": 38.4,
+      "hazard_index_raw": 0.384,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 64.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Banlic": {
+      "hazard_index": 39.36,
+      "hazard_index_raw": 0.3936,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Barangay Dos": {
+      "hazard_index": 37.75,
+      "hazard_index_raw": 0.3775,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 61.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Barangay Tres": {
+      "hazard_index": 40.64,
+      "hazard_index_raw": 0.4064,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Barangay Uno": {
+      "hazard_index": 38.82,
+      "hazard_index_raw": 0.3882,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 66.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Bigaa": {
+      "hazard_index": 39.35,
+      "hazard_index_raw": 0.3935,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Butong": {
+      "hazard_index": 53.87,
+      "hazard_index_raw": 0.5387,
+      "hazard_class": "Moderate",
+      "flood_risk": 100.0,
+      "landslide_risk": 16.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Casile": {
+      "hazard_index": 25.55,
+      "hazard_index_raw": 0.2555,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Diezmo": {
+      "hazard_index": 25.55,
+      "hazard_index_raw": 0.2555,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Gulod": {
+      "hazard_index": 42.73,
+      "hazard_index_raw": 0.4273,
+      "hazard_class": "Moderate",
+      "flood_risk": 39.9,
+      "landslide_risk": 36.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Mamatid": {
+      "hazard_index": 40.08,
+      "hazard_index_raw": 0.4008,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 72.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Marinig": {
+      "hazard_index": 48.5,
+      "hazard_index_raw": 0.485,
+      "hazard_class": "Moderate",
+      "flood_risk": 61.2,
+      "landslide_risk": 38.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Niugan": {
+      "hazard_index": 38.95,
+      "hazard_index_raw": 0.3895,
+      "hazard_class": "Low",
+      "flood_risk": 1.3,
+      "landslide_risk": 65.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Pittland": {
+      "hazard_index": 45.55,
+      "hazard_index_raw": 0.4555,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 100.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Pulo": {
+      "hazard_index": 40.69,
+      "hazard_index_raw": 0.4069,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.7,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Sala": {
+      "hazard_index": 25.55,
+      "hazard_index_raw": 0.2555,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "San Isidro": {
+      "hazard_index": 40.4,
+      "hazard_index_raw": 0.404,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 74.2,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    },
+    "Poblacion": {
+      "hazard_index": 39.07,
+      "hazard_index_raw": 0.3907,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 67.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.0
+    }
+  },
+  "2025": {
+    "Baclaran": {
+      "hazard_index": 37.31,
+      "hazard_index_raw": 0.3731,
+      "hazard_class": "Low",
+      "flood_risk": 2.4,
+      "landslide_risk": 55.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Banay-Banay": {
+      "hazard_index": 38.48,
+      "hazard_index_raw": 0.3848,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 64.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Banlic": {
+      "hazard_index": 39.43,
+      "hazard_index_raw": 0.3943,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Barangay Dos": {
+      "hazard_index": 37.83,
+      "hazard_index_raw": 0.3783,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 61.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Barangay Tres": {
+      "hazard_index": 40.71,
+      "hazard_index_raw": 0.4071,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Barangay Uno": {
+      "hazard_index": 38.89,
+      "hazard_index_raw": 0.3889,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 66.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Bigaa": {
+      "hazard_index": 39.43,
+      "hazard_index_raw": 0.3943,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Butong": {
+      "hazard_index": 53.94,
+      "hazard_index_raw": 0.5394,
+      "hazard_class": "Moderate",
+      "flood_risk": 100.0,
+      "landslide_risk": 16.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Casile": {
+      "hazard_index": 25.63,
+      "hazard_index_raw": 0.2563,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Diezmo": {
+      "hazard_index": 25.63,
+      "hazard_index_raw": 0.2563,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Gulod": {
+      "hazard_index": 42.8,
+      "hazard_index_raw": 0.428,
+      "hazard_class": "Moderate",
+      "flood_risk": 39.9,
+      "landslide_risk": 36.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Mamatid": {
+      "hazard_index": 40.16,
+      "hazard_index_raw": 0.4016,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 72.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Marinig": {
+      "hazard_index": 48.57,
+      "hazard_index_raw": 0.4857,
+      "hazard_class": "Moderate",
+      "flood_risk": 61.2,
+      "landslide_risk": 38.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Niugan": {
+      "hazard_index": 39.03,
+      "hazard_index_raw": 0.3903,
+      "hazard_class": "Low",
+      "flood_risk": 1.3,
+      "landslide_risk": 65.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Pittland": {
+      "hazard_index": 45.63,
+      "hazard_index_raw": 0.4563,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 100.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Pulo": {
+      "hazard_index": 40.77,
+      "hazard_index_raw": 0.4077,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.7,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Sala": {
+      "hazard_index": 25.63,
+      "hazard_index_raw": 0.2563,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "San Isidro": {
+      "hazard_index": 40.47,
+      "hazard_index_raw": 0.4047,
+      "hazard_class": "Moderate",
+      "flood_risk": 0.0,
+      "landslide_risk": 74.2,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    },
+    "Poblacion": {
+      "hazard_index": 39.14,
+      "hazard_index_raw": 0.3914,
+      "hazard_class": "Low",
+      "flood_risk": 0.0,
+      "landslide_risk": 67.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 37.5
+    }
+  },
+  "2026": {
+    "Baclaran": {
+      "hazard_index": 36.9,
+      "hazard_index_raw": 0.369,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 2.4,
+      "landslide_risk": 55.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Banay-Banay": {
+      "hazard_index": 38.1,
+      "hazard_index_raw": 0.381,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 64.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Banlic": {
+      "hazard_index": 39.02,
+      "hazard_index_raw": 0.3902,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Barangay Dos": {
+      "hazard_index": 37.46,
+      "hazard_index_raw": 0.3746,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 61.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Barangay Tres": {
+      "hazard_index": 40.23,
+      "hazard_index_raw": 0.4023,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Barangay Uno": {
+      "hazard_index": 38.51,
+      "hazard_index_raw": 0.3851,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 66.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Bigaa": {
+      "hazard_index": 39.02,
+      "hazard_index_raw": 0.3902,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Butong": {
+      "hazard_index": 53.67,
+      "hazard_index_raw": 0.5367,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 100.0,
+      "landslide_risk": 16.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Casile": {
+      "hazard_index": 25.11,
+      "hazard_index_raw": 0.2511,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Diezmo": {
+      "hazard_index": 25.11,
+      "hazard_index_raw": 0.2511,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Gulod": {
+      "hazard_index": 42.33,
+      "hazard_index_raw": 0.4233,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 39.9,
+      "landslide_risk": 36.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Mamatid": {
+      "hazard_index": 39.7,
+      "hazard_index_raw": 0.397,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 72.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Marinig": {
+      "hazard_index": 48.24,
+      "hazard_index_raw": 0.4824,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 61.2,
+      "landslide_risk": 38.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Niugan": {
+      "hazard_index": 38.62,
+      "hazard_index_raw": 0.3862,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 1.3,
+      "landslide_risk": 65.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Pittland": {
+      "hazard_index": 45.31,
+      "hazard_index_raw": 0.4531,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 100.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Pulo": {
+      "hazard_index": 40.28,
+      "hazard_index_raw": 0.4028,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.7,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Sala": {
+      "hazard_index": 25.11,
+      "hazard_index_raw": 0.2511,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "San Isidro": {
+      "hazard_index": 40.0,
+      "hazard_index_raw": 0.4,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 74.2,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Poblacion": {
+      "hazard_index": 38.73,
+      "hazard_index_raw": 0.3873,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 67.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    }
+  },
+  "2027": {
+    "Baclaran": {
+      "hazard_index": 36.81,
+      "hazard_index_raw": 0.3681,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 2.4,
+      "landslide_risk": 55.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Banay-Banay": {
+      "hazard_index": 38.04,
+      "hazard_index_raw": 0.3804,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 64.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Banlic": {
+      "hazard_index": 38.98,
+      "hazard_index_raw": 0.3898,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Barangay Dos": {
+      "hazard_index": 37.38,
+      "hazard_index_raw": 0.3738,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 61.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Barangay Tres": {
+      "hazard_index": 40.2,
+      "hazard_index_raw": 0.402,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Barangay Uno": {
+      "hazard_index": 38.46,
+      "hazard_index_raw": 0.3846,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 66.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Bigaa": {
+      "hazard_index": 38.98,
+      "hazard_index_raw": 0.3898,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Butong": {
+      "hazard_index": 53.7,
+      "hazard_index_raw": 0.537,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 100.0,
+      "landslide_risk": 16.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Casile": {
+      "hazard_index": 25.09,
+      "hazard_index_raw": 0.2509,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Diezmo": {
+      "hazard_index": 25.09,
+      "hazard_index_raw": 0.2509,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Gulod": {
+      "hazard_index": 42.31,
+      "hazard_index_raw": 0.4231,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 39.9,
+      "landslide_risk": 36.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Mamatid": {
+      "hazard_index": 39.67,
+      "hazard_index_raw": 0.3967,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 72.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Marinig": {
+      "hazard_index": 48.25,
+      "hazard_index_raw": 0.4825,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 61.2,
+      "landslide_risk": 38.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Niugan": {
+      "hazard_index": 38.57,
+      "hazard_index_raw": 0.3857,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 1.3,
+      "landslide_risk": 65.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Pittland": {
+      "hazard_index": 45.34,
+      "hazard_index_raw": 0.4534,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 100.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Pulo": {
+      "hazard_index": 40.25,
+      "hazard_index_raw": 0.4025,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.7,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Sala": {
+      "hazard_index": 25.09,
+      "hazard_index_raw": 0.2509,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "San Isidro": {
+      "hazard_index": 39.97,
+      "hazard_index_raw": 0.3997,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 74.2,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Poblacion": {
+      "hazard_index": 38.68,
+      "hazard_index_raw": 0.3868,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 67.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    }
+  },
+  "2028": {
+    "Baclaran": {
+      "hazard_index": 36.82,
+      "hazard_index_raw": 0.3682,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 2.4,
+      "landslide_risk": 55.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Banay-Banay": {
+      "hazard_index": 38.06,
+      "hazard_index_raw": 0.3806,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 64.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Banlic": {
+      "hazard_index": 39.01,
+      "hazard_index_raw": 0.3901,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Barangay Dos": {
+      "hazard_index": 37.4,
+      "hazard_index_raw": 0.374,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 61.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Barangay Tres": {
+      "hazard_index": 40.24,
+      "hazard_index_raw": 0.4024,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Barangay Uno": {
+      "hazard_index": 38.48,
+      "hazard_index_raw": 0.3848,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 66.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Bigaa": {
+      "hazard_index": 39.01,
+      "hazard_index_raw": 0.3901,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Butong": {
+      "hazard_index": 53.79,
+      "hazard_index_raw": 0.5379,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 100.0,
+      "landslide_risk": 16.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Casile": {
+      "hazard_index": 25.09,
+      "hazard_index_raw": 0.2509,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Diezmo": {
+      "hazard_index": 25.09,
+      "hazard_index_raw": 0.2509,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Gulod": {
+      "hazard_index": 42.36,
+      "hazard_index_raw": 0.4236,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 39.9,
+      "landslide_risk": 36.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Mamatid": {
+      "hazard_index": 39.7,
+      "hazard_index_raw": 0.397,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 72.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Marinig": {
+      "hazard_index": 48.34,
+      "hazard_index_raw": 0.4834,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 61.2,
+      "landslide_risk": 38.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Niugan": {
+      "hazard_index": 38.6,
+      "hazard_index_raw": 0.386,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 1.3,
+      "landslide_risk": 65.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Pittland": {
+      "hazard_index": 45.45,
+      "hazard_index_raw": 0.4545,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 100.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Pulo": {
+      "hazard_index": 40.3,
+      "hazard_index_raw": 0.403,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.7,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Sala": {
+      "hazard_index": 25.09,
+      "hazard_index_raw": 0.2509,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "San Isidro": {
+      "hazard_index": 40.01,
+      "hazard_index_raw": 0.4001,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 74.2,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Poblacion": {
+      "hazard_index": 38.71,
+      "hazard_index_raw": 0.3871,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 67.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    }
+  },
+  "2029": {
+    "Baclaran": {
+      "hazard_index": 36.82,
+      "hazard_index_raw": 0.3682,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 2.4,
+      "landslide_risk": 55.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Banay-Banay": {
+      "hazard_index": 38.08,
+      "hazard_index_raw": 0.3808,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 64.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Banlic": {
+      "hazard_index": 39.03,
+      "hazard_index_raw": 0.3903,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Barangay Dos": {
+      "hazard_index": 37.4,
+      "hazard_index_raw": 0.374,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 61.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Barangay Tres": {
+      "hazard_index": 40.28,
+      "hazard_index_raw": 0.4028,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Barangay Uno": {
+      "hazard_index": 38.5,
+      "hazard_index_raw": 0.385,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 66.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Bigaa": {
+      "hazard_index": 39.03,
+      "hazard_index_raw": 0.3903,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Butong": {
+      "hazard_index": 53.87,
+      "hazard_index_raw": 0.5387,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 100.0,
+      "landslide_risk": 16.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Casile": {
+      "hazard_index": 25.1,
+      "hazard_index_raw": 0.251,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Diezmo": {
+      "hazard_index": 25.1,
+      "hazard_index_raw": 0.251,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Gulod": {
+      "hazard_index": 42.4,
+      "hazard_index_raw": 0.424,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 39.9,
+      "landslide_risk": 36.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Mamatid": {
+      "hazard_index": 39.73,
+      "hazard_index_raw": 0.3973,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 72.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Marinig": {
+      "hazard_index": 48.41,
+      "hazard_index_raw": 0.4841,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 61.2,
+      "landslide_risk": 38.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Niugan": {
+      "hazard_index": 38.61,
+      "hazard_index_raw": 0.3861,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 1.3,
+      "landslide_risk": 65.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Pittland": {
+      "hazard_index": 45.55,
+      "hazard_index_raw": 0.4555,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 100.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Pulo": {
+      "hazard_index": 40.34,
+      "hazard_index_raw": 0.4034,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.7,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Sala": {
+      "hazard_index": 25.1,
+      "hazard_index_raw": 0.251,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "San Isidro": {
+      "hazard_index": 40.04,
+      "hazard_index_raw": 0.4004,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 74.2,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Poblacion": {
+      "hazard_index": 38.73,
+      "hazard_index_raw": 0.3873,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 67.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    }
+  },
+  "2030": {
+    "Baclaran": {
+      "hazard_index": 36.77,
+      "hazard_index_raw": 0.3677,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 2.4,
+      "landslide_risk": 55.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Banay-Banay": {
+      "hazard_index": 38.04,
+      "hazard_index_raw": 0.3804,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 64.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Banlic": {
+      "hazard_index": 39.0,
+      "hazard_index_raw": 0.39,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Barangay Dos": {
+      "hazard_index": 37.35,
+      "hazard_index_raw": 0.3735,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 61.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Barangay Tres": {
+      "hazard_index": 40.27,
+      "hazard_index_raw": 0.4027,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Barangay Uno": {
+      "hazard_index": 38.46,
+      "hazard_index_raw": 0.3846,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 66.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Bigaa": {
+      "hazard_index": 39.0,
+      "hazard_index_raw": 0.39,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 69.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Butong": {
+      "hazard_index": 53.92,
+      "hazard_index_raw": 0.5392,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 100.0,
+      "landslide_risk": 16.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Casile": {
+      "hazard_index": 25.07,
+      "hazard_index_raw": 0.2507,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Diezmo": {
+      "hazard_index": 25.07,
+      "hazard_index_raw": 0.2507,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Gulod": {
+      "hazard_index": 42.4,
+      "hazard_index_raw": 0.424,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 39.9,
+      "landslide_risk": 36.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Mamatid": {
+      "hazard_index": 39.71,
+      "hazard_index_raw": 0.3971,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 72.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Marinig": {
+      "hazard_index": 48.43,
+      "hazard_index_raw": 0.4843,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 61.2,
+      "landslide_risk": 38.3,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Niugan": {
+      "hazard_index": 38.57,
+      "hazard_index_raw": 0.3857,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 1.3,
+      "landslide_risk": 65.4,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Pittland": {
+      "hazard_index": 45.59,
+      "hazard_index_raw": 0.4559,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 100.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Pulo": {
+      "hazard_index": 40.32,
+      "hazard_index_raw": 0.4032,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 75.7,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Sala": {
+      "hazard_index": 25.07,
+      "hazard_index_raw": 0.2507,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 0.0,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "San Isidro": {
+      "hazard_index": 40.02,
+      "hazard_index_raw": 0.4002,
+      "hazard_class": "Moderate (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 74.2,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    },
+    "Poblacion": {
+      "hazard_index": 38.69,
+      "hazard_index_raw": 0.3869,
+      "hazard_class": "Low (Predicted)",
+      "flood_risk": 0.0,
+      "landslide_risk": 67.6,
+      "earthquake_risk": 50.0,
+      "typhoon_risk": 50.0,
+      "rainfall_risk": 36.7
+    }
+  }
+}

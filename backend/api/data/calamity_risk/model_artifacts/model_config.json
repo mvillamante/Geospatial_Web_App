@@ -1,0 +1,19 @@
+{
+  "feature_cols": [
+    "temp",
+    "humidity",
+    "rainfall",
+    "population",
+    "flood_susceptibility",
+    "landslide_susceptibility",
+    "ndvi",
+    "earthquake_mag",
+    "typhoon_severity",
+    "infra_count",
+    "green_index",
+    "hazard_index"
+  ],
+  "sequence_length": 6,
+  "target_col": "calamity_risk_likelihood",
+  "n_features": 12
+}

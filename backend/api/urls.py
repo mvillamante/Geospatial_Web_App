@@ -12,6 +12,14 @@ from .backend_views.misc_views import *
 from .backend_views.researcher_views import *
 from .backend_views.resident_verification_views import *
 from .backend_views.satellite import *
+from .backend_views.hazard_views import (
+    calamity_risk,
+    calamity_risk_forecast,
+    green_index,
+    hazard_index,
+    barangay_geojson,
+    model_info,
+)
 from .backend_views.password_reset_views import *
 from .backend_views.tomtom_views import tomtom_roads_tile, tomtom_traffic_tile
 from .backend_views.community_feed_views import *
@@ -73,6 +81,14 @@ urlpatterns = [
     
     # Satellite_Views
     path("satellite/ndvi/", get_ndvi_image, name="satellite_ndvi"),
+
+    # Hazard / Calamity Risk Views
+    path("hazard/calamity-risk/", calamity_risk, name="hazard_calamity_risk"),
+    path("hazard/calamity-risk/forecast/", calamity_risk_forecast, name="hazard_calamity_risk_forecast"),
+    path("hazard/green-index/", green_index, name="hazard_green_index"),
+    path("hazard/hazard-index/", hazard_index, name="hazard_hazard_index"),
+    path("hazard/barangays/", barangay_geojson, name="hazard_barangays"),
+    path("hazard/model-info/", model_info, name="hazard_model_info"),
 
     # TomTom Tiles
     path("tomtom/roads/<int:z>/<int:x>/<int:y>.png", tomtom_roads_tile, name="tomtom_roads_tile"),

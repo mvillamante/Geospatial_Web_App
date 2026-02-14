@@ -181,6 +181,17 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# ---------------------------------------------------------------------------
+# Hazard / Calamity Risk model data
+# ---------------------------------------------------------------------------
+# Root directory for hazard-related data. Contains:
+#   datasets/       — raw data by purpose (weather, population, hazards, etc.)
+#   green_index/    — Green Index model_artifacts and outputs
+#   hazard_index/   — Hazard Index model_artifacts and outputs
+#   calamity_risk/  — Calamity Risk model_artifacts and outputs
+#   training/       — notebooks and scripts for ML pipeline
+HAZARD_DATA_DIR = BASE_DIR / 'api' / 'data'
+
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "incident-photos")
 

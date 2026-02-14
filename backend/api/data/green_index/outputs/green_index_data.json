@@ -1,0 +1,3536 @@
+{
+  "2000": {
+    "Baclaran": {
+      "green_index": 13.2,
+      "mean_ndvi": 0.1253,
+      "gar": 0.1492,
+      "ndvi_norm": 0.1206,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 44.52,
+      "mean_ndvi": 0.2331,
+      "gar": 0.581,
+      "ndvi_norm": 0.3546,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 33.3,
+      "mean_ndvi": 0.1912,
+      "gar": 0.4372,
+      "ndvi_norm": 0.2636,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 28.34,
+      "mean_ndvi": 0.1806,
+      "gar": 0.3476,
+      "ndvi_norm": 0.2407,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 8.54,
+      "mean_ndvi": 0.1206,
+      "gar": 0.0479,
+      "ndvi_norm": 0.1103,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 66.67,
+      "mean_ndvi": 0.317,
+      "gar": 0.8611,
+      "ndvi_norm": 0.537,
+      "veg_class": "Moderate"
+    },
+    "Diezmo": {
+      "green_index": 58.97,
+      "mean_ndvi": 0.2719,
+      "gar": 0.8156,
+      "ndvi_norm": 0.439,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 45.04,
+      "mean_ndvi": 0.2404,
+      "gar": 0.5704,
+      "ndvi_norm": 0.3705,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 48.69,
+      "mean_ndvi": 0.2419,
+      "gar": 0.6565,
+      "ndvi_norm": 0.3738,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 46.7,
+      "mean_ndvi": 0.2352,
+      "gar": 0.6288,
+      "ndvi_norm": 0.3592,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 26.13,
+      "mean_ndvi": 0.175,
+      "gar": 0.3104,
+      "ndvi_norm": 0.2286,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 46.83,
+      "mean_ndvi": 0.2377,
+      "gar": 0.6239,
+      "ndvi_norm": 0.3646,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 46.55,
+      "mean_ndvi": 0.2341,
+      "gar": 0.6286,
+      "ndvi_norm": 0.3568,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 47.61,
+      "mean_ndvi": 0.2419,
+      "gar": 0.6296,
+      "ndvi_norm": 0.3737,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 34.77,
+      "mean_ndvi": 0.1985,
+      "gar": 0.45,
+      "ndvi_norm": 0.2795,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 39.64,
+      "mean_ndvi": 0.2217,
+      "gar": 0.4961,
+      "ndvi_norm": 0.3299,
+      "veg_class": "Sparse"
+    }
+  },
+  "2001": {
+    "Baclaran": {
+      "green_index": 18.07,
+      "mean_ndvi": 0.1406,
+      "gar": 0.221,
+      "ndvi_norm": 0.1539,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 41.13,
+      "mean_ndvi": 0.211,
+      "gar": 0.5682,
+      "ndvi_norm": 0.3066,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 37.09,
+      "mean_ndvi": 0.2074,
+      "gar": 0.4789,
+      "ndvi_norm": 0.2989,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 34.74,
+      "mean_ndvi": 0.1964,
+      "gar": 0.456,
+      "ndvi_norm": 0.275,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 16.22,
+      "mean_ndvi": 0.145,
+      "gar": 0.1606,
+      "ndvi_norm": 0.1633,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 62.15,
+      "mean_ndvi": 0.284,
+      "gar": 0.8559,
+      "ndvi_norm": 0.4652,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 59.91,
+      "mean_ndvi": 0.2658,
+      "gar": 0.859,
+      "ndvi_norm": 0.4258,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 42.78,
+      "mean_ndvi": 0.2222,
+      "gar": 0.5728,
+      "ndvi_norm": 0.331,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 53.71,
+      "mean_ndvi": 0.2578,
+      "gar": 0.7305,
+      "ndvi_norm": 0.4082,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 49.02,
+      "mean_ndvi": 0.2384,
+      "gar": 0.6761,
+      "ndvi_norm": 0.3662,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 27.9,
+      "mean_ndvi": 0.1784,
+      "gar": 0.3438,
+      "ndvi_norm": 0.2358,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 48.09,
+      "mean_ndvi": 0.2332,
+      "gar": 0.6701,
+      "ndvi_norm": 0.3548,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 48.26,
+      "mean_ndvi": 0.234,
+      "gar": 0.6714,
+      "ndvi_norm": 0.3566,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 47.09,
+      "mean_ndvi": 0.2358,
+      "gar": 0.6365,
+      "ndvi_norm": 0.3605,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 35.75,
+      "mean_ndvi": 0.1981,
+      "gar": 0.4756,
+      "ndvi_norm": 0.2787,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 40.7,
+      "mean_ndvi": 0.2169,
+      "gar": 0.5382,
+      "ndvi_norm": 0.3195,
+      "veg_class": "Sparse"
+    }
+  },
+  "2002": {
+    "Baclaran": {
+      "green_index": 0.0,
+      "mean_ndvi": 0.0698,
+      "gar": 0.0,
+      "ndvi_norm": 0.0,
+      "veg_class": "Bare/Water"
+    },
+    "Banay-Banay": {
+      "green_index": 21.09,
+      "mean_ndvi": 0.161,
+      "gar": 0.2303,
+      "ndvi_norm": 0.198,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 22.87,
+      "mean_ndvi": 0.1582,
+      "gar": 0.2838,
+      "ndvi_norm": 0.1921,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 28.26,
+      "mean_ndvi": 0.1795,
+      "gar": 0.3493,
+      "ndvi_norm": 0.2381,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 12.57,
+      "mean_ndvi": 0.1308,
+      "gar": 0.1155,
+      "ndvi_norm": 0.1324,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 45.5,
+      "mean_ndvi": 0.2212,
+      "gar": 0.6443,
+      "ndvi_norm": 0.3288,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 38.85,
+      "mean_ndvi": 0.2008,
+      "gar": 0.5445,
+      "ndvi_norm": 0.2846,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 33.0,
+      "mean_ndvi": 0.1817,
+      "gar": 0.4605,
+      "ndvi_norm": 0.243,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 13.44,
+      "mean_ndvi": 0.1426,
+      "gar": 0.0991,
+      "ndvi_norm": 0.158,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 33.12,
+      "mean_ndvi": 0.1955,
+      "gar": 0.4186,
+      "ndvi_norm": 0.2729,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 18.84,
+      "mean_ndvi": 0.1511,
+      "gar": 0.2063,
+      "ndvi_norm": 0.1765,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 44.92,
+      "mean_ndvi": 0.2123,
+      "gar": 0.6588,
+      "ndvi_norm": 0.3095,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 38.4,
+      "mean_ndvi": 0.2088,
+      "gar": 0.5071,
+      "ndvi_norm": 0.3019,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 23.9,
+      "mean_ndvi": 0.1637,
+      "gar": 0.2916,
+      "ndvi_norm": 0.2039,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 29.44,
+      "mean_ndvi": 0.1733,
+      "gar": 0.3987,
+      "ndvi_norm": 0.2248,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 22.11,
+      "mean_ndvi": 0.1545,
+      "gar": 0.2769,
+      "ndvi_norm": 0.184,
+      "veg_class": "Sparse"
+    }
+  },
+  "2003": {
+    "Baclaran": {
+      "green_index": 14.36,
+      "mean_ndvi": 0.1308,
+      "gar": 0.1602,
+      "ndvi_norm": 0.1325,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 35.86,
+      "mean_ndvi": 0.1951,
+      "gar": 0.4883,
+      "ndvi_norm": 0.2722,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 27.83,
+      "mean_ndvi": 0.1721,
+      "gar": 0.3624,
+      "ndvi_norm": 0.2222,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 30.68,
+      "mean_ndvi": 0.1841,
+      "gar": 0.3947,
+      "ndvi_norm": 0.2482,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 14.88,
+      "mean_ndvi": 0.1364,
+      "gar": 0.1549,
+      "ndvi_norm": 0.1447,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 47.86,
+      "mean_ndvi": 0.2345,
+      "gar": 0.6599,
+      "ndvi_norm": 0.3577,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 49.87,
+      "mean_ndvi": 0.2241,
+      "gar": 0.744,
+      "ndvi_norm": 0.3352,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 35.22,
+      "mean_ndvi": 0.2003,
+      "gar": 0.4556,
+      "ndvi_norm": 0.2834,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 39.44,
+      "mean_ndvi": 0.2017,
+      "gar": 0.5561,
+      "ndvi_norm": 0.2865,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 46.75,
+      "mean_ndvi": 0.2286,
+      "gar": 0.6513,
+      "ndvi_norm": 0.3449,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 22.71,
+      "mean_ndvi": 0.1639,
+      "gar": 0.2613,
+      "ndvi_norm": 0.2044,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 42.13,
+      "mean_ndvi": 0.2021,
+      "gar": 0.6221,
+      "ndvi_norm": 0.2874,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 43.3,
+      "mean_ndvi": 0.2135,
+      "gar": 0.6143,
+      "ndvi_norm": 0.3121,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 36.46,
+      "mean_ndvi": 0.1954,
+      "gar": 0.5025,
+      "ndvi_norm": 0.2728,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 29.15,
+      "mean_ndvi": 0.179,
+      "gar": 0.3731,
+      "ndvi_norm": 0.2372,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 34.84,
+      "mean_ndvi": 0.1944,
+      "gar": 0.4651,
+      "ndvi_norm": 0.2706,
+      "veg_class": "Sparse"
+    }
+  },
+  "2004": {
+    "Baclaran": {
+      "green_index": 14.32,
+      "mean_ndvi": 0.1305,
+      "gar": 0.1602,
+      "ndvi_norm": 0.1319,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 29.2,
+      "mean_ndvi": 0.1797,
+      "gar": 0.3721,
+      "ndvi_norm": 0.2387,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 19.09,
+      "mean_ndvi": 0.1465,
+      "gar": 0.2275,
+      "ndvi_norm": 0.1665,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 28.93,
+      "mean_ndvi": 0.1821,
+      "gar": 0.3573,
+      "ndvi_norm": 0.2439,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 15.0,
+      "mean_ndvi": 0.1382,
+      "gar": 0.1521,
+      "ndvi_norm": 0.1485,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 42.93,
+      "mean_ndvi": 0.2153,
+      "gar": 0.5993,
+      "ndvi_norm": 0.316,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 33.37,
+      "mean_ndvi": 0.194,
+      "gar": 0.4295,
+      "ndvi_norm": 0.2698,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 40.3,
+      "mean_ndvi": 0.2066,
+      "gar": 0.5617,
+      "ndvi_norm": 0.2971,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 34.39,
+      "mean_ndvi": 0.1934,
+      "gar": 0.4571,
+      "ndvi_norm": 0.2685,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 43.09,
+      "mean_ndvi": 0.2147,
+      "gar": 0.6051,
+      "ndvi_norm": 0.3147,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 18.64,
+      "mean_ndvi": 0.1543,
+      "gar": 0.1906,
+      "ndvi_norm": 0.1835,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 34.56,
+      "mean_ndvi": 0.1847,
+      "gar": 0.4898,
+      "ndvi_norm": 0.2495,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 43.09,
+      "mean_ndvi": 0.2119,
+      "gar": 0.6143,
+      "ndvi_norm": 0.3087,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 34.18,
+      "mean_ndvi": 0.1891,
+      "gar": 0.466,
+      "ndvi_norm": 0.259,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 27.25,
+      "mean_ndvi": 0.1656,
+      "gar": 0.3692,
+      "ndvi_norm": 0.208,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 35.5,
+      "mean_ndvi": 0.1899,
+      "gar": 0.4961,
+      "ndvi_norm": 0.2609,
+      "veg_class": "Sparse"
+    }
+  },
+  "2005": {
+    "Baclaran": {
+      "green_index": 11.76,
+      "mean_ndvi": 0.1211,
+      "gar": 0.1271,
+      "ndvi_norm": 0.1113,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 25.26,
+      "mean_ndvi": 0.1697,
+      "gar": 0.306,
+      "ndvi_norm": 0.217,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 11.14,
+      "mean_ndvi": 0.1268,
+      "gar": 0.0928,
+      "ndvi_norm": 0.1239,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 22.35,
+      "mean_ndvi": 0.1701,
+      "gar": 0.232,
+      "ndvi_norm": 0.2179,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 14.05,
+      "mean_ndvi": 0.1344,
+      "gar": 0.1408,
+      "ndvi_norm": 0.1403,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 38.53,
+      "mean_ndvi": 0.2025,
+      "gar": 0.531,
+      "ndvi_norm": 0.2882,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 28.76,
+      "mean_ndvi": 0.182,
+      "gar": 0.3536,
+      "ndvi_norm": 0.2437,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 37.93,
+      "mean_ndvi": 0.2017,
+      "gar": 0.5185,
+      "ndvi_norm": 0.2865,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 21.76,
+      "mean_ndvi": 0.1638,
+      "gar": 0.2378,
+      "ndvi_norm": 0.2041,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 42.89,
+      "mean_ndvi": 0.2224,
+      "gar": 0.575,
+      "ndvi_norm": 0.3314,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 15.65,
+      "mean_ndvi": 0.1453,
+      "gar": 0.1454,
+      "ndvi_norm": 0.164,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 31.68,
+      "mean_ndvi": 0.1796,
+      "gar": 0.4342,
+      "ndvi_norm": 0.2385,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 36.38,
+      "mean_ndvi": 0.2043,
+      "gar": 0.4714,
+      "ndvi_norm": 0.2921,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 28.85,
+      "mean_ndvi": 0.1754,
+      "gar": 0.3773,
+      "ndvi_norm": 0.2293,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 23.37,
+      "mean_ndvi": 0.1614,
+      "gar": 0.2859,
+      "ndvi_norm": 0.1989,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 22.28,
+      "mean_ndvi": 0.1598,
+      "gar": 0.2636,
+      "ndvi_norm": 0.1956,
+      "veg_class": "Sparse"
+    }
+  },
+  "2006": {
+    "Baclaran": {
+      "green_index": 17.39,
+      "mean_ndvi": 0.1388,
+      "gar": 0.2099,
+      "ndvi_norm": 0.1499,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 31.36,
+      "mean_ndvi": 0.1865,
+      "gar": 0.4041,
+      "ndvi_norm": 0.2534,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 24.9,
+      "mean_ndvi": 0.1665,
+      "gar": 0.3075,
+      "ndvi_norm": 0.2101,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 31.24,
+      "mean_ndvi": 0.1933,
+      "gar": 0.3787,
+      "ndvi_norm": 0.2682,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 16.76,
+      "mean_ndvi": 0.1448,
+      "gar": 0.1746,
+      "ndvi_norm": 0.1629,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 37.06,
+      "mean_ndvi": 0.2033,
+      "gar": 0.4914,
+      "ndvi_norm": 0.29,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 48.13,
+      "mean_ndvi": 0.2241,
+      "gar": 0.7007,
+      "ndvi_norm": 0.335,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 39.14,
+      "mean_ndvi": 0.2106,
+      "gar": 0.5198,
+      "ndvi_norm": 0.3059,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 36.65,
+      "mean_ndvi": 0.1978,
+      "gar": 0.4993,
+      "ndvi_norm": 0.278,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 40.87,
+      "mean_ndvi": 0.2123,
+      "gar": 0.5577,
+      "ndvi_norm": 0.3094,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 18.78,
+      "mean_ndvi": 0.1548,
+      "gar": 0.1925,
+      "ndvi_norm": 0.1846,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 40.88,
+      "mean_ndvi": 0.2061,
+      "gar": 0.5779,
+      "ndvi_norm": 0.296,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 44.21,
+      "mean_ndvi": 0.2205,
+      "gar": 0.6143,
+      "ndvi_norm": 0.3273,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 37.91,
+      "mean_ndvi": 0.2014,
+      "gar": 0.5192,
+      "ndvi_norm": 0.2858,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 27.42,
+      "mean_ndvi": 0.1779,
+      "gar": 0.3333,
+      "ndvi_norm": 0.2348,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 31.2,
+      "mean_ndvi": 0.1858,
+      "gar": 0.402,
+      "ndvi_norm": 0.252,
+      "veg_class": "Sparse"
+    }
+  },
+  "2007": {
+    "Baclaran": {
+      "green_index": 11.07,
+      "mean_ndvi": 0.1175,
+      "gar": 0.1215,
+      "ndvi_norm": 0.1035,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 23.28,
+      "mean_ndvi": 0.163,
+      "gar": 0.2783,
+      "ndvi_norm": 0.2025,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 16.04,
+      "mean_ndvi": 0.1402,
+      "gar": 0.1717,
+      "ndvi_norm": 0.1529,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 17.15,
+      "mean_ndvi": 0.1531,
+      "gar": 0.1573,
+      "ndvi_norm": 0.1809,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 7.03,
+      "mean_ndvi": 0.109,
+      "gar": 0.048,
+      "ndvi_norm": 0.0852,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 34.91,
+      "mean_ndvi": 0.1922,
+      "gar": 0.4739,
+      "ndvi_norm": 0.2658,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 33.15,
+      "mean_ndvi": 0.1917,
+      "gar": 0.4317,
+      "ndvi_norm": 0.2648,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 40.79,
+      "mean_ndvi": 0.2107,
+      "gar": 0.5605,
+      "ndvi_norm": 0.3061,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 26.22,
+      "mean_ndvi": 0.1741,
+      "gar": 0.3157,
+      "ndvi_norm": 0.2265,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 35.22,
+      "mean_ndvi": 0.2033,
+      "gar": 0.4455,
+      "ndvi_norm": 0.29,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 9.52,
+      "mean_ndvi": 0.1266,
+      "gar": 0.053,
+      "ndvi_norm": 0.1233,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 36.95,
+      "mean_ndvi": 0.1914,
+      "gar": 0.5276,
+      "ndvi_norm": 0.2641,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 17.02,
+      "mean_ndvi": 0.1609,
+      "gar": 0.1286,
+      "ndvi_norm": 0.1979,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 27.21,
+      "mean_ndvi": 0.1728,
+      "gar": 0.3448,
+      "ndvi_norm": 0.2236,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 17.63,
+      "mean_ndvi": 0.1453,
+      "gar": 0.1949,
+      "ndvi_norm": 0.1639,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 29.89,
+      "mean_ndvi": 0.1782,
+      "gar": 0.3942,
+      "ndvi_norm": 0.2354,
+      "veg_class": "Sparse"
+    }
+  },
+  "2008": {
+    "Baclaran": {
+      "green_index": 17.7,
+      "mean_ndvi": 0.1412,
+      "gar": 0.2099,
+      "ndvi_norm": 0.155,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 38.56,
+      "mean_ndvi": 0.205,
+      "gar": 0.5235,
+      "ndvi_norm": 0.2937,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 29.2,
+      "mean_ndvi": 0.1793,
+      "gar": 0.3733,
+      "ndvi_norm": 0.2378,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 28.78,
+      "mean_ndvi": 0.1843,
+      "gar": 0.3467,
+      "ndvi_norm": 0.2486,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 10.23,
+      "mean_ndvi": 0.1267,
+      "gar": 0.0704,
+      "ndvi_norm": 0.1235,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 59.64,
+      "mean_ndvi": 0.2662,
+      "gar": 0.8512,
+      "ndvi_norm": 0.4265,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 57.07,
+      "mean_ndvi": 0.2474,
+      "gar": 0.8482,
+      "ndvi_norm": 0.3858,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 45.67,
+      "mean_ndvi": 0.227,
+      "gar": 0.6296,
+      "ndvi_norm": 0.3413,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 44.29,
+      "mean_ndvi": 0.2162,
+      "gar": 0.6301,
+      "ndvi_norm": 0.318,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 33.83,
+      "mean_ndvi": 0.197,
+      "gar": 0.4313,
+      "ndvi_norm": 0.2764,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 15.3,
+      "mean_ndvi": 0.1462,
+      "gar": 0.1336,
+      "ndvi_norm": 0.1659,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 42.1,
+      "mean_ndvi": 0.2126,
+      "gar": 0.5872,
+      "ndvi_norm": 0.3102,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 29.67,
+      "mean_ndvi": 0.1835,
+      "gar": 0.3714,
+      "ndvi_norm": 0.2469,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 40.64,
+      "mean_ndvi": 0.2099,
+      "gar": 0.5596,
+      "ndvi_norm": 0.3043,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 27.79,
+      "mean_ndvi": 0.1685,
+      "gar": 0.3731,
+      "ndvi_norm": 0.2144,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 40.26,
+      "mean_ndvi": 0.2084,
+      "gar": 0.5548,
+      "ndvi_norm": 0.3011,
+      "veg_class": "Sparse"
+    }
+  },
+  "2009": {
+    "Baclaran": {
+      "green_index": 17.95,
+      "mean_ndvi": 0.1482,
+      "gar": 0.1934,
+      "ndvi_norm": 0.1702,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 40.51,
+      "mean_ndvi": 0.2082,
+      "gar": 0.5618,
+      "ndvi_norm": 0.3006,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 32.3,
+      "mean_ndvi": 0.1941,
+      "gar": 0.4027,
+      "ndvi_norm": 0.2699,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 27.26,
+      "mean_ndvi": 0.1775,
+      "gar": 0.3307,
+      "ndvi_norm": 0.234,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 9.33,
+      "mean_ndvi": 0.1215,
+      "gar": 0.0648,
+      "ndvi_norm": 0.1122,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 59.53,
+      "mean_ndvi": 0.269,
+      "gar": 0.839,
+      "ndvi_norm": 0.4328,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 61.21,
+      "mean_ndvi": 0.2665,
+      "gar": 0.8894,
+      "ndvi_norm": 0.4272,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 26.29,
+      "mean_ndvi": 0.1696,
+      "gar": 0.3321,
+      "ndvi_norm": 0.2167,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 41.64,
+      "mean_ndvi": 0.2158,
+      "gar": 0.5654,
+      "ndvi_norm": 0.3171,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 25.07,
+      "mean_ndvi": 0.1729,
+      "gar": 0.2907,
+      "ndvi_norm": 0.224,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 15.44,
+      "mean_ndvi": 0.1479,
+      "gar": 0.1316,
+      "ndvi_norm": 0.1695,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 49.2,
+      "mean_ndvi": 0.2417,
+      "gar": 0.6701,
+      "ndvi_norm": 0.3733,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 24.5,
+      "mean_ndvi": 0.1767,
+      "gar": 0.2643,
+      "ndvi_norm": 0.2321,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 45.39,
+      "mean_ndvi": 0.2306,
+      "gar": 0.6108,
+      "ndvi_norm": 0.3493,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 25.56,
+      "mean_ndvi": 0.1691,
+      "gar": 0.3154,
+      "ndvi_norm": 0.2158,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 40.13,
+      "mean_ndvi": 0.2101,
+      "gar": 0.546,
+      "ndvi_norm": 0.3048,
+      "veg_class": "Sparse"
+    }
+  },
+  "2010": {
+    "Baclaran": {
+      "green_index": 9.52,
+      "mean_ndvi": 0.1208,
+      "gar": 0.0718,
+      "ndvi_norm": 0.1108,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 22.97,
+      "mean_ndvi": 0.16,
+      "gar": 0.2804,
+      "ndvi_norm": 0.1959,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 21.74,
+      "mean_ndvi": 0.1528,
+      "gar": 0.2731,
+      "ndvi_norm": 0.1803,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 15.77,
+      "mean_ndvi": 0.1401,
+      "gar": 0.1653,
+      "ndvi_norm": 0.1526,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 5.92,
+      "mean_ndvi": 0.0988,
+      "gar": 0.0535,
+      "ndvi_norm": 0.063,
+      "veg_class": "Bare/Water"
+    },
+    "Casile": {
+      "green_index": 38.97,
+      "mean_ndvi": 0.208,
+      "gar": 0.5239,
+      "ndvi_norm": 0.3002,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 41.71,
+      "mean_ndvi": 0.2041,
+      "gar": 0.6052,
+      "ndvi_norm": 0.2916,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 20.05,
+      "mean_ndvi": 0.1437,
+      "gar": 0.2605,
+      "ndvi_norm": 0.1604,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 24.3,
+      "mean_ndvi": 0.1634,
+      "gar": 0.3025,
+      "ndvi_norm": 0.2033,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 14.89,
+      "mean_ndvi": 0.1346,
+      "gar": 0.1611,
+      "ndvi_norm": 0.1408,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 6.88,
+      "mean_ndvi": 0.116,
+      "gar": 0.0216,
+      "ndvi_norm": 0.1002,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 32.81,
+      "mean_ndvi": 0.1735,
+      "gar": 0.4826,
+      "ndvi_norm": 0.2252,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 12.61,
+      "mean_ndvi": 0.1535,
+      "gar": 0.0429,
+      "ndvi_norm": 0.1817,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 34.96,
+      "mean_ndvi": 0.1899,
+      "gar": 0.4828,
+      "ndvi_norm": 0.2608,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 14.03,
+      "mean_ndvi": 0.1397,
+      "gar": 0.1231,
+      "ndvi_norm": 0.1517,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 27.33,
+      "mean_ndvi": 0.1707,
+      "gar": 0.3544,
+      "ndvi_norm": 0.2192,
+      "veg_class": "Sparse"
+    }
+  },
+  "2011": {
+    "Baclaran": {
+      "green_index": 13.77,
+      "mean_ndvi": 0.1297,
+      "gar": 0.1492,
+      "ndvi_norm": 0.1301,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 37.22,
+      "mean_ndvi": 0.1973,
+      "gar": 0.5149,
+      "ndvi_norm": 0.277,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 26.36,
+      "mean_ndvi": 0.1678,
+      "gar": 0.3397,
+      "ndvi_norm": 0.2129,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 28.88,
+      "mean_ndvi": 0.1809,
+      "gar": 0.36,
+      "ndvi_norm": 0.2413,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 11.4,
+      "mean_ndvi": 0.1261,
+      "gar": 0.1014,
+      "ndvi_norm": 0.1223,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 63.26,
+      "mean_ndvi": 0.2877,
+      "gar": 0.8715,
+      "ndvi_norm": 0.4733,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 54.76,
+      "mean_ndvi": 0.2397,
+      "gar": 0.8156,
+      "ndvi_norm": 0.3689,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 28.94,
+      "mean_ndvi": 0.1695,
+      "gar": 0.3988,
+      "ndvi_norm": 0.2165,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 35.76,
+      "mean_ndvi": 0.1946,
+      "gar": 0.4875,
+      "ndvi_norm": 0.271,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 27.27,
+      "mean_ndvi": 0.1758,
+      "gar": 0.3365,
+      "ndvi_norm": 0.2302,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 19.85,
+      "mean_ndvi": 0.1558,
+      "gar": 0.2161,
+      "ndvi_norm": 0.1868,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 45.61,
+      "mean_ndvi": 0.2244,
+      "gar": 0.6366,
+      "ndvi_norm": 0.3357,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 35.24,
+      "mean_ndvi": 0.1912,
+      "gar": 0.4857,
+      "ndvi_norm": 0.2636,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 42.9,
+      "mean_ndvi": 0.2218,
+      "gar": 0.5773,
+      "ndvi_norm": 0.3302,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 34.44,
+      "mean_ndvi": 0.192,
+      "gar": 0.4628,
+      "ndvi_norm": 0.2654,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 39.99,
+      "mean_ndvi": 0.2108,
+      "gar": 0.5404,
+      "ndvi_norm": 0.3062,
+      "veg_class": "Sparse"
+    }
+  },
+  "2012": {
+    "Baclaran": {
+      "green_index": 6.92,
+      "mean_ndvi": 0.1161,
+      "gar": 0.0221,
+      "ndvi_norm": 0.1006,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 37.49,
+      "mean_ndvi": 0.2034,
+      "gar": 0.5021,
+      "ndvi_norm": 0.2901,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 15.89,
+      "mean_ndvi": 0.1337,
+      "gar": 0.1891,
+      "ndvi_norm": 0.1388,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 29.64,
+      "mean_ndvi": 0.1868,
+      "gar": 0.36,
+      "ndvi_norm": 0.2541,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 12.74,
+      "mean_ndvi": 0.1321,
+      "gar": 0.1155,
+      "ndvi_norm": 0.1354,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 54.64,
+      "mean_ndvi": 0.2677,
+      "gar": 0.7214,
+      "ndvi_norm": 0.4297,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 14.43,
+      "mean_ndvi": 0.1546,
+      "gar": 0.0846,
+      "ndvi_norm": 0.1841,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 23.5,
+      "mean_ndvi": 0.1516,
+      "gar": 0.321,
+      "ndvi_norm": 0.1776,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 27.16,
+      "mean_ndvi": 0.1667,
+      "gar": 0.3633,
+      "ndvi_norm": 0.2105,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 21.73,
+      "mean_ndvi": 0.1545,
+      "gar": 0.2674,
+      "ndvi_norm": 0.1839,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 15.92,
+      "mean_ndvi": 0.1485,
+      "gar": 0.1415,
+      "ndvi_norm": 0.171,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 27.01,
+      "mean_ndvi": 0.1695,
+      "gar": 0.3503,
+      "ndvi_norm": 0.2166,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 43.1,
+      "mean_ndvi": 0.2098,
+      "gar": 0.6214,
+      "ndvi_norm": 0.3041,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 34.86,
+      "mean_ndvi": 0.1954,
+      "gar": 0.4621,
+      "ndvi_norm": 0.2729,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 34.0,
+      "mean_ndvi": 0.1969,
+      "gar": 0.4359,
+      "ndvi_norm": 0.276,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 39.86,
+      "mean_ndvi": 0.2115,
+      "gar": 0.5349,
+      "ndvi_norm": 0.3077,
+      "veg_class": "Sparse"
+    }
+  },
+  "2013": {
+    "Baclaran": {
+      "green_index": 19.48,
+      "mean_ndvi": 0.1514,
+      "gar": 0.221,
+      "ndvi_norm": 0.1773,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 32.96,
+      "mean_ndvi": 0.1846,
+      "gar": 0.4499,
+      "ndvi_norm": 0.2494,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 29.45,
+      "mean_ndvi": 0.1799,
+      "gar": 0.3777,
+      "ndvi_norm": 0.2391,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 29.08,
+      "mean_ndvi": 0.1825,
+      "gar": 0.36,
+      "ndvi_norm": 0.2447,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 9.82,
+      "mean_ndvi": 0.1209,
+      "gar": 0.0789,
+      "ndvi_norm": 0.111,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 21.21,
+      "mean_ndvi": 0.1535,
+      "gar": 0.2576,
+      "ndvi_norm": 0.1818,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 51.96,
+      "mean_ndvi": 0.2268,
+      "gar": 0.7874,
+      "ndvi_norm": 0.341,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 30.05,
+      "mean_ndvi": 0.1742,
+      "gar": 0.4111,
+      "ndvi_norm": 0.2268,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 33.06,
+      "mean_ndvi": 0.1917,
+      "gar": 0.4293,
+      "ndvi_norm": 0.2648,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 19.68,
+      "mean_ndvi": 0.1553,
+      "gar": 0.2133,
+      "ndvi_norm": 0.1858,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 19.07,
+      "mean_ndvi": 0.1534,
+      "gar": 0.2043,
+      "ndvi_norm": 0.1816,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 32.96,
+      "mean_ndvi": 0.1891,
+      "gar": 0.4352,
+      "ndvi_norm": 0.2591,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 43.61,
+      "mean_ndvi": 0.2093,
+      "gar": 0.6357,
+      "ndvi_norm": 0.303,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 42.29,
+      "mean_ndvi": 0.2199,
+      "gar": 0.5685,
+      "ndvi_norm": 0.3259,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 35.73,
+      "mean_ndvi": 0.1996,
+      "gar": 0.4705,
+      "ndvi_norm": 0.2819,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 39.42,
+      "mean_ndvi": 0.2078,
+      "gar": 0.536,
+      "ndvi_norm": 0.2997,
+      "veg_class": "Sparse"
+    }
+  },
+  "2014": {
+    "Baclaran": {
+      "green_index": 14.13,
+      "mean_ndvi": 0.1341,
+      "gar": 0.1436,
+      "ndvi_norm": 0.1397,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 27.98,
+      "mean_ndvi": 0.1723,
+      "gar": 0.3657,
+      "ndvi_norm": 0.2225,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 27.53,
+      "mean_ndvi": 0.1747,
+      "gar": 0.3465,
+      "ndvi_norm": 0.2278,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 21.66,
+      "mean_ndvi": 0.1599,
+      "gar": 0.248,
+      "ndvi_norm": 0.1956,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 8.59,
+      "mean_ndvi": 0.1132,
+      "gar": 0.0732,
+      "ndvi_norm": 0.0943,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 47.13,
+      "mean_ndvi": 0.2392,
+      "gar": 0.6264,
+      "ndvi_norm": 0.3679,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 47.91,
+      "mean_ndvi": 0.221,
+      "gar": 0.705,
+      "ndvi_norm": 0.3285,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 24.32,
+      "mean_ndvi": 0.1564,
+      "gar": 0.3259,
+      "ndvi_norm": 0.1881,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 33.06,
+      "mean_ndvi": 0.1905,
+      "gar": 0.4333,
+      "ndvi_norm": 0.2621,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 15.51,
+      "mean_ndvi": 0.1437,
+      "gar": 0.1469,
+      "ndvi_norm": 0.1606,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 14.98,
+      "mean_ndvi": 0.1407,
+      "gar": 0.1434,
+      "ndvi_norm": 0.154,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 32.59,
+      "mean_ndvi": 0.1905,
+      "gar": 0.4215,
+      "ndvi_norm": 0.2622,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 31.58,
+      "mean_ndvi": 0.1872,
+      "gar": 0.4071,
+      "ndvi_norm": 0.2549,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 40.83,
+      "mean_ndvi": 0.2162,
+      "gar": 0.5438,
+      "ndvi_norm": 0.3179,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 29.4,
+      "mean_ndvi": 0.179,
+      "gar": 0.3795,
+      "ndvi_norm": 0.2371,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 38.25,
+      "mean_ndvi": 0.2043,
+      "gar": 0.5183,
+      "ndvi_norm": 0.292,
+      "veg_class": "Sparse"
+    }
+  },
+  "2015": {
+    "Baclaran": {
+      "green_index": 17.62,
+      "mean_ndvi": 0.1423,
+      "gar": 0.2044,
+      "ndvi_norm": 0.1574,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 34.58,
+      "mean_ndvi": 0.1918,
+      "gar": 0.467,
+      "ndvi_norm": 0.2651,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 31.11,
+      "mean_ndvi": 0.188,
+      "gar": 0.3927,
+      "ndvi_norm": 0.2567,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 29.07,
+      "mean_ndvi": 0.1823,
+      "gar": 0.36,
+      "ndvi_norm": 0.2444,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 14.06,
+      "mean_ndvi": 0.137,
+      "gar": 0.1324,
+      "ndvi_norm": 0.146,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 58.66,
+      "mean_ndvi": 0.271,
+      "gar": 0.8109,
+      "ndvi_norm": 0.437,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 56.27,
+      "mean_ndvi": 0.2499,
+      "gar": 0.82,
+      "ndvi_norm": 0.3913,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 33.08,
+      "mean_ndvi": 0.1842,
+      "gar": 0.4543,
+      "ndvi_norm": 0.2485,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 27.22,
+      "mean_ndvi": 0.1757,
+      "gar": 0.3355,
+      "ndvi_norm": 0.23,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 23.12,
+      "mean_ndvi": 0.1668,
+      "gar": 0.2622,
+      "ndvi_norm": 0.2106,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 24.48,
+      "mean_ndvi": 0.1708,
+      "gar": 0.2829,
+      "ndvi_norm": 0.2194,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 42.2,
+      "mean_ndvi": 0.2201,
+      "gar": 0.5654,
+      "ndvi_norm": 0.3265,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 43.78,
+      "mean_ndvi": 0.2128,
+      "gar": 0.6286,
+      "ndvi_norm": 0.3106,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 44.06,
+      "mean_ndvi": 0.2295,
+      "gar": 0.5813,
+      "ndvi_norm": 0.3469,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 34.83,
+      "mean_ndvi": 0.1982,
+      "gar": 0.4526,
+      "ndvi_norm": 0.2788,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 36.45,
+      "mean_ndvi": 0.1996,
+      "gar": 0.4884,
+      "ndvi_norm": 0.2819,
+      "veg_class": "Sparse"
+    }
+  },
+  "2016": {
+    "Baclaran": {
+      "green_index": 21.52,
+      "mean_ndvi": 0.162,
+      "gar": 0.2376,
+      "ndvi_norm": 0.2003,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 38.91,
+      "mean_ndvi": 0.2048,
+      "gar": 0.533,
+      "ndvi_norm": 0.2932,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 34.87,
+      "mean_ndvi": 0.2027,
+      "gar": 0.4389,
+      "ndvi_norm": 0.2887,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 29.58,
+      "mean_ndvi": 0.1797,
+      "gar": 0.3813,
+      "ndvi_norm": 0.2388,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 12.89,
+      "mean_ndvi": 0.1324,
+      "gar": 0.1183,
+      "ndvi_norm": 0.1359,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 54.89,
+      "mean_ndvi": 0.2539,
+      "gar": 0.7724,
+      "ndvi_norm": 0.3998,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 50.5,
+      "mean_ndvi": 0.2356,
+      "gar": 0.7223,
+      "ndvi_norm": 0.3601,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 36.43,
+      "mean_ndvi": 0.2019,
+      "gar": 0.4802,
+      "ndvi_norm": 0.2869,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 39.87,
+      "mean_ndvi": 0.2196,
+      "gar": 0.5086,
+      "ndvi_norm": 0.3254,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 20.03,
+      "mean_ndvi": 0.1536,
+      "gar": 0.2278,
+      "ndvi_norm": 0.182,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 23.74,
+      "mean_ndvi": 0.17,
+      "gar": 0.2672,
+      "ndvi_norm": 0.2175,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 40.04,
+      "mean_ndvi": 0.2124,
+      "gar": 0.5363,
+      "ndvi_norm": 0.3098,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 48.4,
+      "mean_ndvi": 0.2307,
+      "gar": 0.6857,
+      "ndvi_norm": 0.3495,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 47.67,
+      "mean_ndvi": 0.2424,
+      "gar": 0.6296,
+      "ndvi_norm": 0.3749,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 34.18,
+      "mean_ndvi": 0.1963,
+      "gar": 0.4423,
+      "ndvi_norm": 0.2748,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 47.18,
+      "mean_ndvi": 0.247,
+      "gar": 0.6024,
+      "ndvi_norm": 0.3848,
+      "veg_class": "Sparse"
+    }
+  },
+  "2017": {
+    "Baclaran": {
+      "green_index": 23.42,
+      "mean_ndvi": 0.1698,
+      "gar": 0.2597,
+      "ndvi_norm": 0.2172,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 37.72,
+      "mean_ndvi": 0.2032,
+      "gar": 0.5085,
+      "ndvi_norm": 0.2896,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 33.46,
+      "mean_ndvi": 0.194,
+      "gar": 0.4321,
+      "ndvi_norm": 0.2697,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 35.19,
+      "mean_ndvi": 0.2015,
+      "gar": 0.4507,
+      "ndvi_norm": 0.286,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 20.02,
+      "mean_ndvi": 0.1568,
+      "gar": 0.2169,
+      "ndvi_norm": 0.189,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 65.12,
+      "mean_ndvi": 0.304,
+      "gar": 0.8652,
+      "ndvi_norm": 0.5086,
+      "veg_class": "Moderate"
+    },
+    "Diezmo": {
+      "green_index": 36.74,
+      "mean_ndvi": 0.1952,
+      "gar": 0.5098,
+      "ndvi_norm": 0.2724,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 33.49,
+      "mean_ndvi": 0.1873,
+      "gar": 0.4543,
+      "ndvi_norm": 0.2552,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 39.96,
+      "mean_ndvi": 0.2191,
+      "gar": 0.5125,
+      "ndvi_norm": 0.3244,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 25.43,
+      "mean_ndvi": 0.173,
+      "gar": 0.2995,
+      "ndvi_norm": 0.2241,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 28.82,
+      "mean_ndvi": 0.1836,
+      "gar": 0.3497,
+      "ndvi_norm": 0.2472,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 37.38,
+      "mean_ndvi": 0.1933,
+      "gar": 0.532,
+      "ndvi_norm": 0.2683,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 52.82,
+      "mean_ndvi": 0.2581,
+      "gar": 0.7071,
+      "ndvi_norm": 0.4089,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 40.09,
+      "mean_ndvi": 0.2129,
+      "gar": 0.536,
+      "ndvi_norm": 0.3109,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 39.8,
+      "mean_ndvi": 0.2186,
+      "gar": 0.5103,
+      "ndvi_norm": 0.3231,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 41.99,
+      "mean_ndvi": 0.2224,
+      "gar": 0.5526,
+      "ndvi_norm": 0.3314,
+      "veg_class": "Sparse"
+    }
+  },
+  "2018": {
+    "Baclaran": {
+      "green_index": 21.73,
+      "mean_ndvi": 0.162,
+      "gar": 0.2431,
+      "ndvi_norm": 0.2002,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 37.1,
+      "mean_ndvi": 0.2013,
+      "gar": 0.4989,
+      "ndvi_norm": 0.2857,
+      "veg_class": "Sparse"
+    },
+    "Banlic": {
+      "green_index": 31.16,
+      "mean_ndvi": 0.1876,
+      "gar": 0.3954,
+      "ndvi_norm": 0.2557,
+      "veg_class": "Sparse"
+    },
+    "Bigaa": {
+      "green_index": 31.62,
+      "mean_ndvi": 0.1872,
+      "gar": 0.408,
+      "ndvi_norm": 0.255,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 16.87,
+      "mean_ndvi": 0.1448,
+      "gar": 0.1775,
+      "ndvi_norm": 0.1628,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 52.14,
+      "mean_ndvi": 0.2589,
+      "gar": 0.6873,
+      "ndvi_norm": 0.4108,
+      "veg_class": "Sparse"
+    },
+    "Diezmo": {
+      "green_index": 38.24,
+      "mean_ndvi": 0.2041,
+      "gar": 0.5184,
+      "ndvi_norm": 0.2918,
+      "veg_class": "Sparse"
+    },
+    "Gulod": {
+      "green_index": 36.72,
+      "mean_ndvi": 0.2034,
+      "gar": 0.4827,
+      "ndvi_norm": 0.2901,
+      "veg_class": "Sparse"
+    },
+    "Mamatid": {
+      "green_index": 36.29,
+      "mean_ndvi": 0.2051,
+      "gar": 0.4663,
+      "ndvi_norm": 0.2939,
+      "veg_class": "Sparse"
+    },
+    "Marinig": {
+      "green_index": 23.26,
+      "mean_ndvi": 0.1675,
+      "gar": 0.2631,
+      "ndvi_norm": 0.2123,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 26.83,
+      "mean_ndvi": 0.1762,
+      "gar": 0.3242,
+      "ndvi_norm": 0.231,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 36.61,
+      "mean_ndvi": 0.1961,
+      "gar": 0.5036,
+      "ndvi_norm": 0.2744,
+      "veg_class": "Sparse"
+    },
+    "Poblacion": {
+      "green_index": 46.23,
+      "mean_ndvi": 0.2207,
+      "gar": 0.6643,
+      "ndvi_norm": 0.3277,
+      "veg_class": "Sparse"
+    },
+    "Pulo": {
+      "green_index": 46.86,
+      "mean_ndvi": 0.2401,
+      "gar": 0.6167,
+      "ndvi_norm": 0.3698,
+      "veg_class": "Sparse"
+    },
+    "Sala": {
+      "green_index": 36.68,
+      "mean_ndvi": 0.2037,
+      "gar": 0.4808,
+      "ndvi_norm": 0.2908,
+      "veg_class": "Sparse"
+    },
+    "San Isidro": {
+      "green_index": 45.81,
+      "mean_ndvi": 0.2381,
+      "gar": 0.5969,
+      "ndvi_norm": 0.3655,
+      "veg_class": "Sparse"
+    }
+  },
+  "2019": {
+    "Baclaran": {
+      "green_index": 41.35,
+      "mean_ndvi": 0.2497,
+      "gar": 0.4475,
+      "ndvi_norm": 0.3908,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 64.31,
+      "mean_ndvi": 0.3454,
+      "gar": 0.71,
+      "ndvi_norm": 0.5985,
+      "veg_class": "Moderate"
+    },
+    "Banlic": {
+      "green_index": 61.45,
+      "mean_ndvi": 0.3377,
+      "gar": 0.6635,
+      "ndvi_norm": 0.5818,
+      "veg_class": "Moderate"
+    },
+    "Bigaa": {
+      "green_index": 57.3,
+      "mean_ndvi": 0.3104,
+      "gar": 0.6486,
+      "ndvi_norm": 0.5225,
+      "veg_class": "Moderate"
+    },
+    "Butong": {
+      "green_index": 38.38,
+      "mean_ndvi": 0.2207,
+      "gar": 0.468,
+      "ndvi_norm": 0.3276,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 90.64,
+      "mean_ndvi": 0.4868,
+      "gar": 0.9076,
+      "ndvi_norm": 0.9057,
+      "veg_class": "Moderate"
+    },
+    "Diezmo": {
+      "green_index": 77.84,
+      "mean_ndvi": 0.4069,
+      "gar": 0.8478,
+      "ndvi_norm": 0.7321,
+      "veg_class": "Moderate"
+    },
+    "Gulod": {
+      "green_index": 60.25,
+      "mean_ndvi": 0.3327,
+      "gar": 0.6496,
+      "ndvi_norm": 0.5711,
+      "veg_class": "Moderate"
+    },
+    "Mamatid": {
+      "green_index": 67.41,
+      "mean_ndvi": 0.378,
+      "gar": 0.6812,
+      "ndvi_norm": 0.6694,
+      "veg_class": "Moderate"
+    },
+    "Marinig": {
+      "green_index": 52.2,
+      "mean_ndvi": 0.2975,
+      "gar": 0.563,
+      "ndvi_norm": 0.4946,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 58.1,
+      "mean_ndvi": 0.3172,
+      "gar": 0.6464,
+      "ndvi_norm": 0.5374,
+      "veg_class": "Moderate"
+    },
+    "Pittland": {
+      "green_index": 59.06,
+      "mean_ndvi": 0.3375,
+      "gar": 0.6041,
+      "ndvi_norm": 0.5815,
+      "veg_class": "Moderate"
+    },
+    "Poblacion": {
+      "green_index": 83.5,
+      "mean_ndvi": 0.4453,
+      "gar": 0.8643,
+      "ndvi_norm": 0.8155,
+      "veg_class": "Moderate"
+    },
+    "Pulo": {
+      "green_index": 80.5,
+      "mean_ndvi": 0.4344,
+      "gar": 0.8244,
+      "ndvi_norm": 0.792,
+      "veg_class": "Moderate"
+    },
+    "Sala": {
+      "green_index": 66.39,
+      "mean_ndvi": 0.368,
+      "gar": 0.6881,
+      "ndvi_norm": 0.6478,
+      "veg_class": "Moderate"
+    },
+    "San Isidro": {
+      "green_index": 72.63,
+      "mean_ndvi": 0.4069,
+      "gar": 0.7176,
+      "ndvi_norm": 0.7321,
+      "veg_class": "Moderate"
+    }
+  },
+  "2020": {
+    "Baclaran": {
+      "green_index": 39.55,
+      "mean_ndvi": 0.2444,
+      "gar": 0.4199,
+      "ndvi_norm": 0.3792,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 63.5,
+      "mean_ndvi": 0.3416,
+      "gar": 0.7019,
+      "ndvi_norm": 0.5904,
+      "veg_class": "Moderate"
+    },
+    "Banlic": {
+      "green_index": 57.54,
+      "mean_ndvi": 0.3239,
+      "gar": 0.6107,
+      "ndvi_norm": 0.5519,
+      "veg_class": "Moderate"
+    },
+    "Bigaa": {
+      "green_index": 50.13,
+      "mean_ndvi": 0.2802,
+      "gar": 0.5676,
+      "ndvi_norm": 0.457,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 33.79,
+      "mean_ndvi": 0.2022,
+      "gar": 0.4133,
+      "ndvi_norm": 0.2876,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 82.34,
+      "mean_ndvi": 0.4239,
+      "gar": 0.905,
+      "ndvi_norm": 0.7691,
+      "veg_class": "Moderate"
+    },
+    "Diezmo": {
+      "green_index": 73.14,
+      "mean_ndvi": 0.3795,
+      "gar": 0.8196,
+      "ndvi_norm": 0.6726,
+      "veg_class": "Moderate"
+    },
+    "Gulod": {
+      "green_index": 63.66,
+      "mean_ndvi": 0.3562,
+      "gar": 0.6587,
+      "ndvi_norm": 0.622,
+      "veg_class": "Moderate"
+    },
+    "Mamatid": {
+      "green_index": 60.07,
+      "mean_ndvi": 0.3421,
+      "gar": 0.6147,
+      "ndvi_norm": 0.5913,
+      "veg_class": "Moderate"
+    },
+    "Marinig": {
+      "green_index": 43.61,
+      "mean_ndvi": 0.2551,
+      "gar": 0.4864,
+      "ndvi_norm": 0.4025,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 52.55,
+      "mean_ndvi": 0.2891,
+      "gar": 0.5992,
+      "ndvi_norm": 0.4763,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 60.22,
+      "mean_ndvi": 0.3434,
+      "gar": 0.6142,
+      "ndvi_norm": 0.5942,
+      "veg_class": "Moderate"
+    },
+    "Poblacion": {
+      "green_index": 77.42,
+      "mean_ndvi": 0.4008,
+      "gar": 0.8571,
+      "ndvi_norm": 0.719,
+      "veg_class": "Moderate"
+    },
+    "Pulo": {
+      "green_index": 78.84,
+      "mean_ndvi": 0.4246,
+      "gar": 0.815,
+      "ndvi_norm": 0.7706,
+      "veg_class": "Moderate"
+    },
+    "Sala": {
+      "green_index": 62.14,
+      "mean_ndvi": 0.3461,
+      "gar": 0.6533,
+      "ndvi_norm": 0.6001,
+      "veg_class": "Moderate"
+    },
+    "San Isidro": {
+      "green_index": 72.24,
+      "mean_ndvi": 0.4077,
+      "gar": 0.7052,
+      "ndvi_norm": 0.7339,
+      "veg_class": "Moderate"
+    }
+  },
+  "2021": {
+    "Baclaran": {
+      "green_index": 44.47,
+      "mean_ndvi": 0.2652,
+      "gar": 0.4751,
+      "ndvi_norm": 0.4245,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 56.94,
+      "mean_ndvi": 0.3018,
+      "gar": 0.6677,
+      "ndvi_norm": 0.5038,
+      "veg_class": "Moderate"
+    },
+    "Banlic": {
+      "green_index": 57.2,
+      "mean_ndvi": 0.3163,
+      "gar": 0.6269,
+      "ndvi_norm": 0.5354,
+      "veg_class": "Moderate"
+    },
+    "Bigaa": {
+      "green_index": 51.25,
+      "mean_ndvi": 0.2851,
+      "gar": 0.5799,
+      "ndvi_norm": 0.4675,
+      "veg_class": "Sparse"
+    },
+    "Butong": {
+      "green_index": 37.66,
+      "mean_ndvi": 0.2156,
+      "gar": 0.4667,
+      "ndvi_norm": 0.3166,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 85.1,
+      "mean_ndvi": 0.4458,
+      "gar": 0.9026,
+      "ndvi_norm": 0.8167,
+      "veg_class": "Moderate"
+    },
+    "Diezmo": {
+      "green_index": 75.97,
+      "mean_ndvi": 0.3945,
+      "gar": 0.8416,
+      "ndvi_norm": 0.7051,
+      "veg_class": "Moderate"
+    },
+    "Gulod": {
+      "green_index": 55.44,
+      "mean_ndvi": 0.3076,
+      "gar": 0.6115,
+      "ndvi_norm": 0.5164,
+      "veg_class": "Moderate"
+    },
+    "Mamatid": {
+      "green_index": 64.2,
+      "mean_ndvi": 0.3597,
+      "gar": 0.6605,
+      "ndvi_norm": 0.6297,
+      "veg_class": "Moderate"
+    },
+    "Marinig": {
+      "green_index": 45.77,
+      "mean_ndvi": 0.2648,
+      "gar": 0.5088,
+      "ndvi_norm": 0.4236,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 47.8,
+      "mean_ndvi": 0.2616,
+      "gar": 0.57,
+      "ndvi_norm": 0.4166,
+      "veg_class": "Sparse"
+    },
+    "Pittland": {
+      "green_index": 61.91,
+      "mean_ndvi": 0.3568,
+      "gar": 0.6126,
+      "ndvi_norm": 0.6235,
+      "veg_class": "Moderate"
+    },
+    "Poblacion": {
+      "green_index": 78.94,
+      "mean_ndvi": 0.408,
+      "gar": 0.8714,
+      "ndvi_norm": 0.7347,
+      "veg_class": "Moderate"
+    },
+    "Pulo": {
+      "green_index": 74.07,
+      "mean_ndvi": 0.3944,
+      "gar": 0.7941,
+      "ndvi_norm": 0.7051,
+      "veg_class": "Moderate"
+    },
+    "Sala": {
+      "green_index": 60.39,
+      "mean_ndvi": 0.3338,
+      "gar": 0.6496,
+      "ndvi_norm": 0.5734,
+      "veg_class": "Moderate"
+    },
+    "San Isidro": {
+      "green_index": 71.62,
+      "mean_ndvi": 0.4,
+      "gar": 0.7148,
+      "ndvi_norm": 0.7171,
+      "veg_class": "Moderate"
+    }
+  },
+  "2022": {
+    "Baclaran": {
+      "green_index": 47.79,
+      "mean_ndvi": 0.2805,
+      "gar": 0.5083,
+      "ndvi_norm": 0.4577,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 68.6,
+      "mean_ndvi": 0.3698,
+      "gar": 0.7377,
+      "ndvi_norm": 0.6515,
+      "veg_class": "Moderate"
+    },
+    "Banlic": {
+      "green_index": 63.49,
+      "mean_ndvi": 0.3596,
+      "gar": 0.6431,
+      "ndvi_norm": 0.6295,
+      "veg_class": "Moderate"
+    },
+    "Bigaa": {
+      "green_index": 57.37,
+      "mean_ndvi": 0.316,
+      "gar": 0.6322,
+      "ndvi_norm": 0.5348,
+      "veg_class": "Moderate"
+    },
+    "Butong": {
+      "green_index": 42.02,
+      "mean_ndvi": 0.241,
+      "gar": 0.4927,
+      "ndvi_norm": 0.3719,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 95.58,
+      "mean_ndvi": 0.5169,
+      "gar": 0.9331,
+      "ndvi_norm": 0.971,
+      "veg_class": "Moderate"
+    },
+    "Diezmo": {
+      "green_index": 78.05,
+      "mean_ndvi": 0.4145,
+      "gar": 0.8283,
+      "ndvi_norm": 0.7487,
+      "veg_class": "Moderate"
+    },
+    "Gulod": {
+      "green_index": 67.43,
+      "mean_ndvi": 0.3846,
+      "gar": 0.6601,
+      "ndvi_norm": 0.6838,
+      "veg_class": "Moderate"
+    },
+    "Mamatid": {
+      "green_index": 69.92,
+      "mean_ndvi": 0.3971,
+      "gar": 0.6818,
+      "ndvi_norm": 0.7108,
+      "veg_class": "Moderate"
+    },
+    "Marinig": {
+      "green_index": 50.62,
+      "mean_ndvi": 0.2928,
+      "gar": 0.5391,
+      "ndvi_norm": 0.4843,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 58.81,
+      "mean_ndvi": 0.3236,
+      "gar": 0.6436,
+      "ndvi_norm": 0.5512,
+      "veg_class": "Moderate"
+    },
+    "Pittland": {
+      "green_index": 62.26,
+      "mean_ndvi": 0.3527,
+      "gar": 0.6348,
+      "ndvi_norm": 0.6145,
+      "veg_class": "Moderate"
+    },
+    "Poblacion": {
+      "green_index": 86.5,
+      "mean_ndvi": 0.4682,
+      "gar": 0.8643,
+      "ndvi_norm": 0.8654,
+      "veg_class": "Moderate"
+    },
+    "Pulo": {
+      "green_index": 80.48,
+      "mean_ndvi": 0.4409,
+      "gar": 0.803,
+      "ndvi_norm": 0.8061,
+      "veg_class": "Moderate"
+    },
+    "Sala": {
+      "green_index": 67.37,
+      "mean_ndvi": 0.3766,
+      "gar": 0.6848,
+      "ndvi_norm": 0.6663,
+      "veg_class": "Moderate"
+    },
+    "San Isidro": {
+      "green_index": 77.44,
+      "mean_ndvi": 0.4429,
+      "gar": 0.7205,
+      "ndvi_norm": 0.8103,
+      "veg_class": "Moderate"
+    }
+  },
+  "2023": {
+    "Baclaran": {
+      "green_index": 47.14,
+      "mean_ndvi": 0.2789,
+      "gar": 0.4972,
+      "ndvi_norm": 0.4542,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 70.3,
+      "mean_ndvi": 0.3816,
+      "gar": 0.7415,
+      "ndvi_norm": 0.6772,
+      "veg_class": "Moderate"
+    },
+    "Banlic": {
+      "green_index": 66.46,
+      "mean_ndvi": 0.3757,
+      "gar": 0.6648,
+      "ndvi_norm": 0.6645,
+      "veg_class": "Moderate"
+    },
+    "Bigaa": {
+      "green_index": 57.02,
+      "mean_ndvi": 0.3182,
+      "gar": 0.6162,
+      "ndvi_norm": 0.5396,
+      "veg_class": "Moderate"
+    },
+    "Butong": {
+      "green_index": 41.34,
+      "mean_ndvi": 0.2393,
+      "gar": 0.4812,
+      "ndvi_norm": 0.3682,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 97.17,
+      "mean_ndvi": 0.5302,
+      "gar": 0.9292,
+      "ndvi_norm": 1.0,
+      "veg_class": "Moderate"
+    },
+    "Diezmo": {
+      "green_index": 77.48,
+      "mean_ndvi": 0.4169,
+      "gar": 0.8061,
+      "ndvi_norm": 0.7539,
+      "veg_class": "Moderate"
+    },
+    "Gulod": {
+      "green_index": 66.1,
+      "mean_ndvi": 0.3805,
+      "gar": 0.6403,
+      "ndvi_norm": 0.6748,
+      "veg_class": "Moderate"
+    },
+    "Mamatid": {
+      "green_index": 69.53,
+      "mean_ndvi": 0.4005,
+      "gar": 0.6608,
+      "ndvi_norm": 0.7183,
+      "veg_class": "Moderate"
+    },
+    "Marinig": {
+      "green_index": 48.05,
+      "mean_ndvi": 0.2806,
+      "gar": 0.5143,
+      "ndvi_norm": 0.4579,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 58.46,
+      "mean_ndvi": 0.3259,
+      "gar": 0.6272,
+      "ndvi_norm": 0.5562,
+      "veg_class": "Moderate"
+    },
+    "Pittland": {
+      "green_index": 62.94,
+      "mean_ndvi": 0.3594,
+      "gar": 0.6301,
+      "ndvi_norm": 0.629,
+      "veg_class": "Moderate"
+    },
+    "Poblacion": {
+      "green_index": 86.88,
+      "mean_ndvi": 0.4734,
+      "gar": 0.8571,
+      "ndvi_norm": 0.8766,
+      "veg_class": "Moderate"
+    },
+    "Pulo": {
+      "green_index": 85.76,
+      "mean_ndvi": 0.4761,
+      "gar": 0.8204,
+      "ndvi_norm": 0.8824,
+      "veg_class": "Moderate"
+    },
+    "Sala": {
+      "green_index": 67.63,
+      "mean_ndvi": 0.3782,
+      "gar": 0.686,
+      "ndvi_norm": 0.6698,
+      "veg_class": "Moderate"
+    },
+    "San Isidro": {
+      "green_index": 78.26,
+      "mean_ndvi": 0.4491,
+      "gar": 0.7208,
+      "ndvi_norm": 0.8238,
+      "veg_class": "Moderate"
+    }
+  },
+  "2024": {
+    "Baclaran": {
+      "green_index": 43.96,
+      "mean_ndvi": 0.2613,
+      "gar": 0.4751,
+      "ndvi_norm": 0.4158,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 61.98,
+      "mean_ndvi": 0.3281,
+      "gar": 0.708,
+      "ndvi_norm": 0.561,
+      "veg_class": "Moderate"
+    },
+    "Banlic": {
+      "green_index": 58.81,
+      "mean_ndvi": 0.3279,
+      "gar": 0.6293,
+      "ndvi_norm": 0.5606,
+      "veg_class": "Moderate"
+    },
+    "Bigaa": {
+      "green_index": 56.76,
+      "mean_ndvi": 0.3143,
+      "gar": 0.6223,
+      "ndvi_norm": 0.5311,
+      "veg_class": "Moderate"
+    },
+    "Butong": {
+      "green_index": 42.6,
+      "mean_ndvi": 0.2441,
+      "gar": 0.4971,
+      "ndvi_norm": 0.3786,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 89.47,
+      "mean_ndvi": 0.4787,
+      "gar": 0.9044,
+      "ndvi_norm": 0.8881,
+      "veg_class": "Moderate"
+    },
+    "Diezmo": {
+      "green_index": 65.67,
+      "mean_ndvi": 0.3347,
+      "gar": 0.7787,
+      "ndvi_norm": 0.5753,
+      "veg_class": "Moderate"
+    },
+    "Gulod": {
+      "green_index": 57.07,
+      "mean_ndvi": 0.3263,
+      "gar": 0.5913,
+      "ndvi_norm": 0.557,
+      "veg_class": "Moderate"
+    },
+    "Mamatid": {
+      "green_index": 62.29,
+      "mean_ndvi": 0.3532,
+      "gar": 0.6342,
+      "ndvi_norm": 0.6155,
+      "veg_class": "Moderate"
+    },
+    "Marinig": {
+      "green_index": 47.72,
+      "mean_ndvi": 0.2811,
+      "gar": 0.5048,
+      "ndvi_norm": 0.4589,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 56.5,
+      "mean_ndvi": 0.3086,
+      "gar": 0.6344,
+      "ndvi_norm": 0.5187,
+      "veg_class": "Moderate"
+    },
+    "Pittland": {
+      "green_index": 54.35,
+      "mean_ndvi": 0.3131,
+      "gar": 0.566,
+      "ndvi_norm": 0.5285,
+      "veg_class": "Moderate"
+    },
+    "Poblacion": {
+      "green_index": 85.95,
+      "mean_ndvi": 0.464,
+      "gar": 0.8643,
+      "ndvi_norm": 0.8563,
+      "veg_class": "Moderate"
+    },
+    "Pulo": {
+      "green_index": 79.21,
+      "mean_ndvi": 0.4298,
+      "gar": 0.8073,
+      "ndvi_norm": 0.7819,
+      "veg_class": "Moderate"
+    },
+    "Sala": {
+      "green_index": 68.51,
+      "mean_ndvi": 0.384,
+      "gar": 0.6892,
+      "ndvi_norm": 0.6824,
+      "veg_class": "Moderate"
+    },
+    "San Isidro": {
+      "green_index": 73.54,
+      "mean_ndvi": 0.4159,
+      "gar": 0.7111,
+      "ndvi_norm": 0.7517,
+      "veg_class": "Moderate"
+    }
+  },
+  "2025": {
+    "Baclaran": {
+      "green_index": 47.84,
+      "mean_ndvi": 0.286,
+      "gar": 0.4917,
+      "ndvi_norm": 0.4696,
+      "veg_class": "Sparse"
+    },
+    "Banay-Banay": {
+      "green_index": 71.91,
+      "mean_ndvi": 0.393,
+      "gar": 0.7448,
+      "ndvi_norm": 0.7019,
+      "veg_class": "Moderate"
+    },
+    "Banlic": {
+      "green_index": 65.96,
+      "mean_ndvi": 0.369,
+      "gar": 0.6741,
+      "ndvi_norm": 0.6499,
+      "veg_class": "Moderate"
+    },
+    "Bigaa": {
+      "green_index": 61.43,
+      "mean_ndvi": 0.341,
+      "gar": 0.6522,
+      "ndvi_norm": 0.5891,
+      "veg_class": "Moderate"
+    },
+    "Butong": {
+      "green_index": 43.8,
+      "mean_ndvi": 0.2524,
+      "gar": 0.5,
+      "ndvi_norm": 0.3966,
+      "veg_class": "Sparse"
+    },
+    "Casile": {
+      "green_index": 92.78,
+      "mean_ndvi": 0.4965,
+      "gar": 0.9294,
+      "ndvi_norm": 0.9267,
+      "veg_class": "Moderate"
+    },
+    "Diezmo": {
+      "green_index": 81.08,
+      "mean_ndvi": 0.4382,
+      "gar": 0.8268,
+      "ndvi_norm": 0.8002,
+      "veg_class": "Moderate"
+    },
+    "Gulod": {
+      "green_index": 59.65,
+      "mean_ndvi": 0.3476,
+      "gar": 0.5861,
+      "ndvi_norm": 0.6034,
+      "veg_class": "Moderate"
+    },
+    "Mamatid": {
+      "green_index": 69.9,
+      "mean_ndvi": 0.3999,
+      "gar": 0.672,
+      "ndvi_norm": 0.717,
+      "veg_class": "Moderate"
+    },
+    "Marinig": {
+      "green_index": 51.04,
+      "mean_ndvi": 0.2939,
+      "gar": 0.5459,
+      "ndvi_norm": 0.4867,
+      "veg_class": "Sparse"
+    },
+    "Niugan": {
+      "green_index": 59.6,
+      "mean_ndvi": 0.3274,
+      "gar": 0.6509,
+      "ndvi_norm": 0.5594,
+      "veg_class": "Moderate"
+    },
+    "Pittland": {
+      "green_index": 62.23,
+      "mean_ndvi": 0.3624,
+      "gar": 0.6024,
+      "ndvi_norm": 0.6356,
+      "veg_class": "Moderate"
+    },
+    "Poblacion": {
+      "green_index": 82.08,
+      "mean_ndvi": 0.4388,
+      "gar": 0.85,
+      "ndvi_norm": 0.8014,
+      "veg_class": "Moderate"
+    },
+    "Pulo": {
+      "green_index": 85.56,
+      "mean_ndvi": 0.4771,
+      "gar": 0.8121,
+      "ndvi_norm": 0.8846,
+      "veg_class": "Moderate"
+    },
+    "Sala": {
+      "green_index": 67.21,
+      "mean_ndvi": 0.375,
+      "gar": 0.6857,
+      "ndvi_norm": 0.663,
+      "veg_class": "Moderate"
+    },
+    "San Isidro": {
+      "green_index": 81.8,
+      "mean_ndvi": 0.4695,
+      "gar": 0.7428,
+      "ndvi_norm": 0.8681,
+      "veg_class": "Moderate"
+    }
+  },
+  "2026": {
+    "Baclaran": {
+      "green_index": 79.67,
+      "mean_ndvi": 0.2882,
+      "gar": 0.4917,
+      "ndvi_norm": 1,
+      "veg_class": "Sparse (Projected)"
+    },
+    "Banay-Banay": {
+      "green_index": 90.29,
+      "mean_ndvi": 0.407,
+      "gar": 0.7572,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Banlic": {
+      "green_index": 87.28,
+      "mean_ndvi": 0.3764,
+      "gar": 0.6821,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Bigaa": {
+      "green_index": 86.63,
+      "mean_ndvi": 0.352,
+      "gar": 0.6656,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Butong": {
+      "green_index": 80.28,
+      "mean_ndvi": 0.2601,
+      "gar": 0.5071,
+      "ndvi_norm": 1,
+      "veg_class": "Sparse (Projected)"
+    },
+    "Casile": {
+      "green_index": 92.91,
+      "mean_ndvi": 0.5028,
+      "gar": 0.9319,
+      "ndvi_norm": 0.9272,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Diezmo": {
+      "green_index": 92.75,
+      "mean_ndvi": 0.439,
+      "gar": 0.8188,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Gulod": {
+      "green_index": 74.29,
+      "mean_ndvi": 0.3498,
+      "gar": 0.5742,
+      "ndvi_norm": 0.8553,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Mamatid": {
+      "green_index": 86.78,
+      "mean_ndvi": 0.4035,
+      "gar": 0.6696,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Marinig": {
+      "green_index": 82.0,
+      "mean_ndvi": 0.2985,
+      "gar": 0.5499,
+      "ndvi_norm": 1,
+      "veg_class": "Sparse (Projected)"
+    },
+    "Niugan": {
+      "green_index": 86.65,
+      "mean_ndvi": 0.339,
+      "gar": 0.6661,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Pittland": {
+      "green_index": 82.86,
+      "mean_ndvi": 0.3596,
+      "gar": 0.5935,
+      "ndvi_norm": 0.9853,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Poblacion": {
+      "green_index": 88.41,
+      "mean_ndvi": 0.4445,
+      "gar": 0.8457,
+      "ndvi_norm": 0.9096,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Pulo": {
+      "green_index": 92.64,
+      "mean_ndvi": 0.4925,
+      "gar": 0.8161,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Sala": {
+      "green_index": 87.74,
+      "mean_ndvi": 0.384,
+      "gar": 0.6934,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "San Isidro": {
+      "green_index": 89.9,
+      "mean_ndvi": 0.4807,
+      "gar": 0.7474,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    }
+  },
+  "2027": {
+    "Baclaran": {
+      "green_index": 79.67,
+      "mean_ndvi": 0.2905,
+      "gar": 0.4917,
+      "ndvi_norm": 1,
+      "veg_class": "Sparse (Projected)"
+    },
+    "Banay-Banay": {
+      "green_index": 90.79,
+      "mean_ndvi": 0.4211,
+      "gar": 0.7697,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Banlic": {
+      "green_index": 87.61,
+      "mean_ndvi": 0.3837,
+      "gar": 0.6902,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Bigaa": {
+      "green_index": 87.16,
+      "mean_ndvi": 0.3631,
+      "gar": 0.6791,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Butong": {
+      "green_index": 80.57,
+      "mean_ndvi": 0.2677,
+      "gar": 0.5142,
+      "ndvi_norm": 1,
+      "veg_class": "Sparse (Projected)"
+    },
+    "Casile": {
+      "green_index": 94.01,
+      "mean_ndvi": 0.5091,
+      "gar": 0.9344,
+      "ndvi_norm": 0.9439,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Diezmo": {
+      "green_index": 92.44,
+      "mean_ndvi": 0.4398,
+      "gar": 0.8109,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Gulod": {
+      "green_index": 74.35,
+      "mean_ndvi": 0.3519,
+      "gar": 0.5622,
+      "ndvi_norm": 0.8643,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Mamatid": {
+      "green_index": 86.69,
+      "mean_ndvi": 0.4072,
+      "gar": 0.6672,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Marinig": {
+      "green_index": 82.15,
+      "mean_ndvi": 0.3031,
+      "gar": 0.5539,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Niugan": {
+      "green_index": 87.26,
+      "mean_ndvi": 0.3507,
+      "gar": 0.6814,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Pittland": {
+      "green_index": 81.62,
+      "mean_ndvi": 0.3568,
+      "gar": 0.5846,
+      "ndvi_norm": 0.9706,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Poblacion": {
+      "green_index": 89.31,
+      "mean_ndvi": 0.4502,
+      "gar": 0.8414,
+      "ndvi_norm": 0.9275,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Pulo": {
+      "green_index": 92.81,
+      "mean_ndvi": 0.5079,
+      "gar": 0.8201,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Sala": {
+      "green_index": 88.04,
+      "mean_ndvi": 0.393,
+      "gar": 0.7011,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "San Isidro": {
+      "green_index": 90.08,
+      "mean_ndvi": 0.4919,
+      "gar": 0.7521,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    }
+  },
+  "2028": {
+    "Baclaran": {
+      "green_index": 79.67,
+      "mean_ndvi": 0.2927,
+      "gar": 0.4917,
+      "ndvi_norm": 1,
+      "veg_class": "Sparse (Projected)"
+    },
+    "Banay-Banay": {
+      "green_index": 91.29,
+      "mean_ndvi": 0.4352,
+      "gar": 0.7821,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Banlic": {
+      "green_index": 87.93,
+      "mean_ndvi": 0.3911,
+      "gar": 0.6982,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Bigaa": {
+      "green_index": 87.7,
+      "mean_ndvi": 0.3741,
+      "gar": 0.6925,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Butong": {
+      "green_index": 80.85,
+      "mean_ndvi": 0.2754,
+      "gar": 0.5213,
+      "ndvi_norm": 1,
+      "veg_class": "Sparse (Projected)"
+    },
+    "Casile": {
+      "green_index": 95.12,
+      "mean_ndvi": 0.5154,
+      "gar": 0.9368,
+      "ndvi_norm": 0.9607,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Diezmo": {
+      "green_index": 92.12,
+      "mean_ndvi": 0.4405,
+      "gar": 0.803,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Gulod": {
+      "green_index": 74.41,
+      "mean_ndvi": 0.3541,
+      "gar": 0.5503,
+      "ndvi_norm": 0.8733,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Mamatid": {
+      "green_index": 86.59,
+      "mean_ndvi": 0.4108,
+      "gar": 0.6647,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Marinig": {
+      "green_index": 82.31,
+      "mean_ndvi": 0.3078,
+      "gar": 0.5579,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Niugan": {
+      "green_index": 87.87,
+      "mean_ndvi": 0.3623,
+      "gar": 0.6967,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Pittland": {
+      "green_index": 80.38,
+      "mean_ndvi": 0.3539,
+      "gar": 0.5757,
+      "ndvi_norm": 0.9558,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Poblacion": {
+      "green_index": 90.21,
+      "mean_ndvi": 0.4559,
+      "gar": 0.8371,
+      "ndvi_norm": 0.9454,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Pulo": {
+      "green_index": 92.97,
+      "mean_ndvi": 0.5234,
+      "gar": 0.8242,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Sala": {
+      "green_index": 88.35,
+      "mean_ndvi": 0.402,
+      "gar": 0.7087,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "San Isidro": {
+      "green_index": 90.27,
+      "mean_ndvi": 0.5031,
+      "gar": 0.7567,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    }
+  },
+  "2029": {
+    "Baclaran": {
+      "green_index": 79.67,
+      "mean_ndvi": 0.2949,
+      "gar": 0.4917,
+      "ndvi_norm": 1,
+      "veg_class": "Sparse (Projected)"
+    },
+    "Banay-Banay": {
+      "green_index": 91.78,
+      "mean_ndvi": 0.4493,
+      "gar": 0.7946,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Banlic": {
+      "green_index": 88.25,
+      "mean_ndvi": 0.3985,
+      "gar": 0.7063,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Bigaa": {
+      "green_index": 88.24,
+      "mean_ndvi": 0.3851,
+      "gar": 0.706,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Butong": {
+      "green_index": 81.14,
+      "mean_ndvi": 0.2831,
+      "gar": 0.5284,
+      "ndvi_norm": 1,
+      "veg_class": "Sparse (Projected)"
+    },
+    "Casile": {
+      "green_index": 96.22,
+      "mean_ndvi": 0.5217,
+      "gar": 0.9393,
+      "ndvi_norm": 0.9775,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Diezmo": {
+      "green_index": 91.8,
+      "mean_ndvi": 0.4413,
+      "gar": 0.795,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Gulod": {
+      "green_index": 74.47,
+      "mean_ndvi": 0.3563,
+      "gar": 0.5383,
+      "ndvi_norm": 0.8824,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Mamatid": {
+      "green_index": 86.49,
+      "mean_ndvi": 0.4145,
+      "gar": 0.6623,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Marinig": {
+      "green_index": 82.47,
+      "mean_ndvi": 0.3124,
+      "gar": 0.5619,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Niugan": {
+      "green_index": 88.48,
+      "mean_ndvi": 0.374,
+      "gar": 0.7119,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Pittland": {
+      "green_index": 79.14,
+      "mean_ndvi": 0.3511,
+      "gar": 0.5668,
+      "ndvi_norm": 0.9411,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Poblacion": {
+      "green_index": 91.11,
+      "mean_ndvi": 0.4616,
+      "gar": 0.8329,
+      "ndvi_norm": 0.9633,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Pulo": {
+      "green_index": 93.13,
+      "mean_ndvi": 0.5388,
+      "gar": 0.8282,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Sala": {
+      "green_index": 88.66,
+      "mean_ndvi": 0.411,
+      "gar": 0.7164,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "San Isidro": {
+      "green_index": 90.46,
+      "mean_ndvi": 0.5143,
+      "gar": 0.7614,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    }
+  },
+  "2030": {
+    "Baclaran": {
+      "green_index": 79.67,
+      "mean_ndvi": 0.2971,
+      "gar": 0.4917,
+      "ndvi_norm": 1,
+      "veg_class": "Sparse (Projected)"
+    },
+    "Banay-Banay": {
+      "green_index": 92.28,
+      "mean_ndvi": 0.4634,
+      "gar": 0.807,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Banlic": {
+      "green_index": 88.57,
+      "mean_ndvi": 0.4058,
+      "gar": 0.7144,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Bigaa": {
+      "green_index": 88.78,
+      "mean_ndvi": 0.3961,
+      "gar": 0.7195,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Butong": {
+      "green_index": 81.42,
+      "mean_ndvi": 0.2908,
+      "gar": 0.5355,
+      "ndvi_norm": 1,
+      "veg_class": "Sparse (Projected)"
+    },
+    "Casile": {
+      "green_index": 97.33,
+      "mean_ndvi": 0.528,
+      "gar": 0.9418,
+      "ndvi_norm": 0.9942,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Diezmo": {
+      "green_index": 91.48,
+      "mean_ndvi": 0.4421,
+      "gar": 0.7871,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Gulod": {
+      "green_index": 74.54,
+      "mean_ndvi": 0.3585,
+      "gar": 0.5263,
+      "ndvi_norm": 0.8914,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Mamatid": {
+      "green_index": 86.39,
+      "mean_ndvi": 0.4181,
+      "gar": 0.6598,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Marinig": {
+      "green_index": 82.63,
+      "mean_ndvi": 0.3171,
+      "gar": 0.5659,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Niugan": {
+      "green_index": 89.09,
+      "mean_ndvi": 0.3856,
+      "gar": 0.7272,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Pittland": {
+      "green_index": 77.9,
+      "mean_ndvi": 0.3482,
+      "gar": 0.5579,
+      "ndvi_norm": 0.9264,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Poblacion": {
+      "green_index": 92.01,
+      "mean_ndvi": 0.4674,
+      "gar": 0.8286,
+      "ndvi_norm": 0.9812,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Pulo": {
+      "green_index": 93.29,
+      "mean_ndvi": 0.5542,
+      "gar": 0.8323,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "Sala": {
+      "green_index": 88.96,
+      "mean_ndvi": 0.42,
+      "gar": 0.7241,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    },
+    "San Isidro": {
+      "green_index": 90.64,
+      "mean_ndvi": 0.5255,
+      "gar": 0.7661,
+      "ndvi_norm": 1,
+      "veg_class": "Moderate (Projected)"
+    }
+  }
+}

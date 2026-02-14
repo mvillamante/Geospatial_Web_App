@@ -1,0 +1,2004 @@
+{
+  "2020": {
+    "Baclaran": {
+      "calamity_risk": 46.07,
+      "calamity_risk_raw": 0.4607,
+      "risk_class": "Moderate",
+      "hazard_index": 40.59,
+      "hazard_index_raw": 0.4059,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.05
+    },
+    "Banay-Banay": {
+      "calamity_risk": 56.82,
+      "calamity_risk_raw": 0.5682,
+      "risk_class": "Moderate",
+      "hazard_index": 41.76,
+      "hazard_index_raw": 0.4176,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.125
+    },
+    "Banlic": {
+      "calamity_risk": 70.02,
+      "calamity_risk_raw": 0.7002,
+      "risk_class": "High",
+      "hazard_index": 42.71,
+      "hazard_index_raw": 0.4271,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.225
+    },
+    "Barangay Dos": {
+      "calamity_risk": 86.9,
+      "calamity_risk_raw": 0.869,
+      "risk_class": "Very High",
+      "hazard_index": 41.1,
+      "hazard_index_raw": 0.411,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.4
+    },
+    "Barangay Tres": {
+      "calamity_risk": 49.67,
+      "calamity_risk_raw": 0.4967,
+      "risk_class": "Moderate",
+      "hazard_index": 43.99,
+      "hazard_index_raw": 0.4399,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.025
+    },
+    "Barangay Uno": {
+      "calamity_risk": 43.38,
+      "calamity_risk_raw": 0.4338,
+      "risk_class": "Moderate",
+      "hazard_index": 42.17,
+      "hazard_index_raw": 0.4217,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.0
+    },
+    "Bigaa": {
+      "calamity_risk": 52.93,
+      "calamity_risk_raw": 0.5293,
+      "risk_class": "Moderate",
+      "hazard_index": 42.71,
+      "hazard_index_raw": 0.4271,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.075
+    },
+    "Butong": {
+      "calamity_risk": 71.94,
+      "calamity_risk_raw": 0.7194,
+      "risk_class": "High",
+      "hazard_index": 57.22,
+      "hazard_index_raw": 0.5722,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.0
+    },
+    "Casile": {
+      "calamity_risk": 29.59,
+      "calamity_risk_raw": 0.2959,
+      "risk_class": "Low",
+      "hazard_index": 28.91,
+      "hazard_index_raw": 0.2891,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.1
+    },
+    "Diezmo": {
+      "calamity_risk": 26.74,
+      "calamity_risk_raw": 0.2674,
+      "risk_class": "Low",
+      "hazard_index": 28.91,
+      "hazard_index_raw": 0.2891,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.075
+    },
+    "Gulod": {
+      "calamity_risk": 59.33,
+      "calamity_risk_raw": 0.5933,
+      "risk_class": "Moderate",
+      "hazard_index": 46.08,
+      "hazard_index_raw": 0.4608,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.075
+    },
+    "Mamatid": {
+      "calamity_risk": 54.32,
+      "calamity_risk_raw": 0.5432,
+      "risk_class": "Moderate",
+      "hazard_index": 43.43,
+      "hazard_index_raw": 0.4343,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.075
+    },
+    "Marinig": {
+      "calamity_risk": 70.29,
+      "calamity_risk_raw": 0.7029,
+      "risk_class": "High",
+      "hazard_index": 51.85,
+      "hazard_index_raw": 0.5185,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.075
+    },
+    "Niugan": {
+      "calamity_risk": 69.25,
+      "calamity_risk_raw": 0.6925,
+      "risk_class": "High",
+      "hazard_index": 42.3,
+      "hazard_index_raw": 0.423,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.225
+    },
+    "Pittland": {
+      "calamity_risk": 61.85,
+      "calamity_risk_raw": 0.6185,
+      "risk_class": "High",
+      "hazard_index": 48.91,
+      "hazard_index_raw": 0.4891,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.05
+    },
+    "Pulo": {
+      "calamity_risk": 66.86,
+      "calamity_risk_raw": 0.6686,
+      "risk_class": "High",
+      "hazard_index": 44.04,
+      "hazard_index_raw": 0.4404,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.175
+    },
+    "Sala": {
+      "calamity_risk": 18.2,
+      "calamity_risk_raw": 0.182,
+      "risk_class": "Very Low",
+      "hazard_index": 28.91,
+      "hazard_index_raw": 0.2891,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.0
+    },
+    "San Isidro": {
+      "calamity_risk": 54.91,
+      "calamity_risk_raw": 0.5491,
+      "risk_class": "Moderate",
+      "hazard_index": 43.75,
+      "hazard_index_raw": 0.4375,
+      "green_index": 61.58,
+      "green_index_raw": 0.6158,
+      "exposure_norm": 0.075
+    }
+  },
+  "2021": {
+    "Baclaran": {
+      "calamity_risk": 37.8,
+      "calamity_risk_raw": 0.378,
+      "risk_class": "Low",
+      "hazard_index": 36.0,
+      "hazard_index_raw": 0.36,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.05
+    },
+    "Banay-Banay": {
+      "calamity_risk": 48.55,
+      "calamity_risk_raw": 0.4855,
+      "risk_class": "Moderate",
+      "hazard_index": 37.16,
+      "hazard_index_raw": 0.3716,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.125
+    },
+    "Banlic": {
+      "calamity_risk": 61.75,
+      "calamity_risk_raw": 0.6175,
+      "risk_class": "High",
+      "hazard_index": 38.12,
+      "hazard_index_raw": 0.3812,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.225
+    },
+    "Barangay Dos": {
+      "calamity_risk": 78.63,
+      "calamity_risk_raw": 0.7863,
+      "risk_class": "High",
+      "hazard_index": 36.51,
+      "hazard_index_raw": 0.3651,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.4
+    },
+    "Barangay Tres": {
+      "calamity_risk": 41.4,
+      "calamity_risk_raw": 0.414,
+      "risk_class": "Moderate",
+      "hazard_index": 39.4,
+      "hazard_index_raw": 0.394,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.025
+    },
+    "Barangay Uno": {
+      "calamity_risk": 35.11,
+      "calamity_risk_raw": 0.3511,
+      "risk_class": "Low",
+      "hazard_index": 37.58,
+      "hazard_index_raw": 0.3758,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.0
+    },
+    "Bigaa": {
+      "calamity_risk": 44.66,
+      "calamity_risk_raw": 0.4466,
+      "risk_class": "Moderate",
+      "hazard_index": 38.11,
+      "hazard_index_raw": 0.3811,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.075
+    },
+    "Butong": {
+      "calamity_risk": 63.67,
+      "calamity_risk_raw": 0.6367,
+      "risk_class": "High",
+      "hazard_index": 52.63,
+      "hazard_index_raw": 0.5263,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.0
+    },
+    "Casile": {
+      "calamity_risk": 21.32,
+      "calamity_risk_raw": 0.2132,
+      "risk_class": "Low",
+      "hazard_index": 24.31,
+      "hazard_index_raw": 0.2431,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.1
+    },
+    "Diezmo": {
+      "calamity_risk": 18.47,
+      "calamity_risk_raw": 0.1847,
+      "risk_class": "Very Low",
+      "hazard_index": 24.31,
+      "hazard_index_raw": 0.2431,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.075
+    },
+    "Gulod": {
+      "calamity_risk": 51.06,
+      "calamity_risk_raw": 0.5106,
+      "risk_class": "Moderate",
+      "hazard_index": 41.49,
+      "hazard_index_raw": 0.4149,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.075
+    },
+    "Mamatid": {
+      "calamity_risk": 46.04,
+      "calamity_risk_raw": 0.4604,
+      "risk_class": "Moderate",
+      "hazard_index": 38.84,
+      "hazard_index_raw": 0.3884,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.075
+    },
+    "Marinig": {
+      "calamity_risk": 62.02,
+      "calamity_risk_raw": 0.6202,
+      "risk_class": "High",
+      "hazard_index": 47.26,
+      "hazard_index_raw": 0.4726,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.075
+    },
+    "Niugan": {
+      "calamity_risk": 60.98,
+      "calamity_risk_raw": 0.6098,
+      "risk_class": "High",
+      "hazard_index": 37.71,
+      "hazard_index_raw": 0.3771,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.225
+    },
+    "Pittland": {
+      "calamity_risk": 53.58,
+      "calamity_risk_raw": 0.5358,
+      "risk_class": "Moderate",
+      "hazard_index": 44.31,
+      "hazard_index_raw": 0.4431,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.05
+    },
+    "Pulo": {
+      "calamity_risk": 58.59,
+      "calamity_risk_raw": 0.5859,
+      "risk_class": "Moderate",
+      "hazard_index": 39.45,
+      "hazard_index_raw": 0.3945,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.175
+    },
+    "Sala": {
+      "calamity_risk": 9.93,
+      "calamity_risk_raw": 0.0993,
+      "risk_class": "Very Low",
+      "hazard_index": 24.31,
+      "hazard_index_raw": 0.2431,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.0
+    },
+    "San Isidro": {
+      "calamity_risk": 46.64,
+      "calamity_risk_raw": 0.4664,
+      "risk_class": "Moderate",
+      "hazard_index": 39.16,
+      "hazard_index_raw": 0.3916,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.075
+    }
+  },
+  "2022": {
+    "Baclaran": {
+      "calamity_risk": 38.96,
+      "calamity_risk_raw": 0.3896,
+      "risk_class": "Low",
+      "hazard_index": 37.15,
+      "hazard_index_raw": 0.3715,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.05
+    },
+    "Banay-Banay": {
+      "calamity_risk": 49.72,
+      "calamity_risk_raw": 0.4972,
+      "risk_class": "Moderate",
+      "hazard_index": 38.32,
+      "hazard_index_raw": 0.3832,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.125
+    },
+    "Banlic": {
+      "calamity_risk": 62.91,
+      "calamity_risk_raw": 0.6291,
+      "risk_class": "High",
+      "hazard_index": 39.27,
+      "hazard_index_raw": 0.3927,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.225
+    },
+    "Barangay Dos": {
+      "calamity_risk": 79.79,
+      "calamity_risk_raw": 0.7979,
+      "risk_class": "High",
+      "hazard_index": 37.67,
+      "hazard_index_raw": 0.3767,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.4
+    },
+    "Barangay Tres": {
+      "calamity_risk": 42.57,
+      "calamity_risk_raw": 0.4257,
+      "risk_class": "Moderate",
+      "hazard_index": 40.55,
+      "hazard_index_raw": 0.4055,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.025
+    },
+    "Barangay Uno": {
+      "calamity_risk": 36.27,
+      "calamity_risk_raw": 0.3627,
+      "risk_class": "Low",
+      "hazard_index": 38.73,
+      "hazard_index_raw": 0.3873,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.0
+    },
+    "Bigaa": {
+      "calamity_risk": 45.82,
+      "calamity_risk_raw": 0.4582,
+      "risk_class": "Moderate",
+      "hazard_index": 39.27,
+      "hazard_index_raw": 0.3927,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.075
+    },
+    "Butong": {
+      "calamity_risk": 64.83,
+      "calamity_risk_raw": 0.6483,
+      "risk_class": "High",
+      "hazard_index": 53.78,
+      "hazard_index_raw": 0.5378,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.0
+    },
+    "Casile": {
+      "calamity_risk": 22.48,
+      "calamity_risk_raw": 0.2248,
+      "risk_class": "Low",
+      "hazard_index": 25.47,
+      "hazard_index_raw": 0.2547,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.1
+    },
+    "Diezmo": {
+      "calamity_risk": 19.63,
+      "calamity_risk_raw": 0.1963,
+      "risk_class": "Very Low",
+      "hazard_index": 25.47,
+      "hazard_index_raw": 0.2547,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.075
+    },
+    "Gulod": {
+      "calamity_risk": 52.23,
+      "calamity_risk_raw": 0.5223,
+      "risk_class": "Moderate",
+      "hazard_index": 42.64,
+      "hazard_index_raw": 0.4264,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.075
+    },
+    "Mamatid": {
+      "calamity_risk": 47.21,
+      "calamity_risk_raw": 0.4721,
+      "risk_class": "Moderate",
+      "hazard_index": 40.0,
+      "hazard_index_raw": 0.4,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.075
+    },
+    "Marinig": {
+      "calamity_risk": 63.18,
+      "calamity_risk_raw": 0.6318,
+      "risk_class": "High",
+      "hazard_index": 48.41,
+      "hazard_index_raw": 0.4841,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.075
+    },
+    "Niugan": {
+      "calamity_risk": 62.14,
+      "calamity_risk_raw": 0.6214,
+      "risk_class": "High",
+      "hazard_index": 38.87,
+      "hazard_index_raw": 0.3887,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.225
+    },
+    "Pittland": {
+      "calamity_risk": 54.74,
+      "calamity_risk_raw": 0.5474,
+      "risk_class": "Moderate",
+      "hazard_index": 45.47,
+      "hazard_index_raw": 0.4547,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.05
+    },
+    "Pulo": {
+      "calamity_risk": 59.75,
+      "calamity_risk_raw": 0.5975,
+      "risk_class": "Moderate",
+      "hazard_index": 40.61,
+      "hazard_index_raw": 0.4061,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.175
+    },
+    "Sala": {
+      "calamity_risk": 11.09,
+      "calamity_risk_raw": 0.1109,
+      "risk_class": "Very Low",
+      "hazard_index": 25.47,
+      "hazard_index_raw": 0.2547,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.0
+    },
+    "San Isidro": {
+      "calamity_risk": 47.81,
+      "calamity_risk_raw": 0.4781,
+      "risk_class": "Moderate",
+      "hazard_index": 40.31,
+      "hazard_index_raw": 0.4031,
+      "green_index": 62.35,
+      "green_index_raw": 0.6235,
+      "exposure_norm": 0.075
+    }
+  },
+  "2023": {
+    "Baclaran": {
+      "calamity_risk": 37.49,
+      "calamity_risk_raw": 0.3749,
+      "risk_class": "Low",
+      "hazard_index": 35.94,
+      "hazard_index_raw": 0.3594,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.05
+    },
+    "Banay-Banay": {
+      "calamity_risk": 48.25,
+      "calamity_risk_raw": 0.4825,
+      "risk_class": "Moderate",
+      "hazard_index": 37.11,
+      "hazard_index_raw": 0.3711,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.125
+    },
+    "Banlic": {
+      "calamity_risk": 61.44,
+      "calamity_risk_raw": 0.6144,
+      "risk_class": "High",
+      "hazard_index": 38.06,
+      "hazard_index_raw": 0.3806,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.225
+    },
+    "Barangay Dos": {
+      "calamity_risk": 78.32,
+      "calamity_risk_raw": 0.7832,
+      "risk_class": "High",
+      "hazard_index": 36.46,
+      "hazard_index_raw": 0.3646,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.4
+    },
+    "Barangay Tres": {
+      "calamity_risk": 41.1,
+      "calamity_risk_raw": 0.411,
+      "risk_class": "Moderate",
+      "hazard_index": 39.34,
+      "hazard_index_raw": 0.3934,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.025
+    },
+    "Barangay Uno": {
+      "calamity_risk": 34.8,
+      "calamity_risk_raw": 0.348,
+      "risk_class": "Low",
+      "hazard_index": 37.52,
+      "hazard_index_raw": 0.3752,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.0
+    },
+    "Bigaa": {
+      "calamity_risk": 44.35,
+      "calamity_risk_raw": 0.4435,
+      "risk_class": "Moderate",
+      "hazard_index": 38.06,
+      "hazard_index_raw": 0.3806,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.075
+    },
+    "Butong": {
+      "calamity_risk": 63.36,
+      "calamity_risk_raw": 0.6336,
+      "risk_class": "High",
+      "hazard_index": 52.57,
+      "hazard_index_raw": 0.5257,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.0
+    },
+    "Casile": {
+      "calamity_risk": 21.01,
+      "calamity_risk_raw": 0.2101,
+      "risk_class": "Low",
+      "hazard_index": 24.26,
+      "hazard_index_raw": 0.2426,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.1
+    },
+    "Diezmo": {
+      "calamity_risk": 18.16,
+      "calamity_risk_raw": 0.1816,
+      "risk_class": "Very Low",
+      "hazard_index": 24.26,
+      "hazard_index_raw": 0.2426,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.075
+    },
+    "Gulod": {
+      "calamity_risk": 50.76,
+      "calamity_risk_raw": 0.5076,
+      "risk_class": "Moderate",
+      "hazard_index": 41.43,
+      "hazard_index_raw": 0.4143,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.075
+    },
+    "Mamatid": {
+      "calamity_risk": 45.74,
+      "calamity_risk_raw": 0.4574,
+      "risk_class": "Moderate",
+      "hazard_index": 38.79,
+      "hazard_index_raw": 0.3879,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.075
+    },
+    "Marinig": {
+      "calamity_risk": 61.71,
+      "calamity_risk_raw": 0.6171,
+      "risk_class": "High",
+      "hazard_index": 47.2,
+      "hazard_index_raw": 0.472,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.075
+    },
+    "Niugan": {
+      "calamity_risk": 60.67,
+      "calamity_risk_raw": 0.6067,
+      "risk_class": "High",
+      "hazard_index": 37.66,
+      "hazard_index_raw": 0.3766,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.225
+    },
+    "Pittland": {
+      "calamity_risk": 53.27,
+      "calamity_risk_raw": 0.5327,
+      "risk_class": "Moderate",
+      "hazard_index": 44.26,
+      "hazard_index_raw": 0.4426,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.05
+    },
+    "Pulo": {
+      "calamity_risk": 58.28,
+      "calamity_risk_raw": 0.5828,
+      "risk_class": "Moderate",
+      "hazard_index": 39.4,
+      "hazard_index_raw": 0.394,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.175
+    },
+    "Sala": {
+      "calamity_risk": 9.62,
+      "calamity_risk_raw": 0.0962,
+      "risk_class": "Very Low",
+      "hazard_index": 24.26,
+      "hazard_index_raw": 0.2426,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.0
+    },
+    "San Isidro": {
+      "calamity_risk": 46.34,
+      "calamity_risk_raw": 0.4634,
+      "risk_class": "Moderate",
+      "hazard_index": 39.1,
+      "hazard_index_raw": 0.391,
+      "green_index": 61.26,
+      "green_index_raw": 0.6126,
+      "exposure_norm": 0.075
+    }
+  },
+  "2024": {
+    "Baclaran": {
+      "calamity_risk": 40.27,
+      "calamity_risk_raw": 0.4027,
+      "risk_class": "Moderate",
+      "hazard_index": 37.24,
+      "hazard_index_raw": 0.3724,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.05
+    },
+    "Banay-Banay": {
+      "calamity_risk": 51.03,
+      "calamity_risk_raw": 0.5103,
+      "risk_class": "Moderate",
+      "hazard_index": 38.4,
+      "hazard_index_raw": 0.384,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.125
+    },
+    "Banlic": {
+      "calamity_risk": 64.22,
+      "calamity_risk_raw": 0.6422,
+      "risk_class": "High",
+      "hazard_index": 39.36,
+      "hazard_index_raw": 0.3936,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.225
+    },
+    "Barangay Dos": {
+      "calamity_risk": 81.1,
+      "calamity_risk_raw": 0.811,
+      "risk_class": "Very High",
+      "hazard_index": 37.75,
+      "hazard_index_raw": 0.3775,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.4
+    },
+    "Barangay Tres": {
+      "calamity_risk": 43.88,
+      "calamity_risk_raw": 0.4388,
+      "risk_class": "Moderate",
+      "hazard_index": 40.64,
+      "hazard_index_raw": 0.4064,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.025
+    },
+    "Barangay Uno": {
+      "calamity_risk": 37.58,
+      "calamity_risk_raw": 0.3758,
+      "risk_class": "Low",
+      "hazard_index": 38.82,
+      "hazard_index_raw": 0.3882,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.0
+    },
+    "Bigaa": {
+      "calamity_risk": 47.13,
+      "calamity_risk_raw": 0.4713,
+      "risk_class": "Moderate",
+      "hazard_index": 39.35,
+      "hazard_index_raw": 0.3935,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.075
+    },
+    "Butong": {
+      "calamity_risk": 66.14,
+      "calamity_risk_raw": 0.6614,
+      "risk_class": "High",
+      "hazard_index": 53.87,
+      "hazard_index_raw": 0.5387,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.0
+    },
+    "Casile": {
+      "calamity_risk": 23.79,
+      "calamity_risk_raw": 0.2379,
+      "risk_class": "Low",
+      "hazard_index": 25.55,
+      "hazard_index_raw": 0.2555,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.1
+    },
+    "Diezmo": {
+      "calamity_risk": 20.95,
+      "calamity_risk_raw": 0.2095,
+      "risk_class": "Low",
+      "hazard_index": 25.55,
+      "hazard_index_raw": 0.2555,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.075
+    },
+    "Gulod": {
+      "calamity_risk": 53.54,
+      "calamity_risk_raw": 0.5354,
+      "risk_class": "Moderate",
+      "hazard_index": 42.73,
+      "hazard_index_raw": 0.4273,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.075
+    },
+    "Mamatid": {
+      "calamity_risk": 48.52,
+      "calamity_risk_raw": 0.4852,
+      "risk_class": "Moderate",
+      "hazard_index": 40.08,
+      "hazard_index_raw": 0.4008,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.075
+    },
+    "Marinig": {
+      "calamity_risk": 64.49,
+      "calamity_risk_raw": 0.6449,
+      "risk_class": "High",
+      "hazard_index": 48.5,
+      "hazard_index_raw": 0.485,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.075
+    },
+    "Niugan": {
+      "calamity_risk": 63.46,
+      "calamity_risk_raw": 0.6346,
+      "risk_class": "High",
+      "hazard_index": 38.95,
+      "hazard_index_raw": 0.3895,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.225
+    },
+    "Pittland": {
+      "calamity_risk": 56.05,
+      "calamity_risk_raw": 0.5605,
+      "risk_class": "Moderate",
+      "hazard_index": 45.55,
+      "hazard_index_raw": 0.4555,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.05
+    },
+    "Pulo": {
+      "calamity_risk": 61.06,
+      "calamity_risk_raw": 0.6106,
+      "risk_class": "High",
+      "hazard_index": 40.69,
+      "hazard_index_raw": 0.4069,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.175
+    },
+    "Sala": {
+      "calamity_risk": 12.41,
+      "calamity_risk_raw": 0.1241,
+      "risk_class": "Very Low",
+      "hazard_index": 25.55,
+      "hazard_index_raw": 0.2555,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.0
+    },
+    "San Isidro": {
+      "calamity_risk": 49.12,
+      "calamity_risk_raw": 0.4912,
+      "risk_class": "Moderate",
+      "hazard_index": 40.4,
+      "hazard_index_raw": 0.404,
+      "green_index": 60.84,
+      "green_index_raw": 0.6084,
+      "exposure_norm": 0.075
+    }
+  },
+  "2025": {
+    "Baclaran": {
+      "calamity_risk": 40.25,
+      "calamity_risk_raw": 0.4025,
+      "risk_class": "Moderate",
+      "hazard_index": 37.31,
+      "hazard_index_raw": 0.3731,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.05
+    },
+    "Banay-Banay": {
+      "calamity_risk": 51.0,
+      "calamity_risk_raw": 0.51,
+      "risk_class": "Moderate",
+      "hazard_index": 38.48,
+      "hazard_index_raw": 0.3848,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.125
+    },
+    "Banlic": {
+      "calamity_risk": 64.2,
+      "calamity_risk_raw": 0.642,
+      "risk_class": "High",
+      "hazard_index": 39.43,
+      "hazard_index_raw": 0.3943,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.225
+    },
+    "Barangay Dos": {
+      "calamity_risk": 81.08,
+      "calamity_risk_raw": 0.8108,
+      "risk_class": "Very High",
+      "hazard_index": 37.83,
+      "hazard_index_raw": 0.3783,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.4
+    },
+    "Barangay Tres": {
+      "calamity_risk": 43.85,
+      "calamity_risk_raw": 0.4385,
+      "risk_class": "Moderate",
+      "hazard_index": 40.71,
+      "hazard_index_raw": 0.4071,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.025
+    },
+    "Barangay Uno": {
+      "calamity_risk": 37.56,
+      "calamity_risk_raw": 0.3756,
+      "risk_class": "Low",
+      "hazard_index": 38.89,
+      "hazard_index_raw": 0.3889,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.0
+    },
+    "Bigaa": {
+      "calamity_risk": 47.11,
+      "calamity_risk_raw": 0.4711,
+      "risk_class": "Moderate",
+      "hazard_index": 39.43,
+      "hazard_index_raw": 0.3943,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.075
+    },
+    "Butong": {
+      "calamity_risk": 66.12,
+      "calamity_risk_raw": 0.6612,
+      "risk_class": "High",
+      "hazard_index": 53.94,
+      "hazard_index_raw": 0.5394,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.0
+    },
+    "Casile": {
+      "calamity_risk": 23.77,
+      "calamity_risk_raw": 0.2377,
+      "risk_class": "Low",
+      "hazard_index": 25.63,
+      "hazard_index_raw": 0.2563,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.1
+    },
+    "Diezmo": {
+      "calamity_risk": 20.92,
+      "calamity_risk_raw": 0.2092,
+      "risk_class": "Low",
+      "hazard_index": 25.63,
+      "hazard_index_raw": 0.2563,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.075
+    },
+    "Gulod": {
+      "calamity_risk": 53.51,
+      "calamity_risk_raw": 0.5351,
+      "risk_class": "Moderate",
+      "hazard_index": 42.8,
+      "hazard_index_raw": 0.428,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.075
+    },
+    "Mamatid": {
+      "calamity_risk": 48.5,
+      "calamity_risk_raw": 0.485,
+      "risk_class": "Moderate",
+      "hazard_index": 40.16,
+      "hazard_index_raw": 0.4016,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.075
+    },
+    "Marinig": {
+      "calamity_risk": 64.47,
+      "calamity_risk_raw": 0.6447,
+      "risk_class": "High",
+      "hazard_index": 48.57,
+      "hazard_index_raw": 0.4857,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.075
+    },
+    "Niugan": {
+      "calamity_risk": 63.43,
+      "calamity_risk_raw": 0.6343,
+      "risk_class": "High",
+      "hazard_index": 39.03,
+      "hazard_index_raw": 0.3903,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.225
+    },
+    "Pittland": {
+      "calamity_risk": 56.03,
+      "calamity_risk_raw": 0.5603,
+      "risk_class": "Moderate",
+      "hazard_index": 45.63,
+      "hazard_index_raw": 0.4563,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.05
+    },
+    "Pulo": {
+      "calamity_risk": 61.04,
+      "calamity_risk_raw": 0.6104,
+      "risk_class": "High",
+      "hazard_index": 40.77,
+      "hazard_index_raw": 0.4077,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.175
+    },
+    "Sala": {
+      "calamity_risk": 12.38,
+      "calamity_risk_raw": 0.1238,
+      "risk_class": "Very Low",
+      "hazard_index": 25.63,
+      "hazard_index_raw": 0.2563,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.0
+    },
+    "San Isidro": {
+      "calamity_risk": 49.09,
+      "calamity_risk_raw": 0.4909,
+      "risk_class": "Moderate",
+      "hazard_index": 40.47,
+      "hazard_index_raw": 0.4047,
+      "green_index": 61.05,
+      "green_index_raw": 0.6105,
+      "exposure_norm": 0.075
+    }
+  },
+  "2026": {
+    "Baclaran": {
+      "calamity_risk": 36.28,
+      "calamity_risk_raw": 0.3628,
+      "risk_class": "Low",
+      "hazard_index": 37.1,
+      "hazard_index_raw": 0.371,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.1568
+    },
+    "Banay-Banay": {
+      "calamity_risk": 40.67,
+      "calamity_risk_raw": 0.4067,
+      "risk_class": "Moderate",
+      "hazard_index": 38.27,
+      "hazard_index_raw": 0.3827,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.2989
+    },
+    "Banlic": {
+      "calamity_risk": 43.7,
+      "calamity_risk_raw": 0.437,
+      "risk_class": "Moderate",
+      "hazard_index": 39.22,
+      "hazard_index_raw": 0.3922,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.384
+    },
+    "Barangay Dos": {
+      "calamity_risk": 44.77,
+      "calamity_risk_raw": 0.4477,
+      "risk_class": "Moderate",
+      "hazard_index": 37.61,
+      "hazard_index_raw": 0.3761,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.4246
+    },
+    "Barangay Tres": {
+      "calamity_risk": 34.7,
+      "calamity_risk_raw": 0.347,
+      "risk_class": "Low",
+      "hazard_index": 40.5,
+      "hazard_index_raw": 0.405,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.0261
+    },
+    "Barangay Uno": {
+      "calamity_risk": 33.78,
+      "calamity_risk_raw": 0.3378,
+      "risk_class": "Low",
+      "hazard_index": 38.68,
+      "hazard_index_raw": 0.3868,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.0304
+    },
+    "Bigaa": {
+      "calamity_risk": 37.47,
+      "calamity_risk_raw": 0.3747,
+      "risk_class": "Low",
+      "hazard_index": 39.21,
+      "hazard_index_raw": 0.3921,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.1571
+    },
+    "Butong": {
+      "calamity_risk": 43.2,
+      "calamity_risk_raw": 0.432,
+      "risk_class": "Moderate",
+      "hazard_index": 53.73,
+      "hazard_index_raw": 0.5373,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.1074
+    },
+    "Casile": {
+      "calamity_risk": 30.09,
+      "calamity_risk_raw": 0.3009,
+      "risk_class": "Low",
+      "hazard_index": 25.41,
+      "hazard_index_raw": 0.2541,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.1312
+    },
+    "Diezmo": {
+      "calamity_risk": 29.6,
+      "calamity_risk_raw": 0.296,
+      "risk_class": "Low",
+      "hazard_index": 25.41,
+      "hazard_index_raw": 0.2541,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.1156
+    },
+    "Gulod": {
+      "calamity_risk": 41.85,
+      "calamity_risk_raw": 0.4185,
+      "risk_class": "Moderate",
+      "hazard_index": 42.59,
+      "hazard_index_raw": 0.4259,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.2672
+    },
+    "Mamatid": {
+      "calamity_risk": 46.44,
+      "calamity_risk_raw": 0.4644,
+      "risk_class": "Moderate",
+      "hazard_index": 39.94,
+      "hazard_index_raw": 0.3994,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.5158
+    },
+    "Marinig": {
+      "calamity_risk": 54.49,
+      "calamity_risk_raw": 0.5449,
+      "risk_class": "Moderate",
+      "hazard_index": 48.36,
+      "hazard_index_raw": 0.4836,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.675
+    },
+    "Niugan": {
+      "calamity_risk": 44.09,
+      "calamity_risk_raw": 0.4409,
+      "risk_class": "Moderate",
+      "hazard_index": 38.81,
+      "hazard_index_raw": 0.3881,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.4081
+    },
+    "Pittland": {
+      "calamity_risk": 38.54,
+      "calamity_risk_raw": 0.3854,
+      "risk_class": "Low",
+      "hazard_index": 45.41,
+      "hazard_index_raw": 0.4541,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.0806
+    },
+    "Pulo": {
+      "calamity_risk": 48.06,
+      "calamity_risk_raw": 0.4806,
+      "risk_class": "Moderate",
+      "hazard_index": 40.55,
+      "hazard_index_raw": 0.4055,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.5494
+    },
+    "Sala": {
+      "calamity_risk": 29.68,
+      "calamity_risk_raw": 0.2968,
+      "risk_class": "Low",
+      "hazard_index": 25.41,
+      "hazard_index_raw": 0.2541,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.1317
+    },
+    "San Isidro": {
+      "calamity_risk": 41.28,
+      "calamity_risk_raw": 0.4128,
+      "risk_class": "Moderate",
+      "hazard_index": 40.26,
+      "hazard_index_raw": 0.4026,
+      "green_index": 60.99,
+      "green_index_raw": 0.6099,
+      "exposure_norm": 0.2942
+    }
+  },
+  "2027": {
+    "Baclaran": {
+      "calamity_risk": 38.07,
+      "calamity_risk_raw": 0.3807,
+      "risk_class": "Low",
+      "hazard_index": 37.44,
+      "hazard_index_raw": 0.3744,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.1561
+    },
+    "Banay-Banay": {
+      "calamity_risk": 41.87,
+      "calamity_risk_raw": 0.4187,
+      "risk_class": "Moderate",
+      "hazard_index": 38.61,
+      "hazard_index_raw": 0.3861,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.2951
+    },
+    "Banlic": {
+      "calamity_risk": 44.38,
+      "calamity_risk_raw": 0.4438,
+      "risk_class": "Moderate",
+      "hazard_index": 39.56,
+      "hazard_index_raw": 0.3956,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.3837
+    },
+    "Barangay Dos": {
+      "calamity_risk": 44.79,
+      "calamity_risk_raw": 0.4479,
+      "risk_class": "Moderate",
+      "hazard_index": 37.96,
+      "hazard_index_raw": 0.3796,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.4275
+    },
+    "Barangay Tres": {
+      "calamity_risk": 36.29,
+      "calamity_risk_raw": 0.3629,
+      "risk_class": "Low",
+      "hazard_index": 40.84,
+      "hazard_index_raw": 0.4084,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.0258
+    },
+    "Barangay Uno": {
+      "calamity_risk": 35.76,
+      "calamity_risk_raw": 0.3576,
+      "risk_class": "Low",
+      "hazard_index": 39.03,
+      "hazard_index_raw": 0.3903,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.0337
+    },
+    "Bigaa": {
+      "calamity_risk": 38.89,
+      "calamity_risk_raw": 0.3889,
+      "risk_class": "Low",
+      "hazard_index": 39.56,
+      "hazard_index_raw": 0.3956,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.1551
+    },
+    "Butong": {
+      "calamity_risk": 43.53,
+      "calamity_risk_raw": 0.4353,
+      "risk_class": "Moderate",
+      "hazard_index": 54.07,
+      "hazard_index_raw": 0.5407,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.1066
+    },
+    "Casile": {
+      "calamity_risk": 32.88,
+      "calamity_risk_raw": 0.3288,
+      "risk_class": "Low",
+      "hazard_index": 25.76,
+      "hazard_index_raw": 0.2576,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.1346
+    },
+    "Diezmo": {
+      "calamity_risk": 32.41,
+      "calamity_risk_raw": 0.3241,
+      "risk_class": "Low",
+      "hazard_index": 25.76,
+      "hazard_index_raw": 0.2576,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.1152
+    },
+    "Gulod": {
+      "calamity_risk": 43.3,
+      "calamity_risk_raw": 0.433,
+      "risk_class": "Moderate",
+      "hazard_index": 42.93,
+      "hazard_index_raw": 0.4293,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.2827
+    },
+    "Mamatid": {
+      "calamity_risk": 47.62,
+      "calamity_risk_raw": 0.4762,
+      "risk_class": "Moderate",
+      "hazard_index": 40.29,
+      "hazard_index_raw": 0.4029,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.5067
+    },
+    "Marinig": {
+      "calamity_risk": 55.02,
+      "calamity_risk_raw": 0.5502,
+      "risk_class": "Moderate",
+      "hazard_index": 48.7,
+      "hazard_index_raw": 0.487,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.675
+    },
+    "Niugan": {
+      "calamity_risk": 44.71,
+      "calamity_risk_raw": 0.4471,
+      "risk_class": "Moderate",
+      "hazard_index": 39.16,
+      "hazard_index_raw": 0.3916,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.4041
+    },
+    "Pittland": {
+      "calamity_risk": 39.56,
+      "calamity_risk_raw": 0.3956,
+      "risk_class": "Low",
+      "hazard_index": 45.76,
+      "hazard_index_raw": 0.4576,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.0798
+    },
+    "Pulo": {
+      "calamity_risk": 49.49,
+      "calamity_risk_raw": 0.4949,
+      "risk_class": "Moderate",
+      "hazard_index": 40.9,
+      "hazard_index_raw": 0.409,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.5744
+    },
+    "Sala": {
+      "calamity_risk": 33.07,
+      "calamity_risk_raw": 0.3307,
+      "risk_class": "Low",
+      "hazard_index": 25.76,
+      "hazard_index_raw": 0.2576,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.1426
+    },
+    "San Isidro": {
+      "calamity_risk": 42.87,
+      "calamity_risk_raw": 0.4287,
+      "risk_class": "Moderate",
+      "hazard_index": 40.6,
+      "hazard_index_raw": 0.406,
+      "green_index": 60.41,
+      "green_index_raw": 0.6041,
+      "exposure_norm": 0.3035
+    }
+  },
+  "2028": {
+    "Baclaran": {
+      "calamity_risk": 38.31,
+      "calamity_risk_raw": 0.3831,
+      "risk_class": "Low",
+      "hazard_index": 37.86,
+      "hazard_index_raw": 0.3786,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.1555
+    },
+    "Banay-Banay": {
+      "calamity_risk": 42.04,
+      "calamity_risk_raw": 0.4204,
+      "risk_class": "Moderate",
+      "hazard_index": 39.02,
+      "hazard_index_raw": 0.3902,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.2915
+    },
+    "Banlic": {
+      "calamity_risk": 44.63,
+      "calamity_risk_raw": 0.4463,
+      "risk_class": "Moderate",
+      "hazard_index": 39.98,
+      "hazard_index_raw": 0.3998,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.3834
+    },
+    "Barangay Dos": {
+      "calamity_risk": 45.12,
+      "calamity_risk_raw": 0.4512,
+      "risk_class": "Moderate",
+      "hazard_index": 38.37,
+      "hazard_index_raw": 0.3837,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.4306
+    },
+    "Barangay Tres": {
+      "calamity_risk": 36.55,
+      "calamity_risk_raw": 0.3655,
+      "risk_class": "Low",
+      "hazard_index": 41.25,
+      "hazard_index_raw": 0.4125,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.0256
+    },
+    "Barangay Uno": {
+      "calamity_risk": 36.1,
+      "calamity_risk_raw": 0.361,
+      "risk_class": "Low",
+      "hazard_index": 39.44,
+      "hazard_index_raw": 0.3944,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.0372
+    },
+    "Bigaa": {
+      "calamity_risk": 39.1,
+      "calamity_risk_raw": 0.391,
+      "risk_class": "Low",
+      "hazard_index": 39.97,
+      "hazard_index_raw": 0.3997,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.1533
+    },
+    "Butong": {
+      "calamity_risk": 43.77,
+      "calamity_risk_raw": 0.4377,
+      "risk_class": "Moderate",
+      "hazard_index": 54.49,
+      "hazard_index_raw": 0.5449,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.1059
+    },
+    "Casile": {
+      "calamity_risk": 33.22,
+      "calamity_risk_raw": 0.3322,
+      "risk_class": "Low",
+      "hazard_index": 26.17,
+      "hazard_index_raw": 0.2617,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.1382
+    },
+    "Diezmo": {
+      "calamity_risk": 32.66,
+      "calamity_risk_raw": 0.3266,
+      "risk_class": "Low",
+      "hazard_index": 26.17,
+      "hazard_index_raw": 0.2617,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.1149
+    },
+    "Gulod": {
+      "calamity_risk": 43.96,
+      "calamity_risk_raw": 0.4396,
+      "risk_class": "Moderate",
+      "hazard_index": 43.35,
+      "hazard_index_raw": 0.4335,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.2992
+    },
+    "Mamatid": {
+      "calamity_risk": 47.66,
+      "calamity_risk_raw": 0.4766,
+      "risk_class": "Moderate",
+      "hazard_index": 40.7,
+      "hazard_index_raw": 0.407,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.4978
+    },
+    "Marinig": {
+      "calamity_risk": 55.28,
+      "calamity_risk_raw": 0.5528,
+      "risk_class": "Moderate",
+      "hazard_index": 49.12,
+      "hazard_index_raw": 0.4912,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.675
+    },
+    "Niugan": {
+      "calamity_risk": 44.87,
+      "calamity_risk_raw": 0.4487,
+      "risk_class": "Moderate",
+      "hazard_index": 39.57,
+      "hazard_index_raw": 0.3957,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.4003
+    },
+    "Pittland": {
+      "calamity_risk": 39.8,
+      "calamity_risk_raw": 0.398,
+      "risk_class": "Low",
+      "hazard_index": 46.17,
+      "hazard_index_raw": 0.4617,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.0789
+    },
+    "Pulo": {
+      "calamity_risk": 50.38,
+      "calamity_risk_raw": 0.5038,
+      "risk_class": "Moderate",
+      "hazard_index": 41.31,
+      "hazard_index_raw": 0.4131,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.6009
+    },
+    "Sala": {
+      "calamity_risk": 33.61,
+      "calamity_risk_raw": 0.3361,
+      "risk_class": "Low",
+      "hazard_index": 26.17,
+      "hazard_index_raw": 0.2617,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.1543
+    },
+    "San Isidro": {
+      "calamity_risk": 43.36,
+      "calamity_risk_raw": 0.4336,
+      "risk_class": "Moderate",
+      "hazard_index": 41.02,
+      "hazard_index_raw": 0.4102,
+      "green_index": 59.82,
+      "green_index_raw": 0.5982,
+      "exposure_norm": 0.3131
+    }
+  },
+  "2029": {
+    "Baclaran": {
+      "calamity_risk": 38.58,
+      "calamity_risk_raw": 0.3858,
+      "risk_class": "Low",
+      "hazard_index": 38.33,
+      "hazard_index_raw": 0.3833,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.1549
+    },
+    "Banay-Banay": {
+      "calamity_risk": 42.24,
+      "calamity_risk_raw": 0.4224,
+      "risk_class": "Moderate",
+      "hazard_index": 39.5,
+      "hazard_index_raw": 0.395,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.2879
+    },
+    "Banlic": {
+      "calamity_risk": 44.91,
+      "calamity_risk_raw": 0.4491,
+      "risk_class": "Moderate",
+      "hazard_index": 40.45,
+      "hazard_index_raw": 0.4045,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.3831
+    },
+    "Barangay Dos": {
+      "calamity_risk": 45.48,
+      "calamity_risk_raw": 0.4548,
+      "risk_class": "Moderate",
+      "hazard_index": 38.85,
+      "hazard_index_raw": 0.3885,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.4339
+    },
+    "Barangay Tres": {
+      "calamity_risk": 36.82,
+      "calamity_risk_raw": 0.3682,
+      "risk_class": "Low",
+      "hazard_index": 41.73,
+      "hazard_index_raw": 0.4173,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.0253
+    },
+    "Barangay Uno": {
+      "calamity_risk": 36.48,
+      "calamity_risk_raw": 0.3648,
+      "risk_class": "Low",
+      "hazard_index": 39.92,
+      "hazard_index_raw": 0.3992,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.041
+    },
+    "Bigaa": {
+      "calamity_risk": 39.34,
+      "calamity_risk_raw": 0.3934,
+      "risk_class": "Low",
+      "hazard_index": 40.45,
+      "hazard_index_raw": 0.4045,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.1514
+    },
+    "Butong": {
+      "calamity_risk": 44.04,
+      "calamity_risk_raw": 0.4404,
+      "risk_class": "Moderate",
+      "hazard_index": 54.96,
+      "hazard_index_raw": 0.5496,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.1051
+    },
+    "Casile": {
+      "calamity_risk": 33.6,
+      "calamity_risk_raw": 0.336,
+      "risk_class": "Low",
+      "hazard_index": 26.65,
+      "hazard_index_raw": 0.2665,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.1421
+    },
+    "Diezmo": {
+      "calamity_risk": 32.94,
+      "calamity_risk_raw": 0.3294,
+      "risk_class": "Low",
+      "hazard_index": 26.65,
+      "hazard_index_raw": 0.2665,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.1145
+    },
+    "Gulod": {
+      "calamity_risk": 44.67,
+      "calamity_risk_raw": 0.4467,
+      "risk_class": "Moderate",
+      "hazard_index": 43.82,
+      "hazard_index_raw": 0.4382,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.3171
+    },
+    "Mamatid": {
+      "calamity_risk": 47.74,
+      "calamity_risk_raw": 0.4774,
+      "risk_class": "Moderate",
+      "hazard_index": 41.18,
+      "hazard_index_raw": 0.4118,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.4891
+    },
+    "Marinig": {
+      "calamity_risk": 55.57,
+      "calamity_risk_raw": 0.5557,
+      "risk_class": "Moderate",
+      "hazard_index": 49.6,
+      "hazard_index_raw": 0.496,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.675
+    },
+    "Niugan": {
+      "calamity_risk": 45.07,
+      "calamity_risk_raw": 0.4507,
+      "risk_class": "Moderate",
+      "hazard_index": 40.05,
+      "hazard_index_raw": 0.4005,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.3965
+    },
+    "Pittland": {
+      "calamity_risk": 40.06,
+      "calamity_risk_raw": 0.4006,
+      "risk_class": "Moderate",
+      "hazard_index": 46.65,
+      "hazard_index_raw": 0.4665,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.078
+    },
+    "Pulo": {
+      "calamity_risk": 51.35,
+      "calamity_risk_raw": 0.5135,
+      "risk_class": "Moderate",
+      "hazard_index": 41.79,
+      "hazard_index_raw": 0.4179,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.6292
+    },
+    "Sala": {
+      "calamity_risk": 34.19,
+      "calamity_risk_raw": 0.3419,
+      "risk_class": "Low",
+      "hazard_index": 26.65,
+      "hazard_index_raw": 0.2665,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.1668
+    },
+    "San Isidro": {
+      "calamity_risk": 43.88,
+      "calamity_risk_raw": 0.4388,
+      "risk_class": "Moderate",
+      "hazard_index": 41.49,
+      "hazard_index_raw": 0.4149,
+      "green_index": 59.24,
+      "green_index_raw": 0.5924,
+      "exposure_norm": 0.3231
+    }
+  },
+  "2030": {
+    "Baclaran": {
+      "calamity_risk": 38.88,
+      "calamity_risk_raw": 0.3888,
+      "risk_class": "Low",
+      "hazard_index": 38.88,
+      "hazard_index_raw": 0.3888,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.1543
+    },
+    "Banay-Banay": {
+      "calamity_risk": 42.47,
+      "calamity_risk_raw": 0.4247,
+      "risk_class": "Moderate",
+      "hazard_index": 40.05,
+      "hazard_index_raw": 0.4005,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.2843
+    },
+    "Banlic": {
+      "calamity_risk": 45.21,
+      "calamity_risk_raw": 0.4521,
+      "risk_class": "Moderate",
+      "hazard_index": 41.0,
+      "hazard_index_raw": 0.41,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.3828
+    },
+    "Barangay Dos": {
+      "calamity_risk": 45.88,
+      "calamity_risk_raw": 0.4588,
+      "risk_class": "Moderate",
+      "hazard_index": 39.39,
+      "hazard_index_raw": 0.3939,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.4374
+    },
+    "Barangay Tres": {
+      "calamity_risk": 37.13,
+      "calamity_risk_raw": 0.3713,
+      "risk_class": "Low",
+      "hazard_index": 42.28,
+      "hazard_index_raw": 0.4228,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.025
+    },
+    "Barangay Uno": {
+      "calamity_risk": 36.89,
+      "calamity_risk_raw": 0.3689,
+      "risk_class": "Low",
+      "hazard_index": 40.46,
+      "hazard_index_raw": 0.4046,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.0451
+    },
+    "Bigaa": {
+      "calamity_risk": 39.61,
+      "calamity_risk_raw": 0.3961,
+      "risk_class": "Low",
+      "hazard_index": 41.0,
+      "hazard_index_raw": 0.41,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.1496
+    },
+    "Butong": {
+      "calamity_risk": 44.33,
+      "calamity_risk_raw": 0.4433,
+      "risk_class": "Moderate",
+      "hazard_index": 55.51,
+      "hazard_index_raw": 0.5551,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.1044
+    },
+    "Casile": {
+      "calamity_risk": 34.01,
+      "calamity_risk_raw": 0.3401,
+      "risk_class": "Low",
+      "hazard_index": 27.2,
+      "hazard_index_raw": 0.272,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.1462
+    },
+    "Diezmo": {
+      "calamity_risk": 33.24,
+      "calamity_risk_raw": 0.3324,
+      "risk_class": "Low",
+      "hazard_index": 27.2,
+      "hazard_index_raw": 0.272,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.1141
+    },
+    "Gulod": {
+      "calamity_risk": 45.44,
+      "calamity_risk_raw": 0.4544,
+      "risk_class": "Moderate",
+      "hazard_index": 44.37,
+      "hazard_index_raw": 0.4437,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.3362
+    },
+    "Mamatid": {
+      "calamity_risk": 47.85,
+      "calamity_risk_raw": 0.4785,
+      "risk_class": "Moderate",
+      "hazard_index": 41.72,
+      "hazard_index_raw": 0.4172,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.4805
+    },
+    "Marinig": {
+      "calamity_risk": 55.88,
+      "calamity_risk_raw": 0.5588,
+      "risk_class": "Moderate",
+      "hazard_index": 50.14,
+      "hazard_index_raw": 0.5014,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.675
+    },
+    "Niugan": {
+      "calamity_risk": 45.29,
+      "calamity_risk_raw": 0.4529,
+      "risk_class": "Moderate",
+      "hazard_index": 40.6,
+      "hazard_index_raw": 0.406,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.3928
+    },
+    "Pittland": {
+      "calamity_risk": 40.35,
+      "calamity_risk_raw": 0.4035,
+      "risk_class": "Moderate",
+      "hazard_index": 47.2,
+      "hazard_index_raw": 0.472,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.0772
+    },
+    "Pulo": {
+      "calamity_risk": 52.38,
+      "calamity_risk_raw": 0.5238,
+      "risk_class": "Moderate",
+      "hazard_index": 42.33,
+      "hazard_index_raw": 0.4233,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.6594
+    },
+    "Sala": {
+      "calamity_risk": 34.83,
+      "calamity_risk_raw": 0.3483,
+      "risk_class": "Low",
+      "hazard_index": 27.2,
+      "hazard_index_raw": 0.272,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.1804
+    },
+    "San Isidro": {
+      "calamity_risk": 44.45,
+      "calamity_risk_raw": 0.4445,
+      "risk_class": "Moderate",
+      "hazard_index": 42.04,
+      "hazard_index_raw": 0.4204,
+      "green_index": 58.65,
+      "green_index_raw": 0.5865,
+      "exposure_norm": 0.3336
+    }
+  }
+}

@@ -355,8 +355,16 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const isVerifiedResident = verificationStatus === "verified";
+
 
   const sendResearcherRequest = async () => {
+
+    if (verificationStatus !== "verified") {
+      alert("You must be a Verified Resident before requesting Researcher Access.");
+      return;
+    }
+
 
     if (!researchPurpose.trim()) return alert("Please enter your purpose.");
     if (!researchOrgSchool.trim()) return alert("Please enter your organization/school.");
@@ -581,6 +589,12 @@ const ProfilePage: React.FC = () => {
                 {/* Researcher Access */}
                 {userRole !== "Researcher" && (
                   <div style={{ marginTop: 10 }}>
+                    {!isVerifiedResident && (
+                      <p className="verification-reason">
+                        You must be a <b>Verified Resident</b> before requesting Researcher Access.
+                      </p>
+                    )}
+
                     {researcherStatus === "rejected" && researcherReason && (
                       <p className="verification-reason">Reason: {researcherReason}</p>
                     )}
@@ -589,7 +603,8 @@ const ProfilePage: React.FC = () => {
                       <button
                         className={`research-btn ${isRequested ? "requested" : ""}`}
                         onClick={() => setShowResearcherModal(true)}
-                        disabled={isRequested}
+                        disabled={isRequested || !isVerifiedResident}
+                        title={!isVerifiedResident ? "Verify your resident status first" : ""}
                       >
                         <GraduationCap size={16} className="cap-icon" />
                         {isRequested ? "Request Sent" : "Request Researcher Access"}
@@ -611,6 +626,7 @@ const ProfilePage: React.FC = () => {
                     )}
                   </div>
                 )}
+
               </>
             )}
           </div>
@@ -701,11 +717,11 @@ const ProfilePage: React.FC = () => {
         </div>
       )}
 
-      {/* Report history */}
+      {/* Active Reports */}
       {!isStaff && (
         <>
           <div className="section-header">
-            <h3 className="section-title">Report History</h3>
+            <h3 className="section-title">Active Reports</h3>
           </div>
 
           <div className="report-list">
@@ -716,6 +732,17 @@ const ProfilePage: React.FC = () => {
             {reports.map((report) => (
               <ReportCard key={report.id} report={report} onUpdate={updateReport} />
             ))}
+          </div>
+        </>
+      )}
+
+      {!isStaff && (
+        <>
+          <div className="section-header">
+            <h3 className="section-title">Report History</h3>
+          </div>
+
+          <div className="report-list">
           </div>
         </>
       )}
@@ -784,63 +811,63 @@ const ProfilePage: React.FC = () => {
       )}
 
       {showResearcherModal && (
-  <div className="modal-overlay" role="dialog" aria-modal="true">
-    <div className="modal-card">
-      <h3>Request Researcher Access</h3>
-      <p className="modal-subtext">
-        Provide your purpose and organization/school. Your request will be reviewed by an admin.
-      </p>
+        <div className="modal-overlay" role="dialog" aria-modal="true">
+          <div className="modal-card">
+            <h3>Request Researcher Access</h3>
+            <p className="modal-subtext">
+              Provide your purpose and organization/school. Your request will be reviewed by an admin.
+            </p>
 
-      <div className="modal-field">
-        <label>Purpose</label>
-        <textarea
-          value={researchPurpose}
-          onChange={(e) => setResearchPurpose(e.target.value)}
-          placeholder="Explain why you need researcher access (e.g., thesis study, data analysis, etc.)"
-          rows={4}
-        />
-      </div>
+            <div className="modal-field">
+              <label>Purpose</label>
+              <textarea
+                value={researchPurpose}
+                onChange={(e) => setResearchPurpose(e.target.value)}
+                placeholder="Explain why you need researcher access (e.g., thesis study, data analysis, etc.)"
+                rows={4}
+              />
+            </div>
 
-      <div className="modal-field">
-        <label>Organization / School</label>
-        <input
-          type="text"
-          value={researchOrgSchool}
-          onChange={(e) => setResearchOrgSchool(e.target.value)}
-          placeholder="e.g., --- University"
-        />
-      </div>
+            <div className="modal-field">
+              <label>Organization / School</label>
+              <input
+                type="text"
+                value={researchOrgSchool}
+                onChange={(e) => setResearchOrgSchool(e.target.value)}
+                placeholder="e.g., --- University"
+              />
+            </div>
 
-      <div className="modal-field">
-        <label>Attachment/Proof (optional)</label>
-        <input
-          type="file"
-          onChange={(e) => setResearchAttachment(e.target.files?.[0] || null)}
-        />
-        {researchAttachment && <small>Selected: {researchAttachment.name}</small>}
-      </div>
+            <div className="modal-field">
+              <label>Attachment/Proof (optional)</label>
+              <input
+                type="file"
+                onChange={(e) => setResearchAttachment(e.target.files?.[0] || null)}
+              />
+              {researchAttachment && <small>Selected: {researchAttachment.name}</small>}
+            </div>
 
-      <div className="modal-actions">
-        <button className="save-btn" onClick={sendResearcherRequest} disabled={researchLoading}>
-          {researchLoading ? "Submitting..." : "Submit"}
-        </button>
+            <div className="modal-actions">
+              <button className="save-btn" onClick={sendResearcherRequest} disabled={researchLoading}>
+                {researchLoading ? "Submitting..." : "Submit"}
+              </button>
 
-        <button
-          className="cancel-btn"
-          onClick={() => {
-            setShowResearcherModal(false);
-            setResearchPurpose("");
-            setResearchOrgSchool("");
-            setResearchAttachment(null);
-          }}
-          disabled={researchLoading}
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+              <button
+                className="cancel-btn"
+                onClick={() => {
+                  setShowResearcherModal(false);
+                  setResearchPurpose("");
+                  setResearchOrgSchool("");
+                  setResearchAttachment(null);
+                }}
+                disabled={researchLoading}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
 
       {/* Logout */}

@@ -245,13 +245,16 @@
 .timeslider-container {
   position: relative;
   padding: 5px 16px;
+  text-align: center;
 }
+
 .timeslider-container .year-display {
   margin-bottom: 8px;
   color: rgb(201, 9, 9);
   font-weight: bold;
   text-align: center;
 }
+
 .timeslider-container .slider-wrapper {
   position: relative;
   width: 100%;

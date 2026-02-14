@@ -164,8 +164,7 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
           <div className="form-group"><strong>Email:</strong> {email}</div>
           <div className="form-group"><strong>Phone:</strong> {phone}</div>
           <div className="form-group">
-            <strong>Temporary Password:</strong>
-            <span className="temp-password">{tempPasswordRef.current}</span>
+            <strong>Temporary Password:</strong> User will receive an email to set their password.
           </div>
 
           <div className="form-row confirm-buttons">
@@ -189,7 +188,7 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
 
         <div className="modal-header">
           <h2>Create Staff User</h2>
-          <p>Admin / Officer / Researcher only</p>
+          <p>For Admin and LGU Officer Accounts</p>
         </div>
 
         <form className="modal-form" onSubmit={(e) => e.preventDefault()}>

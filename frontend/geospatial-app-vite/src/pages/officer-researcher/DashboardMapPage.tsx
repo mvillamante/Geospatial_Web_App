@@ -31,7 +31,7 @@ type HealthItem = {
 const DashboardMapPage: React.FC = () => {
   //get user role
   const { userRole, userRole2 } = getUserRoleAndDisplayName();
-  
+
   // Show Modal Popup
   const [showEdaModal, setShowEdaModal] = useState(false);
 
@@ -42,7 +42,7 @@ const DashboardMapPage: React.FC = () => {
   const [edaSect, setEdaSect] = useState<"edastats" | "modelperf">("edastats");
 
   /* data layer - custom select-option */
-  const [selected, setSelected] = useState("hazard");
+  const [selected, setSelected] = useState("");
   const [open, setOpen] = useState(false);
 
   const options = [
@@ -93,24 +93,16 @@ const DashboardMapPage: React.FC = () => {
 
   const mapLayers = [
     {
-      group: "NDVI",
-      items: ["NDVI"],
-    },
-    {
-      group: "Population Density",
-      items: ["Population Density"],
-    },
-    {
       group: "Hazard Zones",
-      items: ["Fault Lines", "Flood Zones", "Landslide Risk","Hazard Location"],
+      items: ["Fault Lines", "Flood Zones", "Landslide Risk", "Hazard Location"],
     },
     {
-      group: "Infrastructure",
+      group: "Infrastructure and Road Networks",
       items: ["Evacuation Centers", "Roads", "Traffic Conditions",],
     },
   ];
 
-  const mapViewAllowedGroups = ["Population Density", "Hazard Zones", "Infrastructure"];
+  const mapViewAllowedGroups = ["Population Density", "Hazard Zones", "Infrastructure and Road Networks"];
   const visibleMapLayers =
     mapView === "interactive"
       ? mapLayers.filter(layer => mapViewAllowedGroups.includes(layer.group))
@@ -153,7 +145,7 @@ const DashboardMapPage: React.FC = () => {
     setIsRightPanelOpen((prev) => !prev);
   };
 
-  useEffect(() => { /*automatic closes*/ 
+  useEffect(() => { /*automatic closes*/
     const handleResize = () => {
       if (window.innerWidth <= 1056) {
         setIsRightPanelOpen(false);
@@ -341,54 +333,54 @@ const DashboardMapPage: React.FC = () => {
               </button>
             </div>
 
-          {/* Map Type - only show if Interactive is selected */}
-          {mapView === "interactive" && (
-            <div className="segmented-control small slide two">
-              <span className={`slider ${mapType}`} />
+            {/* Map Type - only show if Interactive is selected */}
+            {mapView === "interactive" && (
+              <div className="segmented-control small slide two">
+                <span className={`slider ${mapType}`} />
 
-              <button className={mapType === "basic" ? "active" : ""} onClick={() => setMapType("basic")}>
-                Basic
-              </button>
-              <button className={mapType === "satellite" ? "active" : ""} onClick={() => setMapType("satellite")}>
-                Satellite
-              </button>
+                <button className={mapType === "basic" ? "active" : ""} onClick={() => setMapType("basic")}>
+                  Basic
+                </button>
+                <button className={mapType === "satellite" ? "active" : ""} onClick={() => setMapType("satellite")}>
+                  Satellite
+                </button>
 
-              <button className={mapType === "terrain" ? "active" : ""} onClick={() => setMapType("terrain")}>
-                Terrain
-              </button>
-            </div>
-          )}
+                <button className={mapType === "terrain" ? "active" : ""} onClick={() => setMapType("terrain")}>
+                  Terrain
+                </button>
+              </div>
+            )}
           </div>
 
           {mapView === "interactive" ? (
             <>
               <div className="rowpanel-card">
-              {/* Current Green Index */}
-              <div className="panel-card green">
-                <span className="panel-card-sub-title">Current Green Index</span>
+                {/* Current Green Index */}
+                <div className="panel-card green">
+                  <span className="panel-card-sub-title">Current Green Index</span>
 
-                <div className="panel-card-value">
-                  72<span className="unit">%</span>
+                  <div className="panel-card-value">
+                    72<span className="unit">%</span>
+                  </div>
+
+                  <div className="panel-card-meta">
+                    ↑ 4.2% from last year
+                  </div>
                 </div>
 
-                <div className="panel-card-meta">
-                  ↑ 4.2% from last year
+                {/* Current Hazard Index */}
+                <div className="panel-card hazard">
+                  <span className="panel-card-sub-title">Current Hazard Index</span>
+
+                  <div className="panel-card-value">
+                    38<span className="unit">%</span>
+                  </div>
+
+                  <div className="panel-card-meta">
+                    ↓ 1.1% from last year
+                  </div>
                 </div>
               </div>
-
-              {/* Current Hazard Index */}
-              <div className="panel-card hazard">
-                <span className="panel-card-sub-title">Current Hazard Index</span>
-
-                <div className="panel-card-value">
-                  38<span className="unit">%</span>
-                </div>
-
-                <div className="panel-card-meta">
-                  ↓ 1.1% from last year
-                </div>
-              </div>
-            </div>
             </>
           ) : (
             <div className="panel-card">
@@ -400,7 +392,9 @@ const DashboardMapPage: React.FC = () => {
                   onClick={() => setOpen(!open)}
                 >
                   <button className="select-btn">
-                    {options.find((opt) => opt.value === selected)?.label || "Select an option"}
+                    {selected
+                      ? options.find((opt) => opt.value === selected)?.label
+                      : "Select a layer"}
                     <span className="arrow">▼</span>
                   </button>
                   <ul className="select-options">
@@ -415,13 +409,14 @@ const DashboardMapPage: React.FC = () => {
                     ))}
                   </ul>
                 </div>
+
               </div>
 
               <hr className="section-divider" />
 
               {/* Time Slider */}
               <div className="timeslider-container">
-                <h4>Projections Year</h4>
+                <h4>History and Projection</h4>
 
                 <div className="year-display">{year}</div>
 
@@ -448,7 +443,7 @@ const DashboardMapPage: React.FC = () => {
           {mapView === "choropleth" && activeLayers.includes("NDVI") && (
             <div className="ndvi-controls panel-card">
               <h4>Green Index</h4>
-              
+
               {/* Opacity Slider */}
               <div className="ndvi-control-row">
                 <span className="ndvi-label">Opacity</span>
@@ -510,13 +505,13 @@ const DashboardMapPage: React.FC = () => {
                     />
                   </div>
                 ))}
-                {index < visibleMapLayers.length - 1 && <hr className="section-divider" />}  
+                {index < visibleMapLayers.length - 1 && <hr className="section-divider" />}
               </div>
             ))}
           </div>
 
           {/* Risk Legend */}
-          { mapView == "choropleth" ? (
+          {mapView == "choropleth" ? (
             <div className="risklegend-container panel-card">
               <h4>Index Legend</h4>
               <ul>
@@ -530,20 +525,20 @@ const DashboardMapPage: React.FC = () => {
             <div className="panel-card">
               <span className="panel-card-title">Insights</span>
               <div className="columnpanel-card">
-                  {leftInsights.map((item, index) => (
-                    <div key={index} className={`panel-card left-insight-card ${colors2[index % colors.length]}`}>
-                      {/*<span className="insight-icon">{insightIcons[index % insightIcons.length]}</span>*/}
-                      <div className="insight-text">
-                        <strong>{item.label}:</strong> {item.description}
-                      </div>
+                {leftInsights.map((item, index) => (
+                  <div key={index} className={`panel-card left-insight-card ${colors2[index % colors.length]}`}>
+                    {/*<span className="insight-icon">{insightIcons[index % insightIcons.length]}</span>*/}
+                    <div className="insight-text">
+                      <strong>{item.label}:</strong> {item.description}
                     </div>
-                  ))}
+                  </div>
+                ))}
               </div>
             </div>
           )}
         </aside>
 
-        
+
         {/* Map Component -------------------------------*/}
         {mapView === "interactive" ? (
           <div className="dashboardview-map">
@@ -560,7 +555,7 @@ const DashboardMapPage: React.FC = () => {
 
             {/* Time Slider Floating Island */}
             <div className="timeslider-floating-tab">
-                <span>Projection: {year}</span>
+              <span>Projection: {year}</span>
             </div>
 
             {/* Flood Zone Legend - appears when Flood Zones layer is active */}
@@ -670,7 +665,7 @@ const DashboardMapPage: React.FC = () => {
               <div className="roads-legend">
                 <h4>🛣️ Roads & Bridges</h4>
                 <div className="roads-legend-subtitle">Cabuyao, Laguna</div>
-                
+
                 <div className="roads-legend-section">
                   <span className="section-title">Road Types</span>
                   <ul>
@@ -732,22 +727,22 @@ const DashboardMapPage: React.FC = () => {
             {/* Header */}
             <div className="choropleth-header">
               <h3>Choropleth Map: {options.find((opt) => opt.value === selected)?.label || ""}</h3>
-              <h5>Cabuyao, Laguna Barangays - {year}</h5>
+              <h5>Cabuyao, Laguna - {year}</h5>
             </div>
 
             {/* Map Visual*/}
-            <LeafletMap 
-              height="92vh" 
-              mapView="choropleth" 
+            <LeafletMap
+              height="92vh"
+              mapView="choropleth"
               mapType={mapType}
               activeLayers={activeLayers}
               ndviOpacity={ndviOpacity}
               ndviYear={year}
               ndviMonth={ndviMonth}
-            /> 
+            />
 
             {/* NDVI Legend - appears when NDVI layer is active in Choropleth mode */}
-            {activeLayers.includes("NDVI") && (
+            {/* {activeLayers.includes("NDVI") && (
               <div className="ndvi-legend">
                 <h4>NDVI Green Index</h4>
                 <div className="ndvi-legend-subtitle">Cabuyao, Laguna</div>
@@ -761,10 +756,10 @@ const DashboardMapPage: React.FC = () => {
                   <span>Higher values indicate healthier vegetation</span>
                 </div>
               </div>
-            )}
+            )} */}
 
           </div>
-        ) : null }
+        ) : null}
 
 
         {/* Right Panel */}
@@ -773,20 +768,20 @@ const DashboardMapPage: React.FC = () => {
             <button className="toggle-panel-btn" onClick={toggleRightPanel}>
               {isRightPanelOpen ? "→" : "←"}
             </button>
-          
+
             <div className="segmented-control small slide three">
-                <span className={`slider ${rightNav}`} />
+              <span className={`slider ${rightNav}`} />
 
-                <button className={rightNav === "charts" ? "active" : ""} onClick={() => setRightNav("charts")}>
-                  Charts
-                </button>
-                <button className={rightNav === "analytics" ? "active" : ""} onClick={() => setRightNav("analytics")}>
-                  Analytics
-                </button>
+              <button className={rightNav === "charts" ? "active" : ""} onClick={() => setRightNav("charts")}>
+                Charts
+              </button>
+              <button className={rightNav === "analytics" ? "active" : ""} onClick={() => setRightNav("analytics")}>
+                Analytics
+              </button>
 
-                <button className={rightNav === "export" ? "active" : ""} onClick={() => setRightNav("export")}>
-                  Export
-                </button>
+              <button className={rightNav === "export" ? "active" : ""} onClick={() => setRightNav("export")}>
+                Export
+              </button>
             </div>
           </div>
 
@@ -833,7 +828,7 @@ const DashboardMapPage: React.FC = () => {
                 </div>
               </div>
             </div>
-          ) : ( rightNav === "analytics" ? (
+          ) : (rightNav === "analytics" ? (
             <div className="right-panel-content">
               {/* Analytics Section--------------------------- */}
               <h4>Analytics Section</h4>
@@ -895,7 +890,7 @@ const DashboardMapPage: React.FC = () => {
                 </div>
               )}
             </div>
-          ) : ( rightNav === "export" ? (
+          ) : (rightNav === "export" ? (
             <div className="right-panel-content">
               <h4>Export Section</h4>
               {userRole === "Officer" ? (
@@ -1001,16 +996,15 @@ const DashboardMapPage: React.FC = () => {
                       {itemsToRender.map((item, i) => (
                         <li className="export-content" key={i}>
                           {/* Export Icon */}
-                          <span 
-                            className={`export-left-icon ${
-                              section.title === "Reports"
+                          <span
+                            className={`export-left-icon ${section.title === "Reports"
                                 ? "report"
                                 : section.title === "Charts"
-                                ? "chart"
-                                : (item as DownloadItem).type === "report"
-                                ? "download-report"
-                                : "download-chart"
-                            }`}
+                                  ? "chart"
+                                  : (item as DownloadItem).type === "report"
+                                    ? "download-report"
+                                    : "download-chart"
+                              }`}
                           >
                             {section.title === "Reports" || (section.title === "Recent Downloads" && (item as DownloadItem).type === "report") ? (
                               <HiOutlineDocumentReport />
@@ -1049,12 +1043,12 @@ const DashboardMapPage: React.FC = () => {
               })}
             </div>
 
-          ) : null ))}
+          ) : null))}
 
           {showEdaModal && (
             <div className="eda-modal-overlay" onClick={() => setShowEdaModal(false)}>
               <div className="eda-modal" onClick={(e) => e.stopPropagation()}>
-                
+
                 {/* Header */}
                 <div className="eda-modal-header">
                   <h2>Exploratory Data Analysis & Model Performance</h2>
@@ -1097,9 +1091,8 @@ const DashboardMapPage: React.FC = () => {
                           <span className="eda-stat-value">
                             {item.value.toFixed(2)}
                             <span
-                              className={`eda-badge ${
-                                item.change >= 0 ? "red" : "green"
-                              }`}
+                              className={`eda-badge ${item.change >= 0 ? "red" : "green"
+                                }`}
                             >
                               {item.change > 0 ? "+" : ""}
                               {item.change}%
@@ -1243,9 +1236,9 @@ const DashboardMapPage: React.FC = () => {
                     </div>
 
                   </div>
-                ) : null }
+                ) : null}
 
-                
+
               </div>
             </div>
           )}

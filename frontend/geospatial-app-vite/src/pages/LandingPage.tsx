@@ -27,6 +27,7 @@ const LandingPage: React.FC = () => {
 
   const [stats, setStats] = useState<LandingStats | null>(null);
 
+
   // Fetch user info on mount
   useEffect(() => {
     refreshUser().finally(() => setLoading(false));
@@ -72,9 +73,13 @@ const LandingPage: React.FC = () => {
     fetchLandingStats();
   }, []);
 
-  // Show loading until auth is fetched
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div className="loading-screen">
+        <div className="spinner"></div>
+        <p className="loading-text">Loading...</p>
+      </div>
+    );
   }
 
   // ===== Get user role and display name from localStorage =====
@@ -152,7 +157,7 @@ const LandingPage: React.FC = () => {
             <div className="stats-grid">
               <div className="stat-card">
                 <div className="stat-label">Active Hazards</div>
-                 <div className="stat-value">
+                <div className="stat-value">
                   {stats ? stats.activeHazards : "—"}
                 </div>
               </div>

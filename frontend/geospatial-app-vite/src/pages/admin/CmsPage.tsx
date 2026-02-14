@@ -67,7 +67,7 @@ const CmsPage: React.FC = () => {
     postType: "advisory",
     postBody: "",
   });
-  
+
   const [showNotificationDialog, setShowNotificationDialog] = useState(false);
   const [notification, setNotification] = useState({ type: 'alert', message: '' });
   const [viewArchived, setViewArchived] = useState(false);
@@ -200,8 +200,8 @@ const CmsPage: React.FC = () => {
     });
 
     // Remove restored guide from Archived list
-    setGuides(prev => 
-      prev.map(g => 
+    setGuides(prev =>
+      prev.map(g =>
         g.postId === postId ? { ...g, status: "Draft" } : g
       )
     );
@@ -219,57 +219,57 @@ const CmsPage: React.FC = () => {
   };
 
   const createGuide = async (publishImmediately = false) => {
-  const res = await fetch("/api/cms/guides/create/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    },
-    body: JSON.stringify(newGuide),
-  });
-
-  if (!res.ok) {
-    alert("Failed to create guide");
-    return;
-  }
-
-  const created = await res.json();
-
-  let uploadedImage = null;
-  if (newGuide.imageFile) {
-    uploadedImage = await uploadImage(created.id, newGuide.imageFile);
-  }
-
-  if (publishImmediately) {
-    await fetch(`/api/cms/guides/${created.id}/publish/`, {
-      method: "PATCH",
+    const res = await fetch("/api/cms/guides/create/", {
+      method: "POST",
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       },
+      body: JSON.stringify(newGuide),
     });
-  }
 
-  setGuides(prev => [
-    {
-      postId: created.id,
-      postTitle: created.post_title,
-      postType: created.post_type,
-      postBody: created.post_body,
-      status: publishImmediately ? "Published" : "Draft",
-      isPinned: false,
-      createdAt: created.created_at,
-      updatedAt: created.updated_at,
-      publishedAt: publishImmediately
-        ? new Date().toISOString()
-        : undefined,
-      attachments: uploadedImage ? [uploadedImage] : [],
-    },
-    ...prev,
-  ]);
+    if (!res.ok) {
+      alert("Failed to create guide");
+      return;
+    }
+
+    const created = await res.json();
+
+    let uploadedImage = null;
+    if (newGuide.imageFile) {
+      uploadedImage = await uploadImage(created.id, newGuide.imageFile);
+    }
+
+    if (publishImmediately) {
+      await fetch(`/api/cms/guides/${created.id}/publish/`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
+    }
+
+    setGuides(prev => [
+      {
+        postId: created.id,
+        postTitle: created.post_title,
+        postType: created.post_type,
+        postBody: created.post_body,
+        status: publishImmediately ? "Published" : "Draft",
+        isPinned: false,
+        createdAt: created.created_at,
+        updatedAt: created.updated_at,
+        publishedAt: publishImmediately
+          ? new Date().toISOString()
+          : undefined,
+        attachments: uploadedImage ? [uploadedImage] : [],
+      },
+      ...prev,
+    ]);
 
 
-  setNewGuide({ postTitle: "", postType: "advisory", postBody: "" });
-  setShowCreateModal(false);
+    setNewGuide({ postTitle: "", postType: "advisory", postBody: "" });
+    setShowCreateModal(false);
   };
 
   const updateGuide = async () => {
@@ -307,14 +307,14 @@ const CmsPage: React.FC = () => {
       prev.map(g =>
         g.postId === updated.id
           ? {
-              ...g,
-              postTitle: updated.post_title,
-              postType: updated.post_type,
-              postBody: updated.post_body,
-              updatedAt: updated.updated_at,
-              publishedAt: updated.published_at,
-              attachments: g.attachments?.filter(a => !deletedAttachments.includes(a.id)),
-            }
+            ...g,
+            postTitle: updated.post_title,
+            postType: updated.post_type,
+            postBody: updated.post_body,
+            updatedAt: updated.updated_at,
+            publishedAt: updated.published_at,
+            attachments: g.attachments?.filter(a => !deletedAttachments.includes(a.id)),
+          }
           : g
       )
     );
@@ -379,7 +379,7 @@ const CmsPage: React.FC = () => {
 
   /* Tab */
   const indicatorRef = useRef<HTMLDivElement>(null);
-  const tabRefs = useRef<{[key: string]: HTMLButtonElement | null}>({});
+  const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   const activeTabRef = (isArchived: boolean) => (el: HTMLButtonElement | null) => {
     tabRefs.current[isArchived ? "archived" : "active"] = el;
@@ -490,7 +490,7 @@ const CmsPage: React.FC = () => {
               >x</button>
             )}
           </div>
-          
+
           {/* CMS ACTIONS */}
           <div className="cms-actions">
             <button
@@ -586,7 +586,7 @@ const CmsPage: React.FC = () => {
                           aria-label="Actions"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setOpenMenuId((prev) => (prev === guide.postId  ? null : guide.postId ));
+                            setOpenMenuId((prev) => (prev === guide.postId ? null : guide.postId));
                           }}
                         ><LuEllipsis size={20} /></button>
 
@@ -635,24 +635,24 @@ const CmsPage: React.FC = () => {
                               </button>
                             )}
 
-                              <button
-                                className="dropdown-item danger"
-                                onClick={() => {
-                                  setGuideToDelete(guide);
-                                  setShowDeleteModal(true);
-                                  setOpenMenuId(null);
-                                }}
-                              >
-                                {viewArchived ? (
-                                  <>
-                                    <Trash2 size={16} /> Delete
-                                  </>
-                                ) : (
-                                  <>
-                                    <Archive size={16} /> Archive
-                                  </>
-                                )}
-                              </button>
+                            <button
+                              className="dropdown-item danger"
+                              onClick={() => {
+                                setGuideToDelete(guide);
+                                setShowDeleteModal(true);
+                                setOpenMenuId(null);
+                              }}
+                            >
+                              {viewArchived ? (
+                                <>
+                                  <Trash2 size={16} /> Delete
+                                </>
+                              ) : (
+                                <>
+                                  <Archive size={16} /> Archive
+                                </>
+                              )}
+                            </button>
                           </div>
                         )}
                       </div>
@@ -706,12 +706,6 @@ const CmsPage: React.FC = () => {
           <div className="modal">
             <h2>Create New Guide</h2>
 
-            <label>Title</label>
-            <input
-              value={newGuide.postTitle}
-              onChange={e => setNewGuide({ ...newGuide, postTitle: e.target.value })}
-            />
-
             <label>Type</label>
             <select
               value={newGuide.postType}
@@ -721,6 +715,12 @@ const CmsPage: React.FC = () => {
               <option value="announcement">Announcement</option>
               <option value="guide">Guide</option>
             </select>
+
+            <label>Title</label>
+            <input
+              value={newGuide.postTitle}
+              onChange={e => setNewGuide({ ...newGuide, postTitle: e.target.value })}
+            />
 
 
             <label>Body</label>
@@ -864,14 +864,15 @@ const CmsPage: React.FC = () => {
             )}
 
             <div className="modal-actions">
-              <button className="btn-secondary" onClick={() =>{
-                  setEditingGuide(prev =>
-                    prev ? { ...prev, attachments: originalAttachments } : null
-                  );
-                  setTempEditImages([]);
-                  setDeletedAttachments([]);
-                  setShowEditModal(false);}
-                }>
+              <button className="btn-secondary" onClick={() => {
+                setEditingGuide(prev =>
+                  prev ? { ...prev, attachments: originalAttachments } : null
+                );
+                setTempEditImages([]);
+                setDeletedAttachments([]);
+                setShowEditModal(false);
+              }
+              }>
                 Cancel
               </button>
               <button className="btn-primary" onClick={updateGuide}>
@@ -881,7 +882,7 @@ const CmsPage: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {/* Delete/Archive Modal */}
       {showDeleteModal && guideToDelete && (
         <div className="modal-overlay">
@@ -905,18 +906,18 @@ const CmsPage: React.FC = () => {
                 Cancel
               </button>
 
-            {!viewArchived && (
-              <button
-                className="btn-secondary archive"
-                onClick={() => {
-                  archiveGuide(guideToDelete.postId);
-                  setShowDeleteModal(false);
-                  setGuideToDelete(null);
-                }}
-              >
-                Archive
-              </button>
-            )}
+              {!viewArchived && (
+                <button
+                  className="btn-secondary archive"
+                  onClick={() => {
+                    archiveGuide(guideToDelete.postId);
+                    setShowDeleteModal(false);
+                    setGuideToDelete(null);
+                  }}
+                >
+                  Archive
+                </button>
+              )}
 
               {viewArchived && (
                 <button
@@ -982,7 +983,7 @@ const CmsPage: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {/* Quick Contact Modal */}
       {showContactModal && contact && (
         <div className="modal-overlay">
@@ -991,57 +992,57 @@ const CmsPage: React.FC = () => {
             <div className="contact-grid">
               <div className="contact-section">
                 <h3>Basic Information</h3>
-                  <label>Name</label>
-                  <input
-                    value={contact.name}
-                    onChange={e => setContact({ ...contact, name: e.target.value })}
-                  />
+                <label>Name</label>
+                <input
+                  value={contact.name}
+                  onChange={e => setContact({ ...contact, name: e.target.value })}
+                />
 
-                  {/* <label>Description</label>
+                {/* <label>Description</label>
                   <input
                     value={contact.description}
                     onChange={e => setContact({ ...contact, description: e.target.value })}
                   /> */}
 
-                  <label>Email</label>
-                  <input
-                    value={contact.email || ""}
-                    onChange={e => setContact({ ...contact, email: e.target.value })}
-                  />
+                <label>Email</label>
+                <input
+                  value={contact.email || ""}
+                  onChange={e => setContact({ ...contact, email: e.target.value })}
+                />
               </div>
               <div className="contact-section">
                 <h3>Online Links</h3>
-                  <label>Facebook URL</label>
-                  <input
-                    value={contact.facebook_url || ""}
-                    onChange={e => setContact({ ...contact, facebook_url: e.target.value })}
-                  />
+                <label>Facebook URL</label>
+                <input
+                  value={contact.facebook_url || ""}
+                  onChange={e => setContact({ ...contact, facebook_url: e.target.value })}
+                />
 
-                  <label>Website URL</label>
-                  <input
-                    value={contact.website_url || ""}
-                    onChange={e => setContact({ ...contact, website_url: e.target.value })}
-                  />
+                <label>Website URL</label>
+                <input
+                  value={contact.website_url || ""}
+                  onChange={e => setContact({ ...contact, website_url: e.target.value })}
+                />
 
-                  <label>Map URL</label>
-                  <input
-                    value={contact.map_url || ""}
-                    onChange={e => setContact({ ...contact, map_url: e.target.value })}
-                  />
+                <label>Map URL</label>
+                <input
+                  value={contact.map_url || ""}
+                  onChange={e => setContact({ ...contact, map_url: e.target.value })}
+                />
               </div>
               <div className="contact-section">
                 <h3>Location and Time</h3>
-                  <label>Office Hours</label>
-                  <input
-                    value={contact.office_hours || ""}
-                    onChange={e => setContact({ ...contact, office_hours: e.target.value })}
-                  />
+                <label>Office Hours</label>
+                <input
+                  value={contact.office_hours || ""}
+                  onChange={e => setContact({ ...contact, office_hours: e.target.value })}
+                />
 
-                  <label>Address</label>
-                  <input
-                    value={contact.address || ""}
-                    onChange={e => setContact({ ...contact, address: e.target.value })}
-                  />
+                <label>Address</label>
+                <input
+                  value={contact.address || ""}
+                  onChange={e => setContact({ ...contact, address: e.target.value })}
+                />
               </div>
 
             </div>

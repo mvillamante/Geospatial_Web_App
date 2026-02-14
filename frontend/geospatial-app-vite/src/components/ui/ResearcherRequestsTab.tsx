@@ -10,6 +10,8 @@ export interface ResearcherRequest {
   userId: number;
   userName: string;
   date: string;
+  purpose: string;
+  orgSchool: string;
   status: RequestStatus;
 }
 
@@ -44,7 +46,9 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
         userId: r.user,
         userName: r.username,
         date: r.created_at ? formatDistanceToNow(new Date(r.created_at), { addSuffix: true }) : "Unknown",
-        status: (r.status.charAt(0).toUpperCase() + r.status.slice(1)) as RequestStatus
+        status: (r.status.charAt(0).toUpperCase() + r.status.slice(1)) as RequestStatus,
+        purpose: r.purpose,
+        orgSchool: r.orgSchool
       }));
 
       setRequests(mapped);
@@ -170,7 +174,9 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
             <tr>
               <th>#</th>
               <th className="center">User</th>
-              <th className="center">Requested At</th>
+              <th className="center">Created At</th>
+              <th className="center">Purpose</th>
+              <th className="center">Organization/School</th>
               <th className="center">Status</th>
               <th className="center">Actions</th>
             </tr>
@@ -190,6 +196,8 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                     <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td>
                     <td className="user-name">{req.userName}</td>
                     <td className="center muted">{req.date}</td>
+                    <td className="center muted">{req.purpose}</td>
+                    <td className="center muted">{req.orgSchool}</td>
                     <td className="center"><span className={`badge ${req.status}`}>{req.status}</span></td>
                     <td className="center actions">
                       {req.status === "Pending" && (

@@ -185,8 +185,8 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
               <th className="center">Citizen ID</th>
               <th className="center">Citizen Name</th>
               <th className="center">Barangay</th>
-              <th className="center">Full Address</th>
-              <th className="center">Barangay ID</th>
+              {/* <th className="center">Full Address</th> */}
+              {/* <th className="center">Barangay ID</th> */}
               <th className="center">Requested At</th>
               <th className="center">Status</th>
               <th className="center">Actions</th>
@@ -196,7 +196,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
           <tbody>
             {verifications.length === 0 ? (
               <tr>
-                <td colSpan={9} className="empty">Loading Verification Requests...</td>
+                <td colSpan={9} className="empty">No citizen request found.</td>
               </tr>
             ) : (
               verifications.map((v, index) => (
@@ -204,9 +204,9 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
                   <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td>
                   <td className="center muted">{v.citizen_id}</td>
                   <td className="user-name">{v.citizen_name}</td>
-                  <td className="center muted">{v.barangay}</td>
-                  <td className="center muted">{v.address}</td>
-                  <td className="center muted">
+                  <td className="center">{v.barangay}</td>
+                  {/* <td className="center muted">{v.address}</td> */}
+                  {/* <td className="center muted">
                     {v.id_image ? (
                       <a
                         href={`http://127.0.0.1:8000/api/get-signed-url/?path=${encodeURIComponent(v.id_image)}`}
@@ -216,7 +216,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
                         View ID
                       </a>
                     ) : "N/A"}
-                  </td>
+                  </td> */}
                   <td className="center muted">{formatDistanceToNow(new Date(v.created_at), { addSuffix: true })}</td>
                   <td className="center"><span className={`badge ${v.status}`}>{v.status}</span></td>
 

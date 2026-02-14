@@ -451,7 +451,7 @@ const ReportsMgmtPage: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="search-input"
-              placeholder="Search report id, reporter, location, category..."
+              placeholder="Search by report id, reporter, location...."
             />
             {searchQuery.trim() && (
               <button

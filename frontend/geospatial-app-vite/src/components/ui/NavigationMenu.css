@@ -264,10 +264,6 @@
   transition: background 0.2s ease;
 }
 
-.dropdown-profile-info:hover {
-  background: var(--off-white-bg);
-}
-
 .dropdown-avatar {
   width: 44px;
   height: 44px;

@@ -265,7 +265,7 @@ const UserMgmtPage: React.FC = () => {
           {pendingCount > 0 && <span className="request-count">{pendingCount}</span>}
         </button>
         <button ref={el => { tabRefs.current[2] = el; }} onClick={() => setTab('verification')} className={tab === 'verification' ? 'tab active' : 'tab'}>
-          Verification Requests
+          Citizen Requests
           {/*pendingCount > 0 && <span className="request-count">{pendingCount}</span>*/}
         </button>
         <span className="tab-underline" style={{ left: underlineStyle.left, width: underlineStyle.width }} />
@@ -335,7 +335,7 @@ const UserMgmtPage: React.FC = () => {
                   <th className="center">
                     <span className="sort-header" onClick={() => handleSortClick("dateJoined")}>
                       Date Joined
-                      {sortField === "dateJoined" ? (sortOrder === "asc" ? <HiChevronUp /> : sortOrder === "desc" ? <HiChevronDown /> : <HiChevronUpDown />) : <HiChevronUpDown />}
+                      {sortField === "dateJoined" ? (sortOrder === "desc" ? <HiChevronUp /> : sortOrder === "asc" ? <HiChevronDown /> : <HiChevronUpDown />) : <HiChevronUpDown />}
                     </span>
                   </th>
                   <th className="center">

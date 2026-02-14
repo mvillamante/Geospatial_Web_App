@@ -203,10 +203,6 @@ const NavigationMenu: React.FC = () => {
           <div className="profile-dropdown-menu">
             <div
               className="dropdown-profile-info"
-              onClick={() => {
-                navigate(profilePath);
-                setIsDropdownOpen(false);
-              }}
             >
               <div className="dropdown-avatar">
                 {(user?.username || displayName)?.charAt(0).toUpperCase()}

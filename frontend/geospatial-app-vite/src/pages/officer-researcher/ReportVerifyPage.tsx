@@ -478,7 +478,6 @@ const ReportVerifyPage: React.FC = () => {
       {/* Header */}
       <div className="reportverify-header">
         <div className="reportverify-header-title">
-          <MapPin className="reportverify-title-icon" />
           <h1>Report Verification</h1>
         </div>
         <p className="reportverify-header-desc">Review, validate, and update citizen hazard reports</p>

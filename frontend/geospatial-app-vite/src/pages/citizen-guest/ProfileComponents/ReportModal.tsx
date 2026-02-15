@@ -13,6 +13,9 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
   const [localReport, setLocalReport] = useState(report);
   const [isSending, setIsSending] = useState(false);
 
+  console.log("Status:", localReport.status);
+  console.log("LGU Post:", localReport.lgu_post);
+
   const handleSendReply = async () => {
     // Trim message
     const trimmedMessage = replyMessage.trim();
@@ -127,15 +130,45 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
         {report.photo && <img src={report.photo} alt="report" className="report-photo" />}
 
         {/* Officer Note for Resolved */}
-        {report.status === "resolved" && report.officer_note && (
+        {localReport.status?.toLowerCase() === "resolved" && localReport.lgu_post && (
           <div className="note-card lgu-post-card">
-            <div className="note-header">LGU Post</div>
-            <div className="note-content">{report.officer_note}</div>
-            {report.reply_image_url && (
-              <img src={report.reply_image_url} alt="Reply" className="reply-image" />
+            <div className="note-header">🏛 LGU Official Update</div>
+
+            <div className="note-section">
+              <h4>Incident</h4>
+              <p>{localReport.lgu_post.incident}</p>
+            </div>
+
+            <div className="note-section">
+              <h4>Status</h4>
+              <p>{localReport.lgu_post.status}</p>
+            </div>
+
+            {localReport.lgu_post?.what_happened && (
+              <div className="note-section">
+                <h4>What Happened</h4>
+                <p>{localReport.lgu_post.what_happened}</p>
+              </div>
+            )}
+
+            {localReport.lgu_post?.action_taken && (
+              <div className="note-section">
+                <h4>Action Taken</h4>
+                <p>{localReport.lgu_post.action_taken}</p>
+              </div>
+            )}
+
+            {localReport.lgu_post?.advisory && (
+              <div className="note-section">
+                <h4>Advisory to Citizens</h4>
+                <p>{localReport.lgu_post.advisory}</p>
+              </div>
             )}
           </div>
         )}
+
+
+
 
         {/* Reply Section */}
         {report.status === "needs_info" && report.needs_info_note && (

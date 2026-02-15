@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { act, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GraduationCap, Rss } from "lucide-react";
 import ReportCard from './ReportCard';
@@ -16,6 +16,14 @@ type ReportCardModel = {
   progressStatus: "Pending" | "In Progress" | "Resolved";
   status: string;
   progress: number;
+  lgu_post?: {
+    incident: string;
+    status: string;
+    what_happened?: string | null;
+    action_taken?: string | null;
+    advisory?: string | null;
+    updated_at?: string;
+  } | null;
   photo?: string | null;
   officer_note: string | null;
   needs_info_note?: string;
@@ -33,6 +41,14 @@ type IncidentReportAPI = {
   status?: string;
   suggested_critical_level?: string;
   photo_url?: string | null;
+  lgu_post?: {
+    incident: string;
+    status: string;
+    what_happened?: string | null;
+    action_taken?: string | null;
+    advisory?: string | null;
+    updated_at?: string;
+  } | null;
   officer_note: string | null;
   needs_info_note?: string;
   reply_message?: string | null;
@@ -53,8 +69,6 @@ function toProgressStatus(raw: string | undefined | null): ProgressStatus {
   return "Pending";
 }
 const ProfilePage: React.FC = () => {
-  const [researcherStatus, setResearcherStatus] = useState<ResearcherStatus>("none");
-  const [researcherReason, setResearcherReason] = useState("");
 
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>("unverified");
   const [verificationReason, setVerificationReason] = useState<string>("");
@@ -108,6 +122,16 @@ const ProfilePage: React.FC = () => {
   const [isRequested, setIsRequested] = useState(false);
 
   const [reports, setReports] = useState<ReportCardModel[]>([]);
+
+  const activeReports = reports.filter(
+    (r) => r.status?.toLowerCase() !== "archived"
+  );
+
+  const archivedReports = reports.filter(
+    (r) => r.status?.toLowerCase() === "archived"
+  );
+
+
   const [loadingReports, setLoadingReports] = useState(true);
   const [reportsError, setReportsError] = useState<string | null>(null);
 
@@ -136,10 +160,16 @@ const ProfilePage: React.FC = () => {
   const categoryTitleMap: Record<string, string> = {
     fire: "Fire Incident",
     flood: "Flood Incident",
-    accident: "Road Accident",
     landslide: "Landslide Alert",
+    typhoon: "Severe Weather Alert",
+    earthquake: "Earthquake Alert",
+    vehicular_accident: "Vehicular Accident",
+    chemical_gas_leak: "Chemical / Gas Leak",
+    fallen_tree: "Fallen Tree Hazard",
+    infrastructure_damage: "Infrastructure Damage",
     others: "Reported Incident",
   };
+
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -156,16 +186,8 @@ const ProfilePage: React.FC = () => {
           throw new Error(err.detail || "Failed to load profile")
         }
 
+
         const data = await res.json();
-
-        const rStatus = (data.researcher_status || "none").toLowerCase();
-        setResearcherStatus(
-          rStatus === "pending" || rStatus === "approved" || rStatus === "rejected"
-            ? rStatus
-            : "none"
-        );
-
-        setResearcherReason(data.researcher_rejection_reason || "");
 
         const vStatus = (data.verification_status || "unverified").toLowerCase();
         setVerificationStatus(
@@ -202,6 +224,7 @@ const ProfilePage: React.FC = () => {
 
       try {
         const token = localStorage.getItem("access_token");
+
 
         const res = await fetch("http://localhost:8000/api/reports/my/", {
           headers: {
@@ -251,6 +274,7 @@ const ProfilePage: React.FC = () => {
             status: rawStatus,
             progressStatus,
             progress,
+            lgu_post: r.lgu_post || null,
             photo: r.photo_url || null,
             officer_note: r.officer_note || null,
             needs_info_note: r.needs_info_note || null,
@@ -358,62 +382,6 @@ const ProfilePage: React.FC = () => {
   const isVerifiedResident = verificationStatus === "verified";
 
 
-  const sendResearcherRequest = async () => {
-
-    if (verificationStatus !== "verified") {
-      alert("You must be a Verified Resident before requesting Researcher Access.");
-      return;
-    }
-
-
-    if (!researchPurpose.trim()) return alert("Please enter your purpose.");
-    if (!researchOrgSchool.trim()) return alert("Please enter your organization/school.");
-
-    setResearchLoading(true);
-
-    try {
-      const token = localStorage.getItem("access_token");
-
-      const formData = new FormData();
-      formData.append("purpose", researchPurpose.trim());
-      formData.append("orgSchool", researchOrgSchool.trim());
-      if (researchAttachment) formData.append("attachment", researchAttachment)
-
-      const res = await fetch("http://localhost:8000/api/researcher/request/", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        const msg =
-          data.detail ||
-          (typeof data === "object" ? JSON.stringify(data) : "Failed to send request");
-        alert(msg);
-        return;
-      }
-
-      // Success
-      setResearcherStatus("pending");
-      setResearcherReason("");
-      setIsRequested(true)
-
-      setShowResearcherModal(false);
-
-      setResearchPurpose("");
-      setResearchOrgSchool("");
-      setResearchAttachment(null);
-
-      alert("Researcher request sent!");
-    } catch (err) {
-      console.error("Request failed:", err);
-      alert("Request failed.");
-    }
-  };
-
   const submitVerificationRequest = async () => {
     if (!barangay.trim()) {
       alert("Please select your barangay.");
@@ -482,8 +450,17 @@ const ProfilePage: React.FC = () => {
       <div className="profile-card">
         <div className="profile-left">
           <div className="avatar-wrapper">
-            <img className="avatar" src={mockAvatarUrl} alt={`${displayName} avatar`} />
-            <div className="online-indicator" />
+            <div className="avatar-wrapper">
+              <div className="avatar-initials">
+                {displayName
+                  ?.split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </div>
+            </div>
+
           </div>
 
           <div className="profile-info">
@@ -586,46 +563,7 @@ const ProfilePage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Researcher Access */}
-                {userRole !== "Researcher" && (
-                  <div style={{ marginTop: 10 }}>
-                    {!isVerifiedResident && (
-                      <p className="verification-reason">
-                        You must be a <b>Verified Resident</b> before requesting Researcher Access.
-                      </p>
-                    )}
 
-                    {researcherStatus === "rejected" && researcherReason && (
-                      <p className="verification-reason">Reason: {researcherReason}</p>
-                    )}
-
-                    {(researcherStatus === "none" || researcherStatus === "rejected") && (
-                      <button
-                        className={`research-btn ${isRequested ? "requested" : ""}`}
-                        onClick={() => setShowResearcherModal(true)}
-                        disabled={isRequested || !isVerifiedResident}
-                        title={!isVerifiedResident ? "Verify your resident status first" : ""}
-                      >
-                        <GraduationCap size={16} className="cap-icon" />
-                        {isRequested ? "Request Sent" : "Request Researcher Access"}
-                      </button>
-                    )}
-
-                    {researcherStatus === "pending" && (
-                      <button className="research-btn requested" disabled>
-                        <GraduationCap size={16} className="cap-icon" />
-                        Researcher Request Pending
-                      </button>
-                    )}
-
-                    {researcherStatus === "approved" && (
-                      <button className="research-btn requested" disabled>
-                        <GraduationCap size={16} className="cap-icon" />
-                        Researcher Access Approved
-                      </button>
-                    )}
-                  </div>
-                )}
 
               </>
             )}
@@ -636,7 +574,7 @@ const ProfilePage: React.FC = () => {
         {!isStaff && (
           <div className="stats">
             <div className="stat-item">
-              <h1>{reports.length}</h1>
+              <h1>{activeReports.length}</h1>
               <span>Total Reports</span>
             </div>
             <div className="stat-divider" />
@@ -724,15 +662,27 @@ const ProfilePage: React.FC = () => {
             <h3 className="section-title">Active Reports</h3>
           </div>
 
-          <div className="report-list">
-            {loadingReports && <p>Loading report history...</p>}
-            {reportsError && <p style={{ color: "crimson" }}>{reportsError}</p>}
-            {!loadingReports && !reportsError && reports.length === 0 && <p>No reports yet.</p>}
+          <div className="report-container">
+            {loadingReports ? (
+              <div className="report-loading">Loading reports...</div>
+            ) : reportsError ? (
+              <div className="report-error">{reportsError}</div>
+            ) : reports.length === 0 ? (
+              <div className="report-empty">No reports yet.</div>
+            ) : (
+              activeReports.map((report, index) => (
+                <div key={report.id} className="report-row">
+                  <ReportCard report={report} onUpdate={updateReport} />
+                  {index !== activeReports.length - 1 && (
+                    <div className="report-divider" />
+                  )}
 
-            {reports.map((report) => (
-              <ReportCard key={report.id} report={report} onUpdate={updateReport} />
-            ))}
+                </div>
+              ))
+            )}
           </div>
+
+
         </>
       )}
 
@@ -742,8 +692,24 @@ const ProfilePage: React.FC = () => {
             <h3 className="section-title">Report History</h3>
           </div>
 
-          <div className="report-list">
+          <div className="report-container">
+            {loadingReports ? (
+              <div className="report-loading">Loading history...</div>
+            ) : archivedReports.length === 0 ? (
+              <div className="report-empty">No archived reports.</div>
+            ) : (
+              archivedReports.map((report, index) => (
+                <div key={report.id} className="report-row">
+                  <ReportCard report={report} onUpdate={updateReport} />
+                  {index !== archivedReports.length - 1 && (
+                    <div className="report-divider" />
+                  )}
+                </div>
+              ))
+            )}
           </div>
+
+
         </>
       )}
 

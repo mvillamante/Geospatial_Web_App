@@ -1,3 +1,6 @@
+
+import filipinoBadWords from "filipino-badwords-list";
+
 import { useEffect, useRef, useState } from "react";
 import PinLocationPicker from "./PinLocationPicker";
 import { isWithinCabuyao } from '../../../../src/utils/validateCabuyao';
@@ -6,33 +9,6 @@ interface ReportDrawerProps {
   open: boolean;
   onClose: () => void;
 }
-
-const PROFANITY_LIST = [
-  "puta",
-  "tanga",
-  "tangina",
-  "gago",
-  "ulol",
-  "bobo",
-  "fuck",
-  "shit",
-  "asshole",
-  "bitch",
-];
-
-function escapeRegex(s: string) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function findBadWords(text: string): string[] {
-  const lowered = text.toLowerCase();
-
-  return PROFANITY_LIST.filter((w) => {
-    const re = new RegExp(`\\b${escapeRegex(w)}\\b`, "i");
-    return re.test(lowered);
-  })
-}
-
 
 type ReverseGeocodeResponse = {
   success?: boolean;
@@ -99,7 +75,7 @@ function formatStreetBarangayCity(data: ReverseGeocodeResponse): string {
 
 export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
   const token = localStorage.getItem("access_token");
-
+  const profanityRegex = filipinoBadWords.regex;
   const [badWords, setBadWords] = useState<string[]>([]);
   const [showProfanityWarning, setShowProfanityWarning] = useState(false);
 
@@ -132,7 +108,6 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
 
   // Manual pin reverse-geocode
   async function reverseGeocodeAndSetDisplay(lat: number, lon: number) {
-    // cancel previous pin lookup
     if (pinAbortRef.current) pinAbortRef.current.abort();
     const controller = new AbortController();
     pinAbortRef.current = controller;
@@ -197,10 +172,8 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
 
         if (cancelled) return;
 
-        // store coords (auto)
         setCoords({ lat: latitude, lon: longitude, accuracy });
 
-        // Only update display if still in auto mode at the moment of resolve
         try {
           setLocation("Getting location...");
           const response = await fetch(
@@ -213,7 +186,6 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
           const formatted = formatStreetBarangayCity(data);
           if (cancelled) return;
 
-          // avoid overriding user pin
           setLocation((prev) => {
             if (locationMode === "pin") return prev;
             return formatted || "Location not available";
@@ -246,8 +218,7 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
       cancelled = true;
       controller.abort();
     };
-    // NOTE: we intentionally only depend on `open` so it runs once per open.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [open]);
 
   if (!open) return null;
@@ -264,18 +235,16 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
     setLocationMode("auto");
     setPinnedCoords(null);
 
-    // If we already have coords from geolocation, keep them.
-    // If not, the useEffect geolocation will still populate it.
   }
 
   function handlePinOnMap() {
     setLocationMode("pin");
 
-    const startLat = coords?.lat ?? 14.5995; // Manila fallback
+    const startLat = coords?.lat ?? 14.5995;
     const startLon = coords?.lon ?? 120.9842;
 
     setPinnedCoords({ lat: startLat, lon: startLon });
-    setCoords({ lat: startLat, lon: startLon }); // ensure submit uses pinned coords
+    setCoords({ lat: startLat, lon: startLon });
     reverseGeocodeAndSetDisplay(startLat, startLon);
   }
 
@@ -321,11 +290,6 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
       const lon = coords.lon.toFixed(6);
       form.append("latitude", lat);
       form.append("longitude", lon);
-      if (coords.accuracy != null && locationMode === "auto") {
-        form.append("accuracy_m", String(coords.accuracy));
-      }
-
-      // Optional: tell backend how location was chosen
       form.append("location_source", locationMode);
 
       // Photo
@@ -348,6 +312,10 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
     }
   }
 
+  function containsProfanity(text: string): boolean {
+    return profanityRegex.test(text.toLowerCase());
+  }
+
   return (
     <div className="drawer-overlay">
       <div className="drawer">
@@ -364,9 +332,15 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
             <option value="fire">Fire</option>
             <option value="flood">Flood</option>
             <option value="landslide">Landslide</option>
-            <option value="accident">Accident</option>
+            <option value="typhoon">Typhoon / Severe Weather</option>
+            <option value="earthquake">Earthquake</option>
+            <option value="vehicular_accident">Vehicular Accident</option>
+            <option value="chemical_gas_leak">Chemical / Gas Leak</option>
+            <option value="fallen_tree">Fallen Tree</option>
+            <option value="infrastructure_damage">Infrastructure Damage</option>
             <option value="others">Others</option>
           </select>
+
 
           {category === "others" && (
             <>
@@ -387,15 +361,15 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
               const value = e.target.value;
               setDescription(value);
 
-              const found = findBadWords(value);
-              setBadWords(found);
-              setShowProfanityWarning(found.length > 0);
+              const hasProfanity = containsProfanity(value);
+              setShowProfanityWarning(hasProfanity);
             }}
-            placeholder="Describe what you see (smoke, injuries, blocked roads, etc.)"
+            placeholder="Describe what you see..."
             rows={4}
           />
 
-          {showProfanityWarning && badWords.length > 0 && (
+
+          {showProfanityWarning && (
             <div className="profanity-warning">
               ⚠️ Please avoid inappropriate language. Your report will still be submitted, but it may be flagged for review.
             </div>

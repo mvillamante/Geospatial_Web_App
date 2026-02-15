@@ -4,7 +4,7 @@ import { Search } from 'lucide-react';
 
 export interface Report {
     id: number;
-    incident_type: "fire" | "flood" | "landslide" | "accident";
+    incident_type: "fire" | "flood" | "earthquake" | "typhoon" | "chemical / gas leak" | "fallen tree" | "infrastructure damage" | "landslide" | "vehicular accident" | "others";
     verified_critical_level: "low" | "moderate" | "high" | "critical";
     barangay: string;
     created_at: string;
@@ -24,12 +24,15 @@ interface AlertsPanelProps {
     onReport: () => void;
     onSelectReport?: (report: Report) => void;
     onBarangaySearch?: (barangay: string, severity: string | null) => void;
+    initialOpenIncidentId?: number;
 }
 
-export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch }: AlertsPanelProps) {
+export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch, initialOpenIncidentId }: AlertsPanelProps) {
     const [filtersOpen, setFiltersOpen] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+    const [highlightedId, setHighlightedId] = useState<number | null>(null);
 
     const chipClass = (active: boolean) => `chip ${active ? "chip-active" : ""}`;
 
@@ -44,12 +47,20 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
 
     const normalizeIncident = (v: any): Report["incident_type"] => {
         const s = String(v ?? "").toLowerCase();
+
         if (s.includes("fire")) return "fire";
         if (s.includes("flood")) return "flood";
         if (s.includes("landslide")) return "landslide";
-        if (s.includes("accident")) return "accident";
-        return "accident";
+        if (s.includes("chemical") || s.includes("gas")) return "chemical / gas leak";
+        if (s.includes("typhoon") || s.includes("storm")) return "typhoon";
+        if (s.includes("earthquake")) return "earthquake";
+        if (s.includes("fallen tree") || s.includes("tree")) return "fallen tree";
+        if (s.includes("infrastructure") || s.includes("damage")) return "infrastructure damage";
+        if (s.includes("vehicular") || s.includes("accident")) return "vehicular accident";
+
+        return "others";
     };
+
 
 
     const severityPriority: Record<Report["verified_critical_level"], number> = {
@@ -95,7 +106,9 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
 
                 return {
                     id: r.id,
-                    incident_type: normalizeIncident(r.category_display ?? r.category),
+                    incident_type: r.category === "others"
+                        ? r.other_category || "others"
+                        : normalizeIncident(r.category_display ?? r.category),
                     verified_critical_level: r.verified_critical_level ?? "low",
                     barangay: extractBarangay(r.location_display),
                     created_at: r.created_at,
@@ -107,7 +120,9 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
                     // to check
                     status: normalizeUiStatus(r.status),
 
-                    lgu_post: r.officer_note ? { advisory: r.officer_note } : undefined,
+                    lgu_post: r.lgu_post ?? null,
+
+
                     lastUpdatedAt: r.lastUpdatedAt ?? r.createdAt,
                 };
             });
@@ -126,6 +141,7 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
             setIsLoading(false);
         }
     };
+
 
     useEffect(() => {
         fetchReports();
@@ -172,6 +188,39 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
         if (sortNewest) return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     });
+
+    useEffect(() => {
+        if (!reports.length) return;
+        if (!initialOpenIncidentId) return;
+
+        const match = reports.find(r => r.id === initialOpenIncidentId);
+        if (!match) return;
+
+        onSelectReport?.(match);
+
+        setHighlightedId(match.id);
+
+        requestAnimationFrame(() => {
+            const el = document.getElementById(`report-${match.id}`);
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        })
+
+        const timeout = setTimeout(() => {
+            setHighlightedId(null);
+        }, 2000);
+
+        setSelectedCategory("all");
+        setSelectedSeverity("all");
+        setSelectedStatus("all");
+        setSelectedBarangay("");
+
+        return () => clearTimeout(timeout);
+
+
+
+    }, [sortedReports, initialOpenIncidentId]);
 
     const timeAgo = (iso: string) => {
         const diffMs = Date.now() - new Date(iso).getTime();
@@ -285,19 +334,35 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
 
                 <div className={`filters-collapse ${filtersOpen ? "open" : ""}`}>
                     {/* CHIPS ROW */}
-                    <div className="chip-row">
+                    {/* <div className="chip-row">
                         <span className="chip-label">Category</span>
-                        {["all", "fire", "flood", "landslide", "accident"].map((c) => (
+                        {[
+                            "all",
+                            "fire",
+                            "flood",
+                            "landslide",
+                            "typhoon",
+                            "earthquake",
+                            "vehicular_accident",
+                            "chemical_gas_leak",
+                            "fallen_tree",
+                            "infrastructure_damage",
+                        ].map((c) => (
                             <button
                                 key={c}
                                 type="button"
                                 className={chipClass(selectedCategory === c)}
                                 onClick={() => setSelectedCategory(c)}
                             >
-                                {c === "all" ? "All" : c[0].toUpperCase() + c.slice(1)}
+                                {c === "all"
+                                    ? "All"
+                                    : c
+                                        .replace(/_/g, " ")
+                                        .replace(/\b\w/g, (l) => l.toUpperCase())}
                             </button>
                         ))}
-                    </div>
+
+                    </div> */}
 
                     <div className="chip-row">
                         <span className="chip-label">Severity</span>
@@ -393,8 +458,12 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
                     <ul className="report-list">
                         {sortedReports.map((report) => (
                             <li
+                                id={`report-${report.id}`}
                                 key={report.id}
-                                className={`report-card ${report.verified_critical_level}`}
+                                className={`report-card-wrapper 
+                                    ${report.verified_critical_level}
+                                    ${highlightedId === report.id ? "highlighted" : ""}
+                                `}
                                 onClick={() => onSelectReport?.(report)}
                             >
                                 <div className="report-header">
@@ -427,13 +496,41 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
                                 </div>
 
 
-                                {(report.status ?? "pending") === "resolved" && report.lgu_post && (
+                                {report.status === "resolved" && report.lgu_post && (
                                     <div className="lgu-preview">
-                                        <h5>LGU Update</h5>
-                                        {renderLguPost(report.lgu_post?.advisory || "")}
-                                    </div>
+                                        <div className="lgu-preview-header">
+                                            🏛 LGU Official Update
+                                        </div>
 
+                                        {report.lgu_post.what_happened && (
+                                            <div className="lgu-preview-section">
+                                                <div className="lgu-preview-title">What Happened</div>
+                                                <div className="lgu-preview-body">
+                                                    {report.lgu_post.what_happened}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {report.lgu_post.action_taken && (
+                                            <div className="lgu-preview-section">
+                                                <div className="lgu-preview-title">Action Taken</div>
+                                                <div className="lgu-preview-body">
+                                                    {report.lgu_post.action_taken}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {report.lgu_post.advisory && (
+                                            <div className="lgu-preview-section">
+                                                <div className="lgu-preview-title">Advisory to Citizens</div>
+                                                <div className="lgu-preview-body">
+                                                    {report.lgu_post.advisory}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
+
                             </li>
                         ))}
                     </ul>

@@ -303,12 +303,13 @@
 }
 
 .feed-page .modal {
-  width: min(740px, 100%);
-  background: var(--white-bg);
-  border-radius: 18px;
-  border: 1px solid var(--light-gray-border);
-  padding: 14px;
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
+    position: relative;
+    width: min(740px, 100%);
+    background: var(--white-bg);
+    border-radius: 18px;
+    border: 1px solid var(--light-gray-border);
+    padding: 14px;
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
 }
 
 .feed-page .modal-top {
@@ -329,7 +330,7 @@
 }
 
 .feed-page .modal-close:hover {
-  background: #f8fafc;
+  background: #e2e8f0;
 }
 
 .feed-page .type-badge {
@@ -361,13 +362,18 @@
   color: #0f172a;
 }
 
+.feed-page .modal-header .avatar {
+  font-size: 16px;
+  margin-top: 15px;
+}
+
 .feed-page .modal-meta {
   display: flex;
   align-items: center;
   gap: 6px;
   color: #64748b;
   font-size: 12px;
-  margin-top: 6px;
+  margin-top: 12px;
   flex-wrap: wrap;
 }
 

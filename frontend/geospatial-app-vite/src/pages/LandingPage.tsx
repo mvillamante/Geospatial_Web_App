@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { getUserRoleAndDisplayName } from "../libr/auth";
 import AuthModal from "../components/ui/Modals/AuthModal";
 import LeafletMap from "../components/ui/LeafletMap";
+import ResearcherRequestModal from "../components/ui/Modals/ResearcherRequestModal";
 
 type LandingStats = {
   activeHazards: number;
@@ -19,7 +20,7 @@ const LandingPage: React.FC = () => {
   const { user, refreshUser } = useAuth(); // Get current user from context
 
   const [loading, setLoading] = useState(true);
-  const [modalType, setModalType] = useState<"login" | "signup" | "forgotPassword" | "verifyOtp" | null>(null);
+  const [modalType, setModalType] = useState<"login" | "signup" | "forgotPassword" | "verifyOtp" | "researcherRequest" | null>(null);
   const [activeSection, setActiveSection] = useState("home");
 
   const closeModal = () => setModalType(null);
@@ -91,11 +92,16 @@ const LandingPage: React.FC = () => {
       className={`landing-page ${modalType ? "modal-open" : ""}`}
     >
       {modalType && (
-        <AuthModal
-          type={modalType}
-          onClose={closeModal}
-          switchModal={switchModal}
-        />
+        ["login", "signup", "forgotPassword", "verifyOtp"].includes(modalType) && (
+          <AuthModal
+            type={modalType}
+            onClose={closeModal}
+            switchModal={switchModal}
+          />
+        ))}
+
+      {modalType === "researcherRequest" && (
+        <ResearcherRequestModal onClose={closeModal} />
       )}
 
       {/* Navigation */}
@@ -242,6 +248,13 @@ const LandingPage: React.FC = () => {
                 time-series predictions. Analyze trends, patterns, and correlations to improve
                 disaster response strategies.
               </p>
+
+              <button
+                className="btn btn-outline researcher-btn"
+                onClick={() => setModalType("researcherRequest")}
+              >
+                Request Researcher Access
+              </button>
             </div>
             <div className="feature-card">
               <div className="feature-icon">

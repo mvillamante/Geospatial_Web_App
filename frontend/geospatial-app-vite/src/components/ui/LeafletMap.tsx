@@ -130,14 +130,14 @@ interface LeafletMapProps {
   onSelectEvacuationCenter?: (center: EvacuationCenterData) => void;
 }
 
-export default function LeafletMap({ 
-  height = "600px", 
+export default function LeafletMap({
+  height = "600px",
   width = "100%",
-  mapView = "interactive", 
-  mapType = "basic", 
-  searchedBarangay = "", 
-  searchedSeverity = null, 
-  selectedReport = null, 
+  mapView = "interactive",
+  mapType = "basic",
+  searchedBarangay = "",
+  searchedSeverity = null,
+  selectedReport = null,
   reportClickTimestamp = null,
   activeLayers = [],
   ndviOpacity = 0.8,
@@ -158,7 +158,7 @@ export default function LeafletMap({
   const barangayDataRef = useRef<BarangayData[]>([]);
   const barangayBoundariesLayerRef = useRef<L.LayerGroup | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
-  
+
   // Layer refs for toggle functionality
   const faultLinesLayerRef = useRef<L.LayerGroup | null>(null);
   const floodZonesLayerRef = useRef<L.LayerGroup | null>(null);
@@ -168,7 +168,7 @@ export default function LeafletMap({
   const trafficLayerRef = useRef<L.Layer | null>(null);
   const ndviLayerRef = useRef<L.LayerGroup | null>(null);
   const verifiedReportsLayerRef = useRef<L.LayerGroup | null>(null);
-  
+
 
   // Initialize map
   useEffect(() => {
@@ -247,45 +247,20 @@ export default function LeafletMap({
   // "Go to My Location" button
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || mapView !== "interactive") return;
+    if (!map) return;
+    if (!selectedReport) return;
 
-    const locateControl = new L.Control({ position: "topleft" });
+    const marker = reportMarkersMap.current.get(selectedReport.id);
 
-    locateControl.onAdd = function (_map: L.Map) {
-      const div = L.DomUtil.create("div", "leaflet-bar leaflet-control leaflet-control-custom");
-      div.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-          <path d="M12 8a4 4 0 100 8 4 4 0 000-8zm0-5a1 1 0 011 1v2.07a8.002 8.002 0 015.905 5.905H21a1 1 0 110 2h-2.07a8.002 8.002 0 01-5.905 5.905V21a1 1 0 11-2 0v-2.07a8.002 8.002 0 01-5.905-5.905H3a1 1 0 110-2h2.07a8.002 8.002 0 015.905-5.905V4a1 1 0 011-1z"/>
-        </svg>
-      `;
-      div.title = "Go to My Location";
+    if (marker) {
+      const latLng = marker.getLatLng();
+      map.flyTo(latLng, 16, { duration: 0.5 });
+      marker.openPopup();
+      marker.setZIndexOffset(1000);
+    }
 
-      div.style.cursor = "pointer";
-      div.style.fontSize = "20px";
-      div.style.padding = "4px 8px";
-      div.style.background = "white";
-      div.style.border = "1px solid #ccc";
-      div.style.borderRadius = "4px";
-      div.style.textAlign = "center";
+  }, [selectedReport]);
 
-      div.onclick = () => {
-        if (markerRef.current) {
-          map.flyTo(markerRef.current.getLatLng(), 15, { duration: 1 });
-          markerRef.current.openPopup?.();
-        } else {
-          alert("User location not available yet.");
-        }
-      };
-
-      return div;
-    };
-
-    locateControl.addTo(map);
-
-    return () => {
-      locateControl.remove();
-    };
-  }, [mapView]);
 
   // Load data
   useEffect(() => {
@@ -430,11 +405,11 @@ export default function LeafletMap({
 
     if (matchedBarangay) {
       const { name, lat, lon } = matchedBarangay;
-      
+
       // Use severity from reports if available, otherwise use default
       const severity = (searchedSeverity || "low") as keyof typeof severityColors;
       const colors = severityColors[severity] || severityColors.low;
-      
+
       // Create a highlighted search marker with severity-based colors
       const searchIcon = L.divIcon({
         html: `
@@ -533,15 +508,30 @@ export default function LeafletMap({
 
     const showEvacuationCenters = activeLayers.includes("Evacuation Centers");
 
-    // Add evacuation centers if layer is active
-    if (showEvacuationCenters) {
-      evacuationCentersLayerRef.current = createEvacuationCentersLayer(map, {
-        showOnMap: true,
-        showPopupOnMap,
-        onSelectCenter: onSelectEvacuationCenter,
-      });
+    if (!showEvacuationCenters) {
+      if (evacuationCentersLayerRef.current) {
+        evacuationCentersLayerRef.current.remove();
+        evacuationCentersLayerRef.current = null;
+      }
+      return;
     }
-  }, [activeLayers]);
+
+    if (evacuationCentersLayerRef.current) return;
+
+    const loadLayer = async () => {
+      evacuationCentersLayerRef.current =
+        await createEvacuationCentersLayer(map, {
+          showOnMap: true,
+          showPopupOnMap,
+          onSelectCenter: onSelectEvacuationCenter,
+        });
+    };
+
+    loadLayer();
+
+  }, [activeLayers, showPopupOnMap, onSelectEvacuationCenter]);
+
+
 
   // Handle Roads layer toggle
   useEffect(() => {
@@ -610,23 +600,23 @@ export default function LeafletMap({
     if (!map) return;
 
     const showVerifiedReports = activeLayers.includes("Verified Reports");
-    console.log("[VerifiedReports] Active layer?", showVerifiedReports);
 
-    // Remove previous layer
-    if (verifiedReportsLayerRef.current) {
-      verifiedReportsLayerRef.current.clearLayers(); // remove all markers
+    if (!showVerifiedReports) {
+      if (verifiedReportsLayerRef.current) {
+        verifiedReportsLayerRef.current.clearLayers();
+      }
+      return;
     }
 
-    // Map of report ID → marker
-    if (!reportMarkersMap.current) reportMarkersMap.current = new Map();
-
-    reportMarkersMap.current.clear();
-
-    if (!showVerifiedReports) return;
-
     const token = localStorage.getItem("access_token");
-    const layerGroup = L.layerGroup().addTo(map);
-    verifiedReportsLayerRef.current = layerGroup;
+
+    if (!verifiedReportsLayerRef.current) {
+      verifiedReportsLayerRef.current = L.layerGroup().addTo(map);
+    }
+
+    const layerGroup = verifiedReportsLayerRef.current;
+    layerGroup.clearLayers();
+    reportMarkersMap.current.clear();
 
     fetch("/api/incident-reports/verified/", {
       headers: {
@@ -634,107 +624,72 @@ export default function LeafletMap({
         ...(token && { Authorization: `Bearer ${token}` }),
       },
     })
-      .then(async (res) => {
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.detail || `HTTP ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
+      .then(res => res.json())
+      .then(data => {
         const reports = data.results || [];
-        console.log("[VerifiedReports] Number of reports:", reports.length);
-        //console.log("[VerifiedReports] List:", reports); @here
 
-        reports.forEach((r: any, idx: number) => {
-          let lat = r.lat ?? r.latitude;
-          let lng = r.lng ?? r.longitude;
+        reports.forEach((r: any) => {
 
-          // fallback to barangay center if missing
-          if ((lat === undefined || lng === undefined) && r.location_display) {
-            const barangay = barangayDataRef.current.find(b => b.name === r.location_display);
-            if (barangay) {
-              lat = barangay.lat;
-              lng = barangay.lon;
-            }
-          }
-
-          if (lat == null || lng == null) return; // skip invalid
+          const lat = r.lat ?? r.latitude;
+          const lng = r.lng ?? r.longitude;
+          if (lat == null || lng == null) return;
 
           const severity = (r.verified_critical_level || "low").toLowerCase();
-          const colors = severityColors[severity as keyof typeof severityColors] ?? severityColors.low;
+          const colors =
+            severityColors[severity as keyof typeof severityColors] ??
+            severityColors.low;
 
           const categoryIcons: Record<string, string> = {
             fire: "🔥",
             flood: "🌊",
             landslide: "⛰️",
-            accident: "⚠️",
+            vehicular_accident: "🚗",
+            chemical_gas_leak: "☣️",
           };
-          const icon = categoryIcons[r.category_display] || "📍";
+
+          const iconEmoji = categoryIcons[r.category] || "📍";
 
           const reportIcon = L.divIcon({
             html: `
-              <div class="verified-report-marker">
-                <div class="pulse" style="background: ${colors.secondary}40;"></div>
-                <div class="pin" style="background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});">
-                  <span>${icon}</span>
-                </div>
-              </div>
-            `,
+    <div class="verified-report-marker">
+      <div class="pulse" style="background:${colors.secondary}40;"></div>
+      <div class="pin"
+           style="background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});">
+        <span>${iconEmoji}</span>
+      </div>
+    </div>
+  `,
             className: "",
             iconSize: [44, 44],
             iconAnchor: [22, 44],
           });
 
+
           const marker = L.marker([lat, lng], { icon: reportIcon })
             .addTo(layerGroup)
             .bindPopup(`
-              <div style="text-align:center; min-width:220px;">
-                <div style="font-size:26px;">${icon}</div>
-                <h3 style="margin:4px 0; color:${colors.primary}; font-size:15px;">
-                  ${(r.title || r.category_display || "")
-                    .toString()
-                    .charAt(0).toUpperCase() + (r.title || r.category_display || "").toString().slice(1)}
-                </h3>
-                <p style="margin:0; font-size:12px; color:#555;">
-                  ${r.location_display || "Cabuyao, Laguna"}
-                </p>
-                <span style="
-                  display:inline-block;
-                  margin-top:8px;
-                  padding:4px 14px;
-                  border-radius:20px;
-                  background:${colors.primary};
-                  color:white;
-                  font-size:11px;
-                  font-weight:bold;
-                ">
-                  ${colors.text} RISK
-                </span>
-              </div>
-            `);
+      <div class="verified-popup">
+        <div class="popup-icon">${iconEmoji}</div>
+        <h3>${r.category_display || "Incident"}</h3>
+        <p>${r.location_display || "Cabuyao, Laguna"}</p>
+        <span class="popup-pill" style="background:${colors.primary}">
+          ${colors.text} RISK
+        </span>
+      </div>
+    `);
 
-          // Save marker for later click highlight
+    
+
           reportMarkersMap.current.set(r.id, marker);
         });
 
-        // If a report is selected, fly to it and open popup
-        if (selectedReport) {
-          const marker = reportMarkersMap.current.get(selectedReport.id);
-          if (marker) {
-            const latLng = marker.getLatLng();
-            map.flyTo(latLng, 16, { duration: 0.5 });
-            marker.openPopup();
-            marker.setZIndexOffset(1000); // bring to front
-          } else {
-            console.warn("[VerifiedReports] Selected report marker not found:", selectedReport.id);
-          }
-        }
       })
-      .catch((err) => {
-        console.error("Failed to load verified reports layer:", err.message);
+      .catch(err => {
+        console.error("Failed to load verified reports:", err);
       });
-  }, [activeLayers, selectedReport]);
+
+  }, [activeLayers]);
+
 
 
   return (

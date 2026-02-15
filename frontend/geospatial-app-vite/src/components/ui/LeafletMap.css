@@ -228,7 +228,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  animation: verified-pulse 2s infinite;
+  animation: verifiedPulse 2s ease-out infinite;
 }
 
 .verified-report-marker .pin {
@@ -241,54 +241,81 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
   color: white;
-  z-index: 1;
+  font-size: 16px;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
-@keyframes verified-pulse {
-  0% { transform: scale(0.5); opacity: 0.6; }
-  50% { transform: scale(1); opacity: 0.3; }
-  100% { transform: scale(0.5); opacity: 0.6; }
+.verified-report-marker .pin span {
+  transform: rotate(0deg);
+}
+
+@keyframes verifiedPulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+
+/* =============================================
+   Verified Popup
+============================================= */
+.leaflet-popup-content {
+  margin: 0;
+  padding: 14px;
+  font-family: Inter, sans-serif;
+}
+
+.verified-popup {
+  text-align: center;
+}
+
+.verified-popup h3 {
+  margin: 6px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.verified-popup p {
+  margin: 4px 0 10px 0;
+  font-size: 13px;
+  color: #555;
+}
+
+.popup-icon {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+
+.popup-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: 0.5px;
 }
 
 /* =============================================
-   Selected / Highlighted Report Marker Styles
-   ============================================= */
-.report-marker-container {
-  position: relative;
-  width: 50px;
-  height: 50px;
+   Leaflet UI Polish
+============================================= */
+.leaflet-control-zoom {
+  border-radius: 10px !important;
+  overflow: hidden;
 }
 
-.report-marker-pulse {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  animation: report-pulse 1.5s infinite;
-  z-index: 0;
+.leaflet-control-zoom a {
+  background: white;
+  font-weight: bold;
 }
 
-.report-marker-pin {
-  position: absolute;
-  top: 13px;
-  left: 13px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  color: white;
-  z-index: 1;
-}
-
-@keyframes report-pulse {
-  0% { transform: scale(0.5); opacity: 0.7; }
-  70% { transform: scale(1); opacity: 0; }
-  100% { transform: scale(1); opacity: 0; }
+.leaflet-control-zoom a:hover {
+  background: #f3f4f6;
 }

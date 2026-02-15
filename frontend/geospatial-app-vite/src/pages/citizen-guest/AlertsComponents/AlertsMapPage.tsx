@@ -1,5 +1,7 @@
 // Current Alerts and Map Page (Citizen & Guest)
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
+
 import "./AlertsMapPage.css";
 import LeafletMap from "../../../components/ui/LeafletMap";
 import AlertsPanel from "./AlertsPanel";
@@ -12,12 +14,17 @@ interface SelectedReportWithTimestamp {
 }
 
 const AlertsMapPage: React.FC = () => {
+  const location = useLocation();
+  const openIncidentId = location.state?.openIncidentId;
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [panelCollapsed, setPanelCollapsed] = useState(true);
 
   const [searchedBarangay, setSearchedBarangay] = useState("");
   const [searchedSeverity, setSearchedSeverity] = useState<string | null>(null);
   const [selectedReportData, setSelectedReportData] = useState<SelectedReportWithTimestamp | null>(null);
+
+  const activeLayers = useMemo(() => ["Verified Reports"], []);
 
   const handleBarangaySearch = (barangay: string, severity: string | null) => {
     setSearchedBarangay(barangay);
@@ -45,7 +52,7 @@ const AlertsMapPage: React.FC = () => {
             searchedSeverity={searchedSeverity}
             selectedReport={selectedReportData?.report || null}
             reportClickTimestamp={selectedReportData?.clickedAt || null}
-            activeLayers={["Verified Reports"]}
+            activeLayers={activeLayers}
           />
         </div>
 
@@ -77,8 +84,11 @@ const AlertsMapPage: React.FC = () => {
             onSelectReport={(r) => {
               setPanelCollapsed(false);
               handleSelectReport(r);
+              setSelectedReport(r);
             }}
+            initialOpenIncidentId={openIncidentId}
           />
+
         </div>
 
         {/* Floating Controls */}

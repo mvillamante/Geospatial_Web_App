@@ -9,7 +9,7 @@ type NotificationType = "official" | "incident" | "report";
 type Severity = "low" | "moderate" | "high" | "critical";
 
 type IncidentEvent =
-    | "verified_created"
+    | "verified"
     | "severity_changed"
     | "resolved";
 
@@ -80,7 +80,11 @@ const NotificationPage: React.FC = () => {
                 });
                 const data = await res.json();
 
-                setNotifications(data.map((n: any) => ({
+                const todayOnly = data.filter((n: any) =>
+                    isToday(n.created_at)
+                )
+
+                setNotifications(todayOnly.map((n: any) => ({
                     id: String(n.id),
                     type: n.type,
                     title: n.title,
@@ -163,7 +167,13 @@ const NotificationPage: React.FC = () => {
             navigate("/main/citizen/community-feed", { state: { openPostId: n.cmsGuideId } });
             return;
         }
-    }
+        if (n.type === "incident" && n.incidentId) {
+            navigate("/main/citizen/alerts-map", {
+                state: { openIncidentId: n.incidentId }
+            })
+        }
+    };
+
 
     const markAllAsRead = async () => {
         setNotifications((prev) => prev.map((x) => ({ ...x, isUnread: false })));
@@ -199,6 +209,18 @@ const NotificationPage: React.FC = () => {
 
         };
     }
+
+    const isToday = (iso?: string) => {
+        if (!iso) return false;
+        const d = new Date(iso);
+        const now = new Date();
+
+        return (
+            d.getFullYear() === now.getFullYear() &&
+            d.getMonth() === now.getMonth() &&
+            d.getDate() === now.getDate()
+        );
+    };
 
     return (
         <div className="notif-page">
@@ -320,33 +342,64 @@ const NotificationPage: React.FC = () => {
 };
 
 function formatIncidentLine(n: NotificationItem) {
-    const sev = (n.severityTo ?? n.severity)?.toUpperCase();
-    const barangay = n.barangay ? ` • Barangay ${n.barangay}` : "";
-    const cat = n.category ? `${n.category}` : n.title;
+    const capitalize = (s?: string) =>
+        s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
 
-    if (n.incidentEvent === "severity_changed" && n.severityFrom && n.severityTo) {
+    const extractBarangayCity = (full?: string) => {
+        if (!full) return "";
+        const parts = full.split(",").map(p => p.trim());
+
+        if (parts.length >= 2) {
+            const lastTwo = parts.slice(-2);
+            return lastTwo.join(", ");
+        }
+
+        return full;
+    };
+
+    const barangay = n.barangay ? ` • ${extractBarangayCity(n.barangay)}` : "";
+
+    const cat = n.category ?? n.title;
+
+    if (n.incidentEvent === "severity_changed") {
+        const from = capitalize(n.severityFrom);
+        const to = capitalize(n.severityTo ?? n.severity);
+
         return {
-            header: `Severity changed: ${n.severityFrom.toUpperCase()} → ${n.severityTo.toUpperCase()}`,
-            sub: `${cat}${barangay}`,
-            pillSeverity: n.severityTo,
+            header: "Verified severity changed",
+            sub: `${cat} (${from} → ${to})${barangay}`,
+            pillSeverity: n.severityTo ?? n.severity ?? "high",
         };
     }
 
     if (n.incidentEvent === "resolved") {
+        const category = capitalize(n.category ?? "Hazard");
+        const severity = capitalize(n.severity ?? "High");
+
         return {
-            header: `Resolved: ${cat}`,
-            sub: `${sev ? `${sev}` : ""}${barangay}`.trim(),
+            header: `${category} has been resolved`,
+            sub: `${severity}${barangay}`,
+            pillSeverity: n.severity ?? "high",
+        };
+    }
+
+
+
+    if (n.incidentEvent === "verified") {
+        return {
+            header: "Verified incident",
+            sub: `${cat} (${capitalize(n.severity)})${barangay}`,
             pillSeverity: n.severity ?? "high",
         };
     }
 
     return {
-        header: `Verified ${cat} — ${sev ?? ""}`.trim(),
-        sub: barangay ? barangay.replace(" • ", "") : "",
+        header: n.title,
+        sub: n.body,
         pillSeverity: n.severity ?? "high",
     };
-
 }
+
 
 function NotificationCard({ n, onOpen }: { n: NotificationItem; onOpen?: () => void }) {
     const isIncident = n.type === "incident";

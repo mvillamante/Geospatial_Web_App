@@ -14,7 +14,6 @@ export default function ReportCard({ report, onUpdate }) {
 
     return (
         <>
-            { report.status !== "archived" && (
                 <div className="report-card">
                     <div>
                         <h4>{report.title}</h4>
@@ -35,7 +34,7 @@ export default function ReportCard({ report, onUpdate }) {
                         <button className="dots-btn" onClick={() => setOpen(true)}>...</button>
                     </div>
                 </div>
-            )}
+            
 
             {open && <ReportModal report={report} onClose={() => setOpen(false)} onUpdate={onUpdate} />}
         </>

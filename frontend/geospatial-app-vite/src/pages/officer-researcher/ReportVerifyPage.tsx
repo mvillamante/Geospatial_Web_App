@@ -15,7 +15,18 @@ import {
 } from "lucide-react";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
 
-type ReportCategory = "Fire" | "Flood" | "Landslide" | "Accident" | "Others";
+type ReportCategory =
+  | "fire"
+  | "flood"
+  | "landslide"
+  | "typhoon"
+  | "earthquake"
+  | "vehicular_accident"
+  | "chemical_gas_leak"
+  | "fallen_tree"
+  | "infrastructure_damage"
+  | "others";
+
 type ReportStatus = "pending" | "in_progress" | "resolved" | "needs_info" | "rejected";
 type RiskLevel = "low" | "moderate" | "high" | "critical";
 
@@ -87,6 +98,11 @@ const ReportVerifyPage: React.FC = () => {
     return "low";
   };
 
+  const [whatHappened, setWhatHappened] = useState("");
+  const [actionTaken, setActionTaken] = useState("");
+  const [advisory, setAdvisory] = useState("");
+
+
   const [scopeFilter, setScopeFilter] = useState<"all" | "mine" | "unassigned">("all");
 
   const { displayName, currentUserId } = getUserRoleAndDisplayName();
@@ -113,7 +129,6 @@ const ReportVerifyPage: React.FC = () => {
   // modals
   const [modal, setModal] = useState<ModalType>("none");
   const [resolveTitle, setResolveTitle] = useState("");
-  const [resolveMessage, setResolveMessage] = useState("");
   const [rejectReason, setRejectReason] = useState("");
 
   const selected = useMemo(
@@ -379,25 +394,27 @@ const ReportVerifyPage: React.FC = () => {
 
     // prefill a structured post template
     setResolveTitle(`Update: ${selected.title}`);
-    setResolveMessage(
-      `Status: RESOLVED\n\nWhat happened:\n- \n\nAction taken:\n- \n\nAdvisory to citizens:\n- \n`
-    );
     setModal("resolve");
   };
 
   const confirmResolve = async () => {
     if (!selected) return;
 
-    const finalPost = `${resolveTitle}\n\n${resolveMessage}`.trim();
-    if (finalPost.length < 10) {
-      alert("Please write a short resolution update for citizens.");
+    if (!whatHappened.trim() || !actionTaken.trim()) {
+      alert("Please fill in What Happened and Action Taken.");
       return;
     }
 
     try {
       const updated = await patchReport(selected.id, {
         status: "resolved",
-        officerNote: finalPost,
+        lgu_post: {
+          what_happened: whatHappened.trim(),
+          action_taken: actionTaken.trim(),
+          advisory: advisory.trim() || null,
+          published_at: new Date().toISOString(),
+          officer_id: myOfficerId,
+        }
       });
 
       setReports(prev =>
@@ -406,9 +423,8 @@ const ReportVerifyPage: React.FC = () => {
             ? {
               ...r,
               ...updated,
-              status: (updated.status ?? "resolved") as ReportStatus,
-              officerNote: updated.officerNote ?? finalPost,
-              rejectionReason: updated.rejectionReason ?? undefined,
+              status: "resolved",
+              lgu_post: updated.lgu_post,
               lastUpdatedAt: updated.lastUpdatedAt ?? r.lastUpdatedAt,
             }
             : r
@@ -416,12 +432,16 @@ const ReportVerifyPage: React.FC = () => {
       );
 
       setModal("none");
-      setResolveTitle("");
-      setResolveMessage("");
+      setWhatHappened("");
+      setActionTaken("");
+      setAdvisory("");
+
     } catch (e: any) {
       alert(e.message);
     }
   };
+
+
 
   const openRejectModal = () => {
     if (!selected) return;
@@ -545,14 +565,23 @@ const ReportVerifyPage: React.FC = () => {
             </div>
 
             <div className="queue-filter">
-              <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as any)}>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value as any)}
+              >
                 <option value="all">All Categories</option>
-                <option value="Fire">Fire</option>
-                <option value="Flood">Flood</option>
-                <option value="Landslide">Landslide</option>
-                <option value="Accident">Accident</option>
+                <option value="fire">Fire</option>
+                <option value="flood">Flood</option>
+                <option value="landslide">Landslide</option>
+                <option value="typhoon">Typhoon</option>
+                <option value="earthquake">Earthquake</option>
+                <option value="vehicular_accident">Vehicular Accident</option>
+                <option value="chemical_gas_leak">Chemical / Gas Leak</option>
+                <option value="fallen_tree">Fallen Tree</option>
+                <option value="infrastructure_damage">Infrastructure Damage</option>
               </select>
             </div>
+
 
             <div className="queue-filter">
               <select value={sortMode} onChange={(e) => setSortMode(e.target.value as any)}>
@@ -829,7 +858,7 @@ const ReportVerifyPage: React.FC = () => {
               {/* Needs Info Conversation Container */}
               {selected.needs_info_note && !needsInfoMode && (
                 <div className="needsinfo-container">
-                  
+
                   {/* Officer Note */}
                   {selected.needs_info_note && (
                     <div className="detail-block">
@@ -874,7 +903,7 @@ const ReportVerifyPage: React.FC = () => {
                     Update / Message to Citizen {selected.status === "needs_info" ? "(Needs Info Sent)" : ""}
                   </div>
 
-                  {/* Officer note textarea */} 
+                  {/* Officer note textarea */}
                   <textarea
                     className="note-area"
                     value={selected.needs_info_note ?? ""}
@@ -912,12 +941,12 @@ const ReportVerifyPage: React.FC = () => {
                               prev.map(r =>
                                 r.id === selected.id
                                   ? {
-                                      ...r,
-                                      ...updated,
-                                      status: "needs_info",
-                                      needs_info_note: updated.needs_info_note ?? selected.needs_info_note,
-                                      lastUpdatedAt: updated.lastUpdatedAt ?? r.lastUpdatedAt,
-                                    }
+                                    ...r,
+                                    ...updated,
+                                    status: "needs_info",
+                                    needs_info_note: updated.needs_info_note ?? selected.needs_info_note,
+                                    lastUpdatedAt: updated.lastUpdatedAt ?? r.lastUpdatedAt,
+                                  }
                                   : r
                               )
                             );
@@ -957,20 +986,30 @@ const ReportVerifyPage: React.FC = () => {
                     This will be shown on the citizen side as the final resolution post.
                   </div>
 
-                  <label className="modal-label">Post title</label>
-                  <input
-                    className="modal-input"
-                    value={resolveTitle}
-                    onChange={(e) => setResolveTitle(e.target.value)}
-                    placeholder="e.g., Update: River Overflow near bridge"
-                  />
-
-                  <label className="modal-label">Post content</label>
+                  <label className="modal-label">What Happened</label>
                   <textarea
                     className="modal-textarea"
-                    value={resolveMessage}
-                    onChange={(e) => setResolveMessage(e.target.value)}
+                    value={whatHappened}
+                    onChange={(e) => setWhatHappened(e.target.value)}
+                    placeholder="Describe what happened..."
                   />
+
+                  <label className="modal-label">Action Taken</label>
+                  <textarea
+                    className="modal-textarea"
+                    value={actionTaken}
+                    onChange={(e) => setActionTaken(e.target.value)}
+                    placeholder="Describe actions taken..."
+                  />
+
+                  <label className="modal-label">Advisory to Citizens</label>
+                  <textarea
+                    className="modal-textarea"
+                    value={advisory}
+                    onChange={(e) => setAdvisory(e.target.value)}
+                    placeholder="Optional advisory..."
+                  />
+
 
                   <div className="modal-actions">
                     <button className="btn ghost" onClick={() => setModal("none")}>

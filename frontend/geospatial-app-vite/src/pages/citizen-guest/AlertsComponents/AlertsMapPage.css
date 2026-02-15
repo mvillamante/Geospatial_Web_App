@@ -283,7 +283,7 @@
 }
 
 /* Report Cards */
-.report-card {
+.report-card-wrapper {
   background: #fff;
   border-radius: 16px;
   padding: 14px;
@@ -293,14 +293,33 @@
   position: relative;
 }
 
-.report-card:hover {
+.report-card-wrapper.highlighted {
+  animation: highlightPulse 1.8s ease forwards;
+}
+
+@keyframes highlightPulse {
+  0% {
+    background: rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    background: rgba(59, 130, 246, 0.08);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  }
+  100% {
+    background: #ffffff;
+    box-shadow: none;
+  }
+}
+
+.report-card-wrapper:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   border-color: rgba(37, 99, 235, 0.18);
 }
 
 /* Left accent bar */
-.report-card::before {
+.report-card-wrapper::before {
   content: '';
   position: absolute;
   left: 0;
@@ -310,19 +329,19 @@
   border-radius: 999px;
 }
 
-.report-card.critical::before {
+.report-card-wrapper.critical::before {
   background: #ef4444;
 }
 
-.report-card.high::before {
+.report-card-wrapper.high::before {
   background: #f97316;
 }
 
-.report-card.moderate::before {
+.report-card-wrapper.moderate::before {
   background: #eab308;
 }
 
-.report-card.low::before {
+.report-card-wrapper.low::before {
   background: #22c55e;
 }
 
@@ -422,22 +441,28 @@
   border-radius: 999px;
   background: #10b981;
 }
-
-.lgu-preview h5 {
-  margin: 0 0 0.25rem 0;
-  color: #334155;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.lgu-preview-header {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #065f46;
+  margin-bottom: 8px;
 }
 
-.lgu-preview h5::after {
-  content: "";
-  height: 1px;
-  flex: 1;
-  background: rgba(15, 23, 42, 0.12);
+.lgu-preview-section {
+  margin-bottom: 8px;
+}
+
+.lgu-preview-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #047857;
+  margin-bottom: 2px;
+}
+
+.lgu-preview-body {
+  font-size: 0.8rem;
+  color: #065f46;
+  white-space: pre-line;
 }
 
 .dashboard-alerts .report-btn {

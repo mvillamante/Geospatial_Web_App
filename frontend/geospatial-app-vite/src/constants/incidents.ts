@@ -1,8 +1,12 @@
 const _INCIDENT_CATEGORIES = [
   "Fire",
   "Flood",
+  "Typhoon",
+  "Chemical / Gas Leak",
+  "Fallen Tree",
+  "Infrastructure Damage",
   "Landslide",
-  "Accident",
+  "Vehicular Accident",
   "Others",
 ] as const;
 

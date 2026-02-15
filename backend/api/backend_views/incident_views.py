@@ -69,7 +69,6 @@ class IncidentReportCreateView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # proceed with serializer saving
         serializer = IncidentReportCreateSerializer(
             data=request.data,
             context={"request": request},
@@ -137,7 +136,7 @@ class IncidentReportPatchView(generics.UpdateAPIView):
 
         if data.get("assignToMe") is True:
             report.assigned_officer = request.user
-            report.save(update_fields=["assigned_officer", "status"])
+            report.save(update_fields=["assigned_officer"])
             return Response(IncidentReportQueueSerializer(report).data)
 
         officer_id = data.get("officer_id") or data.get("assigned_officer_id")
@@ -148,10 +147,10 @@ class IncidentReportPatchView(generics.UpdateAPIView):
                 raise ValidationError({"officer_id": "Must be an integer."})
 
             officer = get_object_or_404(CustomUser, id=officer_id, role__iexact="officer")
-            report.assigned_officer = officer
+            report.assigned_officer = request.user
 
-            report.save(update_fields=["assigned_officer", "status"])
-            return Response(IncidentReportQueueSerializer(report).data, status=status.HTTP_200_OK)
+            report.save(update_fields=["assigned_officer"])
+            return Response(IncidentReportUpdateSerializer(report).data, status=status.HTTP_200_OK)
 
         if "status" in data and isinstance(data["status"], str):
             data["status"] = data["status"].lower()

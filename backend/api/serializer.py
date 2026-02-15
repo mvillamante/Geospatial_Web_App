@@ -9,6 +9,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from api.utilities.profanity import contains_profanity
 
 class UserSerializer(serializers.ModelSerializer):
     staff_id = serializers.ReadOnlyField()
@@ -204,6 +205,15 @@ class AdminUserListSerializer(serializers.ModelSerializer):
     
     def get_department(self, obj):
         return getattr(obj, "department", "N/A") 
+    
+    def create(self, validated_data):
+        description = validated_data.get("description", "")
+
+        if contains_profanity(description):
+            validated_data["is_flagged"] = True
+
+        return super().create(validated_data)
+
 
 class AssignUserRoleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -275,7 +285,6 @@ class IncidentReportCreateSerializer(serializers.ModelSerializer):
             "description",
             "latitude",
             "longitude",
-            "accuracy_m",
             "location_display",
             "suggested_critical_level",
             "photo",
@@ -307,6 +316,7 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
     photo_url = serializers.SerializerMethodField()
     category_display = serializers.SerializerMethodField()
     assigned_officer_label = serializers.SerializerMethodField()
+    lgu_post = serializers.SerializerMethodField()
     assigned_officer_id = serializers.IntegerField(allow_null=True, read_only=True)
     reply_image_url = serializers.SerializerMethodField()
 
@@ -330,6 +340,7 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
             "assigned_officer_label",
             "officer_note",
             "needs_info_note",
+            "lgu_post",
             "reply_message",
             "reply_image_url",
             "rejection_reason",
@@ -344,9 +355,28 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
         
     def get_category_display(self, obj):
         if obj.category == "others" and obj.other_category:
-            return obj.other_category
-        return obj.category
-    
+            return obj.other_category.strip()
+        return obj.get_category_display()
+
+    def get_lgu_post(self, obj):
+        if (obj.status or "").lower() != "resolved":
+            return None
+
+        if not obj.lgu_post:
+            return None
+
+        return {
+            "incident": obj.get_category_display(),
+            "status": obj.status,
+            "what_happened": obj.lgu_post.get("what_happened"),
+            "action_taken": obj.lgu_post.get("action_taken"),
+            "advisory": obj.lgu_post.get("advisory"),
+            "updated_at": obj.lgu_post.get("published_at"),
+    }
+
+
+
+
     def get_user_label(self, obj):
         return f"Citizen #0{obj.user_id}"
 
@@ -450,15 +480,7 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
     def get_lgu_post(self, obj):
         if (obj.status or "").lower() != "resolved":
             return None
-        if not obj.officer_note:
-            return None
-        return {
-            "advisory": obj.officer_note,
-            "updated_at": obj.last_updated_at,
-    }
-
-    def get_assignedOfficerId(self, obj):
-        return obj.assigned_officer_id 
+        return obj.lgu_post
 
     def get_assignedTo(self, obj):
         u = obj.assigned_officer
@@ -514,13 +536,13 @@ class IncidentReportUpdateSerializer(serializers.ModelSerializer):
     reply_message = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     reply_image_url = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     needs_info_note = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    lgu_post = serializers.JSONField(required=False, allow_null=True)
 
     class Meta:
         model = IncidentReport
         fields = [
             "status",
             "verifiedRisk",
-            "status",
             "officerNote",
             "rejectionReason",
             "assignedTo",
@@ -529,25 +551,15 @@ class IncidentReportUpdateSerializer(serializers.ModelSerializer):
             "description",
             "reply_message",
             "reply_image_url",
+            "lgu_post",
         ]
 
-    def get_status(self, obj):
-        s = (obj.status or "").lower()
-        if s == "pending":
-            return "pending"
-        if s == "verified":
-            return "in_progress"
-        if s == "resolved":
-            return "resolved"
-        if s == "rejected":
-            return "rejected"
-        return "pending"
-    
     def get_assignedTo(self, obj):
         u = obj.assigned_officer
         if not u:
             return None
         return (u.get_full_name().strip() or u.username or f"Citizen #{u.id}")
+
 
 class IncidentReportReplySerializer(serializers.ModelSerializer):
     reply_message = serializers.CharField(required=False, allow_blank=True)
@@ -782,7 +794,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = ["id", "type", "title", "body", "created_at", "cms_guide_id", "cms_post_id", "event", "incident_id", "category", "barangay", "severity", "severity_from", "severity_to", "is_unread"]
+        fields = ["id", "type", "title", "category", "body", "created_at", "cms_guide_id", "cms_post_id", "event", "incident_id", "category", "barangay", "severity", "severity_from", "severity_to", "is_unread"]
 
     def get_is_unread(self, obj):
         user = self.context["request"].user

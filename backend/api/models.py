@@ -99,9 +99,15 @@ class IncidentReport(models.Model):
         ("fire", "Fire"),
         ("flood", "Flood"),
         ("landslide", "Landslide"),
-        ("accident", "Accident"),
+        ("vehicular_accident", "Vehicular Accident"),
+        ("chemical_gas_leak", "Chemical / Gas Leak"),
+        ("fallen_tree", "Fallen Tree"),
+        ("infrastructure_damage", "Infrastructure Damage"),
+        ("earthquake", "Earthquake"),
+        ("typhoon", "Typhoon"),
         ("others", "Others"),
     ]
+
 
     SUGGESTED_CRITICAL_LEVEL_CHOICES = [
         ("low", "Low"),
@@ -125,7 +131,7 @@ class IncidentReport(models.Model):
         related_name="incident_reports",
     )
 
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     other_category = models.CharField(max_length=100, null=True, blank=True)
 
     description = models.TextField()
@@ -133,7 +139,6 @@ class IncidentReport(models.Model):
 
     latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
-    accuracy_m = models.FloatField(null=True, blank=True)
 
     location_display = models.TextField(blank=True, default="")
 
@@ -149,9 +154,13 @@ class IncidentReport(models.Model):
     rejection_reason = models.TextField(null=True, blank=True)
 
     last_updated_at = models.DateTimeField(auto_now=True)
-    
+    lgu_post = models.JSONField(null=True, blank=True)
     reply_message = models.TextField(null=True, blank=True, help_text="Temporary reply from citizen when report needs info")
     reply_image_url = models.TextField(null=True, blank=True, help_text="Optional URL for reply image (e.g., stored in Supabase)")
+
+    is_flagged = models.BooleanField(default=False)
+    flag_reason = models.CharField(max_length=255, blank=True, null=True)
+
 
 
 # CMS Guide model ------------------------------------------------------------------

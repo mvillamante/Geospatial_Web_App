@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./LeafletMap.css";
@@ -15,55 +15,6 @@ import {
   createTrafficLayer,
   createNDVILayer,
 } from "./mapLayers";
-
-// Fake risk levels
-const barangayRisk: Record<string, "High" | "Medium" | "Low"> = {
-  "Banay-Banay": "High",
-  "Mamatid": "Medium",
-  "Baclaran": "Low",
-  "Pittland": "Medium",
-  "Sala": "Low",
-  "Gulod": "High",
-};
-
-// Numeric values for choropleth
-const barangayRiskValue: Record<string, number> = {
-  "Banay-Banay": 6,
-  "Mamatid": 7,
-  "Baclaran": 4,
-  "Pittland": 5,
-  "Sala": 3,
-  "Gulod": 8,
-};
-
-// Circle markers
-const riskIcons: Record<"High" | "Medium" | "Low", L.DivIcon> = {
-  High: L.divIcon({
-    html: `<div style="width:20px;height:20px;background:red;border-radius:50%;border:2px solid #880000;"></div>`,
-    className: "",
-    iconSize: [20, 20],
-  }),
-  Medium: L.divIcon({
-    html: `<div style="width:20px;height:20px;background:orange;border-radius:50%;border:2px solid #a65e00;"></div>`,
-    className: "",
-    iconSize: [20, 20],
-  }),
-  Low: L.divIcon({
-    html: `<div style="width:20px;height:20px;background:yellow;border-radius:50%;border:2px solid #999900;"></div>`,
-    className: "",
-    iconSize: [20, 20],
-  }),
-};
-
-// Choropleth color
-const getColor = (value: number): string => {
-  if (value >= 8) return "#8B0000";
-  if (value >= 7) return "#FF4500";
-  if (value >= 6) return "#FF8C00";
-  if (value >= 5) return "#FFA500";
-  if (value >= 4) return "#FFFF00";
-  return "#ADFF2F";
-};
 
 // Severity colors matching the alerts panel
 const severityColors: Record<"critical" | "high" | "moderate" | "low", { primary: string; secondary: string; text: string }> = {
@@ -110,11 +61,45 @@ const tileLayerConfigs = {
   },
 };
 
+/** Hazard index data for one barangay (from hazard_index_data.json / API) */
+export interface HazardBarangayData {
+  hazard_index: number;
+  hazard_class: string;
+  flood_risk: number;
+  landslide_risk: number;
+  earthquake_risk: number;
+  typhoon_risk: number;
+  rainfall_risk: number;
+}
+
+/** Green index data for one barangay (from green_index_data.json / API) */
+export interface GreenIndexBarangayData {
+  green_index: number;
+  mean_ndvi: number;
+  gar: number;
+  ndvi_norm: number;
+  veg_class: string;
+}
+
+/** Calamity risk data for one barangay (from calamity_risk_forecast_data.json / API) */
+export interface CalamityRiskBarangayData {
+  calamity_risk: number;
+  calamity_risk_raw: number;
+  risk_class: string;
+  hazard_index: number;
+  hazard_index_raw: number;
+  green_index: number;
+  green_index_raw: number;
+  exposure_norm: number;
+}
+
 interface LeafletMapProps {
   height?: string;
   width?: string;
   mapView?: "interactive" | "choropleth";
   mapType?: "basic" | "satellite" | "terrain";
+  /** Currently selected data layer in choropleth mode (e.g. "hazard", "green", "calamity") */
+  dataLayer?: string;
   searchedBarangay?: string;
   searchedSeverity?: string | null;
   selectedReport?: Report | null;
@@ -126,35 +111,48 @@ interface LeafletMapProps {
   ndviFromDate?: string;
   ndviToDate?: string;
   ndviMaxCloud?: number;
+  /** Year used for hazard / index choropleth timelines (2020–2030) */
+  hazardYear?: number;
   showPopupOnMap?: boolean;
   onSelectEvacuationCenter?: (center: EvacuationCenterData) => void;
+  /** Called when user selects a barangay on the hazard index choropleth (for right-panel details) */
+  onHazardBarangaySelect?: (barangay: string, year: string, data: HazardBarangayData) => void;
+  /** Called when user hovers a barangay on the green index choropleth */
+  onGreenIndexBarangaySelect?: (barangay: string, year: string, data: GreenIndexBarangayData) => void;
+  /** Called when user hovers a barangay on the calamity risk choropleth */
+  onCalamityRiskBarangaySelect?: (barangay: string, year: string, data: CalamityRiskBarangayData) => void;
 }
 
-export default function LeafletMap({
-  height = "600px",
-  width = "100%",
-  mapView = "interactive",
-  mapType = "basic",
-  searchedBarangay = "",
-  searchedSeverity = null,
-  selectedReport = null,
-  reportClickTimestamp = null,
-  activeLayers = [],
-  ndviOpacity = 0.8,
-  ndviYear,
-  ndviMonth,
-  ndviFromDate,
-  ndviToDate,
-  ndviMaxCloud,
-  showPopupOnMap = true,
-  onSelectEvacuationCenter, // Let ndviLayer use smart defaults based on month selection
-}: LeafletMapProps) {
+export default function LeafletMap(props: LeafletMapProps) {
+  const {
+    height = "600px",
+    width = "100%",
+    mapView = "interactive",
+    mapType = "basic",
+    dataLayer,
+    searchedBarangay = "",
+    searchedSeverity = null,
+    selectedReport = null,
+    reportClickTimestamp: _reportClickTimestamp = null, // kept for API compatibility
+    activeLayers = [],
+    ndviOpacity = 0.8,
+    ndviYear,
+    ndviMonth,
+    ndviFromDate,
+    ndviToDate,
+    ndviMaxCloud,
+    hazardYear,
+    showPopupOnMap = true,
+    onSelectEvacuationCenter,
+    onHazardBarangaySelect,
+    onGreenIndexBarangaySelect,
+    onCalamityRiskBarangaySelect,
+  } = props;
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const circleRef = useRef<L.Circle | null>(null);
   const choroplethLayerRef = useRef<L.LayerGroup | null>(null);
   const searchMarkerRef = useRef<L.Marker | null>(null);
-  const reportMarkerRef = useRef<L.Marker | null>(null);
   const barangayDataRef = useRef<BarangayData[]>([]);
   const barangayBoundariesLayerRef = useRef<L.LayerGroup | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
@@ -168,6 +166,121 @@ export default function LeafletMap({
   const trafficLayerRef = useRef<L.Layer | null>(null);
   const ndviLayerRef = useRef<L.LayerGroup | null>(null);
   const verifiedReportsLayerRef = useRef<L.LayerGroup | null>(null);
+
+  // Hazard Index choropleth (barangay-level)
+  const hazardLayerRef = useRef<L.GeoJSON | null>(null);
+  const hazardDataRef = useRef<any | null>(null);
+  const hazardYearsRef = useRef<string[]>([]);
+  const hazardBarangayByLayerIdRef = useRef<Record<number, string>>({});
+  const hazardYearRef = useRef<number | undefined>(hazardYear);
+  const hazardLabelsLayerRef = useRef<L.LayerGroup | null>(null);
+  const onHazardBarangaySelectRef = useRef(onHazardBarangaySelect);
+
+  // Green Index choropleth (barangay-level)
+  const greenLayerRef = useRef<L.GeoJSON | null>(null);
+  const greenDataRef = useRef<any | null>(null);
+  const greenYearsRef = useRef<string[]>([]);
+  const greenBarangayByLayerIdRef = useRef<Record<number, string>>({});
+  const greenYearRef = useRef<number | undefined>(hazardYear);
+  const greenLabelsLayerRef = useRef<L.LayerGroup | null>(null);
+  const onGreenIndexBarangaySelectRef = useRef(onGreenIndexBarangaySelect);
+
+  // Calamity Risk choropleth (barangay-level)
+  const calamityLayerRef = useRef<L.GeoJSON | null>(null);
+  const calamityDataRef = useRef<any | null>(null);
+  const calamityYearsRef = useRef<string[]>([]);
+  const calamityBarangayByLayerIdRef = useRef<Record<number, string>>({});
+  const calamityYearRef = useRef<number | undefined>(hazardYear);
+  const calamityLabelsLayerRef = useRef<L.LayerGroup | null>(null);
+  const onCalamityRiskBarangaySelectRef = useRef(onCalamityRiskBarangaySelect);
+
+  // Color scale adapted from Hazard/hazard_index_server.py (getHazardColor)
+  const getHazardIndexColor = (value: number): string => {
+    let hi = Math.max(0, Math.min(100, value));
+    let r: number, g: number, b: number;
+
+    if (hi >= 80) {
+      const t = (hi - 80) / 20;
+      r = Math.round(183 + t * (100 - 83));
+      g = Math.round(28 - t * 28);
+      b = Math.round(28 - t * 28);
+    } else if (hi >= 60) {
+      const t = (hi - 60) / 20;
+      r = Math.round(229 + t * (183 - 229));
+      g = Math.round(57 + t * (28 - 57));
+      b = Math.round(53 + t * (28 - 53));
+    } else if (hi >= 40) {
+      const t = (hi - 40) / 20;
+      r = Math.round(255 - t * 26);
+      g = Math.round(152 - t * 95);
+      b = Math.round(0 + t * 53);
+    } else if (hi >= 20) {
+      const t = (hi - 20) / 20;
+      r = Math.round(253 + t * 2);
+      g = Math.round(216 - t * 64);
+      b = Math.round(53 - t * 53);
+    } else {
+      const t = hi / 20;
+      r = Math.round(102 + t * 151);
+      g = Math.round(187 + t * 29);
+      b = Math.round(106 - t * 53);
+    }
+
+    return `rgb(${r},${g},${b})`;
+  };
+
+  // Green Index color function (from green_index_server.py interpolateColor)
+  const getGreenIndexColor = (gi: number): string => {
+    gi = Math.max(0, Math.min(100, gi));
+    let r: number, g: number, b: number;
+    if (gi >= 70) {
+      const t = (gi - 70) / 30;
+      r = Math.round(60 - t * 60);
+      g = Math.round(139 + t * (100 - 39));
+      b = Math.round(60 - t * 60);
+    } else if (gi >= 40) {
+      const t = (gi - 40) / 30;
+      r = Math.round(180 - t * 120);
+      g = Math.round(180 - t * 41);
+      b = Math.round(0 + t * 60);
+    } else {
+      const t = gi / 40;
+      r = Math.round(92 + t * 88);
+      g = Math.round(64 + t * 116);
+      b = Math.round(51 - t * 51);
+    }
+    return `rgb(${r},${g},${b})`;
+  };
+
+  // Calamity Risk color scale (warm red tones matching screenshot)
+  const getCalamityRiskColor = (cr: number): string => {
+    const v = Math.max(0, Math.min(1, cr / 100));
+    if (v >= 0.8) return '#b71c1c';
+    if (v >= 0.6) return '#e53935';
+    if (v >= 0.4) return '#ff7043';
+    if (v >= 0.2) return '#ffab91';
+    return '#fce4ec';
+  };
+
+  // Keep latest hazardYear available inside Leaflet event handlers
+  useEffect(() => {
+    hazardYearRef.current = hazardYear;
+    greenYearRef.current = hazardYear;
+    calamityYearRef.current = hazardYear;
+  }, [hazardYear]);
+
+  // Keep latest callback available inside Leaflet event handlers
+  useEffect(() => {
+    onHazardBarangaySelectRef.current = onHazardBarangaySelect;
+  }, [onHazardBarangaySelect]);
+
+  useEffect(() => {
+    onGreenIndexBarangaySelectRef.current = onGreenIndexBarangaySelect;
+  }, [onGreenIndexBarangaySelect]);
+
+  useEffect(() => {
+    onCalamityRiskBarangaySelectRef.current = onCalamityRiskBarangaySelect;
+  }, [onCalamityRiskBarangaySelect]);
 
 
   // Initialize map
@@ -262,46 +375,688 @@ export default function LeafletMap({
   }, [selectedReport]);
 
 
-  // Load data
+  // Reset any generic choropleth placeholder when map view changes
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    // Remove previous choropleth layer if exists
-    if (choroplethLayerRef.current) {
+    if (choroplethLayerRef.current && mapView !== "choropleth") {
       choroplethLayerRef.current.remove();
       choroplethLayerRef.current = null;
     }
+  }, [mapView]);
 
-    // Helper fetch function with timeout and error handling
-    const fetchData = async (query: string, onSuccess: (data: OverpassResponse) => void) => {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout
+  // Hazard Index choropleth: load data + GeoJSON and create barangay polygons
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
 
+    const shouldShowHazardChoropleth =
+      mapView === "choropleth" && dataLayer === "hazard";
+
+    // Clear layer when not needed
+    if (!shouldShowHazardChoropleth) {
+      if (hazardLayerRef.current) {
+        hazardLayerRef.current.remove();
+        hazardLayerRef.current = null;
+        hazardBarangayByLayerIdRef.current = {};
+      }
+      if (hazardLabelsLayerRef.current) {
+        hazardLabelsLayerRef.current.remove();
+        hazardLabelsLayerRef.current = null;
+      }
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadHazardLayer = async () => {
       try {
-        const res = await fetch("https://overpass-api.de/api/interpreter", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: query,
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeout);
-
-        if (!res.ok) {
-          throw new Error(`Overpass API error: ${res.status} ${res.statusText}`);
+        // Fetch hazard index data (all years) once
+        if (!hazardDataRef.current) {
+          const res = await fetch("/api/hazard/hazard-index/");
+          if (!res.ok) throw new Error(`Failed to load hazard index data: ${res.status}`);
+          const json = await res.json();
+          hazardDataRef.current = json;
+          hazardYearsRef.current = Object.keys(json).sort();
         }
 
-        const data = await res.json() as OverpassResponse;
-        onSuccess(data);
-        return;
+        // If layer already exists (e.g., user toggled away and back), just re-add to map
+        // and update colors for current year
+        if (hazardLayerRef.current) {
+          hazardLayerRef.current.addTo(map);
+          // Apply colors for current year
+          const years: string[] = hazardYearsRef.current;
+          const yearKey = String(hazardYearRef.current ?? (years.length ? parseInt(years[0], 10) : 2026));
+          const slice = hazardDataRef.current?.[yearKey];
+          if (slice) {
+            hazardLayerRef.current.eachLayer((layer: L.Layer) => {
+              const id = L.Util.stamp(layer);
+              const brgy = hazardBarangayByLayerIdRef.current[id];
+              if (!brgy) return;
+              const d = slice[brgy];
+              const hi = d?.hazard_index;
+              const fillColor =
+                typeof hi === "number" ? getHazardIndexColor(hi) : "#cccccc";
+              (layer as L.Path).setStyle({
+                fillColor,
+                fillOpacity: typeof hi === "number" ? 0.75 : 0.2,
+                weight: 1.5,
+                color: "#ffffff",
+              });
+            });
+          }
+          return;
+        }
+
+        // Fetch barangay boundaries GeoJSON
+        const geoRes = await fetch("/api/hazard/barangays/");
+        if (!geoRes.ok) throw new Error(`Failed to load barangay GeoJSON: ${geoRes.status}`);
+        const geoJson = await geoRes.json();
+
+        if (cancelled) return;
+
+        const years = hazardYearsRef.current;
+        const sampleYear = years[0];
+        const sampleSlice = sampleYear ? hazardDataRef.current?.[sampleYear] : null;
+        const dataBarangays: string[] = sampleSlice ? Object.keys(sampleSlice) : [];
+
+        const normalizeBrgy = (name: string) =>
+          name
+            .toLowerCase()
+            .trim()
+            .replace(/^barangay\s+/, "")
+            .replace(/^brgy\s+/, "")
+            .replace(/-/g, " ");
+
+        const mapBrgyName = (raw: string) => {
+          const key = normalizeBrgy(raw);
+          if (key === "poblacion") return "Poblacion";
+          const match = dataBarangays.find((b) => normalizeBrgy(b) === key);
+          return match || raw;
+        };
+
+        // Get initial year for coloring
+        const initialYearKey = String(hazardYearRef.current ?? (years.length ? parseInt(years[0], 10) : 2026));
+        const initialSlice = hazardDataRef.current?.[initialYearKey];
+
+        hazardLayerRef.current = L.geoJSON(geoJson as any, {
+          style: (feature) => {
+            if (!feature || !feature.properties) {
+              return {
+                color: "#ffffff",
+                weight: 1.5,
+                opacity: 0.9,
+                fillOpacity: 0.2,
+                fillColor: "#cccccc",
+              };
+            }
+            const rawName =
+              (feature.properties.brgy_name || feature.properties.name) || "";
+            const mappedName = mapBrgyName(rawName);
+            const d = initialSlice?.[mappedName];
+            const hi = d?.hazard_index;
+            const fillColor =
+              typeof hi === "number" ? getHazardIndexColor(hi) : "#cccccc";
+            
+            return {
+              color: "#ffffff",
+              weight: 1.5,
+              opacity: 0.9,
+              fillOpacity: typeof hi === "number" ? 0.75 : 0.2,
+              fillColor,
+            };
+          },
+          onEachFeature: (feature, layer) => {
+            const rawName =
+              (feature.properties &&
+                (feature.properties.brgy_name || feature.properties.name)) ||
+              "";
+            const mappedName = mapBrgyName(rawName);
+
+            if (!feature.properties) feature.properties = {};
+            feature.properties.brgy_name = mappedName;
+
+            const id = L.Util.stamp(layer);
+            hazardBarangayByLayerIdRef.current[id] = mappedName;
+
+            layer.on("mouseover", () => {
+              (layer as L.Path).setStyle({ weight: 3, fillOpacity: 0.9 });
+              // Show barangay details in the right panel on hover
+              const yearKey = String(hazardYearRef.current ?? "");
+              const slice = hazardDataRef.current?.[yearKey];
+              const d = slice?.[mappedName];
+              if (d) {
+                onHazardBarangaySelectRef.current?.(mappedName, yearKey, d as HazardBarangayData);
+              }
+            });
+
+            layer.on("mouseout", () => {
+              const yearKey = String(hazardYearRef.current ?? "");
+              const slice = hazardDataRef.current?.[yearKey];
+              const d = slice?.[mappedName];
+              const hi = d?.hazard_index;
+              const fillColor =
+                typeof hi === "number" ? getHazardIndexColor(hi) : "#cccccc";
+              (layer as L.Path).setStyle({
+                weight: 1.5,
+                fillOpacity: typeof hi === "number" ? 0.75 : 0.2,
+                color: "#ffffff",
+                fillColor,
+              });
+            });
+          },
+        }).addTo(map);
+
+        // Add static labels for each barangay (centered)
+        if (hazardLabelsLayerRef.current) {
+          hazardLabelsLayerRef.current.remove();
+          hazardLabelsLayerRef.current = null;
+        }
+        hazardLabelsLayerRef.current = L.layerGroup().addTo(map);
+        hazardLayerRef.current.eachLayer((layer: L.Layer) => {
+          const id = L.Util.stamp(layer);
+          const brgy = hazardBarangayByLayerIdRef.current[id];
+          if (!brgy) return;
+          const polygon = layer as L.Polygon;
+          const bounds = polygon.getBounds();
+          if (!bounds.isValid()) return;
+          const center = bounds.getCenter();
+          // Estimate label width based on text length - tighter box around text
+          const estimatedWidth = Math.max(60, brgy.length * 7 + 16);
+          const estimatedHeight = 22;
+          
+          L.marker(center, {
+            icon: L.divIcon({
+              className: "barangay-label",
+              html: `<span>${brgy}</span>`,
+              iconSize: [estimatedWidth, estimatedHeight],
+              iconAnchor: [estimatedWidth / 2, estimatedHeight / 2], // Center the label
+            }),
+          }).addTo(hazardLabelsLayerRef.current as L.LayerGroup);
+        });
+
+        const bounds = hazardLayerRef.current.getBounds();
+        if (bounds.isValid()) {
+          map.fitBounds(bounds, { padding: [20, 20] });
+        }
       } catch (err) {
-        console.error("Overpass fetch failed:", err);
+        console.error("Failed to set up hazard index choropleth:", err);
       }
     };
 
+    loadHazardLayer();
 
-  }, [mapView]);
+    return () => {
+      cancelled = true;
+    };
+  }, [mapView, dataLayer]);
+
+  // Update hazard choropleth colors + popups when year changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (!hazardLayerRef.current) return;
+    if (mapView !== "choropleth" || dataLayer !== "hazard") return;
+
+    const hazardData = hazardDataRef.current;
+    if (!hazardData) return;
+
+    const years: string[] = hazardYearsRef.current;
+    if (!years.length) return;
+
+    const yearKey = String(hazardYear ?? parseInt(years[0], 10));
+    const slice = hazardData[yearKey];
+    if (!slice) return;
+
+    hazardLayerRef.current.eachLayer((layer: L.Layer) => {
+      const id = L.Util.stamp(layer);
+      const brgy = hazardBarangayByLayerIdRef.current[id];
+      if (!brgy) return;
+
+      const d = slice[brgy];
+      const hi = d?.hazard_index;
+      const fillColor =
+        typeof hi === "number" ? getHazardIndexColor(hi) : "#cccccc";
+
+      (layer as L.Path).setStyle({
+        fillColor,
+        fillOpacity: typeof hi === "number" ? 0.75 : 0.2,
+        weight: 1.5,
+        color: "#ffffff",
+      });
+
+      // Remove any existing popup (details are shown on hover in the side panel)
+      (layer as L.Path).unbindPopup();
+    });
+  }, [hazardYear, mapView, dataLayer]);
+
+  // Green Index choropleth: load data + GeoJSON and create barangay polygons
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const shouldShowGreenChoropleth =
+      mapView === "choropleth" && dataLayer === "green";
+
+    // Clear layer when not needed
+    if (!shouldShowGreenChoropleth) {
+      if (greenLayerRef.current) {
+        greenLayerRef.current.remove();
+        greenLayerRef.current = null;
+        greenBarangayByLayerIdRef.current = {};
+      }
+      if (greenLabelsLayerRef.current) {
+        greenLabelsLayerRef.current.remove();
+        greenLabelsLayerRef.current = null;
+      }
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadGreenLayer = async () => {
+      try {
+        // Fetch green index data (all years) once
+        if (!greenDataRef.current) {
+          const res = await fetch("/api/hazard/green-index/");
+          if (!res.ok) throw new Error(`Failed to load green index data: ${res.status}`);
+          const json = await res.json();
+          greenDataRef.current = json;
+          greenYearsRef.current = Object.keys(json).sort();
+        }
+
+        // If layer already exists, just re-add to map and update colors
+        if (greenLayerRef.current) {
+          greenLayerRef.current.addTo(map);
+          if (greenLabelsLayerRef.current) greenLabelsLayerRef.current.addTo(map);
+          const years = greenYearsRef.current;
+          const yearKey = String(greenYearRef.current ?? (years.length ? parseInt(years[0], 10) : 2025));
+          const slice = greenDataRef.current?.[yearKey];
+          if (slice) {
+            greenLayerRef.current.eachLayer((layer: L.Layer) => {
+              const id = L.Util.stamp(layer);
+              const brgy = greenBarangayByLayerIdRef.current[id];
+              if (!brgy) return;
+              const d = slice[brgy];
+              const gi = d?.green_index;
+              const fillColor = typeof gi === "number" ? getGreenIndexColor(gi) : "#cccccc";
+              (layer as L.Path).setStyle({
+                fillColor,
+                fillOpacity: typeof gi === "number" ? 0.7 : 0.2,
+                weight: 2,
+                color: "#ffffff",
+              });
+            });
+          }
+          const bounds = greenLayerRef.current.getBounds();
+          if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
+          return;
+        }
+
+        // Fetch barangay boundaries GeoJSON
+        const geoRes = await fetch("/api/hazard/barangays/");
+        if (!geoRes.ok) throw new Error(`Failed to load barangay GeoJSON: ${geoRes.status}`);
+        const geoJson = await geoRes.json();
+
+        if (cancelled) return;
+
+        const years = greenYearsRef.current;
+        const sampleYear = years[0];
+        const sampleSlice = sampleYear ? greenDataRef.current?.[sampleYear] : null;
+        const dataBarangays: string[] = sampleSlice ? Object.keys(sampleSlice) : [];
+
+        const normalizeBrgy = (name: string) =>
+          name.toLowerCase().trim().replace(/^barangay\s+/, "").replace(/^brgy\s+/, "").replace(/-/g, " ");
+
+        const mapBrgyName = (raw: string) => {
+          const key = normalizeBrgy(raw);
+          if (key === "poblacion") return "Poblacion";
+          const match = dataBarangays.find((b) => normalizeBrgy(b) === key);
+          return match || raw;
+        };
+
+        const initialYearKey = String(greenYearRef.current ?? (years.length ? parseInt(years[0], 10) : 2025));
+        const initialSlice = greenDataRef.current?.[initialYearKey];
+
+        greenLayerRef.current = L.geoJSON(geoJson as any, {
+          style: (feature) => {
+            if (!feature || !feature.properties) {
+              return { color: "#ffffff", weight: 2, opacity: 0.9, fillOpacity: 0.2, fillColor: "#cccccc" };
+            }
+            const rawName = (feature.properties.brgy_name || feature.properties.name) || "";
+            const mappedName = mapBrgyName(rawName);
+            const d = initialSlice?.[mappedName];
+            const gi = d?.green_index;
+            const fillColor = typeof gi === "number" ? getGreenIndexColor(gi) : "#cccccc";
+            return {
+              color: "#ffffff",
+              weight: 2,
+              opacity: 0.9,
+              fillOpacity: typeof gi === "number" ? 0.7 : 0.2,
+              fillColor,
+            };
+          },
+          onEachFeature: (feature, layer) => {
+            const rawName = (feature.properties && (feature.properties.brgy_name || feature.properties.name)) || "";
+            const mappedName = mapBrgyName(rawName);
+            if (!feature.properties) feature.properties = {};
+            feature.properties.brgy_name = mappedName;
+
+            const id = L.Util.stamp(layer);
+            greenBarangayByLayerIdRef.current[id] = mappedName;
+
+            layer.on("mouseover", () => {
+              (layer as L.Path).setStyle({ weight: 3, fillOpacity: 0.85 });
+              const yearKey = String(greenYearRef.current ?? "");
+              const slice = greenDataRef.current?.[yearKey];
+              const d = slice?.[mappedName];
+              if (d) {
+                onGreenIndexBarangaySelectRef.current?.(mappedName, yearKey, d as GreenIndexBarangayData);
+              }
+            });
+
+            layer.on("mouseout", () => {
+              const yearKey = String(greenYearRef.current ?? "");
+              const slice = greenDataRef.current?.[yearKey];
+              const d = slice?.[mappedName];
+              const gi = d?.green_index;
+              const fillColor = typeof gi === "number" ? getGreenIndexColor(gi) : "#cccccc";
+              (layer as L.Path).setStyle({
+                weight: 2,
+                fillOpacity: typeof gi === "number" ? 0.7 : 0.2,
+                color: "#ffffff",
+                fillColor,
+              });
+            });
+          },
+        }).addTo(map);
+
+        // Add labels for each barangay
+        if (greenLabelsLayerRef.current) {
+          greenLabelsLayerRef.current.remove();
+          greenLabelsLayerRef.current = null;
+        }
+        greenLabelsLayerRef.current = L.layerGroup().addTo(map);
+        greenLayerRef.current.eachLayer((layer: L.Layer) => {
+          const id = L.Util.stamp(layer);
+          const brgy = greenBarangayByLayerIdRef.current[id];
+          if (!brgy) return;
+          const polygon = layer as L.Polygon;
+          const bounds = polygon.getBounds();
+          if (!bounds.isValid()) return;
+          const center = bounds.getCenter();
+          const estimatedWidth = Math.max(60, brgy.length * 7 + 16);
+          const estimatedHeight = 22;
+          L.marker(center, {
+            icon: L.divIcon({
+              className: "barangay-label",
+              html: `<span>${brgy}</span>`,
+              iconSize: [estimatedWidth, estimatedHeight],
+              iconAnchor: [estimatedWidth / 2, estimatedHeight / 2],
+            }),
+          }).addTo(greenLabelsLayerRef.current as L.LayerGroup);
+        });
+
+        const bounds = greenLayerRef.current.getBounds();
+        if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
+      } catch (err) {
+        console.error("Failed to set up green index choropleth:", err);
+      }
+    };
+
+    loadGreenLayer();
+    return () => { cancelled = true; };
+  }, [mapView, dataLayer]);
+
+  // Update green index choropleth colors when year changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (!greenLayerRef.current) return;
+    if (mapView !== "choropleth" || dataLayer !== "green") return;
+
+    const greenData = greenDataRef.current;
+    if (!greenData) return;
+
+    const years = greenYearsRef.current;
+    if (!years.length) return;
+
+    const yearKey = String(hazardYear ?? parseInt(years[0], 10));
+    const slice = greenData[yearKey];
+    if (!slice) return;
+
+    greenLayerRef.current.eachLayer((layer: L.Layer) => {
+      const id = L.Util.stamp(layer);
+      const brgy = greenBarangayByLayerIdRef.current[id];
+      if (!brgy) return;
+
+      const d = slice[brgy];
+      const gi = d?.green_index;
+      const fillColor = typeof gi === "number" ? getGreenIndexColor(gi) : "#cccccc";
+      (layer as L.Path).setStyle({
+        fillColor,
+        fillOpacity: typeof gi === "number" ? 0.7 : 0.2,
+        weight: 2,
+        color: "#ffffff",
+      });
+      (layer as L.Path).unbindPopup();
+    });
+  }, [hazardYear, mapView, dataLayer]);
+
+  // Calamity Risk choropleth: load data + GeoJSON and create barangay polygons
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const shouldShowCalamityChoropleth =
+      mapView === "choropleth" && dataLayer === "calamity";
+
+    if (!shouldShowCalamityChoropleth) {
+      if (calamityLayerRef.current) {
+        calamityLayerRef.current.remove();
+        calamityLayerRef.current = null;
+        calamityBarangayByLayerIdRef.current = {};
+      }
+      if (calamityLabelsLayerRef.current) {
+        calamityLabelsLayerRef.current.remove();
+        calamityLabelsLayerRef.current = null;
+      }
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadCalamityLayer = async () => {
+      try {
+        if (!calamityDataRef.current) {
+          const res = await fetch("/api/hazard/calamity-risk/forecast/");
+          if (!res.ok) {
+            const fallbackRes = await fetch("/api/hazard/calamity-risk/");
+            if (!fallbackRes.ok) throw new Error(`Failed to load calamity risk data`);
+            const json = await fallbackRes.json();
+            calamityDataRef.current = json;
+          } else {
+            const json = await res.json();
+            calamityDataRef.current = json;
+          }
+          calamityYearsRef.current = Object.keys(calamityDataRef.current).sort();
+        }
+
+        if (calamityLayerRef.current) {
+          calamityLayerRef.current.addTo(map);
+          if (calamityLabelsLayerRef.current) calamityLabelsLayerRef.current.addTo(map);
+          const years = calamityYearsRef.current;
+          const yearKey = String(calamityYearRef.current ?? (years.length ? parseInt(years[0], 10) : 2020));
+          const slice = calamityDataRef.current?.[yearKey];
+          if (slice) {
+            calamityLayerRef.current.eachLayer((layer: L.Layer) => {
+              const id = L.Util.stamp(layer);
+              const brgy = calamityBarangayByLayerIdRef.current[id];
+              if (!brgy) return;
+              const d = slice[brgy];
+              const cr = d?.calamity_risk;
+              const fillColor = typeof cr === "number" ? getCalamityRiskColor(cr) : "#cccccc";
+              (layer as L.Path).setStyle({
+                fillColor,
+                fillOpacity: typeof cr === "number" ? 0.75 : 0.2,
+                weight: 1.5,
+                color: "#ffffff",
+              });
+            });
+          }
+          const bounds = calamityLayerRef.current.getBounds();
+          if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
+          return;
+        }
+
+        const geoRes = await fetch("/api/hazard/barangays/");
+        if (!geoRes.ok) throw new Error(`Failed to load barangay GeoJSON: ${geoRes.status}`);
+        const geoJson = await geoRes.json();
+
+        if (cancelled) return;
+
+        const years = calamityYearsRef.current;
+        const sampleYear = years[0];
+        const sampleSlice = sampleYear ? calamityDataRef.current?.[sampleYear] : null;
+        const dataBarangays: string[] = sampleSlice ? Object.keys(sampleSlice) : [];
+
+        const normalizeBrgy = (name: string) =>
+          name.toLowerCase().trim().replace(/^barangay\s+/, "").replace(/^brgy\s+/, "").replace(/-/g, " ");
+
+        const mapBrgyName = (raw: string) => {
+          const key = normalizeBrgy(raw);
+          if (key === "poblacion") return "Poblacion";
+          const match = dataBarangays.find((b) => normalizeBrgy(b) === key);
+          return match || raw;
+        };
+
+        const initialYearKey = String(calamityYearRef.current ?? (years.length ? parseInt(years[0], 10) : 2020));
+        const initialSlice = calamityDataRef.current?.[initialYearKey];
+
+        calamityLayerRef.current = L.geoJSON(geoJson as any, {
+          style: (feature) => {
+            if (!feature || !feature.properties) {
+              return { color: "#ffffff", weight: 1.5, opacity: 0.9, fillOpacity: 0.2, fillColor: "#cccccc" };
+            }
+            const rawName = (feature.properties.brgy_name || feature.properties.name) || "";
+            const mappedName = mapBrgyName(rawName);
+            const d = initialSlice?.[mappedName];
+            const cr = d?.calamity_risk;
+            const fillColor = typeof cr === "number" ? getCalamityRiskColor(cr) : "#cccccc";
+            return {
+              color: "#ffffff",
+              weight: 1.5,
+              opacity: 0.9,
+              fillOpacity: typeof cr === "number" ? 0.75 : 0.2,
+              fillColor,
+            };
+          },
+          onEachFeature: (feature, layer) => {
+            const rawName = (feature.properties && (feature.properties.brgy_name || feature.properties.name)) || "";
+            const mappedName = mapBrgyName(rawName);
+            if (!feature.properties) feature.properties = {};
+            feature.properties.brgy_name = mappedName;
+
+            const id = L.Util.stamp(layer);
+            calamityBarangayByLayerIdRef.current[id] = mappedName;
+
+            layer.on("mouseover", () => {
+              (layer as L.Path).setStyle({ weight: 3, fillOpacity: 0.9 });
+              const yearKey = String(calamityYearRef.current ?? "");
+              const slice = calamityDataRef.current?.[yearKey];
+              const d = slice?.[mappedName];
+              if (d) {
+                onCalamityRiskBarangaySelectRef.current?.(mappedName, yearKey, d as CalamityRiskBarangayData);
+              }
+            });
+
+            layer.on("mouseout", () => {
+              const yearKey = String(calamityYearRef.current ?? "");
+              const slice = calamityDataRef.current?.[yearKey];
+              const d = slice?.[mappedName];
+              const cr = d?.calamity_risk;
+              const fillColor = typeof cr === "number" ? getCalamityRiskColor(cr) : "#cccccc";
+              (layer as L.Path).setStyle({
+                weight: 1.5,
+                fillOpacity: typeof cr === "number" ? 0.75 : 0.2,
+                color: "#ffffff",
+                fillColor,
+              });
+            });
+          },
+        }).addTo(map);
+
+        if (calamityLabelsLayerRef.current) {
+          calamityLabelsLayerRef.current.remove();
+          calamityLabelsLayerRef.current = null;
+        }
+        calamityLabelsLayerRef.current = L.layerGroup().addTo(map);
+        calamityLayerRef.current.eachLayer((layer: L.Layer) => {
+          const id = L.Util.stamp(layer);
+          const brgy = calamityBarangayByLayerIdRef.current[id];
+          if (!brgy) return;
+          const polygon = layer as L.Polygon;
+          const bounds = polygon.getBounds();
+          if (!bounds.isValid()) return;
+          const center = bounds.getCenter();
+          const estimatedWidth = Math.max(60, brgy.length * 7 + 16);
+          const estimatedHeight = 22;
+          L.marker(center, {
+            icon: L.divIcon({
+              className: "barangay-label",
+              html: `<span>${brgy}</span>`,
+              iconSize: [estimatedWidth, estimatedHeight],
+              iconAnchor: [estimatedWidth / 2, estimatedHeight / 2],
+            }),
+          }).addTo(calamityLabelsLayerRef.current as L.LayerGroup);
+        });
+
+        const bounds = calamityLayerRef.current.getBounds();
+        if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
+      } catch (err) {
+        console.error("Failed to set up calamity risk choropleth:", err);
+      }
+    };
+
+    loadCalamityLayer();
+    return () => { cancelled = true; };
+  }, [mapView, dataLayer]);
+
+  // Update calamity risk choropleth colors when year changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (!calamityLayerRef.current) return;
+    if (mapView !== "choropleth" || dataLayer !== "calamity") return;
+
+    const calamityData = calamityDataRef.current;
+    if (!calamityData) return;
+
+    const years = calamityYearsRef.current;
+    if (!years.length) return;
+
+    const yearKey = String(hazardYear ?? parseInt(years[0], 10));
+    const slice = calamityData[yearKey];
+    if (!slice) return;
+
+    calamityLayerRef.current.eachLayer((layer: L.Layer) => {
+      const id = L.Util.stamp(layer);
+      const brgy = calamityBarangayByLayerIdRef.current[id];
+      if (!brgy) return;
+
+      const d = slice[brgy];
+      const cr = d?.calamity_risk;
+      const fillColor = typeof cr === "number" ? getCalamityRiskColor(cr) : "#cccccc";
+      (layer as L.Path).setStyle({
+        fillColor,
+        fillOpacity: typeof cr === "number" ? 0.75 : 0.2,
+        weight: 1.5,
+        color: "#ffffff",
+      });
+      (layer as L.Path).unbindPopup();
+    });
+  }, [hazardYear, mapView, dataLayer]);
 
   // Handle Barangay Boundaries layer toggle
   useEffect(() => {

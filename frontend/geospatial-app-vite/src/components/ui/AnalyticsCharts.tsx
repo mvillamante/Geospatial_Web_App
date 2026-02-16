@@ -7,6 +7,9 @@ import { useEffect, useState } from "react";
 import {
   LineChart,
   Line,
+  BarChart,
+  Bar,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -643,6 +646,87 @@ export function TyphoonFrequencyChart({ onDataLoaded }: { onDataLoaded?: (hasDat
         </LineChart>
       </ResponsiveContainer>
       <div className="analytics-chart-caption">Typhoon frequency and max severity by year (2020–2025) — Cabuyao region.</div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Hazard Index by Barangay (bar chart for a specific year)
+// ---------------------------------------------------------------------------
+
+const getHazardBarColor = (hi: number): string => {
+  if (hi >= 80) return '#b71c1c';
+  if (hi >= 60) return '#e53935';
+  if (hi >= 40) return '#ff9800';
+  if (hi >= 20) return '#fdd835';
+  return '#66bb6a';
+};
+
+export function HazardIndexBarangayChart({ year = 2025 }: { year?: number }) {
+  const [chartData, setChartData] = useState<{ barangay: string; hazard_index: number }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    fetch(`${API}/hazard-index/?year=${year}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (cancelled) return;
+        const rawData = json?.data ?? json;
+        if (!rawData || typeof rawData !== "object" || Array.isArray(rawData)) {
+          setChartData([]);
+          return;
+        }
+        const entries = Object.entries(rawData as Record<string, { hazard_index: number }>)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .slice(0, FIRST_N_BARANGAYS)
+          .map(([name, data]) => ({
+            barangay: name,
+            hazard_index: Math.round(data.hazard_index * 10) / 10,
+          }));
+        setChartData(entries);
+      })
+      .catch((e) => { if (!cancelled) setError(e.message || "Failed to load"); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [year]);
+
+  if (loading) return <div className="analytics-chart analytics-chart--loading"><span>Loading hazard data…</span></div>;
+  if (error) return <div className="analytics-chart analytics-chart--error"><span>{error}</span></div>;
+  if (chartData.length === 0) return <div className="analytics-chart analytics-chart--empty"><span>No hazard data available.</span></div>;
+
+  return (
+    <div className="analytics-chart analytics-chart--hazard">
+      <ResponsiveContainer width="100%" height={280}>
+        <BarChart data={chartData} margin={{ top: 8, right: 16, left: 8, bottom: 40 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+          <XAxis
+            dataKey="barangay"
+            tick={{ fontSize: 9 }}
+            stroke="#555"
+            angle={-25}
+            textAnchor="end"
+            interval={0}
+          />
+          <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} stroke="#555" />
+          <Tooltip
+            contentStyle={{ fontSize: 11 }}
+            formatter={(v: number | undefined) => [`${v != null ? v.toFixed(1) : 0}`, "Hazard Index"]}
+            labelFormatter={(l) => `Brgy. ${l}`}
+          />
+          <Bar dataKey="hazard_index" name="Hazard Index" radius={[4, 4, 0, 0]}>
+            {chartData.map((entry, index) => (
+              <Cell key={index} fill={getHazardBarColor(entry.hazard_index)} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+      <div className="analytics-chart-caption">
+        Hazard index by barangay ({year}) — first 5 barangays (A–Z). Color indicates severity.
+      </div>
     </div>
   );
 }

@@ -115,6 +115,168 @@
   color: #dc2626;
 }
 
+/*----Index summary cards (right panel top row)----*/
+.panel-card.idx-summary-card {
+  border: 2px solid #e5e7eb;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.panel-card.idx-summary-card .idx-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: #9ca3af;
+}
+
+/* Active green index card */
+.panel-card.idx-summary-card.idx-active.green-active {
+  border-color: #27ae60;
+  box-shadow: 0 0 0 1px #27ae60, 0 2px 8px rgba(39, 174, 96, 0.15);
+}
+
+.panel-card.idx-summary-card.idx-active.green-active .green-idx-value {
+  color: #2e7d32;
+}
+
+/* Active hazard index card */
+.panel-card.idx-summary-card.idx-active.hazard-active {
+  border-color: #ff9800;
+  box-shadow: 0 0 0 1px #ff9800, 0 2px 8px rgba(255, 152, 0, 0.15);
+}
+
+.panel-card.idx-summary-card.idx-active.hazard-active .hazard-idx-value {
+  color: #ff9800;
+}
+
+.hazard-city-avg-card {
+  padding: 14px 16px;
+}
+.hazard-city-avg-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+.hazard-city-avg-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ff9800;
+  line-height: 1.2;
+}
+.hazard-city-avg-subtitle {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+.hazard-timeline-card {
+  text-align: center;
+  padding: 12px 16px;
+}
+.hazard-timeline-year {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ff9800;
+  margin-bottom: 4px;
+}
+.hazard-timeline-hint {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.hazard-barangay-details-card {
+  padding: 14px 16px;
+}
+.hazard-details-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #374151;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.hazard-details-placeholder {
+  font-size: 13px;
+  color: #6b7280;
+  font-style: italic;
+  padding: 16px 0;
+  text-align: center;
+}
+.hazard-details-content {
+  font-size: 13px;
+}
+.hazard-details-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.hazard-details-label {
+  color: #6b7280;
+  min-width: 100px;
+}
+.hazard-details-pill-row {
+  align-items: center;
+}
+.hazard-details-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.hazard-details-breakdown {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+.hazard-details-breakdown-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 10px;
+}
+.hazard-details-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.hazard-details-bar-icon {
+  width: 22px;
+  text-align: center;
+  font-size: 12px;
+}
+.hazard-details-bar-label {
+  flex: 0 0 72px;
+  font-size: 12px;
+  color: #374151;
+}
+.hazard-details-bar-bg {
+  flex: 1;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.hazard-details-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.3s ease;
+}
+.hazard-details-bar-value {
+  flex: 0 0 40px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #111827;
+  text-align: right;
+}
+
 /*----Map View----*/
 .segmented-control + .segmented-control,
 .segmented-control + .info-text {
@@ -190,7 +352,7 @@
   transform: translateX(200%);
 }
 
-/*Data Layer (Choropleth View)*/
+/*Data Layer (Choropleth View) */
 .choropleth-data-layer {
   position: relative;
   width: 100%;
@@ -209,16 +371,22 @@
   align-items: center;
   box-shadow: 0 1px 3px rgba(0,0,0,0.12);
 }
+
+/* Options list overlays above the slider so slider position stays fixed; list can cover slider when open */
 .choropleth-data-layer .select-options {
   list-style: none;
-  margin-top: 125px;
+  margin: 0;
+  margin-top: 6px;
   padding: 4px 0;
   position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
   width: 100%;
   background: var(--white-bg);
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  display: none; /* hidden by default */
+  display: none;
   z-index: 10;
 }
 .choropleth-data-layer .select-options li {
@@ -230,9 +398,6 @@
   background: var(--light-gray-bg);
   border-radius: 8px;
 }
-.choropleth-data-layer .select-wrapper.active .select-options {
-  display: block;
-}
 .choropleth-data-layer .select-options li.selected::after {
   content: "✓";
   float: right;
@@ -242,6 +407,35 @@
 
 
 /*----Time Slider----*/
+.timeslider-wrapper {
+  position: relative;
+}
+
+.timeslider-wrapper.no-layer .timeslider-container {
+  filter: blur(4px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.timeslider-choose-layer-reminder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.timeslider-reminder-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  text-align: center;
+  padding: 0 12px;
+}
+
 .timeslider-container {
   position: relative;
   padding: 5px 16px;
@@ -373,6 +567,52 @@ li.high::before { background: var(--highrisk-color); }
 li.very-high::before { background: var(--veryhighrisk-color); }
 li.critical::before { background: var(--criticalrisk-color); }
 
+/* Note in left-panel legend pointing to map scale */
+.hazard-scale-map-note {
+  margin: 10px 0 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--light-gray-border);
+  font-size: 11px;
+  color: #6b7280;
+  font-style: italic;
+  text-align: center;
+}
+
+/* Index Legend when no layer selected — 3 indices with colors */
+.index-legend-none .index-legend-three {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.index-legend-none .index-legend-three li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+}
+.index-legend-none .index-legend-three li::before {
+  display: none;
+}
+.index-legend-none .index-legend-three .legend-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+.index-legend-none .index-legend-three .legend-swatch.index-green {
+  background: #22c55e;
+}
+.index-legend-none .index-legend-three .legend-swatch.index-hazard {
+  background: #e65100;
+}
+.index-legend-none .index-legend-three .legend-swatch.index-crl {
+  background: #c62828;
+}
+
 /*---------------------MAP COMPONENT----------------------*/
 /*interactive map view*/
 .main-layout-dbmap {
@@ -435,6 +675,219 @@ li.critical::before { background: var(--criticalrisk-color); }
   color: #4b5563;
 }
 
+/* Hazard Index: Floating header card (top-left) */
+.hazard-map-header-card {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  max-width: 320px;
+}
+
+.hazard-map-header-card h3 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.3;
+}
+
+.hazard-map-header-subtitle {
+  margin: 0 0 12px 0;
+  font-size: 11px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.hazard-map-header-avg {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hazard-map-header-avg-label {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.hazard-map-header-avg-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #d32f2f;
+  line-height: 1;
+}
+
+/* Hazard Index: Barangay Details panel (top-right) */
+.hazard-map-barangay-details {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  width: 280px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 13px;
+}
+
+.hazard-map-details-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #374151;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #d32f2f;
+}
+
+.hazard-map-details-placeholder {
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+  padding: 12px 0;
+  text-align: center;
+}
+
+.hazard-map-details-content {
+  font-size: 13px;
+}
+
+.hazard-map-details-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.hazard-map-details-label {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.hazard-map-details-pill-row {
+  align-items: center;
+}
+
+.hazard-map-details-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.hazard-map-details-breakdown {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.hazard-map-details-breakdown-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 10px;
+}
+
+.hazard-map-details-bar-item {
+  margin-bottom: 8px;
+}
+
+.hazard-map-details-bar-text {
+  display: block;
+  font-size: 11px;
+  color: #374151;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.hazard-map-details-bar-bg {
+  width: 100%;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.hazard-map-details-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.hazard-map-risk-scale {
+  position: absolute;
+  bottom: 20px;
+  right: 16px;
+  z-index: 1000;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.hazard-map-risk-scale-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #374151;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #d32f2f;
+}
+
+.hazard-map-risk-scale-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 11px;
+  color: #374151;
+}
+
+.hazard-map-risk-scale-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.hazard-map-risk-scale-list li:last-child {
+  margin-bottom: 0;
+}
+
+.hazard-map-legend-color {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.hazard-map-risk-scale-list li.very-high .hazard-map-legend-color { background: #b71c1c; }
+.hazard-map-risk-scale-list li.high .hazard-map-legend-color { background: #e53935; }
+.hazard-map-risk-scale-list li.moderate .hazard-map-legend-color { background: #ff9800; }
+.hazard-map-risk-scale-list li.low .hazard-map-legend-color { background: #fdd835; }
+.hazard-map-risk-scale-list li.very-low .hazard-map-legend-color { background: #66bb6a; }
+
 /*---------------------RIGHT PANEL----------------------*/
 .dbmright-panel {
   width: 380px;
@@ -446,6 +899,7 @@ li.critical::before { background: var(--criticalrisk-color); }
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  height: 100vh;
 }
 
 .dbmright-panel.closed {
@@ -457,6 +911,7 @@ li.critical::before { background: var(--criticalrisk-color); }
   display: flex;
   align-items: center;
   margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .toggle-panel-btn {
@@ -498,10 +953,31 @@ li.critical::before { background: var(--criticalrisk-color); }
   transition: opacity 0.3s ease;
 }
 
+/* Right-panel scrollbar: use default (same as left panel reference — native up/down arrows) */
 .dbmright-panel.open .right-panel-content {
-  height: 100vh;
+  flex: 1;
   overflow-y: auto;
-  padding-right: 12px;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+/* Webkit scrollbar styling (Chrome, Safari, Edge) */
+.dbmright-panel.open .right-panel-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dbmright-panel.open .right-panel-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dbmright-panel.open .right-panel-content::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.dbmright-panel.open .right-panel-content::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .right-panel-content h4 {
@@ -1912,3 +2388,431 @@ li.critical::before { background: var(--criticalrisk-color); }
 .eda-finding-text strong {
   margin-right: 4px;
 }
+
+
+/* ============================================================
+   GREEN INDEX MAP OVERLAYS (inside the map)
+   ============================================================ */
+
+/* Barangay Details panel (top-right, inside map) */
+.green-map-barangay-details {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  width: 260px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 13px;
+}
+
+.green-map-details-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #374151;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #27ae60;
+}
+
+.green-map-details-placeholder {
+  font-size: 12px;
+  color: #95a5a6;
+  font-style: italic;
+  padding: 12px 0;
+  text-align: center;
+}
+
+.green-map-details-content {
+  font-size: 13px;
+}
+
+.green-map-details-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.green-map-details-label {
+  color: #7f8c8d;
+  font-size: 12px;
+}
+
+.green-map-details-pill-row {
+  align-items: center;
+}
+
+.green-map-details-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Green Index Scale legend (bottom-right, inside map) */
+.green-map-legend {
+  position: absolute;
+  bottom: 20px;
+  right: 16px;
+  z-index: 1000;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.green-map-legend-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #27ae60;
+}
+
+.green-map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-size: 11px;
+  color: #555;
+}
+
+.green-map-legend-item:last-child {
+  margin-bottom: 0;
+}
+
+.green-map-legend-color {
+  display: inline-block;
+  width: 22px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   GREEN INDEX RIGHT PANEL CARDS
+   ============================================================ */
+
+
+.green-city-avg-card {
+  text-align: center;
+  padding: 16px;
+}
+
+.green-city-avg-label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.green-city-avg-value {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 4px 0;
+}
+
+.green-city-avg-subtitle {
+  font-size: 11px;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.green-timeline-card {
+  text-align: center;
+  padding: 12px;
+}
+
+.green-timeline-year {
+  font-size: 24px;
+  font-weight: 800;
+  transition: color 0.3s ease;
+}
+
+.green-timeline-projected {
+  font-size: 11px;
+  color: #e67e22;
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.green-timeline-hint {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+/* ============================================================
+   CALAMITY RISK MAP OVERLAYS (inside the map)
+   ============================================================ */
+
+/* Barangay Details panel (top-right, inside map) */
+.calamity-map-barangay-details {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  width: 280px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 13px;
+}
+
+.calamity-map-details-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #374151;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #e53935;
+}
+
+.calamity-map-details-placeholder {
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+  padding: 12px 0;
+  text-align: center;
+}
+
+.calamity-map-details-content {
+  font-size: 13px;
+}
+
+.calamity-map-details-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.calamity-map-details-label {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.calamity-map-details-pill-row {
+  align-items: center;
+}
+
+.calamity-map-details-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.calamity-map-classification {
+  font-size: 20px;
+  font-weight: 800;
+  color: #374151;
+}
+
+/* Component Breakdown bars */
+.calamity-map-details-breakdown {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.calamity-map-details-breakdown-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 10px;
+}
+
+.calamity-map-details-bar-item {
+  margin-bottom: 8px;
+}
+
+.calamity-map-details-bar-text {
+  display: block;
+  font-size: 11px;
+  color: #374151;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.calamity-map-details-bar-bg {
+  width: 100%;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.calamity-map-details-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+/* Calamity Risk Scale legend (bottom-right, inside map) */
+.calamity-map-risk-scale {
+  position: absolute;
+  bottom: 20px;
+  right: 16px;
+  z-index: 1000;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.calamity-map-risk-scale-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #374151;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #e53935;
+}
+
+.calamity-map-risk-scale-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 11px;
+  color: #374151;
+}
+
+.calamity-map-risk-scale-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.calamity-map-risk-scale-list li:last-child {
+  margin-bottom: 0;
+}
+
+.calamity-map-legend-color {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.calamity-map-risk-scale-list li.very-high .calamity-map-legend-color { background: #b71c1c; }
+.calamity-map-risk-scale-list li.high .calamity-map-legend-color { background: #e53935; }
+.calamity-map-risk-scale-list li.moderate .calamity-map-legend-color { background: #ff7043; }
+.calamity-map-risk-scale-list li.low .calamity-map-legend-color { background: #ffab91; }
+.calamity-map-risk-scale-list li.very-low .calamity-map-legend-color { background: #fce4ec; }
+
+/* ============================================================
+   CALAMITY RISK RIGHT PANEL CARDS
+   ============================================================ */
+
+/* Active calamity risk summary card */
+.panel-card.idx-summary-card.idx-active.calamity-active {
+  border-color: #e53935;
+  box-shadow: 0 0 0 1px #e53935, 0 2px 8px rgba(229, 57, 53, 0.15);
+}
+
+.panel-card.idx-summary-card.idx-active.calamity-active .calamity-idx-value {
+  color: #e53935;
+}
+
+.calamity-city-avg-card {
+  padding: 14px 16px;
+}
+
+.calamity-city-avg-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.calamity-city-avg-value {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 4px 0;
+}
+
+.calamity-city-avg-subtitle {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+.calamity-timeline-card {
+  text-align: center;
+  padding: 12px 16px;
+}
+
+.calamity-timeline-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.calamity-timeline-year {
+  font-size: 24px;
+  font-weight: 800;
+  color: #e53935;
+  margin-bottom: 4px;
+  transition: color 0.3s ease;
+}
+
+.calamity-timeline-projected {
+  font-size: 11px;
+  color: #b71c1c;
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.calamity-timeline-hint {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+

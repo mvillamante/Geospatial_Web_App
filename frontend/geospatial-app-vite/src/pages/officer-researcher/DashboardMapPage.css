@@ -873,10 +873,18 @@ li.critical::before { background: var(--criticalrisk-color); }
 }
 
 .flood-zone-legend .flood-legend-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 28px;
   height: 28px;
   object-fit: contain;
   flex-shrink: 0;
+}
+.flood-zone-legend .flood-legend-icon svg {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 
 .flood-zone-legend .flood-legend-subtitle {
@@ -1003,10 +1011,17 @@ li.critical::before { background: var(--criticalrisk-color); }
 }
 
 .landslide-risk-legend .landslide-legend-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.landslide-risk-legend .landslide-legend-icon svg {
   width: 28px;
   height: 28px;
   object-fit: contain;
-  flex-shrink: 0;
 }
 
 .landslide-risk-legend .landslide-legend-subtitle {
@@ -1897,5 +1912,3 @@ li.critical::before { background: var(--criticalrisk-color); }
 .eda-finding-text strong {
   margin-right: 4px;
 }
-
-

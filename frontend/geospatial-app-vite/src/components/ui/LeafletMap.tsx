@@ -300,6 +300,7 @@ export default function LeafletMap({
       }
     };
 
+
   }, [mapView]);
 
   // Handle Barangay Boundaries layer toggle
@@ -696,3 +697,4 @@ export default function LeafletMap({
     <div id="map" style={{ height: height, width: width }}></div>
   );
 }
+

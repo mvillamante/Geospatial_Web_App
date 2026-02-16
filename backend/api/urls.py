@@ -19,6 +19,8 @@ from .backend_views.hazard_views import (
     hazard_index,
     barangay_geojson,
     model_info,
+    earthquake_freq,
+    typhoon_freq,
 )
 from .backend_views.password_reset_views import *
 from .backend_views.tomtom_views import tomtom_roads_tile, tomtom_traffic_tile
@@ -89,6 +91,8 @@ urlpatterns = [
     path("hazard/hazard-index/", hazard_index, name="hazard_hazard_index"),
     path("hazard/barangays/", barangay_geojson, name="hazard_barangays"),
     path("hazard/model-info/", model_info, name="hazard_model_info"),
+    path("hazard/datasets/earthquake-freq/", earthquake_freq, name="hazard_earthquake_freq"),
+    path("hazard/datasets/typhoon-freq/", typhoon_freq, name="hazard_typhoon_freq"),
 
     # TomTom Tiles
     path("tomtom/roads/<int:z>/<int:x>/<int:y>.png", tomtom_roads_tile, name="tomtom_roads_tile"),

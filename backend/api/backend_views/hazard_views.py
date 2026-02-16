@@ -27,6 +27,7 @@ Endpoint summary
 
 from __future__ import annotations
 
+import csv
 import json
 import logging
 from pathlib import Path
@@ -51,9 +52,10 @@ GREEN_INDEX_OUTPUTS: Path = DATA_DIR / "green_index" / "outputs"
 HAZARD_INDEX_OUTPUTS: Path = DATA_DIR / "hazard_index" / "outputs"
 CALAMITY_RISK_OUTPUTS: Path = DATA_DIR / "calamity_risk" / "outputs"
 
-# Datasets by purpose (geography = barangay boundaries)
+# Datasets by purpose (geography = barangay boundaries, hazards = earthquake/typhoon)
 DATASETS_DIR: Path = DATA_DIR / "datasets"
 GEOGRAPHY_DIR: Path = DATASETS_DIR / "geography"
+HAZARDS_DIR: Path = DATASETS_DIR / "hazards"
 
 # Index-specific model artifacts (for model_info endpoint)
 GREEN_INDEX_ARTIFACTS: Path = DATA_DIR / "green_index" / "model_artifacts"
@@ -193,6 +195,64 @@ def barangay_geojson(request):
             status=404,
         )
     return JsonResponse(data)
+
+
+def _load_csv_as_json(csv_path: Path) -> List[Dict[str, Any]]:
+    """Load a CSV file and return a list of row dicts (numeric values as float/int, dates kept as str)."""
+    if not csv_path.exists():
+        raise FileNotFoundError(f"CSV not found: {csv_path}")
+    rows: List[Dict[str, Any]] = []
+    with csv_path.open("r", encoding="utf-8", newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            out: Dict[str, Any] = {}
+            for k, v in row.items():
+                if not k:
+                    continue
+                if k.lower() == "date" or k.lower().endswith("_place"):
+                    out[k] = v
+                    continue
+                try:
+                    if "." in str(v):
+                        out[k] = float(v)
+                    else:
+                        out[k] = int(v)
+                except (ValueError, TypeError):
+                    out[k] = v
+            rows.append(out)
+    return rows
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def earthquake_freq(request):
+    """
+    Returns earthquake frequency data (date, max_magnitude, quake_count) for charts.
+    Source: datasets/hazards/earthquake_freq.csv
+    """
+    path = HAZARDS_DIR / "earthquake_freq.csv"
+    try:
+        data = _load_csv_as_json(path)
+    except FileNotFoundError as exc:
+        logger.warning(str(exc))
+        return JsonResponse({"error": "Earthquake data not found.", "data": []}, status=404)
+    return JsonResponse({"data": data})
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def typhoon_freq(request):
+    """
+    Returns typhoon frequency data (date, typhoon_count, max_severity) for charts.
+    Source: datasets/hazards/typhoon_freq.csv
+    """
+    path = HAZARDS_DIR / "typhoon_freq.csv"
+    try:
+        data = _load_csv_as_json(path)
+    except FileNotFoundError as exc:
+        logger.warning(str(exc))
+        return JsonResponse({"error": "Typhoon data not found.", "data": []}, status=404)
+    return JsonResponse({"data": data})
 
 
 @api_view(["GET"])

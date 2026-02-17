@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import LeafletMap from "../../components/ui/LeafletMap";
 import "./ReportVerifyPage.css";
 import {
   MapPin,
@@ -14,6 +15,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
+import type { Report } from "../citizen-guest/AlertsComponents/AlertsPanel"
 
 type ReportCategory =
   | "fire"
@@ -26,6 +28,23 @@ type ReportCategory =
   | "fallen_tree"
   | "infrastructure_damage"
   | "others";
+
+const incidentTypeMap: Record<
+  ReportCategory,
+  Report["incident_type"]
+> = {
+  fire: "fire",
+  flood: "flood",
+  landslide: "landslide",
+  typhoon: "typhoon",
+  earthquake: "earthquake",
+  vehicular_accident: "vehicular accident",
+  chemical_gas_leak: "chemical / gas leak",
+  fallen_tree: "fallen tree",
+  infrastructure_damage: "infrastructure damage",
+  others: "others",
+};
+
 
 type ReportStatus = "pending" | "in_progress" | "resolved" | "needs_info" | "rejected";
 type RiskLevel = "low" | "moderate" | "high" | "critical";
@@ -48,11 +67,18 @@ interface CitizenReport {
   assignedOfficerId?: number | null;
   officerNote?: string;
   needs_info_note?: string;
-  rejectionReason?: string;
+  rejection_reason?: string;
   lastUpdatedAt: string;
   photo_url?: string | null;
   reply_message?: string | null;
   reply_image_url?: string | null;
+
+  lgu_post?: {
+    what_happened?: string;
+    action_taken?: string;
+    advisory?: string;
+    updated_at?: string;
+  } | null;
 }
 
 // Report status
@@ -63,8 +89,6 @@ const statusLabel: Record<ReportStatus, string> = {
   needs_info: "Needs Info",
   rejected: "Rejected",
 };
-
-
 
 function formatTime(iso: string) {
   const d = new Date(iso);
@@ -135,6 +159,25 @@ const ReportVerifyPage: React.FC = () => {
     () => reports.find((r) => r.id === selectedId) ?? reports[0],
     [reports, selectedId]
   );
+
+
+  const selectedReportForMap = useMemo(() => {
+    if (!selected) return null;
+
+    return {
+      id: selected.id,
+      incident_type: incidentTypeMap[selected.category],
+      verified_critical_level: selected.verifiedRisk ?? selected.citizenRisk,
+      barangay: selected.barangay,
+      created_at: selected.createdAt,
+      latitude: selected.lat,
+      longitude: selected.lng,
+      status: selected.status,
+      assigned_officer_id: selected.assignedOfficerId ?? null,
+      lgu_post: selected.lgu_post ?? null,
+    };
+  }, [selected]);
+
 
   const isAssignedToMe =
     !!selected &&
@@ -296,7 +339,7 @@ const ReportVerifyPage: React.FC = () => {
     if (!selected) return;
 
     try {
-      const updated = await patchReport(selected.id, { verifiedRisk: level });
+      const updated = await patchReport(selected.id, { verified_critical_level: level });
 
       setReports(prev =>
         prev.map(r =>
@@ -304,7 +347,7 @@ const ReportVerifyPage: React.FC = () => {
             ? {
               ...r,
               ...updated,
-              verifiedRisk: updated.verifiedRisk ?? level,
+              verifiedRisk: updated.verified_critical_level ?? level,
               lastUpdatedAt: updated.lastUpdatedAt ?? r.lastUpdatedAt,
             }
             : r
@@ -412,10 +455,9 @@ const ReportVerifyPage: React.FC = () => {
           what_happened: whatHappened.trim(),
           action_taken: actionTaken.trim(),
           advisory: advisory.trim() || null,
-          published_at: new Date().toISOString(),
-          officer_id: myOfficerId,
         }
       });
+
 
       setReports(prev =>
         prev.map(r =>
@@ -445,7 +487,7 @@ const ReportVerifyPage: React.FC = () => {
 
   const openRejectModal = () => {
     if (!selected) return;
-    setRejectReason(selected.rejectionReason ?? "");
+    setRejectReason(selected.rejection_reason ?? "");
     setModal("reject");
   };
 
@@ -461,8 +503,8 @@ const ReportVerifyPage: React.FC = () => {
     try {
       const updated = await patchReport(selected.id, {
         status: "rejected",
-        rejectionReason: reason,
-        officerNote: `Rejected: ${reason}`,
+        rejection_reason: reason,
+        officer_note: `Rejected: ${reason}`,
       });
 
       setReports(prev =>
@@ -471,9 +513,9 @@ const ReportVerifyPage: React.FC = () => {
             ? {
               ...r,
               ...updated,
-              status: (updated.status ?? "rejected") as ReportStatus,
-              rejectionReason: updated.rejectionReason ?? reason,
-              officerNote: updated.officerNote ?? `Rejected: ${reason}`,
+              status: "rejected",
+              rejection_reason: updated.rejection_reason ?? reason,
+              officerNote: updated.officer_note ?? `Rejected: ${reason}`,
               lastUpdatedAt: updated.lastUpdatedAt ?? r.lastUpdatedAt,
             }
             : r
@@ -486,6 +528,7 @@ const ReportVerifyPage: React.FC = () => {
       alert(e.message);
     }
   };
+
 
 
   const saveNeedsInfoNote = (note: string) => {
@@ -619,8 +662,6 @@ const ReportVerifyPage: React.FC = () => {
                   </div>
 
                   <div className="queue-sub">
-                    <span className="queue-badge">{r.category}</span>
-                    <span className="queue-dot">•</span>
                     <span className="queue-location">{r.barangay}</span>
                   </div>
 
@@ -635,6 +676,14 @@ const ReportVerifyPage: React.FC = () => {
               );
             })}
           </ul>
+        </section>
+
+        <section className="verify-map">
+          <LeafletMap
+            height="100%"
+            selectedReport={selectedReportForMap}
+            activeLayers={["Verified Reports"]}
+          />
         </section>
 
         {/* Right: Detail / Workflow */}
@@ -847,12 +896,49 @@ const ReportVerifyPage: React.FC = () => {
                 </div>
 
                 {/* if rejected show reason */}
-                {selected.status === "rejected" && selected.rejectionReason && (
+                {selected.status === "rejected" && selected.rejection_reason && (
                   <div className="reason-box">
                     <div className="reason-title">Rejection reason</div>
-                    <div className="reason-text">{selected.rejectionReason}</div>
+                    <div className="reason-text">{selected.rejection_reason}</div>
                   </div>
                 )}
+
+                {/* Resolution Summary */}
+                {selected.status === "resolved" && selected.lgu_post && (
+                  <div className="resolution-container">
+                    <div className="detail-block">
+                      <div className="detail-label-block">Resolution Summary</div>
+
+                      {selected.lgu_post.what_happened && (
+                        <>
+                          <div className="resolution-label">What Happened</div>
+                          <div className="resolution-box">
+                            {selected.lgu_post.what_happened}
+                          </div>
+                        </>
+                      )}
+
+                      {selected.lgu_post.action_taken && (
+                        <>
+                          <div className="resolution-label">Action Taken</div>
+                          <div className="resolution-box">
+                            {selected.lgu_post.action_taken}
+                          </div>
+                        </>
+                      )}
+
+                      {selected.lgu_post.advisory && (
+                        <>
+                          <div className="resolution-label">Advisory</div>
+                          <div className="resolution-box advisory">
+                            {selected.lgu_post.advisory}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+
               </div>
 
               {/* Needs Info Conversation Container */}

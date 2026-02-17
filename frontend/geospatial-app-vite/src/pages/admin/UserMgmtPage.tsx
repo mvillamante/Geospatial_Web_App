@@ -226,19 +226,6 @@ const UserMgmtPage: React.FC = () => {
     } catch (err) { console.error(err); }
   };
 
-  const revokeResearcher = async (id: number) => {
-    try {
-      const token = localStorage.getItem("access_token");
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/users/${id}/revoke-researcher/`, {
-        method: "PATCH", headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error("Failed");
-      const updatedUser = await res.json();
-      setUsers(prev => prev.map(u => u.id === id ? updatedUser : u));
-      fetchUsers(currentPage);
-    } catch (err) { console.error(err); }
-  };
-
   /* TABS */
   const tabsRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);

@@ -13,14 +13,9 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
   const [localReport, setLocalReport] = useState(report);
   const [isSending, setIsSending] = useState(false);
 
-  console.log("Status:", localReport.status);
-  console.log("LGU Post:", localReport.lgu_post);
-
   const handleSendReply = async () => {
-    // Trim message
     const trimmedMessage = replyMessage.trim();
 
-    // If nothing to send, exit early
     if (!trimmedMessage && !replyImage) return;
 
     setIsSending(true);
@@ -31,12 +26,10 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
 
       if (trimmedMessage) formData.append("reply_message", trimmedMessage);
 
-      // Only append if file exists and has size > 0
       if (replyImage && replyImage.size > 0) {
         formData.append("reply_image", replyImage);
       }
 
-      // If both are empty after filtering, do nothing
       if (!formData.has("reply_message") && !formData.has("reply_image")) {
         alert("Cannot send empty reply.");
         setIsSending(false);
@@ -62,7 +55,6 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
       setReplyMessage("");
       setReplyImage(null);
 
-      // Update Local and UI
       const updatedReport = {
         ...localReport,
         reply_message: data.reply_message,
@@ -102,6 +94,8 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
         return "Resolved";
       case "archived":
         return "Archived";
+      case "rejected":
+        return "Rejected";
       default:
         return s.charAt(0).toUpperCase() + s.slice(1);
     }
@@ -128,6 +122,20 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
         <p className="modal-desc">{report.description}</p>
 
         {report.photo && <img src={report.photo} alt="report" className="report-photo" />}
+       
+        {/* Officer Note for Rejected */}
+        {localReport.status?.toLowerCase() === "rejected" && (
+          <div className="note-card rejected-card">
+            <div className="note-header">Report Rejected</div>
+
+            {localReport.rejection_reason && (
+              <div className="note-content">
+                {localReport.rejection_reason}
+              </div>
+            )}
+          </div>
+        )}
+
 
         {/* Officer Note for Resolved */}
         {localReport.status?.toLowerCase() === "resolved" && localReport.lgu_post && (
@@ -169,15 +177,13 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
 
 
 
-
         {/* Reply Section */}
-        {report.status === "needs_info" && report.needs_info_note && (
+        {localReport.status === "needs_info" && report.needs_info_note && (
           <div className="note-card needs-info-card">
             <div className="note-header">Officer Note</div>
             <div className="note-content">{report.needs_info_note}</div>
 
             {!report.reply_message && !report.reply_image_url ? (
-              // Show input if no reply exists yet
               <div className="reply-card">
                 <div className="note-header">Your Reply</div>
                 <textarea

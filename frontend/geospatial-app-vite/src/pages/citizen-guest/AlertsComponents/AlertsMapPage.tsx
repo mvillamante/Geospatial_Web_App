@@ -1,5 +1,4 @@
-// Current Alerts and Map Page (Citizen & Guest)
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 import "./AlertsMapPage.css";
@@ -26,6 +25,8 @@ const AlertsMapPage: React.FC = () => {
 
   const activeLayers = useMemo(() => ["Verified Reports"], []);
 
+  const [isVerified, setIsVerified] = useState<boolean | null>(null);
+
   const handleBarangaySearch = (barangay: string, severity: string | null) => {
     setSearchedBarangay(barangay);
     setSearchedSeverity(severity);
@@ -40,6 +41,34 @@ const AlertsMapPage: React.FC = () => {
     setSearchedBarangay("");
     setSearchedSeverity(null);
   };
+  
+
+  useEffect(() => {
+    async function checkVerification() {
+      const token = localStorage.getItem("access_token");
+
+      if (!token) {
+        setIsVerified(false);
+        return;
+      }
+
+      const res = await fetch("http://localhost:8000/api/users/me/", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        setIsVerified(false);
+        return;
+      }
+
+      const data = await res.json();
+      setIsVerified(data.is_resident_verified);
+    }
+
+    checkVerification();
+  }, []);
 
   return (
     <div className="main-layout-map">
@@ -54,6 +83,14 @@ const AlertsMapPage: React.FC = () => {
             reportClickTimestamp={selectedReportData?.clickedAt || null}
             activeLayers={activeLayers}
           />
+
+          {isVerified === false && (
+            <div className="map-overlay">
+              <div className="verification-message">
+                Verify your account to view hazards near your area.
+              </div>
+            </div>
+          )}
         </div>
 
         <div
@@ -75,19 +112,22 @@ const AlertsMapPage: React.FC = () => {
 
 
           {/* Alerts Panel */}
-          <AlertsPanel
-            onReport={() => setIsDrawerOpen(true)}
-            onBarangaySearch={(b, s) => {
-              setPanelCollapsed(false);
-              handleBarangaySearch(b, s);
-            }}
-            onSelectReport={(r) => {
-              setPanelCollapsed(false);
-              handleSelectReport(r);
-              setSelectedReport(r);
-            }}
-            initialOpenIncidentId={openIncidentId}
-          />
+          {isVerified && (
+            <AlertsPanel
+              onReport={() => setIsDrawerOpen(true)}
+              onBarangaySearch={(b, s) => {
+                setPanelCollapsed(false);
+                handleBarangaySearch(b, s);
+              }}
+              onSelectReport={(r) => {
+                setPanelCollapsed(false);
+                handleSelectReport(r);
+                setSelectedReport(r);
+              }}
+              initialOpenIncidentId={openIncidentId}
+            />
+          )}
+
 
         </div>
 

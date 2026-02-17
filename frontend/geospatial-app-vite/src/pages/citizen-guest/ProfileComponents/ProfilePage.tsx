@@ -1,6 +1,5 @@
-import React, { act, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { GraduationCap, Rss } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import ReportCard from './ReportCard';
 import "./ProfilePage.css";
 import { getUserRoleAndDisplayName } from "../../../libr/auth";
@@ -29,6 +28,7 @@ type ReportCardModel = {
   needs_info_note?: string;
   reply_message?: string | null;
   reply_image_url?: string | null;
+  rejection_reason?: string | null;
 };
 
 type IncidentReportAPI = {
@@ -53,11 +53,10 @@ type IncidentReportAPI = {
   needs_info_note?: string;
   reply_message?: string | null;
   reply_image_url?: string | null;
+  rejection_reason: string | null;
 };
 
 type VerificationStatus = "unverified" | "pending" | "verified" | "rejected";
-type ResearcherStatus = "none" | "pending" | "approved" | "rejected";
-
 type ProgressStatus = "Pending" | "In Progress" | "Resolved";
 
 function toProgressStatus(raw: string | undefined | null): ProgressStatus {
@@ -69,6 +68,8 @@ function toProgressStatus(raw: string | undefined | null): ProgressStatus {
   return "Pending";
 }
 const ProfilePage: React.FC = () => {
+  const location = useLocation();
+  const [autoOpenReportId, setAutoOpenReportId] = useState<number | null>(null);
 
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>("unverified");
   const [verificationReason, setVerificationReason] = useState<string>("");
@@ -169,6 +170,16 @@ const ProfilePage: React.FC = () => {
     infrastructure_damage: "Infrastructure Damage",
     others: "Reported Incident",
   };
+
+  useEffect(() => {
+    const openReportId = location.state?.openReportId;
+
+    if (openReportId && reports.length > 0) {
+      setAutoOpenReportId(openReportId);
+
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, reports]);
 
 
   useEffect(() => {
@@ -280,6 +291,7 @@ const ProfilePage: React.FC = () => {
             needs_info_note: r.needs_info_note || null,
             reply_message: r.reply_message || null,
             reply_image_url: r.reply_image_url || null,
+            rejection_reason: r.rejection_reason || null,
           };
 
         });
@@ -672,7 +684,13 @@ const ProfilePage: React.FC = () => {
             ) : (
               activeReports.map((report, index) => (
                 <div key={report.id} className="report-row">
-                  <ReportCard report={report} onUpdate={updateReport} />
+                  <ReportCard
+                    key={report.id}
+                    report={report}
+                    onUpdate={updateReport}
+                    autoOpen={autoOpenReportId === report.id}
+                  />
+
                   {index !== activeReports.length - 1 && (
                     <div className="report-divider" />
                   )}
@@ -700,7 +718,12 @@ const ProfilePage: React.FC = () => {
             ) : (
               archivedReports.map((report, index) => (
                 <div key={report.id} className="report-row">
-                  <ReportCard report={report} onUpdate={updateReport} />
+                  <ReportCard
+                    report={report}
+                    onUpdate={updateReport}
+                    autoOpen={autoOpenReportId === report.id}
+                  />
+
                   {index !== archivedReports.length - 1 && (
                     <div className="report-divider" />
                   )}

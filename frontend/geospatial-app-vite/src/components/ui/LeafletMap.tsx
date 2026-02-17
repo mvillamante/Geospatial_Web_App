@@ -283,6 +283,8 @@ export default function LeafletMap(props: LeafletMapProps) {
   }, [onCalamityRiskBarangaySelect]);
 
 
+
+
   // Initialize map
   useEffect(() => {
     if (!mapRef.current) {
@@ -1371,8 +1373,6 @@ export default function LeafletMap(props: LeafletMapProps) {
     }
 
     const layerGroup = verifiedReportsLayerRef.current;
-    layerGroup.clearLayers();
-    reportMarkersMap.current.clear();
 
     fetch("/api/incident-reports/verified/", {
       headers: {
@@ -1382,13 +1382,20 @@ export default function LeafletMap(props: LeafletMapProps) {
     })
       .then(res => res.json())
       .then(data => {
+        layerGroup.clearLayers();
+        reportMarkersMap.current.clear();
+
         const reports = data.results || [];
 
         reports.forEach((r: any) => {
 
-          const lat = r.lat ?? r.latitude;
-          const lng = r.lng ?? r.longitude;
+          const lat = parseFloat(r.lat);
+          const lng = parseFloat(r.lng);
+
           if (lat == null || lng == null) return;
+
+          console.log("REPORT COORDS:", r.id, r.lat, r.lng);
+
 
           const severity = (r.verified_critical_level || "low").toLowerCase();
           const colors =
@@ -1434,7 +1441,7 @@ export default function LeafletMap(props: LeafletMapProps) {
       </div>
     `);
 
-    
+
 
           reportMarkersMap.current.set(r.id, marker);
         });

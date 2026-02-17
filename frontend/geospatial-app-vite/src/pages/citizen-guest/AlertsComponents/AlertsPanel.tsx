@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Search } from 'lucide-react';
 
 
@@ -27,7 +27,15 @@ interface AlertsPanelProps {
     initialOpenIncidentId?: number;
 }
 
+
+
+
 export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch, initialOpenIncidentId }: AlertsPanelProps) {
+    const hasAutoOpenedRef = useRef(false);
+
+    console.log("initialOpenIncidentId:", initialOpenIncidentId);
+
+
     const [filtersOpen, setFiltersOpen] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -127,11 +135,6 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
                 };
             });
 
-            console.log("verified endpoint payload:", data);
-            console.log("count:", data.count, "results:", data.results?.length);
-
-
-
             setReports(mappedReports);
             setLastUpdated(new Date());
         } catch (err: any) {
@@ -184,43 +187,58 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
         .filter(r => selectedBarangay === "" || r.barangay.toLowerCase().includes(selectedBarangay.toLowerCase()));
 
 
-    const sortedReports = [...filteredReports].sort((a, b) => {
-        if (sortNewest) return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-    });
+    const sortedReports = useMemo(() => {
+        return [...filteredReports].sort((a, b) => {
+            if (sortNewest)
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        });
+    }, [filteredReports, sortNewest]);
+
 
     useEffect(() => {
         if (!reports.length) return;
         if (!initialOpenIncidentId) return;
+        if (hasAutoOpenedRef.current) return;
 
-        const match = reports.find(r => r.id === initialOpenIncidentId);
-        if (!match) return;
+        console.log("reports contains:", reports.some(r => r.id === initialOpenIncidentId));
+        console.log("sortedReports contains:", sortedReports.some(r => r.id === initialOpenIncidentId));
 
-        onSelectReport?.(match);
-
-        setHighlightedId(match.id);
-
-        requestAnimationFrame(() => {
-            const el = document.getElementById(`report-${match.id}`);
-            if (el) {
-                el.scrollIntoView({ behavior: "smooth", block: "center" });
-            }
-        })
-
-        const timeout = setTimeout(() => {
-            setHighlightedId(null);
-        }, 2000);
 
         setSelectedCategory("all");
         setSelectedSeverity("all");
         setSelectedStatus("all");
         setSelectedBarangay("");
 
+    }, [reports, initialOpenIncidentId]);
+
+    useEffect(() => {
+        if (!reports.length) return;
+        if (!initialOpenIncidentId) return;
+        if (hasAutoOpenedRef.current) return;
+
+        const match = reports.find(r => r.id === initialOpenIncidentId);
+        if (!match) return;
+
+        hasAutoOpenedRef.current = true;
+
+        onSelectReport?.(match);
+        setHighlightedId(match.id);
+
+        requestAnimationFrame(() => {
+            const el = document.getElementById(`report-${match.id}`);
+            el?.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+
+        const timeout = setTimeout(() => {
+            setHighlightedId(null);
+        }, 2000);
+
         return () => clearTimeout(timeout);
 
+    }, [sortedReports, reports, initialOpenIncidentId]);
 
 
-    }, [sortedReports, initialOpenIncidentId]);
 
     const timeAgo = (iso: string) => {
         const diffMs = Date.now() - new Date(iso).getTime();
@@ -333,36 +351,6 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
 
 
                 <div className={`filters-collapse ${filtersOpen ? "open" : ""}`}>
-                    {/* CHIPS ROW */}
-                    {/* <div className="chip-row">
-                        <span className="chip-label">Category</span>
-                        {[
-                            "all",
-                            "fire",
-                            "flood",
-                            "landslide",
-                            "typhoon",
-                            "earthquake",
-                            "vehicular_accident",
-                            "chemical_gas_leak",
-                            "fallen_tree",
-                            "infrastructure_damage",
-                        ].map((c) => (
-                            <button
-                                key={c}
-                                type="button"
-                                className={chipClass(selectedCategory === c)}
-                                onClick={() => setSelectedCategory(c)}
-                            >
-                                {c === "all"
-                                    ? "All"
-                                    : c
-                                        .replace(/_/g, " ")
-                                        .replace(/\b\w/g, (l) => l.toUpperCase())}
-                            </button>
-                        ))}
-
-                    </div> */}
 
                     <div className="chip-row">
                         <span className="chip-label">Severity</span>

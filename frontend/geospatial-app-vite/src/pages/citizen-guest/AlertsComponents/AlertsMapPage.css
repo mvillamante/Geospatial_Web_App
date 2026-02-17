@@ -24,6 +24,27 @@
   overflow: hidden;
 }
 
+.map-overlay {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.4);
+  --wekbkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.verification-message {
+  background: white;
+  padding: 20px 30px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
 /* =========================
        Alerts Panel
 ========================= */
@@ -302,10 +323,12 @@
     background: rgba(59, 130, 246, 0.15);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
   }
+
   50% {
     background: rgba(59, 130, 246, 0.08);
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
   }
+
   100% {
     background: #ffffff;
     box-shadow: none;
@@ -441,6 +464,7 @@
   border-radius: 999px;
   background: #10b981;
 }
+
 .lgu-preview-header {
   font-weight: 600;
   font-size: 0.85rem;

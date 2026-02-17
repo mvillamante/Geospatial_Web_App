@@ -24,11 +24,14 @@ export interface NotificationItem {
     timestamp?: string;
     isUnread: boolean;
 
+    reportId?: number;
+    reportCategory?: string;
+    reportBarangay?: string;
     statusFrom?: ReportStatus;
     statusTo?: ReportStatus;
     officerMessage?: string;
     resolutionSummary?: string;
-    rejectReason?: string;
+    rejectionReason?: string;
 
     // For incident
     incidentId?: number;
@@ -93,11 +96,14 @@ const NotificationPage: React.FC = () => {
                     timestamp: n.created_at ? timeAgo(n.created_at) : "",
                     isUnread: !!n.is_unread,
 
+                    reportId: n.report_id,
+                    reportCategory: n.report_category,
+                    reportBarangay: n.report_barangay,
                     statusFrom: n.status_from,
                     statusTo: n.status_to,
                     officerMessage: n.officer_message,
                     resolutionSummary: n.resolution_summary,
-                    rejectReason: n.rejection_reason,
+                    rejectionReason: n.rejection_reason,
 
                     cmsGuideId: n.cms_guide_id,
                     cmsPostId: n.cms_post_id,
@@ -171,6 +177,13 @@ const NotificationPage: React.FC = () => {
             navigate("/main/citizen/alerts-map", {
                 state: { openIncidentId: n.incidentId }
             })
+        }
+
+        if (n.type === "report" && n.reportId) {
+            navigate("/main/citizen/profile", {
+                state: { openReportId: n.reportId }
+            });
+            return;
         }
     };
 
@@ -405,6 +418,9 @@ function NotificationCard({ n, onOpen }: { n: NotificationItem; onOpen?: () => v
     const isIncident = n.type === "incident";
     const incidentUI = isIncident ? formatIncidentLine(n) : null;
 
+    const isReport = n.type === "report";
+    const reportUI = isReport ? formatReportLine(n) : null;
+
     const pill = (() => {
         if (n.type === "official") return <span className="pill pill-official">Official</span>
         if (n.type === "incident") {
@@ -417,21 +433,69 @@ function NotificationCard({ n, onOpen }: { n: NotificationItem; onOpen?: () => v
 
     const metaLine = (() => {
         if (n.type === "incident") {
-            return (
-                <span className="meta">
-                    {incidentUI?.header ?? n.title}
-                </span>
-            );
+            return <span className="meta"> {incidentUI?.header} </span>;
         }
-        return <span className="meta">{n.title}</span>
+        if (n.type === "report") {
+            return <span className="meta"> {reportUI?.header} </span>;
+        }
+        return <span className="meta">{n.title}</span>;
     })();
 
     const detailLine = (() => {
         if (n.type == "incident") {
-            return incidentUI?.sub || n.body;
+            return incidentUI?.sub;
+        }
+        if (n.type === "report") {
+            return reportUI?.sub;
         }
         return n.body;
     })();
+
+    function formatReportLine(n: NotificationItem) {
+        const capitalize = (s?: string) =>
+            s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
+        const category = capitalize(n.reportCategory ?? "Report");
+        const barangay = n.reportBarangay ? ` • ${n.reportBarangay}` : "";
+
+        const from = n.statusFrom;
+        const to = n.statusTo;
+
+        console.log("REPORT STATUS TO:", n.statusTo);
+
+
+        if (n.statusTo === "in_progress") {
+            return {
+                header: `${category}${barangay}`,
+                sub: "An officer has started reviewing your report.",
+            };
+        }
+
+        if (n.statusTo === "needs_info") {
+            return {
+                header: `${category}${barangay}`,
+                sub: `Needs info: ${n.officerMessage ?? ""}`,
+            };
+        }
+
+        if (n.statusTo === "resolved") {
+            return {
+                header: `${category}${barangay}`,
+                sub: `Resolved: ${n.resolutionSummary ?? "The incident has been resolved."}`,
+            };
+        }
+
+        if (n.statusTo === "rejected") {
+            return {
+                header: `${category}${barangay}`,
+                sub: `Rejected: ${n.rejectionReason ?? ""}`,
+            };
+        }
+
+        return {
+            header: `${category}${barangay}`,
+            sub: n.body
+        };
+    }
 
     return (
         <button

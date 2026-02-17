@@ -14,6 +14,7 @@ import VerificationRequestsTab, { type VerificationRequest } from "../../compone
 
 import CreateUserModal from '../../components/ui/Modals/CreateUserModal';
 import Pagination from "../../components/ui/Pagination";
+import ChangePasswordModal from '../../components/ui/Modals/ChangePasswordModal';
 
 type Role = 'Researcher' | 'Officer' | 'Admin';
 type Status = 'Active' | 'Inactive';
@@ -74,6 +75,8 @@ const UserMgmtPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const { userRole } = getUserRoleAndDisplayName();
+
+  const [changePWModal, setChangePWModal] = useState<{ userId: number; userName: string } | null>(null);
 
   /* FETCH USERS */
   const fetchUsers = useCallback(async (page = 1, showLoading = true) => {
@@ -225,7 +228,6 @@ const UserMgmtPage: React.FC = () => {
       fetchUsers(currentPage);
     } catch (err) { console.error(err); }
   };
-
   /* TABS */
   const tabsRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -429,6 +431,17 @@ const UserMgmtPage: React.FC = () => {
                                     <FaUserSlash size={14} /> Revoke Researcher
                                   </button>
                                 )}
+                                {(user.role === "Researcher" || user.extra_roles?.some(r => r.toLowerCase() === "researcher")) && (
+                                  <button
+                                    className="menu-item"
+                                    onClick={() => {
+                                      setChangePWModal({ userId: user.id, userName: user.name });
+                                      setOpenMenu(null);
+                                    }}
+                                  >
+                                  Change Password
+                                  </button>
+                                )}
                               </div>
                             )}
                           </div>
@@ -466,6 +479,16 @@ const UserMgmtPage: React.FC = () => {
           setShowCreateModal(false);
         }} />
       )}
+      {/* Change Password Modal */}
+      {changePWModal && (
+        <ChangePasswordModal
+          userId={changePWModal.userId}
+          userName={changePWModal.userName}
+          onClose={() => setChangePWModal(null)}
+          onPasswordChanged={() => fetchUsers(currentPage)}
+        />
+      )}
+
     </div>
   );
 };

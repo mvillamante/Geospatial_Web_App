@@ -186,6 +186,22 @@ Admin
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated, IsAdminRole])
+def change_user_password(request, user_id):
+    try:
+        user = CustomUser.objects.get(id=user_id) 
+    except User.DoesNotExist:
+        return Response({"detail": "User not found"}, status=404)
+
+    password = request.data.get("password")
+    if not password:
+        return Response({"detail": "Password required"}, status=400)
+
+    user.set_password(password)
+    user.save()
+    return Response({"detail": "Password changed successfully"})
+    
 # Dashboard Views
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])

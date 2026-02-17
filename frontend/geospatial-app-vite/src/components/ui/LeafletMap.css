@@ -251,39 +251,53 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
+  background: radial-gradient(rgba(220, 38, 38, 0.15), rgba(220, 38, 38, 0));
   animation: verifiedPulse 2s ease-out infinite;
 }
 
 .verified-report-marker .pin {
   position: absolute;
-  top: 6px;
-  left: 6px;
+  bottom: 0;
+  left: 50%;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: 50% 50% 50% 0;
+  transform: translateX(-50%) rotate(-45deg) scale(1.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #fff;
   font-size: 16px;
+  font-weight: 600;
   z-index: 2;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease;
 }
 
-.verified-report-marker .pin span {
-  transform: rotate(0deg);
+.verified-report-icon {
+  transform: rotate(45deg);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.verified-report-marker:hover .pin {
+  transform: translateX(-50%) rotate(-45deg) scale(1.1);
 }
 
 @keyframes verifiedPulse {
   0% {
-    transform: scale(0.6);
-    opacity: 0.7;
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.4;
   }
   100% {
-    transform: scale(2);
+    transform: scale(1.4);
     opacity: 0;
   }
 }
+
 
 
 /* =============================================

@@ -17,11 +17,11 @@ import {
 } from "./mapLayers";
 
 // Severity colors matching the alerts panel
-const severityColors: Record<"critical" | "high" | "moderate" | "low", { primary: string; secondary: string; text: string }> = {
-  critical: { primary: "#991b1b", secondary: "#dc2626", text: "CRITICAL" },
-  high: { primary: "#ef4444", secondary: "#f87171", text: "HIGH" },
-  moderate: { primary: "#f59e0b", secondary: "#fbbf24", text: "MODERATE" },
-  low: { primary: "#10b981", secondary: "#34d399", text: "LOW" },
+const severityColors: Record<"critical" | "high" | "moderate" | "low", { primary: string; secondary: string; border: string; text: string }> = {
+  critical: { primary: "#991b1b", secondary: "#dc2626", border: "#9c1515", text: "CRITICAL" },
+  high: { primary: "#ef4444", secondary: "#f87171", border: "#df3838", text: "HIGH" },
+  moderate: { primary: "#f59e0b", secondary: "#fbbf24", border: "#e78c23", text: "MODERATE" },
+  low: { primary: "#10b981", secondary: "#34d399", border: "#0ba876", text: "LOW" },
 };
 
 interface BarangayData {
@@ -1389,13 +1389,13 @@ export default function LeafletMap(props: LeafletMapProps) {
 
         reports.forEach((r: any) => {
 
-          const lat = parseFloat(r.lat);
-          const lng = parseFloat(r.lng);
+          // Wag parseFloat kasi nageerror sa iba :)
+          const lat = r.lat ?? r.latitude;
+          const lng = r.lng ?? r.longitude;
 
           if (lat == null || lng == null) return;
 
-          console.log("REPORT COORDS:", r.id, r.lat, r.lng);
-
+          //console.log("REPORT COORDS:", r.id, r.lat, r.lng);
 
           const severity = (r.verified_critical_level || "low").toLowerCase();
           const colors =
@@ -1408,20 +1408,25 @@ export default function LeafletMap(props: LeafletMapProps) {
             landslide: "⛰️",
             vehicular_accident: "🚗",
             chemical_gas_leak: "☣️",
+            fallen_tree: "🌳",
+            infrastructure_damage: "🏗️",
           };
 
-          const iconEmoji = categoryIcons[r.category] || "📍";
+          const iconEmoji = categoryIcons[r.category] || "⚠️";
 
           const reportIcon = L.divIcon({
             html: `
-    <div class="verified-report-marker">
-      <div class="pulse" style="background:${colors.secondary}40;"></div>
-      <div class="pin"
-           style="background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});">
-        <span>${iconEmoji}</span>
-      </div>
-    </div>
-  `,
+              <div class="verified-report-marker">
+                <div class="pulse" style="background:${colors.secondary}40;"></div>
+                <div class="pin"
+                    style="
+                      background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
+                      border: 3px solid ${colors.border};
+                    ">
+                  <span class="verified-report-icon">${iconEmoji}</span>
+                </div>
+              </div>
+            `,
             className: "",
             iconSize: [44, 44],
             iconAnchor: [22, 44],
@@ -1431,17 +1436,15 @@ export default function LeafletMap(props: LeafletMapProps) {
           const marker = L.marker([lat, lng], { icon: reportIcon })
             .addTo(layerGroup)
             .bindPopup(`
-      <div class="verified-popup">
-        <div class="popup-icon">${iconEmoji}</div>
-        <h3>${r.category_display || "Incident"}</h3>
-        <p>${r.location_display || "Cabuyao, Laguna"}</p>
-        <span class="popup-pill" style="background:${colors.primary}">
-          ${colors.text} RISK
-        </span>
-      </div>
-    `);
-
-
+              <div class="verified-popup">
+                <div class="popup-icon">${iconEmoji}</div>
+                <h3>${r.category_display || "Incident"}</h3>
+                <p>${r.location_display || "Cabuyao, Laguna"}</p>
+                <span class="popup-pill" style="background:${colors.primary}">
+                  ${colors.text} RISK
+                </span>
+              </div>
+            `);
 
           reportMarkersMap.current.set(r.id, marker);
         });

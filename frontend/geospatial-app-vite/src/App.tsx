@@ -5,7 +5,7 @@ import {
   EvacCenterPage, CommunityFeedPage,
   CmsPage, DashboardPage, ReportsMgmtPage, SysMonitoringPage, UserMgmtPage,
   AlertsMapPage, ProfilePage, NotificationPage,
-  DashboardMapPage, ReportVerifyPage,
+  DashboardMapPage, OldDashboardMapPage, ReportVerifyPage,
   PwaAuthPage
  } from "./pages";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -75,6 +75,15 @@ const App: React.FC = () => {
               </ProtectedRoute>
             } 
           />
+          {/* Testing lang ito
+          <Route 
+            path="officer/dashboardmap-test" 
+            element={
+              <ProtectedRoute allowedRoles={["Officer"]}>
+                <DashboardMapPage />
+              </ProtectedRoute>
+            } 
+          />*/}
           <Route 
             path="officer/report-verify" 
             element={

@@ -10,7 +10,8 @@ interface Props {
   onCreated: () => Promise<void>;
 }
 
-const departments: readonly Departments[] = getDepartments();
+// const departments: readonly Departments[] = getDepartments();
+
 
 const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
   const today = new Date().toLocaleDateString();
@@ -22,7 +23,13 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState<StaffRole | "">("");
-  const [department, setDepartment] = useState<Departments | "">("");
+  // const [department, setDepartment] = useState<Departments | "">("");
+  const [department, setDepartment] = useState<string>("");
+  const [departmentsList, setDepartmentsList] = useState<string[]>([
+    ...getDepartments()
+  ]);
+  const [addingDept, setAddingDept] = useState(false);
+  const [newDeptName, setNewDeptName] = useState("");
   const [deptOpen, setDeptOpen] = useState(false);
   const deptRef = useRef<HTMLDivElement>(null);
 
@@ -233,11 +240,56 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
                   </div>
                   {deptOpen && (
                     <ul className="dropdown-options">
-                      {departments.map(dep => (
-                        <li key={dep} onClick={() => { setDepartment(dep); setDeptOpen(false); }}>
+                      {departmentsList.map(dep => (
+                        <li
+                          key={dep}
+                          onClick={() => {
+                            setDepartment(dep);
+                            setDeptOpen(false);
+                          }}
+                        >
                           {dep}
                         </li>
                       ))}
+
+                      {!addingDept && (
+                        <li
+                          className="add-department-option"
+                          onClick={() => setAddingDept(true)}
+                        >
+                          + Add Department
+                        </li>
+                      )}
+
+                      {addingDept && (
+                        <li className="add-department-input">
+                          <input
+                            type="text"
+                            placeholder="Enter new department"
+                            value={newDeptName}
+                            onChange={(e) => setNewDeptName(e.target.value)}
+                            autoFocus
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!newDeptName.trim()) return;
+
+                              setDepartmentsList(prev => [
+                                ...prev,
+                                newDeptName.trim()
+                              ]);
+
+                              setDepartment(newDeptName.trim());
+                              setNewDeptName("");
+                              setAddingDept(false);
+                              setDeptOpen(false);
+                            }}
+                          >
+                            Add
+                          </button>
+                        </li>
+                      )}
                     </ul>
                   )}
                 </div>

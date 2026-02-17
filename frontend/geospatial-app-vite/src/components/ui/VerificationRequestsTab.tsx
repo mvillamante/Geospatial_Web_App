@@ -181,7 +181,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
         <table>
           <thead>
             <tr>
-              <th>#</th>
+              {/* <th>#</th> */}
               <th className="center">Citizen ID</th>
               <th className="center">Citizen Name</th>
               <th className="center">Barangay</th>
@@ -201,7 +201,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
             ) : (
               verifications.map((v, index) => (
                 <tr key={v.id}>
-                  <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td>
+                  {/* <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td> */}
                   <td className="center muted">{v.citizen_id}</td>
                   <td className="user-name">{v.citizen_name}</td>
                   <td className="center">{v.barangay}</td>

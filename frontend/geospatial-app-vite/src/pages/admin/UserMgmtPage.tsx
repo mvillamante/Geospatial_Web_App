@@ -260,10 +260,10 @@ const UserMgmtPage: React.FC = () => {
       {/* Tabs */}
       <div className="user-tabs" ref={tabsRef}>
         <button ref={el => { tabRefs.current[0] = el; }} onClick={() => setTab('users')} className={tab === 'users' ? 'tab active' : 'tab'}>Users</button>
-        <button ref={el => { tabRefs.current[1] = el; }} onClick={() => setTab('requests')} className={tab === 'requests' ? 'tab active' : 'tab'}>
+        {/* <button ref={el => { tabRefs.current[1] = el; }} onClick={() => setTab('requests')} className={tab === 'requests' ? 'tab active' : 'tab'}>
           Researcher Requests
           {pendingCount > 0 && <span className="request-count">{pendingCount}</span>}
-        </button>
+        </button> */}
         <button ref={el => { tabRefs.current[2] = el; }} onClick={() => setTab('verification')} className={tab === 'verification' ? 'tab active' : 'tab'}>
           Citizen Requests
           {/*pendingCount > 0 && <span className="request-count">{pendingCount}</span>*/}
@@ -327,8 +327,9 @@ const UserMgmtPage: React.FC = () => {
             <table>
               <thead>
                 <tr>
-                  <th>#</th>
+                  {/* <th>#</th> */}
                   <th className="center">User</th>
+                  <th className="center">Contact Number</th>
                   <th className="center">Role</th>
                   {/*<th className="center">Department</th>*/}
                   <th className="center">Status</th>
@@ -350,13 +351,13 @@ const UserMgmtPage: React.FC = () => {
               <tbody className="user-table-body">
                 {loading ? (
                   <tr>
-                    <td colSpan={9} className="empty">
+                    <td colSpan={10} className="empty">
                       Loading Users...
                     </td>
                   </tr>
                 ) : users.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="empty">
+                    <td colSpan={10} className="empty">
                       No Users Found.
                     </td>
                   </tr>
@@ -373,12 +374,15 @@ const UserMgmtPage: React.FC = () => {
 
                     return (
                       <tr key={user.id}>
-                        <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td>
+                        {/* <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td> */}
                         <td>
                           <div className={`user-details role-${roleClass}`}>
                             <strong className="user-name">{user.name}</strong>
                             <span className="user-email muted">{user.email}</span>
                           </div>
+                        </td>
+                        <td className="center muted">
+                          {user.phone || "---"}
                         </td>
                         <td className="center">
                           <div className="role-cell">

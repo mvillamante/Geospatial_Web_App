@@ -101,10 +101,41 @@ const CmsPage: React.FC = () => {
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
+  const fetchGuides = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/cms/guides/", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
+
+      const data = await res.json();
+      const mappedGuide = data.map((g: any) => ({
+        postId: g.id,
+        postTitle: g.post_title,
+        postType: g.post_type,
+        postBody: g.post_body,
+        status: g.status === "published" ? "Published" : g.status === "archived" ? "Archived" : "Draft",
+        isPinned: g.is_pinned,
+        createdAt: g.created_at,
+        updatedAt: g.updated_at,
+        publishedAt: g.published_at,
+        attachments: g.attachments || [],
+      }));
+
+      setGuides(mappedGuide);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
     setCurrentPage(1);
   }, [statusFilter, typeFilter, searchQuery, viewArchived]);
@@ -128,40 +159,13 @@ const CmsPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const fetchGuides = async () => {
-      setIsLoading(true);
-      try {
-        const res = await fetch("/api/cms/guides/", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-        });
-
-        const data = await res.json();
-        const mappedGuide = data.map((g: any) => ({
-          postId: g.id,
-          postTitle: g.post_title,
-          postType: g.post_type,
-          postBody: g.post_body,
-          status: g.status === "published" ? "Published" : g.status === "archived" ? "Archived" : "Draft",
-          isPinned: g.is_pinned,
-          createdAt: g.created_at,
-          updatedAt: g.updated_at,
-          publishedAt: g.published_at,
-          attachments: g.attachments || [],
-        }));
-
-        setGuides(mappedGuide);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchGuides();
   }, []);
 
+  // ✅ 3️⃣ And this one for tab switching
+  useEffect(() => {
+    fetchGuides();
+  }, [viewArchived]);
 
   const togglePublish = async (postId: number) => {
     await fetch(`/api/cms/guides/${postId}/publish/`, {
@@ -219,58 +223,68 @@ const CmsPage: React.FC = () => {
   };
 
   const createGuide = async (publishImmediately = false) => {
-    const res = await fetch("/api/cms/guides/create/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-      body: JSON.stringify(newGuide),
-    });
+    if (isPublishing) return; // prevent double click
 
-    if (!res.ok) {
-      alert("Failed to create guide");
-      return;
-    }
+    try {
+      setIsPublishing(true);
 
-    const created = await res.json();
-
-    let uploadedImage = null;
-    if (newGuide.imageFile) {
-      uploadedImage = await uploadImage(created.id, newGuide.imageFile);
-    }
-
-    if (publishImmediately) {
-      await fetch(`/api/cms/guides/${created.id}/publish/`, {
-        method: "PATCH",
+      const res = await fetch("/api/cms/guides/create/", {
+        method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
+        body: JSON.stringify(newGuide),
       });
+
+      if (!res.ok) {
+        alert("Failed to create guide");
+        return;
+      }
+
+      const created = await res.json();
+
+      let uploadedImage = null;
+      if (newGuide.imageFile) {
+        uploadedImage = await uploadImage(created.id, newGuide.imageFile);
+      }
+
+      if (publishImmediately) {
+        await fetch(`/api/cms/guides/${created.id}/publish/`, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+      }
+
+      setGuides(prev => [
+        {
+          postId: created.id,
+          postTitle: created.post_title,
+          postType: created.post_type,
+          postBody: created.post_body,
+          status: publishImmediately ? "Published" : "Draft",
+          isPinned: false,
+          createdAt: created.created_at,
+          updatedAt: created.updated_at,
+          publishedAt: publishImmediately
+            ? new Date().toISOString()
+            : undefined,
+          attachments: uploadedImage ? [uploadedImage] : [],
+        },
+        ...prev,
+      ]);
+
+      setNewGuide({ postTitle: "", postType: "advisory", postBody: "" });
+      setShowCreateModal(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsPublishing(false); // always reset
     }
-
-    setGuides(prev => [
-      {
-        postId: created.id,
-        postTitle: created.post_title,
-        postType: created.post_type,
-        postBody: created.post_body,
-        status: publishImmediately ? "Published" : "Draft",
-        isPinned: false,
-        createdAt: created.created_at,
-        updatedAt: created.updated_at,
-        publishedAt: publishImmediately
-          ? new Date().toISOString()
-          : undefined,
-        attachments: uploadedImage ? [uploadedImage] : [],
-      },
-      ...prev,
-    ]);
-
-
-    setNewGuide({ postTitle: "", postType: "advisory", postBody: "" });
-    setShowCreateModal(false);
   };
+
 
   const updateGuide = async () => {
     if (!editingGuide) return;
@@ -770,16 +784,18 @@ const CmsPage: React.FC = () => {
               <div style={{ display: "flex", gap: "8px" }}>
                 <button
                   className="btn-tertiary"
+                  disabled={isPublishing}
                   onClick={() => createGuide(false)}
                 >
-                  Save Draft
+                  {isPublishing ? "Saving..." : "Save Draft"}
                 </button>
 
                 <button
                   className="btn-primary"
+                  disabled={isPublishing}
                   onClick={() => createGuide(true)}
                 >
-                  Publish Content
+                  {isPublishing ? "Publishing..." : "Publish Content"}
                 </button>
               </div>
             </div>

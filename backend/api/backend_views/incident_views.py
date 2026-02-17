@@ -230,7 +230,11 @@ class OfficerListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        qs = CustomUser.objects.filter(role__iexact="officer").order_by(
+        qs = CustomUser.objects.filter(
+            role__iexact="officer",
+            department__iexact="Operations and Warning",
+            is_active=True
+        ).order_by(
             "first_name", "last_name", "username"
         )
 

@@ -11,6 +11,8 @@ from api.serializer import AdminUserListSerializer, AssignUserRoleSerializer, Cr
 from api.admin_permissions import IsAdminRole
 
 from django.db.models import Q
+from django.core.mail import send_mail
+from django.conf import settings
 
 from .pagination import AdminUserPagination
 
@@ -153,6 +155,35 @@ class CreateStaffUserView(generics.CreateAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         user = serializer.save()
+
+        temp_password = request.data.get("password")
+
+        subject = "Your Temporary Login Credentials"
+        message = f"""
+Hello {user.first_name},
+
+Your account has been created.
+
+Username: {user.username}
+Temporary Password: {temp_password}
+
+Please login and change your password immediately.
+
+Regards,
+Admin
+"""
+
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            print("EMAIL ERROR:", e)
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 # Dashboard Views

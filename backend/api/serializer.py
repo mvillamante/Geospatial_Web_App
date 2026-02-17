@@ -403,6 +403,16 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
 class AssignOfficerSerializer(serializers.Serializer):
     officer_id = serializers.IntegerField()
 
+    def update(self, instance, validated_data):
+        officer_id = validated_data.get("officer_id")
+        officer = CustomUser.objects.filter(id=officer_id, role="officer").first()
+        if not officer:
+            raise serializers.ValidationError("Officer not found.")
+        instance.assigned_officer = officer
+        instance.save()
+        return instance
+
+
 class UpdateStatusSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=IncidentReport.STATUS_CHOICES)
 
@@ -533,6 +543,7 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
     
 class IncidentReportUpdateSerializer(serializers.ModelSerializer):
     verifiedRisk = serializers.CharField(source="verified_critical_level", required=False, allow_null=True)
+    assigned_officer = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.filter(role="officer"),write_only=True,required=False)
     assignedTo = serializers.SerializerMethodField()
     officerNote = serializers.CharField(source="officer_note", required=False, allow_blank=True, allow_null=True)
     rejectionReason = serializers.CharField(source="rejection_reason", required=False, allow_blank=True, allow_null=True)
@@ -547,6 +558,7 @@ class IncidentReportUpdateSerializer(serializers.ModelSerializer):
         fields = [
             "status",
             "verifiedRisk",
+            "assigned_officer",
             "officerNote",
             "rejectionReason",
             "assignedTo",
@@ -564,6 +576,12 @@ class IncidentReportUpdateSerializer(serializers.ModelSerializer):
             return None
         return (u.get_full_name().strip() or u.username or f"Citizen #{u.id}")
 
+    def update(self, instance, validated_data):
+        officer = validated_data.pop("assigned_officer", None)
+        if officer:
+            instance.assigned_officer = officer
+
+        return super().update(instance, validated_data)
 
 class IncidentReportReplySerializer(serializers.ModelSerializer):
     reply_message = serializers.CharField(required=False, allow_blank=True)

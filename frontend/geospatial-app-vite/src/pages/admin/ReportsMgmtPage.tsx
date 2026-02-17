@@ -282,7 +282,7 @@ const ReportsMgmtPage: React.FC = () => {
 
   const assignOfficer = async (reportId: number, officerId: number) => {
     try {
-      const updated = await patchReport(reportId, { officer_id: officerId });
+      const updated = await patchReport(reportId, { assigned_officer: officerId });
 
       setReports((prev) =>
         prev.map((r) => (r.id === reportId ? { ...r, ...updated } : r))

@@ -50,7 +50,17 @@ class UserListView(ListAPIView):
 
         # Apply search filter (include citizens if they match)
         if search:
-            qs = qs.filter(username__icontains=search)
+            search = search.strip()
+
+            qs = qs.filter(
+                Q(first_name__icontains=search) |
+                Q(last_name__icontains=search) |
+                Q(email__icontains=search) |
+                Q(phone__icontains=search) |
+                Q(first_name__icontains=search.split(" ")[0],
+                last_name__icontains=search.split(" ")[-1])
+    )
+
 
         # Ordering
         if ordering:

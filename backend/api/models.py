@@ -28,6 +28,7 @@ class CustomUser(AbstractUser):
     phone = models.CharField(max_length=20, unique=True, null=True, blank=True)
     staff_number = models.PositiveIntegerField(null=True, blank=True, unique=True)
     department = models.CharField(max_length=100, blank=True, null=True)
+    is_resident_verified = models.BooleanField(default=False)
 
     groups = models.ManyToManyField(
         'auth.Group',
@@ -384,6 +385,10 @@ class Notification(models.Model):
     title = models.CharField(max_length = 255)
     body = models.TextField(blank=True, null=True)
 
+    report_id = models.BigIntegerField(null=True, blank=True)
+    report_category = models.CharField(max_length=40, null=True, blank=True)
+    report_barangay = models.CharField(max_length=120, null=True, blank=True)
+
     incident_id = models.BigIntegerField(null=True, blank=True)
     severity = models.CharField(max_length=20, null=True, blank=True)
     severity_from = models.CharField(max_length=20, null=True, blank=True)
@@ -392,6 +397,14 @@ class Notification(models.Model):
 
     cms_guide_id = models.BigIntegerField(null=True, blank=True)
     cms_post_id = models.CharField(max_length=50, null=True, blank=True)
+
+    status_from = models.CharField(max_length=20, null=True, blank=True)
+    status_to = models.CharField(max_length=20, null=True, blank=True)
+
+    officer_message = models.TextField(null=True, blank=True)
+    resolution_summary = models.TextField(null=True, blank=True)
+    rejection_reason = models.TextField(null=True, blank=True)
+
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -412,7 +425,8 @@ class NotificationRead(models.Model):
 class ResidentVerificationRequest(models.Model):
     STATUS_CHOICES = [
         ("pending", "Pending"),
-        ("approved", "Approved"),
+        ("approved", "Approved"
+        ),
         ("rejected", "Rejected"),
     ]
 

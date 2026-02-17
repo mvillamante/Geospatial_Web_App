@@ -23,8 +23,6 @@ class MeSerializer(serializers.ModelSerializer):
     verification_status = serializers.SerializerMethodField()
     verification_rejection_reason = serializers.SerializerMethodField()
 
-    researcher_status = serializers.SerializerMethodField()
-    researcher_rejection_reason = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
@@ -38,11 +36,9 @@ class MeSerializer(serializers.ModelSerializer):
             "role",
             "extra_roles",
             "staff_id",
-
+            "is_resident_verified",
             "verification_status",
             "verification_rejection_reason",
-            "researcher_status",
-            "researcher_rejection_reason",
         )
         read_only_fields = ("id", 
                             "username", 
@@ -51,8 +47,6 @@ class MeSerializer(serializers.ModelSerializer):
                             "staff_id",
                             "verification_status",
                             "verification_rejection_reason",
-                            "researcher_status",
-                            "researcher_rejection_reason",
                             )
 
     def validate_email(self, value):
@@ -318,6 +312,19 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
     assigned_officer_label = serializers.SerializerMethodField()
     lgu_post = serializers.SerializerMethodField()
     assigned_officer_id = serializers.IntegerField(allow_null=True, read_only=True)
+    lat = serializers.DecimalField(
+        source="latitude",
+        max_digits=10,
+        decimal_places=7,
+        allow_null=True
+    )
+
+    lng = serializers.DecimalField(
+        source="longitude",
+        max_digits=10,
+        decimal_places=7,
+        allow_null=True
+    )
     reply_image_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -330,8 +337,8 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
             "category_display",
             "description",
             "location_display",
-            "latitude",
-            "longitude",
+            "lat",
+            "lng",
             "status",
             "created_at",
             "suggested_critical_level",
@@ -435,6 +442,7 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
     reply_message = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     reply_image_url = serializers.SerializerMethodField()
     needs_info_note = serializers.CharField(required=False, allow_blank=True, allow_null=True )
+    rejection_reason = serializers.CharField(required=False, allow_blank=True, allow_null=True )
 
 
     class Meta:
@@ -456,6 +464,7 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
             "reply_message",
             "reply_image_url",
             "needs_info_note",
+            "rejection_reason",
             "lat",
             "lng",
             "status",
@@ -464,13 +473,9 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
         ]
         
     def update(self, instance, validated_data):
-        # needsInfoNote
-        note = validated_data.pop("needs_info_note", None)
-        if note is not None and (instance.status or "").lower() == "needs_info":
-            instance.needs_info_note = note
-
-        instance.save()
-        return instance
+       
+       instance = super().update(instance, validated_data)
+       return instance
     
     def get_photo_url(self, obj):
         if not obj.photo_path:
@@ -501,7 +506,6 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
         if s == "rejected":
             return "rejected"
         return "pending"
-
 
     def get_reporterName(self, obj):
         u = obj.user
@@ -794,7 +798,38 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = ["id", "type", "title", "category", "body", "created_at", "cms_guide_id", "cms_post_id", "event", "incident_id", "category", "barangay", "severity", "severity_from", "severity_to", "is_unread"]
+        fields = [
+            "id", 
+            "type",
+            "title", 
+            "category", 
+            "body", 
+            "created_at", 
+
+            # CMS
+            "cms_guide_id", 
+            "cms_post_id", 
+
+            # Incident fields
+            "event", 
+            "incident_id", 
+            "category", 
+            "barangay", 
+            "severity", 
+            "severity_from", 
+            "severity_to",
+
+            # Report status fields
+            "report_id",
+            "report_category",
+            "report_barangay",
+            "status_from",
+            "status_to",
+            "officer_message",
+            "resolution_summary",
+            "rejection_reason",
+
+            "is_unread"]
 
     def get_is_unread(self, obj):
         user = self.context["request"].user

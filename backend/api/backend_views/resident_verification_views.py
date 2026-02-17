@@ -41,24 +41,38 @@ class ApproveRejectResidentVerificationView(generics.UpdateAPIView):
 
     def patch(self, request, *args, **kwargs):
         verification = self.get_object()
-        action = request.data.get("action")  # "approve" or "reject"
+        action = request.data.get("action")  
 
         if action not in ["approve", "reject"]:
-            return Response({"detail": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Invalid action."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         if action == "approve":
-            verification.status = "Approved"
+            verification.status = "approved"
             verification.reviewed_by = request.user
             verification.reviewed_at = timezone.now()
+            verification.save()
+
+            user = verification.user
+            user.is_resident_verified = True
+            user.save()
+
         else:
-            verification.status = "Rejected"
+            verification.status = "rejected"  
             verification.rejection_reason = request.data.get("reason", "")
             verification.reviewed_by = request.user
             verification.reviewed_at = timezone.now()
+            verification.save()
 
-        verification.save()
+            user = verification.user
+            user.is_resident_verified = False
+            user.save()
+
         serializer = self.get_serializer(verification)
         return Response(serializer.data)
+
 
 class ResidentVerificationRequestView(APIView):
     permission_classes = [IsAuthenticated]

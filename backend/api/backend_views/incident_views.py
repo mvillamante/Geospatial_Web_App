@@ -13,6 +13,10 @@ from api.serializer import *
 from api.supabase_storage import create_signed_url
 from api.models import IncidentReport
 
+from django.db import transaction
+from django.db.models import Q
+from django.db.models.functions import Lower
+
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser])
@@ -128,66 +132,98 @@ class IncidentReportsQueueView(generics.ListAPIView):
 class IncidentReportPatchView(generics.UpdateAPIView):
     queryset = IncidentReport.objects.select_related("user", "assigned_officer")
     serializer_class = IncidentReportUpdateSerializer
-    lookup_url_kwarg = "report_id"   
+    lookup_url_kwarg = "report_id"
 
     def patch(self, request, *args, **kwargs):
         report = self.get_object()
         data = request.data.copy()
 
-        if data.get("assignToMe") is True:
-            report.assigned_officer = request.user
-            report.save(update_fields=["assigned_officer"])
-            return Response(IncidentReportQueueSerializer(report).data)
-
-        officer_id = data.get("officer_id") or data.get("assigned_officer_id")
-        if officer_id:
-            try:
-                officer_id = int(officer_id)
-            except (TypeError, ValueError):
-                raise ValidationError({"officer_id": "Must be an integer."})
-
-            officer = get_object_or_404(CustomUser, id=officer_id, role__iexact="officer")
-            report.assigned_officer = request.user
-
-            report.save(update_fields=["assigned_officer"])
-            return Response(IncidentReportUpdateSerializer(report).data, status=status.HTTP_200_OK)
+        old_status = report.status
 
         if "status" in data and isinstance(data["status"], str):
             data["status"] = data["status"].lower()
-        
+
         new_status = data.get("status")
-        if isinstance(new_status, str):
-            new_status = new_status.lower()
 
         if new_status in ["in_progress", "resolved"] and not report.verified_critical_level:
-            raise ValidationError({"verifiedRisk": "Verified critical level is required before setting this status."})
+            raise ValidationError({
+                "verifiedRisk": "Verified critical level is required before setting this status."
+            })
 
         serializer = self.get_serializer(report, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         report.refresh_from_db()
-        return Response(IncidentReportQueueSerializer(report).data, status=status.HTTP_200_OK)
+
+        if new_status and old_status != report.status:
+
+            title_map = {
+                "in_progress": "Your report is now in progress",
+                "needs_info": "More information required",
+                "resolved": "Report resolved",
+                "rejected": "Report rejected"
+            }
+
+            notif_kwargs = {
+                "type": "report",
+                "title": title_map.get(report.status, "Report status updated"),
+                "status_from": old_status,
+                "status_to": report.status,
+                "report_id": report.id,
+                "report_category": report.get_category_display(),
+                "report_barangay": report.location_display,
+            }
+
+            if report.status == "needs_info":
+                notif_kwargs["officer_message"] = report.needs_info_note
+
+            elif report.status == "resolved":
+                notif_kwargs["resolution_summary"] = (
+                    report.lgu_post.get("action_taken")
+                    if report.lgu_post else None
+                )
+
+            elif report.status == "rejected":
+                notif_kwargs["rejection_reason"] = report.rejection_reason
+
+            Notification.objects.create(**notif_kwargs)
+
+        return Response(
+            IncidentReportQueueSerializer(report).data,
+            status=status.HTTP_200_OK
+        )
+
 
 
 
 class VerifiedIncidentReportsView(generics.ListAPIView):
-    """
-    Returns all incident reports where status='verified'.
-    """
     serializer_class = IncidentReportListSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        qs = (
+        user = self.request.user
+
+        if getattr(user, "role", None) == "officer":
+            return self.base_queryset()
+
+        if user.is_resident_verified:
+            return self.base_queryset()
+
+        return IncidentReport.objects.none()
+
+    def base_queryset(self):
+        return (
             IncidentReport.objects
-            .exclude(verified_critical_level__isnull=True)
             .annotate(vcl_lower=Lower("verified_critical_level"))
-            .filter(vcl_lower__in=["low", "moderate", "high", "critical"])
+            .filter(
+                Q(vcl_lower__in=["low", "moderate", "high", "critical"]) |
+                Q(status__iexact="resolved")
+            )
             .order_by("-created_at")
         )
-        
-        return qs
+    
+    
 
 
 class OfficerListView(APIView):

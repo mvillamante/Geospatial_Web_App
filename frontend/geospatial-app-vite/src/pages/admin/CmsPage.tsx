@@ -634,7 +634,7 @@ const CmsPage: React.FC = () => {
                                     setOpenMenuId(null);
                                   }}
                                 >
-                                  <Eye size={16} /> View
+                                  <Eye size={16} /> {guide.status === "Published" ? "Unpublish" : "Publish"}
                                 </button>
                               </>
                             ) : (

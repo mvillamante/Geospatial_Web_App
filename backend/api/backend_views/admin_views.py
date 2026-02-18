@@ -73,7 +73,7 @@ class UserListView(ListAPIView):
         if ordering:
             qs = qs.order_by(ordering)
         else:
-            qs = qs.order_by('-date_joined')
+            qs = qs.order_by('date_joined')
 
         return qs
     

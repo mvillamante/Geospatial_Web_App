@@ -20,6 +20,13 @@ ROLE_CHOICES = [
     ('citizen', 'Citizen'),
 ]
 
+# Departments model -------------------------------------------------------------------------------
+class Department(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
+
 # Custom User model ------------------------------------------------------------------
 class CustomUser(AbstractUser):
     # Custom fields
@@ -27,7 +34,6 @@ class CustomUser(AbstractUser):
     extra_roles = models.JSONField(default=list, blank=True)
     phone = models.CharField(max_length=20, unique=True, null=True, blank=True)
     staff_number = models.PositiveIntegerField(null=True, blank=True, unique=True)
-    department = models.CharField(max_length=100, blank=True, null=True)
     is_resident_verified = models.BooleanField(default=False)
 
     groups = models.ManyToManyField(
@@ -43,6 +49,14 @@ class CustomUser(AbstractUser):
         blank=True,
         help_text='Specific permissions for this user.',    
         related_query_name='customuser'
+    )
+
+    department = models.ForeignKey(
+        Department,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="users"
     )
 
     def __str__(self):
@@ -474,3 +488,4 @@ class ResearcherRequest(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+

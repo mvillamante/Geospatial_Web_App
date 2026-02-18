@@ -6,8 +6,8 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
-from api.models import CustomUser, IncidentReport
-from api.serializer import AdminUserListSerializer, AssignUserRoleSerializer, CreateStaffUserSerializer
+from api.models import CustomUser, IncidentReport, Department
+from api.serializer import AdminUserListSerializer, AssignUserRoleSerializer, CreateStaffUserSerializer, DepartmentSerializer
 from api.admin_permissions import IsAdminRole
 
 from django.db.models import Q
@@ -15,6 +15,11 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 from .pagination import AdminUserPagination
+
+class DepartmentListCreateView(generics.ListCreateAPIView):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentSerializer
+    permission_classes = [IsAuthenticated, IsAdminRole]
 
 class UserListView(ListAPIView):
     serializer_class = AdminUserListSerializer

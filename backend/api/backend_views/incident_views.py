@@ -232,7 +232,7 @@ class OfficerListView(APIView):
     def get(self, request):
         qs = CustomUser.objects.filter(
             role__iexact="officer",
-            department__iexact="Operations and Warning",
+            department__name__iexact="Operations and Warning",
             is_active=True
         ).order_by(
             "first_name", "last_name", "username"

@@ -42,6 +42,8 @@ urlpatterns = [
     path('admin/resident-verifications/<int:pk>/', ApproveRejectResidentVerificationView.as_view(), name="admin_resident_verification_detail",),
     path("admin/stats/", dashboard_stats,name="dashboard-stats"),
     path("admin/users/<int:user_id>/change-password/", change_user_password),
+    path("admin/departments/", DepartmentListCreateView.as_view()),
+
     # Researcher_Views
     path("researcher/request/", CreateResearcherRequestView.as_view(), name="researcher_request_create"),
     path("admin/researcher_requests/", ResearcherRequestListView.as_view(), name="researcher_requests_list"),

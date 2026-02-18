@@ -11,6 +11,11 @@ from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from api.utilities.profanity import contains_profanity
 
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Department
+        fields = ["id", "name"]
+
 class UserSerializer(serializers.ModelSerializer):
     staff_id = serializers.ReadOnlyField()
     class Meta:
@@ -167,7 +172,7 @@ class AdminUserListSerializer(serializers.ModelSerializer):
     staff_id = serializers.ReadOnlyField()
     date_joined_display = serializers.SerializerMethodField()
     last_login_display = serializers.SerializerMethodField()
-    department = serializers.SerializerMethodField()
+    department = serializers.CharField(source="department.name", read_only=True)
     
     class Meta:
         model = CustomUser
@@ -696,6 +701,11 @@ class CmsGuideAttachmentCreateSerializer(serializers.Serializer):
 class CreateStaffUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     staff_id = serializers.CharField(read_only=True)
+    department = serializers.PrimaryKeyRelatedField(
+        queryset=Department.objects.all(),
+        required=False,
+        allow_null=True
+    )
 
     class Meta:
         model = CustomUser

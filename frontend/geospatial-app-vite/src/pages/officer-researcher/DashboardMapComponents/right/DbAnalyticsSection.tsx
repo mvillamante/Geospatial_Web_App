@@ -1,4 +1,4 @@
-import React, { useState, useEffect, type JSX } from "react";
+import React, { useState, type JSX } from "react";
 import {
   RiskLikelihoodChart,
   GreenIndexProjectionChart,
@@ -27,7 +27,6 @@ const DbAnalyticsSection: React.FC<Props> = ({
   keyInsights = [],
   colors = [],
   insightIcons = [],
-  userRole2,
   showEdaModal = false,
   setShowEdaModal,
   edaSect = "edastats",
@@ -44,7 +43,12 @@ const DbAnalyticsSection: React.FC<Props> = ({
   const [fetchedModelHealth, setFetchedModelHealth] = useState<any[]>([]);
   const [fetchedTimeSeries, setFetchedTimeSeries] = useState<any | null>(null);
   const [fetchedPerBarangay, setFetchedPerBarangay] = useState<Record<string, any> | null>(null);
-  const [fetchedConfusionMatrix, setFetchedConfusionMatrix] = useState<number[][] | null>(null);
+  const [fetchedTrainingHistory, setFetchedTrainingHistory] = useState<{ loss: number[]; val_loss: number[] } | null>(null);
+  const [fetchedResiduals, setFetchedResiduals] = useState<{ actual: number[]; predicted: number[] } | null>(null);
+  const [fetchedPopulationCorrelation, setFetchedPopulationCorrelation] = useState<any | null>(null);
+  const [fetchedDistribution, setFetchedDistribution] = useState<any | null>(null);
+  const [fetchedModelComparison, setFetchedModelComparison] = useState<any | null>(null);
+  const [fetchedEnhancedDataQuality, setFetchedEnhancedDataQuality] = useState<any | null>(null);
 
   const loadEdaData = async () => {
     setEdaError(null);
@@ -59,7 +63,12 @@ const DbAnalyticsSection: React.FC<Props> = ({
       setFetchedModelHealth(payload.modelHealthItems || []);
       setFetchedTimeSeries(payload.timeSeries || null);
       setFetchedPerBarangay(payload.perBarangaySummary || null);
-      setFetchedConfusionMatrix(payload.confusion_matrix || payload.confusionMatrix || payload.model_confusion_matrix || null);
+      setFetchedTrainingHistory(payload.trainingHistory || null);
+      setFetchedResiduals(payload.residuals || null);
+      setFetchedPopulationCorrelation(payload.populationCorrelation || null);
+      setFetchedDistribution(payload.distribution || null);
+      setFetchedModelComparison(payload.modelComparison || null);
+      setFetchedEnhancedDataQuality(payload.enhancedDataQuality || null);
     } catch (err: any) {
       setEdaError(err?.message || "Failed to load EDA data");
       setFetchedStatItems([]);
@@ -126,7 +135,12 @@ const DbAnalyticsSection: React.FC<Props> = ({
           edaError={edaError}
           timeSeries={fetchedTimeSeries}
           perBarangaySummary={fetchedPerBarangay}
-          confusionMatrix={fetchedConfusionMatrix}
+          populationCorrelation={fetchedPopulationCorrelation}
+          trainingHistory={fetchedTrainingHistory}
+          residuals={fetchedResiduals}
+          distribution={fetchedDistribution}
+          modelComparison={fetchedModelComparison}
+          enhancedDataQuality={fetchedEnhancedDataQuality}
         />
     </>
   );

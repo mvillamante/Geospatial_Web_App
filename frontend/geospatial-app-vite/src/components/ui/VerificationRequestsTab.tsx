@@ -263,6 +263,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
               <p><strong>Rejection Reason:</strong> {modalVerification.rejection_reason}</p>
             )}
             <p><strong>Requested At:</strong> {new Date(modalVerification.created_at).toLocaleString()}</p>
+            <p><strong>Barangay ID:</strong></p>
             <img
               src={signedUrl || placeholderImg}
               alt="Barangay ID"

@@ -19,6 +19,7 @@ from .backend_views.hazard_views import (
     hazard_index,
     barangay_geojson,
     model_info,
+    eda_summary,
     earthquake_freq,
     typhoon_freq,
 )
@@ -93,6 +94,7 @@ urlpatterns = [
     path("hazard/hazard-index/", hazard_index, name="hazard_hazard_index"),
     path("hazard/barangays/", barangay_geojson, name="hazard_barangays"),
     path("hazard/model-info/", model_info, name="hazard_model_info"),
+    path("hazard/eda/summary/", eda_summary, name="hazard_eda_summary"),
     path("hazard/datasets/earthquake-freq/", earthquake_freq, name="hazard_earthquake_freq"),
     path("hazard/datasets/typhoon-freq/", typhoon_freq, name="hazard_typhoon_freq"),
 

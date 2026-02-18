@@ -63,6 +63,22 @@ Welcome! If you are working on the machine learning models for this project, her
 7. Backend uses the new outputs/ automatically on next restart
 ```
 
+### Optional: Dashboard training curves and residual plot
+
+The **Model Performance** tab in the EDA modal can show:
+
+- **Training vs Validation Loss** — LSTM loss over epochs.
+- **Residual Plot** — residuals (actual − predicted) vs predicted.
+
+To enable these, save the following files under `model_artifacts/` (e.g. in `data/hazard/model_artifacts/` or your workspace `Hazard/model_artifacts/`):
+
+| File | Format | Example (in notebook after `model.fit`) |
+|------|--------|----------------------------------------|
+| `training_history.json` | `{"loss": [0.1, 0.05, ...], "val_loss": [0.12, 0.06, ...]}` | `json.dump({"loss": history.history["loss"], "val_loss": history.history["val_loss"]}, open("model_artifacts/training_history.json", "w"))` |
+| `residuals.json` | `{"actual": [y1, y2, ...], "predicted": [ŷ1, ŷ2, ...]}` | After validation: `json.dump({"actual": y_true.tolist(), "predicted": y_pred.tolist()}, open("model_artifacts/residuals.json", "w"))` |
+
+Alternatively you can add `training_history` and/or `residuals` to `gi_model_config.json` (same key names and array shapes). The backend checks `green_index/model_artifacts`, then `hazard/model_artifacts`, then the workspace artifacts.
+
 ---
 
 ## Models Overview

@@ -143,6 +143,24 @@
   transform: scale(1.05);
 }
 
+.user-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.manage-dept-btn {
+  background: #f1f3f5;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.manage-dept-btn:hover {
+  background: #e9ecef;
+}
+
 /*Sort Header*/
 .user-page .sort-header {
   display: inline-flex;

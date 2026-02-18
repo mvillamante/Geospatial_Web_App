@@ -15,6 +15,7 @@ import VerificationRequestsTab, { type VerificationRequest } from "../../compone
 import CreateUserModal from '../../components/ui/Modals/CreateUserModal';
 import Pagination from "../../components/ui/Pagination";
 import ChangePasswordModal from '../../components/ui/Modals/ChangePasswordModal';
+import ManageDepartmentsModal from '../../components/ui/Modals/ManageDepartmentsModal';
 
 type Role = 'Researcher' | 'Officer' | 'Admin';
 type Status = 'Active' | 'Inactive';
@@ -77,6 +78,8 @@ const UserMgmtPage: React.FC = () => {
   const { userRole } = getUserRoleAndDisplayName();
 
   const [changePWModal, setChangePWModal] = useState<{ userId: number; userName: string } | null>(null);
+  const [showDeptModal, setShowDeptModal] = useState(false);
+  const [departmentRefreshKey, setDepartmentRefreshKey] = useState(0);
 
   /* FETCH USERS */
   const fetchUsers = useCallback(async (page = 1, showLoading = true) => {
@@ -304,9 +307,17 @@ const UserMgmtPage: React.FC = () => {
                   >x</button>
                 )}
               </div>
-              <button className="create-user-btn" onClick={() => setShowCreateModal(true)}>
-                <FiPlus size={16} /> Create User
-              </button>
+              <div className="user-actions">
+                <button
+                  className="manage-dept-btn"
+                  onClick={() => setShowDeptModal(true)}
+                >
+                  ⚙ Manage Departments
+                </button>
+                <button className="create-user-btn" onClick={() => setShowCreateModal(true)}>
+                  <FiPlus size={16} /> Create User
+                </button>
+              </div>
             </div>
           </div>
 
@@ -479,6 +490,16 @@ const UserMgmtPage: React.FC = () => {
           setShowCreateModal(false);
         }} />
       )}
+      {/* Manage Departments Modal */}
+      {showDeptModal && (
+        <ManageDepartmentsModal
+          onClose={() => setShowDeptModal(false)}
+          onDepartmentChanged={() => {
+            setDepartmentRefreshKey(prev => prev + 1);
+          }}
+        />
+      )}
+
       {/* Change Password Modal */}
       {changePWModal && (
         <ChangePasswordModal

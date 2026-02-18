@@ -1,9 +1,5 @@
 const _DEPARTMENTS = [
-  "Administrative and Training",
-  "Research and Planning",
-  "Operations and Warning",
-  "Communications and Command",
-  "Rescue and Emergency Medical Services"
+"hi"
 ] as const;
 
 export type Departments = typeof _DEPARTMENTS[number];

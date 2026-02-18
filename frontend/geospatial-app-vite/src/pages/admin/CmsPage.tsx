@@ -83,6 +83,7 @@ const CmsPage: React.FC = () => {
       time: d.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
+        second: "2-digit",
       }),
     };
   };
@@ -162,7 +163,6 @@ const CmsPage: React.FC = () => {
     fetchGuides();
   }, []);
 
-  // ✅ 3️⃣ And this one for tab switching
   useEffect(() => {
     fetchGuides();
   }, [viewArchived]);
@@ -634,7 +634,7 @@ const CmsPage: React.FC = () => {
                                     setOpenMenuId(null);
                                   }}
                                 >
-                                  <Eye size={16} /> View
+                                  <Eye size={16} /> {guide.status === "Published" ? "Unpublish" : "Publish"}
                                 </button>
                               </>
                             ) : (

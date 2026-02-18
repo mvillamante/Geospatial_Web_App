@@ -4,6 +4,7 @@ import { CheckCircle, XCircle } from "lucide-react";
 import { LuEllipsis } from "react-icons/lu";
 import { FiEye, FiX } from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
+import placeholderImg from '../../assets/placeholder_img/SampleID.png';
 
 export type VerificationStatus = "Pending" | "Approved" | "Rejected";
 
@@ -33,6 +34,8 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [modalVerification, setModalVerification] = useState<Verification | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
 
   /* =========================
      FETCH FROM BACKEND
@@ -260,7 +263,26 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
               <p><strong>Rejection Reason:</strong> {modalVerification.rejection_reason}</p>
             )}
             <p><strong>Requested At:</strong> {new Date(modalVerification.created_at).toLocaleString()}</p>
-            <img src={signedUrl || "/placeholder.png"} alt="Barangay ID" style={{ width: "60px" }} />
+            <p><strong>Barangay ID:</strong></p>
+            <img
+              src={signedUrl || placeholderImg}
+              alt="Barangay ID"
+              className="clickable"
+              onClick={() => setIsImageModalOpen(true)}
+            />
+            {/* Image Lightbox Modal */}
+            {isImageModalOpen && (
+              <div
+                className="image-modal-backdrop"
+                onClick={() => setIsImageModalOpen(false)}
+              >
+                <img
+                  src={signedUrl || placeholderImg}
+                  alt="Enlarged ID"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            )}
 
             {modalVerification.status === "Pending" && (
               <div className="verification-modal-actions" style={{ display: "flex", gap: "10px", alignItems: "flex-start", marginTop: "10px" }}>

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import "./GlobalModal.css";
-import { getDepartments, type Departments } from "../../../constants"
+// import { getDepartments, type Departments } from "../../../constants"
 
 
 type StaffRole = "admin" | "officer" | "researcher";
@@ -8,12 +8,13 @@ type StaffRole = "admin" | "officer" | "researcher";
 interface Props {
   onClose: () => void;
   onCreated: () => Promise<void>;
+  departmentRefreshKey: number; 
 }
 
 // const departments: readonly Departments[] = getDepartments();
 
 
-const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
+const CreateUserModal: React.FC<Props> = ({ onClose, onCreated, departmentRefreshKey }) => {
   const today = new Date().toLocaleDateString();
 
   // Form state
@@ -23,15 +24,15 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState<StaffRole | "">("");
-  // const [department, setDepartment] = useState<Departments | "">("");
-  const [department, setDepartment] = useState<string>("");
-  const [departmentsList, setDepartmentsList] = useState<string[]>([
-    ...getDepartments()
-  ]);
-  const [addingDept, setAddingDept] = useState(false);
-  const [newDeptName, setNewDeptName] = useState("");
-  const [deptOpen, setDeptOpen] = useState(false);
-  const deptRef = useRef<HTMLDivElement>(null);
+  const [department, setDepartment] = useState<number | "">("");
+  const [departments, setDepartments] = useState<{id:number,name:string}[]>([]);
+
+  // const [departmentsList, setDepartmentsList] = useState<string[]>([
+  //   ...getDepartments()
+  // ]);
+  // const [addingDept, setAddingDept] = useState(false);
+  // const [newDeptName, setNewDeptName] = useState("");
+
 
   // Password & validation
   const [error, setError] = useState("");
@@ -45,15 +46,43 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
   const finalUsername = username || generatedUsername;
 
   // Close dropdown if clicked outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (deptRef.current && !deptRef.current.contains(e.target as Node)) {
-        setDeptOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  // useEffect(() => {
+  //   const handleClickOutside = (e: MouseEvent) => {
+  //     if (deptRef.current && !deptRef.current.contains(e.target as Node)) {
+  //       setDeptOpen(false);
+  //     }
+  //   };
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => document.removeEventListener("mousedown", handleClickOutside);
+  // }, []);
+
+const fetchDepartments = async () => {
+  try {
+    const token = localStorage.getItem("access_token");
+    const res = await fetch("http://127.0.0.1:8000/api/admin/departments/", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await res.json();
+    console.log("Departments API response:", data);
+
+    if (Array.isArray(data.results)) {
+      setDepartments(data.results); // <-- use the results array
+    } else {
+      setDepartments([]);
+    }
+  } catch (err) {
+    console.error("Failed to fetch departments:", err);
+    setDepartments([]);
+  }
+};
+
+
+
+useEffect(() => {
+  fetchDepartments();
+}, [departmentRefreshKey]);
+
 
   // Validators
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -232,69 +261,24 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
             </div>
 
             {role === "officer" && (
-              <div className="form-group" ref={deptRef}>
+              <div className="form-group">
                 <label>Department <span className="required-star">*</span></label>
-                <div className="custom-dropdown">
-                  <div className="dropdown-selected" onClick={() => setDeptOpen(!deptOpen)}>
-                    {department || "Select department"} <span className="dropdown-arrow">▾</span>
-                  </div>
-                  {deptOpen && (
-                    <ul className="dropdown-options">
-                      {departmentsList.map(dep => (
-                        <li
-                          key={dep}
-                          onClick={() => {
-                            setDepartment(dep);
-                            setDeptOpen(false);
-                          }}
-                        >
-                          {dep}
-                        </li>
+                  <div className="department-select-wrapper">
+                    <select
+                      value={department || ""}
+                      onChange={(e) => setDepartment(Number(e.target.value))}
+                    >
+                      <option value="">Select Department</option>
+                      {departments.map((dep) => (
+                        <option key={dep.id} value={dep.id}>
+                          {dep.name}
+                        </option>
                       ))}
-
-                      {!addingDept && (
-                        <li
-                          className="add-department-option"
-                          onClick={() => setAddingDept(true)}
-                        >
-                          + Add Department
-                        </li>
-                      )}
-
-                      {addingDept && (
-                        <li className="add-department-input">
-                          <input
-                            type="text"
-                            placeholder="Enter new department"
-                            value={newDeptName}
-                            onChange={(e) => setNewDeptName(e.target.value)}
-                            autoFocus
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (!newDeptName.trim()) return;
-
-                              setDepartmentsList(prev => [
-                                ...prev,
-                                newDeptName.trim()
-                              ]);
-
-                              setDepartment(newDeptName.trim());
-                              setNewDeptName("");
-                              setAddingDept(false);
-                              setDeptOpen(false);
-                            }}
-                          >
-                            Add
-                          </button>
-                        </li>
-                      )}
-                    </ul>
-                  )}
-                </div>
+                    </select>
+                  </div>
               </div>
             )}
+
           </div>
 
           <div className="form-row">

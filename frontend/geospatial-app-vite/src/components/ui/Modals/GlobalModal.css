@@ -420,3 +420,67 @@
   text-decoration: underline;
 }
 
+
+/* Add Dept */
+.dept-add-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+}
+
+.dept-add-row input {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.dept-add-row button {
+  padding: 0.5rem 0.9rem;
+  border-radius: 6px;
+  border: none;
+  background: #1e88e5;
+  color: white;
+  cursor: pointer;
+}
+
+.dept-add-row button:hover {
+  background: #1565c0;
+}
+
+.dept-list {
+  max-height: 250px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dept-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.dept-item:hover {
+  background: #f1f3f5;
+}
+
+.dept-item .danger {
+  background: #e53935;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+}
+
+.dept-item .danger:hover {
+  background: #c62828;
+}
+

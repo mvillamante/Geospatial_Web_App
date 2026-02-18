@@ -27,6 +27,7 @@ const reportStatuses: ReportStatus[] = [
 type Officer = {
   id: number;
   label: string;
+  department_id: number;
 }
 
 
@@ -717,7 +718,9 @@ const ReportsMgmtPage: React.FC = () => {
                   >
                     <option value="" disabled>Select Officer..</option>
 
-                    {officers.map((o) => (
+                  {officers
+                    .filter(o => o.department_id === selectedReport.department_id)
+                    .map((o) => (
                       <option key={o.id} value={String(o.id)}>
                         {o.label}
                       </option>

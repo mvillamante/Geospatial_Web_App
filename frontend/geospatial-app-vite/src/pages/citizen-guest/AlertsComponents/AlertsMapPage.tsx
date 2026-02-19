@@ -41,7 +41,7 @@ const AlertsMapPage: React.FC = () => {
     setSearchedBarangay("");
     setSearchedSeverity(null);
   };
-  
+
 
   useEffect(() => {
     async function checkVerification() {
@@ -64,7 +64,10 @@ const AlertsMapPage: React.FC = () => {
       }
 
       const data = await res.json();
-      setIsVerified(data.is_resident_verified);
+      const rawStatus = (data.verification_status || "").toLowerCase();
+
+      setIsVerified(rawStatus === "approved" || rawStatus === "verified");
+
     }
 
     checkVerification();

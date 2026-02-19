@@ -1,4 +1,4 @@
-import '../../../pages/shared/EvacCenterPage.css';
+import "./AddEvacCenterModal.css";
 import React, { useState } from "react";
 import MapPickerModal from "./MapPickerModal";
 
@@ -76,7 +76,7 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = (
 
   return (
     <>
-      <div className="modal-overlay">
+      <div className="add-evac-modal-overlay">
         <div className="modal">
           <h3>Add Evacuation Center</h3>
           <form onSubmit={handleSubmit}>
@@ -167,7 +167,7 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = (
               <div className="form-group">
                 <label>Coordinates</label>
                 <div className="coord-row">
-                  <input name="coordinates" readOnly value={formState.coordinates} placeholder="Lat, Long" required />
+                  <input name="coordinates" disabled value={formState.coordinates} placeholder="Lat, Long" required />
                   <button type="button" className="pick-map-btn" onClick={() => setMapOpen(true)}>Pick on Map</button>
                 </div>
               </div>

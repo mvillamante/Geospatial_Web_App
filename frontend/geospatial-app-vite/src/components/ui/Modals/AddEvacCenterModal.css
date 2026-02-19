@@ -1,0 +1,292 @@
+/* =======================================
+   ADD EVACUATION CENTER MODAL
+======================================= */
+
+/* Overlay */
+.evac-page .add-evac-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  z-index: 1000;
+  animation: fadeInOverlay 0.2s ease;
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Modal Container */
+.evac-page .modal {
+  width: min(650px, 100%);
+  max-height: 90vh;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2rem 1.8rem;
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.15),
+    0 8px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  overflow-y: auto;
+  animation: modalSlideIn 0.25s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(15px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Title */
+.evac-page .modal h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111827;
+  text-align: center;
+  letter-spacing: -0.3px;
+}
+
+/* Form Layout */
+.evac-page .modal .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.evac-page .modal .form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+/* Inputs */
+.evac-page .modal input,
+.evac-page .modal select {
+  height: 42px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  background: #f9fafb;
+  transition: all 0.2s ease;
+}
+
+.evac-page .modal input:focus,
+.evac-page .modal select:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.evac-page .modal input[readonly] {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.evac-page .modal input[readonly]:focus {
+  border-color: none
+}
+
+/* Form Rows */
+.evac-page .modal .form-row {
+  display: grid;
+  gap: 14px;
+}
+
+.evac-page .modal .form-row.two {
+  grid-template-columns: 1fr 1fr;
+}
+
+.evac-page .modal .form-row.three {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+/* Coordinate Row */
+.evac-page .modal .coord-row {
+  display: flex;
+  gap: 10px;
+}
+
+.evac-page .modal input:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  border-color: none;
+}
+
+/* Facilities card */
+.facilities-card{
+  margin-top: 6px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--muted-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.facilities-card .title{
+  font-weight: 700;
+  font-size: 14px;
+  margin: 0;
+}
+
+.facility-item{
+  display: inline-block;
+  background: rgba(15,23,42,0.05);
+  padding: 6px 8px;
+  border-radius: 999px;
+  margin: 4px 6px 0 0;
+  font-size: 13px;
+  color: var(--text);
+}
+
+/* Facility row for editing */
+.facility-row{
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.facility-row input{
+  flex: 1;
+  height: 38px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(2,6,23,0.06);
+}
+
+.facility-row button{
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background var(--transition);
+}
+
+.facility-row button:hover{
+  background: rgba(2,6,23,0.04);
+}
+
+/* Add facility button */
+.add-facility-btn{
+  align-self: start;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px dashed rgba(15,23,42,0.06);
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+
+
+/* Pick Map Button */
+.evac-page .modal .pick-map-btn {
+  background: #eef2ff;
+  border: 1px solid #dbeafe;
+  color: #1e40af;
+  font-weight: 600;
+  height: 42px;
+  border-radius: 10px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.evac-page .modal .pick-map-btn:hover {
+  background: #dbeafe;
+  transform: translateY(-2px);
+}
+
+/* Facilities Input */
+.evac-page .modal input[name="facilities"] {
+  font-style: italic;
+  color: #4b5563;
+}
+
+/* Divider between sections (optional) */
+.evac-page .modal hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Modal Actions */
+.evac-page .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+.evac-page .modal-actions button {
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem 1.2rem;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+/* Primary */
+.evac-page .modal-actions button[type="submit"] {
+  background: #2563eb;
+  color: white;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+}
+
+.evac-page .modal-actions button[type="submit"]:hover {
+  background: #1e40af;
+  transform: translateY(-2px);
+}
+
+/* Cancel */
+.evac-page .modal-actions button[type="button"] {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.evac-page .modal-actions button[type="button"]:hover {
+  background: #e5e7eb;
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .evac-page .modal {
+    padding: 1.5rem 1rem;
+  }
+
+  .evac-page .modal .form-row.two,
+  .evac-page .modal .form-row.three {
+    grid-template-columns: 1fr;
+  }
+
+  .evac-page .modal-actions {
+    flex-direction: column;
+  }
+
+  .evac-page .modal-actions button {
+    width: 100%;
+  }
+}

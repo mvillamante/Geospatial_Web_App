@@ -674,7 +674,7 @@
 .verification-badge.rejected { background: #ffe7e7; }
 .verification-badge.unverified { background: #f0f0f0; }
 
-.verification-reason {
+.profile-page .profile-info .verification-reason {
   margin-top: 6px;
   color: #b00020;
   font-size: 13px;

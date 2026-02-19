@@ -300,17 +300,6 @@
     font-weight: 500;
 }
 
-.form-group input:invalid,
-.form-group select:invalid {
-    border-color: #dc2626;
-    background-color: #fef2f2;
-}
-
-.form-group input:invalid:focus,
-.form-group select:invalid:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-}
 
 .create-user-modal.confirm-step {
   padding: 1rem 1.5rem;

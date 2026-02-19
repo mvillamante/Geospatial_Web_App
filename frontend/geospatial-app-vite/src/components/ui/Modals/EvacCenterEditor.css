@@ -1,472 +1,307 @@
-/* =========================
-   Editor Card - Common
-========================= */
-.editor-card {
-  border-radius: 12px;
-  padding: 0.8rem 1rem;
-  border: 1px solid var(--light-gray-border);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  display: flex;
-  flex-direction: column;
+/* Container card */
+.editor-card{
   width: 100%;
-  gap: 0.6rem;
-  transition: transform .3s cubic-bezier(.4,0,.2,1), box-shadow .3s cubic-bezier(.4,0,.2,1), border-color .3s ease;
-  transform-origin: center;
-}
-
-/* Enter animation: zoom in */
-@keyframes zoomIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.editor-card.enter {
-  animation: zoomIn 0.35s cubic-bezier(.4,0,.2,1) forwards;
-}
-
-/* Exit animation: slide left */
-@keyframes slideLeft {
-  0% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(-100%);
-  }
-}
-
-.editor-card.exit {
-  animation: slideLeft 0.3s ease forwards;
-}
-
-.editor-card.view-only {
-  border-color: #d1d5db;
-  background: #f9fafb;
+  max-width: 880px;
+  margin: 14px auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.08);
+  padding: 18px;
+  box-sizing: border-box;
+  color: #0f172a;
+  border: 1px solid rgba(15,23,42,0.04);
+  position: relative;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
 }
 
 /* Header */
-.editor-header {
+.editor-header{
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  color: white;
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 10px;
-  letter-spacing: 0.4px;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(15,23,42,0.05);
+  margin-bottom: 14px;
 }
 
-.editor-header.edit-mode {
-  background: linear-gradient(135deg, #3b82f6, #3b82f6cc);
-}
-
-.editor-header.view-only {
-  background: linear-gradient(135deg, #9ca3af, #9ca3afcc);
-}
-
-.editor-header .icon {
-  font-size: 20px;
-}
-
-.editor-card .role-badge {
-  margin-left: auto;
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: white;
-  background: #6b7280;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-/* Form Labels */
-.editor-card .form-group label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 0.25rem;
-}
-
-/* Editable Inputs */
-.editor-card .form-group input,
-.editor-card .form-group select {
-  width: 100%;
-  border-radius: 10px;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.85rem;
-  border: 1px solid #d1d5db;
-  outline: none;
-  background: #f9fafb;
-}
-
-.editor-card .form-group input:focus,
-.editor-card .form-group select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-  background: #fff;
-}
-
-/* =========================
-   View-only Cards
-========================= */
-.view-card {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  background: #e5e7eb;
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
-  color: #374151;
-  font-size: 0.85rem;
-}
-
-.view-card .icon {
-  font-size: 16px;
-}
-
-.view-card .label {
-  font-size: 12px;
-  color: #6b7280;
-  margin: 0;
-}
-
-.view-card .value {
-  font-size: 13px;
-  font-weight: 600;
-  color: #3b82f6;
-  margin: 0;
-  margin-left: 5px;
-}
-
-.view-card.small {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 6px;
-  font-size: 0.75rem;
-}
-
-
-.view-card.small .value {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #111827;
-}
-
-/* Form Rows */
-.form-row {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.form-row.two {
-  grid-template-columns: 1fr 1fr;
-}
-
-.form-row.three {
-  grid-template-columns: 1fr 1fr 1fr;
-}
-
-.form-group.small {
-  margin-bottom: 0.5rem;
-}
-
-/* Facilities Card */
-.facilities-card {
-  padding: 6px 8px;
-  background: #f9fafb;
-  border-radius: 6px;
-  border: 0.2px solid rgb(243, 242, 242);
-  border-left: 3px solid #3b82f6;
-  margin-bottom: 0.5rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-}
-
-.facilities-card .title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 4px;
-}
-
-.facility-item {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 8px;
-  background: linear-gradient(135deg, #eff6ff, #dbeafe);
-  border: 1px solid #93c5fd;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #1e3a8a;
-  margin-right: 4px;
-  margin-bottom: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-/* Coordinates / Pick on Map Button */
-.coord-row {
-  display: flex;
-  gap: 6px;
-}
-
-.pick-map-btn {
-  background: #3b82f6;
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.3rem 0.5rem;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-}
-
-.pick-map-btn:hover {
-  background: #2563eb;
-}
-
-/* Bottom Banner */
-.evac-banner {
-  margin-top: 8px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #d1fae5;
-}
-
-.evac-banner .icon {
-  font-size: 14px;
-}
-
-.evac-banner .text {
-  font-size: 10px;
-  font-weight: 500;
-}
-
-/* Modal Actions (Save / Cancel) */
-.editor-card .modal-actions {
-  display: flex;
-  gap: 6px;
-  margin-top: 0.5rem;
-}
-
-.editor-card .modal-actions button {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.35rem 0.6rem;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-}
-
-.editor-card .modal-actions button:first-child {
-  background: #3b82f6;
-  color: white;
-}
-
-.editor-card .modal-actions button:first-child:hover {
-  background: #2563eb;
-}
-
-.editor-card .modal-actions button:last-child {
-  background: #e5e7eb;
-  color: #374151;
-}
-
-.editor-card .modal-actions button:last-child:hover {
-  background: #d1d5db;
-}
-
-/* =========================
-   Compact Edit Mode
-========================= */
-.editor-card.edit-mode {
-  padding: 0.6rem 0.75rem;
-  gap: 0.45rem;
-  border-color: #3b82f6;
-  background: #f0f9ff;
-  max-height: 435px;
-  height: 400px;
-}
-
-/* Header tighter */
-.editor-card.edit-mode .editor-header {
-  padding: 4px 8px;
-  font-size: 9px;
-}
-
-/* Labels smaller */
-.editor-card.edit-mode .form-group label {
-  font-size: 0.7rem;
-  margin-bottom: 0.15rem;
-}
-
-/* Inputs tighter */
-.editor-card.edit-mode .form-group input,
-.editor-card.edit-mode .form-group select {
-  padding: 0.35rem 0.55rem;
-  font-size: 0.75rem;
-  border-radius: 8px;
-}
-
-/* Reduce row gaps */
-.editor-card.edit-mode .form-row {
-  gap: 0.35rem;
-}
-
-.editor-card.edit-mode .form-group.small {
-  margin-bottom: 0.35rem;
-}
-
-/* Facilities card tighter */
-.editor-card.edit-mode .facilities-card {
-  padding: 4px 6px;
-  margin-bottom: 0.35rem;
-}
-
-.editor-card.edit-mode .facility-item {
-  padding: 2px 6px;
-  font-size: 10px;
-  margin-right: 3px;
-  margin-bottom: 3px;
-}
-
-/* Map picker row tighter */
-.editor-card.edit-mode .coord-row {
-  gap: 4px;
-}
-
-.editor-card.edit-mode .facilities-card {
-  max-height: 150px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-/* Optional: scrollbar styling for webkit browsers */
-.editor-card.edit-mode .facilities-card::-webkit-scrollbar {
-  width: 6px;
-}
-
-.editor-card.edit-mode .facilities-card::-webkit-scrollbar-thumb {
-  background-color: #93c5fd;
-  border-radius: 3px;
-}
-
-.editor-card.edit-mode .facilities-card::-webkit-scrollbar-track {
-  background: #e5e7eb;
-}
-
-
-/* Editable Facility Rows */
-.editor-card.edit-mode .facilities-card .facility-row {
-  display: flex;
-  align-items: center;
-  overflow-y: auto;
-  max-height: 150px;
-  gap: 4px;
-  margin-bottom: 4px;
-}
-
-.editor-card.edit-mode .facilities-card .facility-row input {
-  flex: 1;
-  padding: 0.35rem 0.5rem;
-  font-size: 0.75rem;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  outline: none;
-  background: #f9fafb;
-}
-
-.editor-card.edit-mode .facilities-card .facility-row input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-  background: #fff;
-}
-
-.editor-card.edit-mode .facilities-card .facility-row button {
-  background: #ef4444;
-  color: white;
-  font-size: 0.65rem;
-  font-weight: 600;
-  padding: 0.25rem 0.4rem;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-}
-
-.editor-card.edit-mode .facilities-card .facility-row button:hover {
-  background: #dc2626;
-}
-
-.editor-card.edit-mode .facilities-card .add-facility-btn {
-  background: #3b82f6;
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 0.3rem 0.5rem;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-}
-
-.editor-card.edit-mode .facilities-card .add-facility-btn:hover {
-  background: #2563eb;
-}
-
-/* =========================
-   Compact Save / Cancel
-========================= */
-.editor-card.edit-mode .modal-actions {
-  gap: 6px;
-  margin-top: 0.5rem;
-  justify-content: flex-end;
-}
-
-.editor-card.edit-mode .modal-actions button {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.3rem 0.7rem;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 70px;
+.editor-header .icon{
+  font-size: 22px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border-radius: 9px;
+  background: #f1f5f9;
 }
 
-.editor-card.edit-mode .modal-actions button:first-child {
-  background: #10b981;
-  color: white;
+.editor-header .label{
+  font-weight: 600;
+  font-size: 16px;
 }
 
-.editor-card.edit-mode .modal-actions button:first-child:hover {
-  background: #059669;
-  transform: scale(1.05);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-}
-
-.editor-card.edit-mode .modal-actions button:last-child {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.editor-card.edit-mode .modal-actions button:last-child:hover {
+.role-badge{
+  margin-left: auto;
   background: #e5e7eb;
-  transform: scale(1.05);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* View cards */
+.view-field-group{
+  display: grid;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.view-card{
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+  min-height: 54px;
+}
+
+.view-card.small{
+  padding: 10px;
+  min-height: 48px;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.view-card .label{
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.view-card .value{
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Form */
+.form-group{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.form-group label{
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group select{
+  height: 40px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus{
+  border-color: #0ea5a4;
+  box-shadow: 0 0 0 3px rgba(14,165,164,0.1);
+}
+
+.form-group input[readonly]{
+  background: #f1f5f9;
+  color: #6b7280;
+  cursor: default;
+}
+
+/* Layout rows */
+.form-row{
+  display: grid;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.form-row.two{
+  grid-template-columns: 1fr 280px;
+}
+
+.form-row.three{
+  grid-template-columns: 1fr 1fr 200px;
+}
+
+
+
+@media (max-width: 720px){
+  .form-row.two,
+  .form-row.three{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Coordinates */
+.coord-row{
+  display: flex;
+  gap: 8px;
+}
+
+.coord-row input{
+  flex: 1;
+}
+
+.pick-map-btn{
+  background: #0ea5a4;
+  color: white;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  height: 40px;
+  transition: 0.2s ease;
+}
+
+.pick-map-btn:hover{
+  background: #05989a;
+}
+
+/* Facilities */
+.facilities-card{
+  margin-top: 6px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.facilities-card .title{
+  font-weight: 700;
+  font-size: 14px;
+  margin: 0;
+}
+
+.facility-item{
+  display: inline-block;
+  background: #e5e7eb;
+  padding: 6px 8px;
+  border-radius: 999px;
+  margin: 4px 6px 0 0;
+  font-size: 13px;
+}
+
+.facility-row{
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.facility-row input{
+  flex: 1;
+  height: 38px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.facility-row button{
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.facility-row button:hover{
+  background: #f1f5f9;
+}
+
+.add-facility-btn{
+  align-self: start;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px dashed #d1d5db;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Evacuation banner */
+.evac-banner{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+}
+
+.evac-banner .text{
+  font-weight: 700;
+  color: #92400e;
+}
+
+/* Footer buttons */
+.evac-card-wrapper .modal-actions{
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  justify-content: flex-end;
+} 
+
+.evac-card-wrapper .modal-actions button{
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  height: 40px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.evac-card-wrapper .modal-actions button:first-child{
+  background: #0ea5a4;
+  color: white;
+} 
+
+.evac-card-wrapper .modal-actions button:first-child:hover{
+  background: #05989a;
+}
+
+.evac-card-wrapper .modal-actions button:last-child{
+  background: transparent;
+  border: 1px solid #e5e7eb;
+} 
+
+.evac-card-wrapper .modal-actions button:hover{
+  transform: translateY(-2px);
+} 
+
+
+/* Saving overlay */
+.saving-overlay{
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+.saving-overlay p{
+  padding: 10px 14px;
+  background: white;
+  border-radius: 8px;
+  font-weight: 700;
 }

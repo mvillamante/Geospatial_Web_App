@@ -514,6 +514,209 @@ def lstm_bundle_zip(request):
     return _zip_response_from_files(zip_filename="lstm_model_artifacts_bundle.zip", files=deduped)
 
 
+# ---------------------------------------------------------------------------
+# Dataset CSV downloads
+# ---------------------------------------------------------------------------
+
+DATASET_CSV_PATHS: Dict[str, Path] = {
+    "Hazard Index by Barangay": HAZARD_INDEX_OUTPUTS / "hazard_index_data.json",  # Will convert JSON to CSV
+    "Green Index Scores": GREEN_INDEX_OUTPUTS / "green_index_data.json",  # Will convert JSON to CSV
+    "Green Index Complete": DATASETS_DIR / "vegetation" / "green_index_complete.csv",
+    "Green Index by Barangay": DATASETS_DIR / "vegetation" / "green_index_barangay.csv",
+    "Earthquake Historical Data": HAZARDS_DIR / "earthquake_freq.csv",
+    "Typhoon Tracking Data": HAZARDS_DIR / "typhoon_freq.csv",
+    "Flood Zone Mapping": DATASETS_DIR / "susceptibility" / "flood_susceptibility.csv",
+    "Landslide Risk Assessment": DATASETS_DIR / "susceptibility" / "landslide_susceptibility.csv",
+    "Population by Barangay": DATASETS_DIR / "population" / "population_barangay.csv",
+    "Weather Data": DATASETS_DIR / "weather" / "weather_data.csv",
+    "Infrastructure Data": DATASETS_DIR / "infrastructure" / "infrastructure.csv",
+    "LSTM Training Data": DATASETS_DIR / "training" / "lstm_training_data.csv",
+    "Evaluation Predictions": DATASETS_DIR / "training" / "eval_predictions.csv",
+}
+
+# Fallback paths (check hazard subdirectory if main path doesn't exist)
+DATASET_CSV_FALLBACKS: Dict[str, List[Path]] = {
+    "Green Index Complete": [
+        DATA_DIR / "hazard" / "datasets" / "green_index_complete.csv",
+        DATASETS_DIR / "vegetation" / "green_index_complete.csv",
+    ],
+    "Green Index by Barangay": [
+        DATA_DIR / "hazard" / "datasets" / "green_index_barangay.csv",
+        DATASETS_DIR / "vegetation" / "green_index_barangay.csv",
+    ],
+    "Earthquake Historical Data": [
+        DATA_DIR / "hazard" / "datasets" / "earthquake_freq.csv",
+        HAZARDS_DIR / "earthquake_freq.csv",
+    ],
+    "Typhoon Tracking Data": [
+        DATA_DIR / "hazard" / "datasets" / "typhoon_freq.csv",
+        HAZARDS_DIR / "typhoon_freq.csv",
+    ],
+    "Flood Zone Mapping": [
+        DATA_DIR / "hazard" / "datasets" / "flood_susceptibility.csv",
+        DATASETS_DIR / "susceptibility" / "flood_susceptibility.csv",
+    ],
+    "Landslide Risk Assessment": [
+        DATA_DIR / "hazard" / "datasets" / "landslide_susceptibility.csv",
+        DATASETS_DIR / "susceptibility" / "landslide_susceptibility.csv",
+    ],
+    "Population by Barangay": [
+        DATA_DIR / "hazard" / "datasets" / "population_barangay.csv",
+        DATASETS_DIR / "population" / "population_barangay.csv",
+    ],
+    "Weather Data": [
+        DATA_DIR / "hazard" / "datasets" / "weather_data.csv",
+        DATASETS_DIR / "weather" / "weather_data.csv",
+    ],
+    "Infrastructure Data": [
+        DATA_DIR / "hazard" / "datasets" / "infrastructure.csv",
+        DATASETS_DIR / "infrastructure" / "infrastructure.csv",
+    ],
+    "LSTM Training Data": [
+        DATA_DIR / "hazard" / "datasets" / "lstm_training_data.csv",
+        DATASETS_DIR / "training" / "lstm_training_data.csv",
+    ],
+    "Evaluation Predictions": [
+        DATA_DIR / "hazard" / "datasets" / "eval_predictions.csv",
+        DATASETS_DIR / "training" / "eval_predictions.csv",
+    ],
+}
+
+
+def _json_to_csv_response(json_data: Dict[str, Any], filename: str) -> HttpResponse:
+    """Convert yearly-keyed JSON data to CSV format."""
+    
+    if not json_data:
+        return JsonResponse({"error": "No data available."}, status=404)
+    
+    # Flatten yearly data: year, barangay, value
+    rows: List[Dict[str, str]] = []
+    for year, barangays in json_data.items():
+        if not isinstance(barangays, dict):
+            continue
+        for barangay, values in barangays.items():
+            if isinstance(values, dict):
+                row = {"year": year, "barangay": barangay}
+                row.update({k: str(v) for k, v in values.items()})
+                rows.append(row)
+    
+    if not rows:
+        return JsonResponse({"error": "No data to export."}, status=404)
+    
+    # Write CSV to memory
+    buf = io.StringIO()
+    fieldnames = list(rows[0].keys())
+    writer = csv.DictWriter(buf, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(rows)
+    
+    csv_content = buf.getvalue()
+    resp = HttpResponse(csv_content, content_type="text/csv; charset=utf-8")
+    resp["Content-Disposition"] = f'attachment; filename="{filename}"'
+    resp["Content-Length"] = str(len(csv_content.encode("utf-8")))
+    return resp
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def download_dataset(request):
+    """
+    Download a dataset CSV file.
+    
+    Query param: ?name=<dataset_name>
+    Example: /api/hazard/datasets/download?name=Earthquake Historical Data
+    """
+    dataset_name = request.GET.get("name", "").strip()
+    if not dataset_name:
+        return JsonResponse({"error": "Dataset name required. Use ?name=<dataset_name>"}, status=400)
+    
+    # Find the file path
+    file_path: Optional[Path] = None
+    
+    # Check primary path
+    if dataset_name in DATASET_CSV_PATHS:
+        primary_path = DATASET_CSV_PATHS[dataset_name]
+        
+        # Special handling for JSON files that need conversion
+        if primary_path.suffix == ".json":
+            if primary_path.exists() and primary_path.is_file():
+                try:
+                    json_data = _load_json(primary_path)
+                    safe_name = dataset_name.lower().replace(" ", "_").replace("/", "_")
+                    logger.info("Converting JSON to CSV for %s from %s", dataset_name, primary_path)
+                    return _json_to_csv_response(json_data, f"{safe_name}.csv")
+                except Exception as exc:
+                    logger.error("Failed to convert JSON to CSV for %s: %s", dataset_name, exc, exc_info=True)
+                    return JsonResponse({"error": f"Failed to convert dataset '{dataset_name}': {str(exc)}"}, status=500)
+            else:
+                logger.warning("Primary JSON path does not exist for %s: %s", dataset_name, primary_path)
+                # Continue to check fallbacks or return 404
+        
+        # Regular CSV file - check primary path first
+        if primary_path.exists() and primary_path.is_file():
+            file_path = primary_path
+            logger.info("Found dataset %s at primary path: %s", dataset_name, primary_path)
+    
+    # Try fallback paths if primary path doesn't exist
+    if not file_path and dataset_name in DATASET_CSV_FALLBACKS:
+        for fallback in DATASET_CSV_FALLBACKS[dataset_name]:
+            if fallback.exists() and fallback.is_file():
+                file_path = fallback
+                logger.info("Found dataset %s at fallback path: %s", dataset_name, fallback)
+                break
+    
+    # If still not found, try a generic search in common locations
+    if not file_path:
+        # Try to find CSV files by name pattern in common directories
+        safe_name = dataset_name.lower().replace(" ", "_").replace("/", "_").replace("-", "_")
+        possible_names = [
+            safe_name + ".csv",
+            dataset_name.lower().replace(" ", "_") + ".csv",
+        ]
+        
+        search_dirs = [
+            DATASETS_DIR,
+            DATA_DIR / "hazard" / "datasets",
+            HAZARDS_DIR,
+        ]
+        
+        for search_dir in search_dirs:
+            if not search_dir.exists():
+                continue
+            for possible_name in possible_names:
+                candidate = search_dir / possible_name
+                if candidate.exists() and candidate.is_file():
+                    file_path = candidate
+                    logger.info("Found dataset %s via search: %s", dataset_name, candidate)
+                    break
+            if file_path:
+                break
+    
+    if not file_path or not file_path.exists():
+        logger.error("Dataset '%s' not found. Searched primary and fallback paths.", dataset_name)
+        return JsonResponse({
+            "error": f"Dataset '{dataset_name}' not found.",
+            "searched_paths": [
+                str(DATASET_CSV_PATHS.get(dataset_name, "N/A")),
+                *[str(p) for p in DATASET_CSV_FALLBACKS.get(dataset_name, [])]
+            ]
+        }, status=404)
+    
+    # Serve the CSV file
+    try:
+        with file_path.open("r", encoding="utf-8") as f:
+            content = f.read()
+        resp = HttpResponse(content, content_type="text/csv; charset=utf-8")
+        safe_name = dataset_name.lower().replace(" ", "_").replace("/", "_")
+        resp["Content-Disposition"] = f'attachment; filename="{safe_name}.csv"'
+        resp["Content-Length"] = str(len(content.encode("utf-8")))
+        logger.info("Successfully serving dataset %s from %s", dataset_name, file_path)
+        return resp
+    except Exception as exc:
+        logger.error("Failed to serve dataset %s from %s: %s", dataset_name, file_path, exc, exc_info=True)
+        return JsonResponse({"error": f"Failed to read dataset file: {str(exc)}"}, status=500)
+
+
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def eda_summary(request):

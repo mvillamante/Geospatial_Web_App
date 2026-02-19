@@ -26,6 +26,7 @@ from .backend_views.hazard_views import (
     hazard_artifacts_zip,
     calamity_risk_artifacts_zip,
     lstm_bundle_zip,
+    download_dataset,
 )
 from .backend_views.password_reset_views import *
 from .backend_views.tomtom_views import tomtom_roads_tile, tomtom_traffic_tile
@@ -101,6 +102,8 @@ urlpatterns = [
     path("hazard/eda/summary/", eda_summary, name="hazard_eda_summary"),
     path("hazard/datasets/earthquake-freq/", earthquake_freq, name="hazard_earthquake_freq"),
     path("hazard/datasets/typhoon-freq/", typhoon_freq, name="hazard_typhoon_freq"),
+    path("hazard/datasets/download/", download_dataset, name="hazard_datasets_download"),
+    path("hazard/datasets/download", download_dataset, name="hazard_datasets_download_no_slash"),  # Support both with/without trailing slash
 
     # Model artifacts downloads (ZIP)
     path("hazard/models/green/artifacts.zip", green_artifacts_zip, name="hazard_models_green_artifacts_zip"),

@@ -65,35 +65,31 @@
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
+  text-align: center;
 }
 
 .index-kpi-value {
   font-size: 16px;
   font-weight: 700;
   margin-top: 4px;
+  text-align: center;
 }
 
 .index-kpi-meta {
   font-size: 11px;
-  color: #607d8b;
+  color: #607d8bd3;
   margin-top: 2px;
+  text-align: center;
 }
 
 /* KPI text color themes based on active data layer */
-.index-kpi-grid.index-kpi-green .index-kpi-label,
-.index-kpi-grid.index-kpi-green .index-kpi-value {
-  color: #166534;
-}
+.index-kpi-grid.index-kpi-green .index-kpi-label { color: #064e3b; }
+.index-kpi-grid.index-kpi-green .index-kpi-value { color: #3ecf73; }
+.index-kpi-grid.index-kpi-hazard .index-kpi-label { color: #78350f; }
+.index-kpi-grid.index-kpi-hazard .index-kpi-value { color: #f6ad55; }
+.index-kpi-grid.index-kpi-calamity .index-kpi-label { color: #7f1d1d; }
+.index-kpi-grid.index-kpi-calamity .index-kpi-value { color: #f87171; }
 
-.index-kpi-grid.index-kpi-hazard .index-kpi-label,
-.index-kpi-grid.index-kpi-hazard .index-kpi-value {
-  color: #c05621;
-}
-
-.index-kpi-grid.index-kpi-calamity .index-kpi-label,
-.index-kpi-grid.index-kpi-calamity .index-kpi-value {
-  color: #b91c1c;
-}
 
 .panel-btn-eda {
   margin-bottom: 0;
@@ -217,6 +213,7 @@
 }
 
 .hazard-city-avg-card {
+  background-color: #f5f1e2;
   padding: 14px 16px;
   text-align: center;
 }
@@ -751,22 +748,6 @@
     font-size: 12px;
 }
 
-.risklegend-container ul li::before {
-    content: '';
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-    margin-right: 8px;
-    border: 1px solid #cccccc;
-}
-
-li.very-low::before { background: var(--verylowrisk-color); }
-li.low::before { background: var(--lowrisk-color); }
-li.moderate::before { background: var(--moderaterisk-color); }
-li.high::before { background: var(--highrisk-color); }
-li.very-high::before { background: var(--veryhighrisk-color); }
-li.critical::before { background: var(--criticalrisk-color); }
-
 /* Note in left-panel legend pointing to map scale */
 .hazard-scale-map-note {
   margin: 10px 0 0 0;
@@ -875,6 +856,42 @@ li.critical::before { background: var(--criticalrisk-color); }
   color: #4b5563;
 }
 
+/* General Indices -------------------------------*/
+.hazard-map-barangay-details,
+.calamity-map-barangay-details {
+  position: absolute;
+  bottom: 25px;
+  z-index: 1000;
+  width: 280px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 13px;
+}
+
+.hazard-map-barangay-details,
+.green-map-barangay-details {
+  right: 10px;
+}
+
+
+.hazard-map-legend-color,
+.calamity-map-legend-color,
+.green-map-legend-color {
+  display: inline-block;
+  width: 22px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+
 /* Hazard Index: Floating header card (top-left) */
 .hazard-map-header-card {
   position: absolute;
@@ -924,23 +941,6 @@ li.critical::before { background: var(--criticalrisk-color); }
 }
 
 /* Hazard Index: Barangay Details panel (top-right) */
-.hazard-map-barangay-details {
-  position: absolute;
-  top: 65px;
-  right: 0;
-  z-index: 1000;
-  width: 280px;
-  max-height: calc(100vh - 100px);
-  overflow-y: auto;
-  padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.97);
-  backdrop-filter: blur(10px);
-  border-radius: 0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  font-size: 13px;
-}
-
 .hazard-map-details-title {
   font-size: 11px;
   font-weight: 700;
@@ -1044,14 +1044,11 @@ li.critical::before { background: var(--criticalrisk-color); }
 }
 
 .hazard-map-risk-scale-title {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #374151;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   padding-bottom: 6px;
-  border-bottom: 2px solid #d32f2f;
+  border-bottom: 2px solid #ff9800;
 }
 
 .hazard-map-risk-scale-list {
@@ -1075,9 +1072,9 @@ li.critical::before { background: var(--criticalrisk-color); }
 
 .hazard-map-legend-color {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+  width: 22px;
+  height: 14px;
+  border-radius: 3px;
   flex-shrink: 0;
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
@@ -1217,9 +1214,13 @@ li.critical::before { background: var(--criticalrisk-color); }
   font-weight: 600;
 }
 
-.right-panel-content ul {
+.right-panel-content .scrollable-export-list {
   margin-top: 8px;
   padding-left: 0;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
 }
 
 /*slide three*/
@@ -1999,23 +2000,6 @@ li.critical::before { background: var(--criticalrisk-color); }
    ============================================================ */
 
 /* Barangay Details panel (top-right, inside map) */
-.green-map-barangay-details {
-  position: absolute;
-  top: 65px;
-  right: 0;
-  z-index: 1000;
-  width: 260px;
-  max-height: calc(100vh - 100px);
-  overflow-y: auto;
-  padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.97);
-  backdrop-filter: blur(10px);
-  border-radius: 0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  font-size: 13px;
-}
-
 .green-map-details-title {
   font-size: 11px;
   font-weight: 700;
@@ -2082,12 +2066,9 @@ li.critical::before { background: var(--criticalrisk-color); }
 }
 
 .green-map-legend-title {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #2c3e50;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   padding-bottom: 6px;
   border-bottom: 2px solid #27ae60;
 }
@@ -2105,15 +2086,6 @@ li.critical::before { background: var(--criticalrisk-color); }
   margin-bottom: 0;
 }
 
-.green-map-legend-color {
-  display: inline-block;
-  width: 22px;
-  height: 14px;
-  border-radius: 3px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  flex-shrink: 0;
-}
-
 /* ============================================================
    GREEN INDEX RIGHT PANEL CARDS
    ============================================================ */
@@ -2121,6 +2093,7 @@ li.critical::before { background: var(--criticalrisk-color); }
 
 .green-city-avg-card {
   text-align: center;
+  background-color: #e2f5ef;
   padding: 16px;
 }
 
@@ -2173,28 +2146,12 @@ li.critical::before { background: var(--criticalrisk-color); }
 
 /* Barangay Details panel (top-right, inside map) */
 .calamity-map-barangay-details {
-  position: absolute;
-  top: 65px;
-  right: 0;
-  z-index: 1000;
-  width: 280px;
-  max-height: calc(100vh - 100px);
-  overflow-y: auto;
-  padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.97);
-  backdrop-filter: blur(10px);
-  border-radius: 0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  font-size: 13px;
+  right: 12px;
 }
 
-.calamity-map-details-title {
-  font-size: 11px;
+.calamity-map-risk-scale-title {
+  font-size: 14px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #374151;
   margin-bottom: 10px;
   padding-bottom: 6px;
   border-bottom: 2px solid #e53935;
@@ -2330,14 +2287,6 @@ li.critical::before { background: var(--criticalrisk-color); }
   margin-bottom: 0;
 }
 
-.calamity-map-legend-color {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
 
 .calamity-map-risk-scale-list li.very-high .calamity-map-legend-color { background: #b71c1c; }
 .calamity-map-risk-scale-list li.high .calamity-map-legend-color { background: #e53935; }
@@ -2360,6 +2309,7 @@ li.critical::before { background: var(--criticalrisk-color); }
 }
 
 .calamity-city-avg-card {
+  background-color: #f5e4e2;
   padding: 14px 16px;
   text-align: center;
 }
@@ -2422,3 +2372,218 @@ li.critical::before { background: var(--criticalrisk-color); }
   margin-top: 4px;
 }
 
+/* ===============================
+   GREEN & HAZARD INDICES + RECOMMENDATION CARD
+================================= */
+
+.indices-card {
+  cursor: pointer;
+  transition: all 0.25s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.indices-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* layout */
+.indices-card .indices-content {
+  display: flex;
+  align-items: stretch;
+  margin-top: 16px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.index-block {
+  position: relative;
+  flex: 1;
+  padding: 16px 14px;
+  border-radius: 12px;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.index-block:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.indices-card .index-block.green {
+  background: linear-gradient(135deg, #e0f2f1, #f1f8f4);
+  border-top: 1px solid #00796b;
+}
+.indices-card .index-block.hazard {
+  background: linear-gradient(135deg, #fff3e0, #fff8ec);
+  border-top: 1px solid #ef6c00;
+} 
+
+.index-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 2px;
+  color: #212121;
+}
+
+.index-meta {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.index-note {
+  font-size: 11px;
+  opacity: 0.6;
+  margin-top: 10px;
+  font-style: italic;
+}
+
+/* Arrows */
+.index-meta .up {
+  color: #2e7d32c2;
+}
+
+.index-meta .down {
+  color: #c62828c2;
+}
+
+/* Divider */
+.index-divider {
+  width: 12px;
+  background: transparent;
+}
+
+.index-divider-line {
+  width: 100%;
+  height: 1px;
+  background: rgba(0,0,0,0.1);
+  margin:4px auto;
+  border-radius: 1px;
+}
+
+/* labels */
+.indices-card .index-label {
+  font-size: 11px;
+  font-weight: 800;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.indices-card .index-block.green .index-label {
+  color: #00796b;
+}
+.indices-card .index-block.hazard .index-label {
+  color: #ef6c00;
+}
+
+/* values */
+.indices-card .index-value {
+  font-size: 26px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.index-block.green .index-value {
+  color: #27ae60;
+  color: #052b14c4;
+}
+.index-block.hazard .index-value {
+  color: #ff9800;
+  color: #d14007c4;
+}
+
+/* change meta */
+.indices-card .index-meta {
+  font-size: 13px;
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+/* arrows */
+.indices-card .index-meta.up {
+  color: #2e7d32;
+}
+
+.indices-card .index-meta.down {
+  color: #c62828;
+}
+
+/* recommendation */
+.recommendation-card {
+  margin-top: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #ffffff;
+  border-left: 4px solid #607d8b;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  animation: fadeSlide 0.25s ease;
+}
+
+.recommendation-card.green {
+  border-left: 4px solid #2e7d32;
+  background: linear-gradient(135deg, #f1f8f4, #ffffff);
+}
+
+.recommendation-card.hazard {
+  border-left: 4px solid #ef6c00;
+  background: linear-gradient(135deg, #fff8ec, #ffffff);
+}
+
+.recommendation-card .recommendation-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.recommendation-card.green .recommendation-title {
+  color: #2e7d32;
+}
+.recommendation-card.hazard .recommendation-title {
+  color: #ef6c00;
+}
+
+.recommendation-card .recommendation-text {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: rgb(53, 52, 52);
+}
+
+.recommendation-card ul {
+  padding-left: 18px;
+  margin: 6px 0;
+}
+
+.recommendation-card li {
+  margin-bottom: 4px;
+}
+
+.recommendation-note {
+  font-size: 11px;
+  opacity: 0.6;
+  margin-top: 10px;
+  font-style: italic;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

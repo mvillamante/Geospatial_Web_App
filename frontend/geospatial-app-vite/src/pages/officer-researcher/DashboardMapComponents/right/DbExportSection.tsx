@@ -42,7 +42,7 @@ const DbExportSection: React.FC<ExportSectionProps> = ({
           <div className="panel-card" key={index}>
             <span className="rightpanel-title">{section.title}</span>
 
-            <ul>
+            <ul className="scrollable-export-list">
               {itemsToRender.map((item, i) => {
                 const isRecent = section.title === "Recent Downloads";
 

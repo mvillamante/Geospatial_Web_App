@@ -54,7 +54,13 @@ const DbDataLayer: React.FC<MapControlsProps> = ({
     calamity: "Calamity Risk History and Projection",
   };
 
-  const layerColors: Record<string, string> = {
+  const layerTitleColors: Record<string, string> = {
+    hazard: "#c44003",    // orange
+    green: "#144416",     // green
+    calamity: "#a12422",  // red
+  };
+
+  const layerYearColors: Record<string, string> = {
     hazard: "#ff9800",    // orange
     green: "#2e7d32",     // green
     calamity: "#e53935",  // red
@@ -113,13 +119,13 @@ const DbDataLayer: React.FC<MapControlsProps> = ({
       {/* Year Slider */}
       <div className={`timeslider-wrapper ${!selectedLayer || selectedLayer === "none" ? "no-layer" : ""}`}>
         <div className="timeslider-container">
-          <h4 style={{ color: selectedLayer ? layerColors[selectedLayer] : "#000" }}>
+          <h4 style={{ color: selectedLayer ? layerTitleColors[selectedLayer] : "#000" }}>
             {selectedLayer ? layerTitles[selectedLayer] : "Select a Layer"}
           </h4>
 
           <div 
             className="year-display" 
-            style={{ color: selectedLayer ? layerColors[selectedLayer] : "#000" }}
+            style={{ color: selectedLayer ? layerYearColors[selectedLayer] : "#000" }}
           >
             {year}
           </div>

@@ -533,6 +533,7 @@ const DashboardMapPage: React.FC = () => {
           ndviMonth={ndviMonth}
           setNdviMonth={setNdviMonth}
           year={year}
+          currentYear={currentYear}
           setYear={setYear}
           minYear={minYear}
           maxYear={maxYear}
@@ -550,15 +551,15 @@ const DashboardMapPage: React.FC = () => {
               mapType={mapType}
               activeLayers={activeLayers}
               ndviOpacity={ndviOpacity}
-              ndviYear={year}
+              ndviYear={currentYear}
               ndviMonth={ndviMonth}
               dataLayer={selectedLayer !== "none" ? selectedLayer : undefined}
-              hazardYear={year}
+              hazardYear={currentYear}
             />
 
             {/* Time Slider Floating Island */}
             <div className="timeslider-floating-tab">
-              <span>Projection: {year}</span>
+              <span>Projection: {currentYear}</span>
             </div>
 
             <MapLegends activeLayers={activeLayers} />

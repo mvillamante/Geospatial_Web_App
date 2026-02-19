@@ -212,6 +212,22 @@ const DashboardMapPage: React.FC = () => {
     "LSTM Forecasting Bundle (ZIP)",
   ];
 
+  const datasetItems: ChartItem[] = [
+    "Hazard Index by Barangay",
+    "Green Index Scores",
+    "Green Index Complete",
+    "Green Index by Barangay",
+    "Earthquake Historical Data",
+    "Typhoon Tracking Data",
+    "Flood Zone Mapping",
+    "Landslide Risk Assessment",
+    "Population by Barangay",
+    "Weather Data",
+    "Infrastructure Data",
+    "LSTM Training Data",
+    "Evaluation Predictions",
+  ];
+
   const exportSections = [
     {
       title: "Reports",
@@ -236,6 +252,10 @@ const DashboardMapPage: React.FC = () => {
     {
       title: "Model Artifacts",
       items: modelArtifactItems as ChartItem[],
+    },
+    {
+      title: "Datasets",
+      items: datasetItems as ChartItem[],
     },
     {
       title: "Recent Downloads",
@@ -279,26 +299,14 @@ const DashboardMapPage: React.FC = () => {
   /*---------- Placeholder Recent Download Section (Right Panel)----------*/
   const [recentDownloads, setRecentDownloads] = useState<DownloadItem[]>([]);
 
-  const downloadDatasets = [
-    {
-      title: "Datasets",
-      items: [
-        ["Hazard Index by Barangay", "2.4 MB", "18"],
-        ["Green Index Scores", "1.8 MB", "18"],
-        ["Earthquake Historical Data", "5.2 MB", "156"],
-        ["Typhoon Tracking Data", "8.7 MB", "89"],
-        ["Flood Zone Mapping", "12.3 MB", "45"],
-        ["Landslide Risk Assessment", "6.1 MB", "32"],
-      ] as DatasetsItem[],
-    },
-  ]
-
   const MODEL_ARTIFACT_ENDPOINTS: Record<string, string> = {
     "Green Index Model (ZIP)": "/api/hazard/models/green/artifacts.zip",
     "Hazard Index Model (ZIP)": "/api/hazard/models/hazard/artifacts.zip",
     "Calamity Risk Model (ZIP)": "/api/hazard/models/calamity_risk/artifacts.zip",
     "LSTM Forecasting Bundle (ZIP)": "/api/hazard/models/lstm/all_artifacts.zip",
   };
+
+  const DATASET_ENDPOINT = "/api/hazard/datasets/download";
 
   const handleDownload = async (
     item: ExportItem,
@@ -347,6 +355,68 @@ const DashboardMapPage: React.FC = () => {
       } catch (err) {
         console.error("Failed to trigger model artifact download", err);
         toast.error("Unable to download model artifacts. Please try again.");
+      }
+      return;
+    }
+
+    // Datasets: download CSV files from backend
+    if (sectionTitle === "Datasets") {
+      const label =
+        typeof item === "string"
+          ? item
+          : Array.isArray(item)
+          ? item[0]
+          : item.name;
+
+      const csvName = label.toLowerCase().endsWith(".csv")
+        ? label
+        : `${label}.csv`;
+
+      const endpoint = `${DATASET_ENDPOINT}?name=${encodeURIComponent(label)}`;
+
+      try {
+        // Use fetch to properly handle errors
+        const response = await fetch(endpoint);
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+          toast.error(errorData.error || `Failed to download ${label}. File may not be available.`);
+          return;
+        }
+
+        // Get the CSV content
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        
+        // Trigger download
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = csvName;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        // Clean up the blob URL
+        window.URL.revokeObjectURL(url);
+
+        const downloadedItem: DownloadItem = {
+          name: csvName,
+          type: "report",
+        };
+
+        setRecentDownloads((prev) => {
+          const exists = prev.some(
+            (d) => d.name === downloadedItem.name && d.type === downloadedItem.type
+          );
+          if (exists) return prev;
+          return [downloadedItem, ...prev].slice(0, 5);
+        });
+
+        toast.success(`Downloaded ${label}`);
+      } catch (err) {
+        console.error("Failed to trigger dataset download", err);
+        toast.error(`Unable to download ${label}. Please try again.`);
       }
       return;
     }

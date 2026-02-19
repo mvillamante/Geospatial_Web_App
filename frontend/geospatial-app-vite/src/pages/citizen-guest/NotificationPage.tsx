@@ -83,11 +83,17 @@ const NotificationPage: React.FC = () => {
                 });
                 const data = await res.json();
 
-                const todayOnly = data.filter((n: any) =>
-                    isToday(n.created_at)
-                )
+                const recentOnly = data.filter((n: any) => {
+                    if (!n.created_at) return false;
+                    const created = new Date(n.created_at);
+                    const now = new Date();
+                    const diffMs = now.getTime() - created.getTime();
+                    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+                    return diffDays <= 7;   
+                });
 
-                setNotifications(todayOnly.map((n: any) => ({
+
+                setNotifications(recentOnly.map((n: any) => ({
                     id: String(n.id),
                     type: n.type,
                     title: n.title,

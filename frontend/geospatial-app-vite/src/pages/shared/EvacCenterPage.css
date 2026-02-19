@@ -12,49 +12,31 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.evac-search-wrapper {
-  position: relative;
-  width: 48px;
-  height: 42px;
-  background: var(--white-bg);
-  border-radius: 10px;
-  border: 1px solid rgb(172, 169, 169);
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  cursor: text;
-  overflow: visible;
-
-  transition: 
-    width 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-    background 0.3s ease-in-out,
-    box-shadow 0.3s ease-in-out;
-}
 
 .evac-search-add-container {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  position: relative;
   gap: 1rem;
 }
 
+.evac-search-wrapper {
+  position: relative;
+  width: 320px;
+  max-width: 100%;
+}
+
 .evac-search {
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 0;
-  opacity: 0;
-  padding: 0.75rem 2.5rem 0.75rem 1rem;
-  border-radius: 12px;
-  border: 1px solid #d1d5db;
-  font-size: 0.9rem;
-  background: var(--white-bg);
-  transition: width 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease-in-out;
-  z-index: 1;
+  width: 100%;
+  height: 44px;
+  padding: 0 1rem 0 2.75rem;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.95rem;
+  background: #ffffff;
+  transition: 0.2s ease;
 }
 
 .evac-search:focus {
@@ -65,20 +47,13 @@
 
 .evac-search-icon {
   position: absolute;
-  right: 0.75rem;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: #6b7280;
-  font-size: 0.95rem;
-  cursor: pointer;
-  z-index: 20;
-}
-
-.evac-search-wrapper:hover .evac-search,
-.evac-search-wrapper:focus-within .evac-search,
-.evac-search:not(:placeholder-shown) {
-  width: 400px;
-  opacity: 1;
+  color: #9ca3af;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
 }
 
 
@@ -281,6 +256,7 @@
     opacity: 1;
     transform: translateY(0);
   }
+
   to {
     opacity: 0;
     transform: translateY(16px);
@@ -292,6 +268,7 @@
     opacity: 0;
     transform: translateY(16px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -309,7 +286,7 @@
 }
 
 .scroll-btn {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0, 0, 0, 0.05);
   border: none;
   border-radius: 50%;
   width: 36px;
@@ -330,7 +307,7 @@
 }
 
 .scroll-btn:hover {
-  background: rgba(0,0,0,0.1);
+  background: rgba(0, 0, 0, 0.1);
 }
 
 
@@ -383,14 +360,11 @@
 
   .evac-search-wrapper {
     width: 100%;
-    margin-left: 0;
-    margin-bottom: 1rem;
   }
 
-  .evac-search {
-    padding: 0.8rem 2.5rem 0.8rem 1rem;
-    border-radius: 14px;
-    font-size: 0.95rem;
+  .evac-search-add-container {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .evac-grid {
@@ -467,12 +441,12 @@
 .evac-map-wrapper {
   display: flex;
   justify-content: justify;
-  align-items: flex-start; 
+  align-items: flex-start;
 }
 
 .evac-side-content {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: right;
   align-items: center;
   gap: 1rem;
@@ -483,64 +457,84 @@
   padding: 15px;
 }
 
+/* =========================
+      Stat Container
+========================= */
+
 .evac-stat-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   width: 30%;
-  height: 100%;
   padding: 15px;
-} 
+}
 
+/* Stat Card */
 .evac-stat-card {
-  background: var(--white-bg);
-  border-radius: 16px;
-  padding: 1.2rem 1.25rem;
-  border: 1px solid var(--light-gray-border);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.4rem 1.5rem;
+  border: 1px solid #eef2f7;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: 0.25s ease;
-  color: var(--text-white);
+  transition: all 0.25s ease;
 }
 
 .evac-stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.10);
+}
+
+.evac-stat-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  height: 60%;
+  width: 4px;
+  border-radius: 4px;
+}
+
+.evac-stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Primary Accent */
+.evac-stat-primary::before {
+  background: #2563eb;
+}
+
+.evac-stat-secondary::before {
+  background: #f97316;
 }
 
 .evac-stat-text h3 {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
 }
 
 .evac-card-value {
-  margin: 0.25rem 0 0;
-  font-size: 1.6rem;
+  margin-top: 6px;
+  font-size: 1.8rem;
   font-weight: 800;
-  letter-spacing: -0.5px;
+  color: #0f172a;
 }
 
 .evac-card-icon {
-  width: 34px;
-  height: 34px;
-  opacity: 0.9;
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  color: #334155;
 }
 
-.evac-stat-primary,
-.evac-stat-secondary {
-  border-color: #dbe3f3;
-}
-
-.evac-stat-primary {
-  background: linear-gradient(135deg, #ff5f6d, #ffc371);
-}
-
-.evac-stat-secondary {
-  background: linear-gradient(135deg, #4568dc, #b06ab3);
-}
 
 .evac-card.officer {
   padding: 1.5rem;
@@ -761,7 +755,9 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .form-row.two, .form-row.three {
+  
+  .form-row.two,
+  .form-row.three {
     grid-template-columns: 1fr;
   }
 
@@ -775,6 +771,18 @@
   }
 
   .evac-page .modal-actions button {
+    width: 100%;
+  }
+
+  .evac-stat-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0;
+  }
+
+  .evac-stat-card {
     width: 100%;
   }
 }
@@ -797,7 +805,7 @@
   background: #fff;
   border-radius: 16px;
   border: 1px solid var(--light-gray-border);
-  box-shadow: 0 10px 45px rgba(0,0,0,0.22);
+  box-shadow: 0 10px 45px rgba(0, 0, 0, 0.22);
   padding: 1rem;
 }
 
@@ -866,7 +874,7 @@
 }
 
 .map-modal-actions .btn-secondary {
-  background:var(--off-white-bg);
+  background: var(--off-white-bg);
   color: #111827;
 }
 
@@ -951,7 +959,8 @@
 
 .empty-evac-state .icon {
   font-size: 3rem;
-  color: #9ca3af; /* gray icon */
+  color: #9ca3af;
+  /* gray icon */
 }
 
 .empty-evac-state .title {
@@ -995,7 +1004,8 @@
 @media (max-width: 768px) {
   .evac-page {
     height: 60vh;
-    margin-bottom: 100px; /* space for PWA bottom nav */
+    margin-bottom: 100px;
+    /* space for PWA bottom nav */
   }
 
   .evac-map-wrapper {
@@ -1051,4 +1061,3 @@
     display: none;
   }
 }
-

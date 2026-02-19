@@ -262,7 +262,7 @@ function EvacCenterPage() {
           <LeafletMap
             key={mapRefreshKey}
             height="43vh"
-            width={mapWidth}
+            width="{mapWidth}"
             mapView="interactive"
             mapType="basic"
             activeLayers={activeLayers}

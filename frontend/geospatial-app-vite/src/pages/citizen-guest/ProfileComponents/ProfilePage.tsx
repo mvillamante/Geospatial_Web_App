@@ -200,14 +200,16 @@ const ProfilePage: React.FC = () => {
 
         const data = await res.json();
 
-        const vStatus = (data.verification_status || "unverified").toLowerCase();
-        setVerificationStatus(
-          vStatus === "pending" || vStatus === "verified" || vStatus === "rejected"
-            ? vStatus
-            : "unverified"
-        );
+        const rawStatus = (data.verification_status || "unverified").toLowerCase();
 
-        const fixedV = vStatus === "approved" ? "verified" : vStatus
+        const normalizedStatus =
+          rawStatus === "approved"
+            ? "verified"
+            : rawStatus === "pending" || rawStatus === "verified" || rawStatus === "rejected"
+              ? rawStatus
+              : "unverified";
+
+        setVerificationStatus(normalizedStatus);
 
         setVerificationReason(data.verification_rejection_reason || "");
 

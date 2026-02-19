@@ -56,7 +56,20 @@ function PinLocationPicker({
                         onPick(lat, lon);
                     }}
                 />
-                <Marker position={[marker.lat, marker.lon]} />
+
+                <Marker
+                    position={[marker.lat, marker.lon]}
+                    draggable={true}
+                    eventHandlers={{
+                        dragend: (e) => {
+                            const marker = e.target;
+                            const position = marker.getLatLng();
+                            setMarker({ lat: position.lat, lon: position.lng });
+                            onPick(position.lat, position.lng);
+                        },
+                    }}
+                />
+
             </MapContainer>
 
             <small className="pin-hint">

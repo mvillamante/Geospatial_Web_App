@@ -268,6 +268,8 @@ const ReportVerifyPage: React.FC = () => {
 
     if (!res.ok) {
       const text = await res.text();
+      console.log("PATCH RESPONSE:", await res.text());
+
       throw new Error(`Update failed (${res.status}): ${text}`);
     }
 
@@ -339,7 +341,7 @@ const ReportVerifyPage: React.FC = () => {
     if (!selected) return;
 
     try {
-      const updated = await patchReport(selected.id, { verified_critical_level: level });
+      const updated = await patchReport(selected.id, { verifiedRisk: level });
 
       setReports(prev =>
         prev.map(r =>
@@ -370,6 +372,8 @@ const ReportVerifyPage: React.FC = () => {
 
     try {
       const updated = await patchReport(selected.id, { assignToMe: true });
+      console.log("ASSIGN RESPONSE:", updated);
+
 
       setReports(prev =>
         prev.map(r =>
@@ -626,13 +630,13 @@ const ReportVerifyPage: React.FC = () => {
             </div>
 
 
-            <div className="queue-filter">
+            {/* <div className="queue-filter">
               <select value={sortMode} onChange={(e) => setSortMode(e.target.value as any)}>
                 <option value="effectiveRisk">Sort: Effective Risk (True)</option>
                 <option value="citizenRisk">Sort: Citizen Suggested Risk</option>
                 <option value="newest">Sort: Newest</option>
               </select>
-            </div>
+            </div> */}
 
             <div className="queue-filter">
               <select value={scopeFilter} onChange={(e) => setScopeFilter(e.target.value as any)}>

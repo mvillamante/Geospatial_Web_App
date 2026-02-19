@@ -64,7 +64,21 @@ const DbDataLayer: React.FC<MapControlsProps> = ({
     <div className="panel-card choropleth-data-layer">
       {/* Layer Selection — Custom Dropdown */}
       <div className="info-text choropleth-data-layer">
-        <h5>Data Layer</h5>
+        <div className="field-header-with-help">
+          <h5>Data Layer</h5>
+          <div className="mapview-help-wrap">
+            <button
+              type="button"
+              className="mapview-help-icon"
+              aria-label="What does Data Layer do?"
+            >
+              ?
+            </button>
+            <div className="field-help-tooltip">
+              Choose which index or risk layer to visualize in the choropleth map. This controls what the year slider and map colors represent.
+            </div>
+          </div>
+        </div>
         <div
           className={`select-wrapper ${open ? "active" : ""}`}
           onClick={() => setOpen(!open)}

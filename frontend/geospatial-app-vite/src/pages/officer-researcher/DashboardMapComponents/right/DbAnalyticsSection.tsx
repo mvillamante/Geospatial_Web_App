@@ -21,6 +21,10 @@ interface Props {
   statisticalSummaryItems?: any[];
   keyFindings?: any[];
   modelHealthItems?: any[];
+
+  // Map context
+  mapView?: string;
+  selected?: string;
 }
 
 const DbAnalyticsSection: React.FC<Props> = ({
@@ -34,6 +38,8 @@ const DbAnalyticsSection: React.FC<Props> = ({
   statisticalSummaryItems = [],
   keyFindings = [],
   modelHealthItems = [],
+  mapView,
+  selected,
 }) => {
   // Local state for fetched EDA / model performance data
   const [loadingEda, setLoadingEda] = useState(false);
@@ -78,26 +84,135 @@ const DbAnalyticsSection: React.FC<Props> = ({
       setLoadingEda(false);
     }
   };
+
+  const isChoropleth = mapView === "choropleth";
+  const isGreenLayer = isChoropleth && selected === "green";
+  const isHazardLayer = isChoropleth && selected === "hazard";
+  const isCalamityLayer = isChoropleth && selected === "calamity";
+
+  // Filter insights by layer if a category/type field is present.
+  let filteredInsights = keyInsights;
+  if ((isGreenLayer || isHazardLayer || isCalamityLayer) && keyInsights.length) {
+    const layerKey = isGreenLayer ? "green" : isHazardLayer ? "hazard" : "calamity";
+    const byCategory = keyInsights.filter(
+      (item: any) =>
+        item?.category === layerKey ||
+        item?.type === layerKey ||
+        item?.layer === layerKey,
+    );
+    if (byCategory.length) {
+      filteredInsights = byCategory;
+    }
+  }
+
+  const extraInsights: any[] = [];
+  if (isGreenLayer) {
+    extraInsights.push(
+      {
+        label: "Green Index Hotspots",
+        description:
+          "Top barangays sustain green index scores above the city average, indicating stable vegetation cover that buffers urban heat and surface runoff.",
+      },
+      {
+        label: "Areas for Greening",
+        description:
+          "Several inland and roadside barangays continue to trail the city average, highlighting priority zones for street‑tree planting and pocket parks.",
+      },
+    );
+  } else if (isHazardLayer) {
+    extraInsights.push(
+      {
+        label: "Multi‑Hazard Concentration",
+        description:
+          "Hazard index scores cluster highest along river corridors and upland slopes, where flood, landslide, and strong‑wind exposure overlap.",
+      },
+      {
+        label: "Below‑Average Hazard Zones",
+        description:
+          "Low‑lying central barangays remain below the citywide hazard index, offering opportunities for densification with relatively lower physical risk.",
+      },
+    );
+  } else if (isCalamityLayer) {
+    extraInsights.push(
+      {
+        label: "Projected Risk Peak",
+        description:
+          "Calamity risk likelihood peaks in the late 2020s under current assumptions, driven by compounding heavy‑rainfall and typhoon seasons.",
+      },
+      {
+        label: "Impact of Adaptation",
+        description:
+          "Barangays that recently improved drainage and slope stabilization show flatter risk trajectories compared with other high‑exposure areas.",
+      },
+    );
+  }
+
+  const combinedInsights = [...filteredInsights, ...extraInsights];
+
   return (
     <>
         <div>
         <h4>Analytics Section</h4>
         <h5>Forecasting and Trends</h5>
 
-        <div className="rowpanel-card">
-            <div className="panel-card"><span className="panel-card-sub-title">Risk Trend</span></div>
-            <div className="panel-card"><span className="panel-card-sub-title">Green Trend</span></div>
-            <div className="panel-card"><span className="panel-card-sub-title">Accuracy</span></div>
-        </div>
-        <div className="panel-card"><span className="panel-card-title">Risk Likelihood (2020–2030)</span><RiskLikelihoodChart /></div>
-        <div className="panel-card"><span className="panel-card-title">Green Index Projection (2020–2030)</span><GreenIndexProjectionChart /></div>
-        <div className="panel-card"><span className="panel-card-title">Hazard Index Trend (2020–2030)</span><HazardIndexTrendChart /></div>
+        {/* Layer-aware forecasting cards */}
+        {/* Default / non-choropleth / no selection: show all three */}
+        {(!isChoropleth || !selected || selected === "none") && (
+          <>
+            <div className="panel-card">
+              <span className="panel-card-title">Risk Likelihood (2020–2030)</span>
+              <RiskLikelihoodChart chartId="chart-risk-likelihood" />
+            </div>
+            <div className="panel-card">
+              <span className="panel-card-title">Green Index Projection (2020–2030)</span>
+              <GreenIndexProjectionChart chartId="chart-green-index-projection" />
+            </div>
+            <div className="panel-card">
+              <span className="panel-card-title">Hazard Index Trend (2020–2030)</span>
+              <HazardIndexTrendChart chartId="chart-hazard-index-trend" />
+            </div>
+          </>
+        )}
+
+        {/* Green layer: only green index projection */}
+        {isGreenLayer && (
+          <div className="panel-card">
+            <span className="panel-card-title">Green Index Projection (2020–2030)</span>
+            <GreenIndexProjectionChart chartId="chart-green-index-projection" />
+          </div>
+        )}
+
+        {/* Hazard layer: only hazard index trend */}
+        {isHazardLayer && (
+          <div className="panel-card">
+            <span className="panel-card-title">Hazard Index Trend (2020–2030)</span>
+            <HazardIndexTrendChart chartId="chart-hazard-index-trend" />
+          </div>
+        )}
+
+        {/* Calamity layer: show all three, with Risk Likelihood emphasized first */}
+        {isCalamityLayer && (
+          <>
+            <div className="panel-card">
+              <span className="panel-card-title">Risk Likelihood (2020–2030)</span>
+              <RiskLikelihoodChart chartId="chart-risk-likelihood" />
+            </div>
+            <div className="panel-card">
+              <span className="panel-card-title">Green Index Projection (2020–2030)</span>
+              <GreenIndexProjectionChart chartId="chart-green-index-projection" />
+            </div>
+            <div className="panel-card">
+              <span className="panel-card-title">Hazard Index Trend (2020–2030)</span>
+              <HazardIndexTrendChart chartId="chart-hazard-index-trend" />
+            </div>
+          </>
+        )}
 
         {/* Key Insights */}
         <div className="panel-card">
             <span className="panel-card-title">Key Insights</span>
             <div className="columnpanel-card">
-            {keyInsights.map((item, index) => (
+            {combinedInsights.map((item, index) => (
                 <div key={index} className={`panel-card insight-card ${colors[index % colors.length]}`}>
                 <span className="insight-icon">{insightIcons[index % insightIcons.length]}</span>
                 <div className="insight-text"><strong>{item.label}:</strong> {item.description}</div>

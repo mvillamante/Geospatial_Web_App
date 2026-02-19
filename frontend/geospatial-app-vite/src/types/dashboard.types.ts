@@ -25,6 +25,7 @@ export type HealthItem = {
 export type DownloadItem = {
   name: string;
   type: "report" | "chart";
+  format?: "png" | "pdf";
 };
 
 export type ReportItem = [string, string];

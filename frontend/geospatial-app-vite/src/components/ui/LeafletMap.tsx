@@ -115,11 +115,11 @@ interface LeafletMapProps {
   hazardYear?: number;
   showPopupOnMap?: boolean;
   onSelectEvacuationCenter?: (center: EvacuationCenterData) => void;
-  /** Called when user selects a barangay on the hazard index choropleth (for right-panel details) */
+  /** Called when user clicks a barangay on the hazard index choropleth (for right-panel details) */
   onHazardBarangaySelect?: (barangay: string, year: string, data: HazardBarangayData) => void;
-  /** Called when user hovers a barangay on the green index choropleth */
+  /** Called when user clicks a barangay on the green index choropleth */
   onGreenIndexBarangaySelect?: (barangay: string, year: string, data: GreenIndexBarangayData) => void;
-  /** Called when user hovers a barangay on the calamity risk choropleth */
+  /** Called when user clicks a barangay on the calamity risk choropleth */
   onCalamityRiskBarangaySelect?: (barangay: string, year: string, data: CalamityRiskBarangayData) => void;
 }
 
@@ -524,13 +524,6 @@ export default function LeafletMap(props: LeafletMapProps) {
 
             layer.on("mouseover", () => {
               (layer as L.Path).setStyle({ weight: 3, fillOpacity: 0.9 });
-              // Show barangay details in the right panel on hover
-              const yearKey = String(hazardYearRef.current ?? "");
-              const slice = hazardDataRef.current?.[yearKey];
-              const d = slice?.[mappedName];
-              if (d) {
-                onHazardBarangaySelectRef.current?.(mappedName, yearKey, d as HazardBarangayData);
-              }
             });
 
             layer.on("mouseout", () => {
@@ -546,6 +539,15 @@ export default function LeafletMap(props: LeafletMapProps) {
                 color: "#ffffff",
                 fillColor,
               });
+            });
+
+            layer.on("click", () => {
+              const yearKey = String(hazardYearRef.current ?? "");
+              const slice = hazardDataRef.current?.[yearKey];
+              const d = slice?.[mappedName];
+              if (d) {
+                onHazardBarangaySelectRef.current?.(mappedName, yearKey, d as HazardBarangayData);
+              }
             });
           },
         }).addTo(map);
@@ -750,12 +752,6 @@ export default function LeafletMap(props: LeafletMapProps) {
 
             layer.on("mouseover", () => {
               (layer as L.Path).setStyle({ weight: 3, fillOpacity: 0.85 });
-              const yearKey = String(greenYearRef.current ?? "");
-              const slice = greenDataRef.current?.[yearKey];
-              const d = slice?.[mappedName];
-              if (d) {
-                onGreenIndexBarangaySelectRef.current?.(mappedName, yearKey, d as GreenIndexBarangayData);
-              }
             });
 
             layer.on("mouseout", () => {
@@ -770,6 +766,15 @@ export default function LeafletMap(props: LeafletMapProps) {
                 color: "#ffffff",
                 fillColor,
               });
+            });
+
+            layer.on("click", () => {
+              const yearKey = String(greenYearRef.current ?? "");
+              const slice = greenDataRef.current?.[yearKey];
+              const d = slice?.[mappedName];
+              if (d) {
+                onGreenIndexBarangaySelectRef.current?.(mappedName, yearKey, d as GreenIndexBarangayData);
+              }
             });
           },
         }).addTo(map);
@@ -965,12 +970,6 @@ export default function LeafletMap(props: LeafletMapProps) {
 
             layer.on("mouseover", () => {
               (layer as L.Path).setStyle({ weight: 3, fillOpacity: 0.9 });
-              const yearKey = String(calamityYearRef.current ?? "");
-              const slice = calamityDataRef.current?.[yearKey];
-              const d = slice?.[mappedName];
-              if (d) {
-                onCalamityRiskBarangaySelectRef.current?.(mappedName, yearKey, d as CalamityRiskBarangayData);
-              }
             });
 
             layer.on("mouseout", () => {
@@ -985,6 +984,15 @@ export default function LeafletMap(props: LeafletMapProps) {
                 color: "#ffffff",
                 fillColor,
               });
+            });
+
+            layer.on("click", () => {
+              const yearKey = String(calamityYearRef.current ?? "");
+              const slice = calamityDataRef.current?.[yearKey];
+              const d = slice?.[mappedName];
+              if (d) {
+                onCalamityRiskBarangaySelectRef.current?.(mappedName, yearKey, d as CalamityRiskBarangayData);
+              }
             });
           },
         }).addTo(map);

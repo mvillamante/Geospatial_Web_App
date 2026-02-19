@@ -18,6 +18,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
+import html2canvas from "html2canvas";
 import "./AnalyticsCharts.css";
 
 const API = "/api/hazard";
@@ -31,6 +32,163 @@ const API = "/api/hazard";
 
 type CalamityYearData = Record<string, { calamity_risk: number }>;
 type CalamityData = Record<string, CalamityYearData>;
+
+export type ChartExportFormat = "png" | "pdf";
+
+const CHART_ID_REGISTRY: Record<string, string> = {
+  "Calamity Risk Likelihood (City Average)": "chart-risk-likelihood",
+  "Green Index Projection (City Average)": "chart-green-index-projection",
+  "Hazard Index Trend (City Average)": "chart-hazard-index-trend",
+  "Green Index Scores by Barangay": "chart-green-index-scores",
+  "Calamity Risk Likelihood by Barangay": "chart-calamity-risk-barangay",
+  "Earthquake Frequency": "chart-earthquake-frequency",
+  "Typhoon Frequency": "chart-typhoon-frequency",
+  "Hazard Index by Barangay": "chart-hazard-index-barangay",
+};
+
+async function exportSvgContainerToImage(
+  containerId: string,
+  filenameBase: string,
+  format: ChartExportFormat,
+): Promise<boolean> {
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    return false;
+  }
+
+  const container = document.getElementById(containerId);
+  if (!container) {
+    console.warn("[ChartExport] Container not found:", containerId);
+    return false;
+  }
+
+  // Check if chart is still loading (has loading/error/empty state)
+  const hasLoadingState =
+    container.classList.contains("analytics-chart--loading") ||
+    container.classList.contains("analytics-chart--error") ||
+    container.classList.contains("analytics-chart--empty");
+  
+  const svg = container.querySelector("svg");
+  if (!svg && !hasLoadingState) {
+    console.warn("[ChartExport] No SVG found in container - chart may still be loading:", containerId);
+    return false;
+  }
+
+  try {
+    // Use html2canvas to capture the ENTIRE container including captions, padding, borders, etc.
+    const canvas = await html2canvas(container, {
+      backgroundColor: "#ffffff",
+      scale: 2, // Higher resolution
+      logging: false,
+      useCORS: true,
+      allowTaint: false,
+      width: container.scrollWidth,
+      height: container.scrollHeight,
+      windowWidth: container.scrollWidth,
+      windowHeight: container.scrollHeight,
+    });
+
+    const ext = format === "png" ? "png" : "png";
+    const safeName = (filenameBase || "chart-export").replace(/[<>:"/\\|?*]/g, "_");
+    const downloadName = safeName.toLowerCase().endsWith(`.${ext}`)
+      ? safeName
+      : `${safeName}.${ext}`;
+
+    const pngUrl = canvas.toDataURL("image/png", 1.0);
+    const a = document.createElement("a");
+    a.href = pngUrl;
+    a.download = downloadName;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    if (format === "pdf") {
+      window.alert("PDF export is not yet available; downloaded as PNG instead.");
+    }
+    return true;
+  } catch (err) {
+    console.warn("[ChartExport] Export failed:", err);
+    // Fallback to SVG-only export
+    return await exportSvgOnly(container, filenameBase, format);
+  }
+}
+
+async function exportSvgOnly(
+  container: HTMLElement,
+  filenameBase: string,
+  format: ChartExportFormat,
+): Promise<boolean> {
+  const svg = container.querySelector("svg");
+  if (!svg) return false;
+
+  const bbox = (svg as SVGSVGElement).getBoundingClientRect();
+  let width = Math.round(bbox.width) || 800;
+  let height = Math.round(bbox.height) || 400;
+  if (width < 100 || height < 100) {
+    width = 800;
+    height = 400;
+  }
+
+  const clonedSvg = (svg as SVGSVGElement).cloneNode(true) as SVGSVGElement;
+  clonedSvg.setAttribute("width", String(width));
+  clonedSvg.setAttribute("height", String(height));
+
+  const serializer = new XMLSerializer();
+  const svgString = serializer.serializeToString(clonedSvg);
+  const base64 = btoa(unescape(encodeURIComponent(svgString)));
+  const dataUri = `data:image/svg+xml;base64,${base64}`;
+
+  try {
+    const img = new Image();
+    const imageLoaded = await new Promise<boolean>((resolve) => {
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = dataUri;
+    });
+    if (!imageLoaded) return false;
+
+    const canvas = document.createElement("canvas");
+    const scale = 2;
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return false;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, width * scale, height * scale);
+
+    const ext = format === "png" ? "png" : "png";
+    const safeName = (filenameBase || "chart-export").replace(/[<>:"/\\|?*]/g, "_");
+    const downloadName = safeName.toLowerCase().endsWith(`.${ext}`)
+      ? safeName
+      : `${safeName}.${ext}`;
+
+    const pngUrl = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = pngUrl;
+    a.download = downloadName;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    if (format === "pdf") {
+      window.alert("PDF export is not yet available; downloaded as PNG instead.");
+    }
+    return true;
+  } catch (err) {
+    console.warn("[ChartExport] SVG export failed:", err);
+    return false;
+  }
+}
+
+export async function exportChartImageByName(
+  chartName: string,
+  format: ChartExportFormat,
+): Promise<boolean> {
+  const id = CHART_ID_REGISTRY[chartName];
+  if (!id) return false;
+  return exportSvgContainerToImage(id, chartName, format);
+}
 
 function computeCityAverageByYear(data: CalamityData): { year: string; value: number; isProjected?: boolean }[] {
   const years = Object.keys(data).filter((y) => /^\d{4}$/.test(y)).sort();
@@ -48,7 +206,7 @@ function computeCityAverageByYear(data: CalamityData): { year: string; value: nu
   });
 }
 
-export function RiskLikelihoodChart() {
+export function RiskLikelihoodChart({ chartId }: { chartId?: string }) {
   const [data, setData] = useState<{ year: string; value: number; isProjected?: boolean }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -118,7 +276,10 @@ export function RiskLikelihoodChart() {
   }
 
   return (
-    <div className="analytics-chart analytics-chart--risk">
+    <div
+      className="analytics-chart analytics-chart--risk"
+      id={chartId}
+    >
       <ResponsiveContainer width="100%" height={260}>
         <LineChart data={data} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
@@ -127,11 +288,11 @@ export function RiskLikelihoodChart() {
             domain={[0, 100]}
             tick={{ fontSize: 11 }}
             stroke="#555"
-            tickFormatter={(v) => `${v}%`}
+            tickFormatter={(v: number) => `${v}%`}
           />
           <Tooltip
             formatter={(value: number | undefined) => [`${value != null ? value : 0}%`, "City avg"]}
-            labelFormatter={(label) => `Year ${label}`}
+            labelFormatter={(label: string) => `Year ${label}`}
             contentStyle={{ fontSize: 12 }}
           />
           <ReferenceLine x="2025.5" stroke="#c62828" strokeDasharray="4 4" />
@@ -183,7 +344,11 @@ function computeGreenCityAverageByYear(data: GreenData): { year: string; value: 
   });
 }
 
-export function GreenIndexProjectionChart() {
+export function GreenIndexProjectionChart({
+  chartId,
+}: {
+  chartId?: string;
+}) {
   const [data, setData] = useState<{ year: string; value: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -233,7 +398,10 @@ export function GreenIndexProjectionChart() {
   }
 
   return (
-    <div className="analytics-chart analytics-chart--green">
+    <div
+      className="analytics-chart analytics-chart--green"
+      id={chartId}
+    >
       <ResponsiveContainer width="100%" height={260}>
         <LineChart data={data} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
@@ -242,11 +410,11 @@ export function GreenIndexProjectionChart() {
             domain={[0, 100]}
             tick={{ fontSize: 11 }}
             stroke="#555"
-            tickFormatter={(v) => `${v}`}
+            tickFormatter={(v: number) => `${v}`}
           />
           <Tooltip
             formatter={(value: number | undefined) => [value != null ? value : 0, "Green index"]}
-            labelFormatter={(label) => `Year ${label}`}
+            labelFormatter={(label: string) => `Year ${label}`}
             contentStyle={{ fontSize: 12 }}
           />
           <ReferenceLine x="2025.5" stroke="#2e7d32" strokeDasharray="4 4" />
@@ -286,7 +454,7 @@ function computeHazardCityAverageByYear(data: HazardData): { year: string; value
   });
 }
 
-export function HazardIndexTrendChart() {
+export function HazardIndexTrendChart({ chartId }: { chartId?: string }) {
   const [data, setData] = useState<{ year: string; value: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -336,15 +504,18 @@ export function HazardIndexTrendChart() {
   }
 
   return (
-    <div className="analytics-chart analytics-chart--hazard">
+    <div
+      className="analytics-chart analytics-chart--hazard"
+      id={chartId}
+    >
       <ResponsiveContainer width="100%" height={260}>
         <LineChart data={data} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
           <XAxis dataKey="year" tick={{ fontSize: 11 }} stroke="#555" />
-          <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} stroke="#555" tickFormatter={(v) => `${v}`} />
+          <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} stroke="#555" tickFormatter={(v: number) => `${v}`} />
           <Tooltip
             formatter={(value: number | undefined) => [value != null ? value : 0, "Hazard index"]}
-            labelFormatter={(label) => `Year ${label}`}
+            labelFormatter={(label: string) => `Year ${label}`}
             contentStyle={{ fontSize: 12 }}
           />
           <Legend wrapperStyle={{ fontSize: 11 }} formatter={() => "City avg hazard index"} />
@@ -378,20 +549,53 @@ const BARANGAY_COLORS = [
 
 const FIRST_N_BARANGAYS = 5;
 
-function greenIndexToBarangaySeries(data: GreenData): { years: string[]; barangays: string[]; chartData: Record<string, number | string>[] } {
-  const years = Object.keys(data).filter((y) => /^\d{4}$/.test(y)).sort();
-  const allBarangays = years.length ? Object.keys(data[years[0]] || {}).sort() : [];
-  const barangays = allBarangays.slice(0, FIRST_N_BARANGAYS);
+function greenIndexToBarangaySeries(
+  data: GreenData,
+): { years: string[]; barangays: string[]; chartData: Record<string, number | string>[] } {
+  const years = Object.keys(data)
+    .filter((y) => /^\d{4}$/.test(y))
+    .sort();
+
+  // Compute average green index per barangay across all years so we can
+  // rank barangays from highest to lowest.
+  const barangayAgg: Record<string, { sum: number; count: number }> = {};
+
+  years.forEach((year) => {
+    const bar = data[year] || {};
+    Object.entries(bar).forEach(([barangay, { green_index }]) => {
+      if (typeof green_index !== "number") return;
+      if (!barangayAgg[barangay]) {
+        barangayAgg[barangay] = { sum: 0, count: 0 };
+      }
+      barangayAgg[barangay].sum += green_index;
+      barangayAgg[barangay].count += 1;
+    });
+  });
+
+  const rankedBarangays = Object.entries(barangayAgg)
+    .map(([name, { sum, count }]) => ({
+      name,
+      avg: count > 0 ? sum / count : 0,
+    }))
+    .sort((a, b) => b.avg - a.avg)
+    .slice(0, FIRST_N_BARANGAYS)
+    .map((b) => b.name);
+
+  const barangays = rankedBarangays;
+
   const chartData = years.map((year) => {
     const row: Record<string, number | string> = { year };
     const bar = data[year] || {};
-    barangays.forEach((b) => { row[b] = bar[b]?.green_index ?? 0; });
+    barangays.forEach((b) => {
+      row[b] = bar[b]?.green_index ?? 0;
+    });
     return row;
   });
+
   return { years, barangays, chartData };
 }
 
-export function GreenIndexScoresChart() {
+export function GreenIndexScoresChart({ chartId }: { chartId?: string }) {
   const [chartData, setChartData] = useState<Record<string, number | string>[]>([]);
   const [barangays, setBarangays] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -424,20 +628,25 @@ export function GreenIndexScoresChart() {
   if (chartData.length === 0) return <div className="analytics-chart analytics-chart--empty"><span>No green index data. Run the pipeline.</span></div>;
 
   return (
-    <div className="analytics-chart analytics-chart--green">
+    <div
+      className="analytics-chart analytics-chart--green"
+      id={chartId}
+    >
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={chartData} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
           <XAxis dataKey="year" tick={{ fontSize: 10 }} stroke="#555" />
           <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} stroke="#555" width={28} />
-          <Tooltip contentStyle={{ fontSize: 11 }} formatter={(v: number | undefined) => [v != null ? v.toFixed(1) : 0, ""]} labelFormatter={(l) => `Year ${l}`} />
+          <Tooltip contentStyle={{ fontSize: 11 }} formatter={(v: number | undefined) => [v != null ? v.toFixed(1) : 0, ""]} labelFormatter={(l: string) => `Year ${l}`} />
           <Legend wrapperStyle={{ fontSize: 10 }} />
           {barangays.map((b, i) => (
             <Line key={b} type="monotone" dataKey={b} name={b} stroke={BARANGAY_COLORS[i % BARANGAY_COLORS.length]} strokeWidth={1.5} dot={{ r: 2 }} activeDot={{ r: 4 }} />
           ))}
         </LineChart>
       </ResponsiveContainer>
-      <div className="analytics-chart-caption">Green index (NDVI + GAR) — first 5 barangays (A–Z) 2020–2030.</div>
+      <div className="analytics-chart-caption">
+        Green index (NDVI + GAR) — Top 5 barangays projected 2020–2030.
+      </div>
     </div>
   );
 }
@@ -446,25 +655,64 @@ export function GreenIndexScoresChart() {
 // Calamity Risk Likelihood by Barangay (line graph, formula + LSTM forecast)
 // ---------------------------------------------------------------------------
 
-function calamityToBarangaySeries(formula: CalamityData, forecast: CalamityData | null): { chartData: Record<string, number | string>[]; barangays: string[] } {
-  const years = Object.keys(formula).filter((y) => /^\d{4}$/.test(y)).sort();
-  const allBarangays = years.length ? Object.keys(formula[years[0]] || {}).sort() : [];
-  const barangays = allBarangays.slice(0, FIRST_N_BARANGAYS);
+function calamityToBarangaySeries(
+  formula: CalamityData,
+  forecast: CalamityData | null,
+): { chartData: Record<string, number | string>[]; barangays: string[] } {
   const combined: Record<string, CalamityYearData> = { ...formula };
+
   if (forecast) {
-    Object.keys(forecast).filter((y) => /^\d{4}$/.test(y)).forEach((y) => { combined[y] = forecast[y]; });
+    Object.keys(forecast)
+      .filter((y) => /^\d{4}$/.test(y))
+      .forEach((y) => {
+        combined[y] = forecast[y];
+      });
   }
-  const allYears = Object.keys(combined).filter((y) => /^\d{4}$/.test(y)).sort();
+
+  const allYears = Object.keys(combined)
+    .filter((y) => /^\d{4}$/.test(y))
+    .sort();
+
+  const barangayAgg: Record<string, { sum: number; count: number }> = {};
+
+  allYears.forEach((year) => {
+    const bar = combined[year] || {};
+    Object.entries(bar).forEach(([barangay, { calamity_risk }]) => {
+      if (typeof calamity_risk !== "number") return;
+      if (!barangayAgg[barangay]) {
+        barangayAgg[barangay] = { sum: 0, count: 0 };
+      }
+      barangayAgg[barangay].sum += calamity_risk;
+      barangayAgg[barangay].count += 1;
+    });
+  });
+
+  const barangays = Object.entries(barangayAgg)
+    .map(([name, { sum, count }]) => ({
+      name,
+      avg: count > 0 ? sum / count : 0,
+    }))
+    .sort((a, b) => b.avg - a.avg)
+    .slice(0, FIRST_N_BARANGAYS)
+    .map((b) => b.name);
+
   const chartData = allYears.map((year) => {
     const row: Record<string, number | string> = { year };
     const bar = combined[year] || {};
-    barangays.forEach((b) => { row[b] = bar[b]?.calamity_risk ?? 0; });
+    barangays.forEach((b) => {
+      row[b] = bar[b]?.calamity_risk ?? 0;
+    });
     return row;
   });
+
   return { chartData, barangays };
 }
 
-export function CalamityRiskBarangayChart() {
+export function CalamityRiskBarangayChart({
+  chartId,
+}: {
+  chartId?: string;
+}) {
   const [chartData, setChartData] = useState<Record<string, number | string>[]>([]);
   const [barangays, setBarangays] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -501,13 +749,16 @@ export function CalamityRiskBarangayChart() {
   if (chartData.length === 0) return <div className="analytics-chart analytics-chart--empty"><span>No calamity risk data. Run the pipeline.</span></div>;
 
   return (
-    <div className="analytics-chart analytics-chart--risk">
+    <div
+      className="analytics-chart analytics-chart--risk"
+      id={chartId}
+    >
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={chartData} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
           <XAxis dataKey="year" tick={{ fontSize: 10 }} stroke="#555" />
-          <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} stroke="#555" width={28} tickFormatter={(v) => `${v}%`} />
-          <Tooltip contentStyle={{ fontSize: 11 }} formatter={(v: number | undefined) => [v != null ? `${v.toFixed(1)}%` : "0%", ""]} labelFormatter={(l) => `Year ${l}`} />
+          <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} stroke="#555" width={28} tickFormatter={(v: number) => `${v}%`} />
+          <Tooltip contentStyle={{ fontSize: 11 }} formatter={(v: number | undefined) => [v != null ? `${v.toFixed(1)}%` : "0%", ""]} labelFormatter={(l: string) => `Year ${l}`} />
           <ReferenceLine x="2025.5" stroke="#c62828" strokeDasharray="4 4" />
           <Legend wrapperStyle={{ fontSize: 10 }} />
           {barangays.map((b, i) => (
@@ -515,7 +766,9 @@ export function CalamityRiskBarangayChart() {
           ))}
         </LineChart>
       </ResponsiveContainer>
-      <div className="analytics-chart-caption">Calamity risk likelihood — first 5 barangays (A–Z), historical + LSTM (2026–2030).</div>
+      <div className="analytics-chart-caption">
+        Calamity risk likelihood — Top 5 barangays (highest to lowest), historical + LSTM (2026–2030).
+      </div>
     </div>
   );
 }
@@ -526,7 +779,13 @@ export function CalamityRiskBarangayChart() {
 
 type EarthquakeRow = { date: string; max_magnitude: number; quake_count: number };
 
-export function EarthquakeFrequencyChart({ onDataLoaded }: { onDataLoaded?: (hasData: boolean) => void }) {
+export function EarthquakeFrequencyChart({
+  onDataLoaded,
+  chartId,
+}: {
+  onDataLoaded?: (hasData: boolean) => void;
+  chartId?: string;
+}) {
   const [data, setData] = useState<EarthquakeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasData, setHasData] = useState(false);
@@ -568,13 +827,16 @@ export function EarthquakeFrequencyChart({ onDataLoaded }: { onDataLoaded?: (has
   const displayData = Object.keys(byYear).sort().map((year) => ({ year, ...byYear[year] }));
 
   return (
-    <div className="analytics-chart analytics-chart--earthquake">
+    <div
+      className="analytics-chart analytics-chart--earthquake"
+      id={chartId}
+    >
       <ResponsiveContainer width="100%" height={260}>
         <LineChart data={displayData} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
           <XAxis dataKey="year" tick={{ fontSize: 10 }} stroke="#555" />
           <YAxis tick={{ fontSize: 10 }} stroke="#555" />
-          <Tooltip contentStyle={{ fontSize: 11 }} labelFormatter={(l) => `Year ${l}`} />
+          <Tooltip contentStyle={{ fontSize: 11 }} labelFormatter={(l: string) => `Year ${l}`} />
           <Legend wrapperStyle={{ fontSize: 10 }} />
           <Line type="monotone" dataKey="quake_count" name="Earthquake count" stroke="#5d4037" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
           <Line type="monotone" dataKey="max_magnitude" name="Max magnitude" stroke="#ff7043" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
@@ -591,7 +853,13 @@ export function EarthquakeFrequencyChart({ onDataLoaded }: { onDataLoaded?: (has
 
 type TyphoonRow = { date: string; typhoon_count: number; max_severity: number };
 
-export function TyphoonFrequencyChart({ onDataLoaded }: { onDataLoaded?: (hasData: boolean) => void }) {
+export function TyphoonFrequencyChart({
+  onDataLoaded,
+  chartId,
+}: {
+  onDataLoaded?: (hasData: boolean) => void;
+  chartId?: string;
+}) {
   const [data, setData] = useState<TyphoonRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasData, setHasData] = useState(false);
@@ -633,13 +901,16 @@ export function TyphoonFrequencyChart({ onDataLoaded }: { onDataLoaded?: (hasDat
   const displayData = Object.keys(byYear).sort().map((year) => ({ year, ...byYear[year] }));
 
   return (
-    <div className="analytics-chart analytics-chart--typhoon">
+    <div
+      className="analytics-chart analytics-chart--typhoon"
+      id={chartId}
+    >
       <ResponsiveContainer width="100%" height={260}>
         <LineChart data={displayData} margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
           <XAxis dataKey="year" tick={{ fontSize: 10 }} stroke="#555" />
           <YAxis tick={{ fontSize: 10 }} stroke="#555" />
-          <Tooltip contentStyle={{ fontSize: 11 }} labelFormatter={(l) => `Year ${l}`} />
+          <Tooltip contentStyle={{ fontSize: 11 }} labelFormatter={(l: string) => `Year ${l}`} />
           <Legend wrapperStyle={{ fontSize: 10 }} />
           <Line type="monotone" dataKey="typhoon_count" name="Typhoon count" stroke="#0d47a1" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
           <Line type="monotone" dataKey="max_severity" name="Max severity" stroke="#1565c0" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
@@ -662,7 +933,13 @@ const getHazardBarColor = (hi: number): string => {
   return '#66bb6a';
 };
 
-export function HazardIndexBarangayChart({ year = 2025 }: { year?: number }) {
+export function HazardIndexBarangayChart({
+  year = 2025,
+  chartId,
+}: {
+  year?: number;
+  chartId?: string;
+}) {
   const [chartData, setChartData] = useState<{ barangay: string; hazard_index: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -681,11 +958,12 @@ export function HazardIndexBarangayChart({ year = 2025 }: { year?: number }) {
           return;
         }
         const entries = Object.entries(rawData as Record<string, { hazard_index: number }>)
-          .sort(([a], [b]) => a.localeCompare(b))
+          // Sort by hazard index descending so we show highest-risk first
+          .sort(([, aData], [, bData]) => (bData.hazard_index ?? 0) - (aData.hazard_index ?? 0))
           .slice(0, FIRST_N_BARANGAYS)
           .map(([name, data]) => ({
             barangay: name,
-            hazard_index: Math.round(data.hazard_index * 10) / 10,
+            hazard_index: Math.round((data.hazard_index ?? 0) * 10) / 10,
           }));
         setChartData(entries);
       })
@@ -699,7 +977,10 @@ export function HazardIndexBarangayChart({ year = 2025 }: { year?: number }) {
   if (chartData.length === 0) return <div className="analytics-chart analytics-chart--empty"><span>No hazard data available.</span></div>;
 
   return (
-    <div className="analytics-chart analytics-chart--hazard">
+    <div
+      className="analytics-chart analytics-chart--hazard"
+      id={chartId}
+    >
       <ResponsiveContainer width="100%" height={280}>
         <BarChart data={chartData} margin={{ top: 8, right: 16, left: 8, bottom: 40 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
@@ -715,7 +996,7 @@ export function HazardIndexBarangayChart({ year = 2025 }: { year?: number }) {
           <Tooltip
             contentStyle={{ fontSize: 11 }}
             formatter={(v: number | undefined) => [`${v != null ? v.toFixed(1) : 0}`, "Hazard Index"]}
-            labelFormatter={(l) => `Brgy. ${l}`}
+            labelFormatter={(l: string) => `Brgy. ${l}`}
           />
           <Bar dataKey="hazard_index" name="Hazard Index" radius={[4, 4, 0, 0]}>
             {chartData.map((entry, index) => (
@@ -725,7 +1006,7 @@ export function HazardIndexBarangayChart({ year = 2025 }: { year?: number }) {
         </BarChart>
       </ResponsiveContainer>
       <div className="analytics-chart-caption">
-        Hazard index by barangay ({year}) — first 5 barangays (A–Z). Color indicates severity.
+        Hazard index by barangay ({year}) — Top 5 barangays (highest to lowest). Color indicates severity.
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import React from "react";
-import { HazardBarangayData, GreenIndexBarangayData, CalamityRiskBarangayData } from "../../components/ui/LeafletMap";
+import type { HazardBarangayData, GreenIndexBarangayData, CalamityRiskBarangayData } from "../../../../components/ui/LeafletMap";
 
 type Props = {
   selectedLayer: string;
@@ -7,9 +7,9 @@ type Props = {
   selectedGreenBarangay: { barangay: string; year: string; data: GreenIndexBarangayData } | null;
   selectedCalamityBarangay: { barangay: string; year: string; data: CalamityRiskBarangayData } | null;
   activeLayers: string[];
-  getHazardIndexColor?: (val: number) => string;
-  getGreenIndexColor?: (val: number) => string;
-  getCalamityRiskColor?: (val: number) => string;
+  getHazardIndexColor: (val: number) => string;
+  getGreenIndexColor: (val: number) => string;
+  getCalamityRiskColor: (val: number) => string;
 };
 
 // Define a reusable component for rendering hazard breakdown details
@@ -91,7 +91,7 @@ const DbChoroplethOverlays: React.FC<Props> = ({
   selectedHazardBarangay,
   selectedGreenBarangay,
   selectedCalamityBarangay,
-  activeLayers,
+  activeLayers: _activeLayers,
   getHazardIndexColor,
   getGreenIndexColor,
   getCalamityRiskColor,
@@ -127,7 +127,7 @@ const DbChoroplethOverlays: React.FC<Props> = ({
                     </div>
                 ) : (
                     <div className="hazard-map-details-placeholder">
-                        Hover over a barangay on the map to view details.
+                        Click on a barangay on the map to view its details.
                     </div>
                 )}
             </div>
@@ -180,7 +180,7 @@ const DbChoroplethOverlays: React.FC<Props> = ({
                 </div>
                 ) : (
                 <div className="green-map-details-placeholder">
-                    Hover over a barangay on the map to view details.
+                    Click on a barangay on the map to view its details.
                 </div>
                 )}
             </div>
@@ -224,7 +224,7 @@ const DbChoroplethOverlays: React.FC<Props> = ({
                 </div>
                 ) : (
                 <div className="calamity-map-details-placeholder">
-                    Hover over a barangay on the map to view details.
+                    Click on a barangay on the map to view its details.
                 </div>
                 )}
             </div>

@@ -14,6 +14,8 @@ import {
   DbRightPanel,
   DbEdaModal,
 } from "./DashboardMapComponents";
+import { exportChartImageByName, type ChartExportFormat } from "../../components/ui/AnalyticsCharts";
+import { toast } from "sonner";
 
 import MapLegends from "./DashboardMapComponents/left/DbMapLegends";
 import ChoroplethOverlays from "./DashboardMapComponents/left/DbChoroplethOverlays";
@@ -25,13 +27,13 @@ import { useUniversalIndexData } from "../../hooks/useUniversalIndexData";
 
 import { FaChartLine, FaLeaf, FaMountain } from "react-icons/fa";
 
-const getHazardIndexColor = (cr: number): string => {
-    const hi = Math.max(0, Math.min(1, cr / 100));
-      if (hi >= 80) return "#b71c1c";
-      if (hi >= 60) return "#e53935";
-      if (hi >= 40) return "#ff9800";
-      if (hi >= 20) return "#fdd835";
-    return "#66bb6a";
+const getHazardIndexColor = (hi: number): string => {
+  const v = Math.max(0, Math.min(hi, 100));
+  if (v >= 80) return "#b71c1c";   // 80–100: Very High Risk
+  if (v >= 60) return "#e53935";   // 60–79: High Risk
+  if (v >= 40) return "#ff9800";   // 40–59: Moderate Risk
+  if (v >= 20) return "#fdd835";   // 20–39: Low Risk
+  return "#66bb6a";                // 0–19: Very Low Risk
 };
 
 const getGreenIndexColor = (gi: number): string => {
@@ -111,8 +113,8 @@ const DashboardMapPage: React.FC = () => {
   /*---------- Layer Options----------*/
   const layerOptions: { value: string; label: string }[] = [
     { value: "none", label: "None" },
-    { value: "hazard", label: "Hazard Index" },
     { value: "green", label: "Green Index" },
+    { value: "hazard", label: "Hazard Index" },
     { value: "calamity", label: "Calamity Risk Likelihood" },
   ];
 
@@ -188,15 +190,28 @@ const DashboardMapPage: React.FC = () => {
   const [calamityYearData, setCalamityYearData] = useState<Record<string, CalamityRiskBarangayData> | null>(null);
   
   /*---------- Get Universal Index Data ----------*/
-  const { 
-    universalGreenAvg, universalHazardAvg, universalCalamityAvg,
-    greenChangeFromLastYear, hazardChangeFromLastYear
+  const {
+    universalGreenAvg,
+    universalHazardAvg,
+    universalCalamityAvg,
+    greenChangeFromLastYear,
+    hazardChangeFromLastYear,
+    greenData: universalGreenData,
+    hazardData: universalHazardData,
+    calamityData: universalCalamityData,
   } = useUniversalIndexData(year);
 
   /*---------- Right Panel ----------*/
-  const [rightNav, setRightNav] = useState<"charts" | "analytics" | "export">("charts");
+  const [rightNav, setRightNav] = useState<"analytics" | "export">("analytics");
 
   /*---------- Placeholder Export Section (Right Panel)----------*/
+  const modelArtifactItems: ChartItem[] = [
+    "Green Index Model (ZIP)",
+    "Hazard Index Model (ZIP)",
+    "Calamity Risk Model (ZIP)",
+    "LSTM Forecasting Bundle (ZIP)",
+  ];
+
   const exportSections = [
     {
       title: "Reports",
@@ -208,18 +223,27 @@ const DashboardMapPage: React.FC = () => {
     {
       title: "Charts",
       items: [
-        "Vulnerability Index Chart",
-        "Green Index Trends",
-        "Calamity Risk Projection"
+        "Calamity Risk Likelihood (City Average)",
+        "Green Index Projection (City Average)",
+        "Hazard Index Trend (City Average)",
+        "Green Index Scores by Barangay",
+        "Calamity Risk Likelihood by Barangay",
+        "Earthquake Frequency",
+        "Typhoon Frequency",
+        "Hazard Index by Barangay",
       ] as ChartItem[],
+    },
+    {
+      title: "Model Artifacts",
+      items: modelArtifactItems as ChartItem[],
     },
     {
       title: "Recent Downloads",
       items: [
-        { name: "Lgu Planning Report.pdf", type: "report" },
-        { name: "Risk Summary.pdf", type: "report" }
+        { name: "Lgu Planning Report.pdf", type: "report", format: "pdf" },
+        { name: "Risk Summary.pdf", type: "report", format: "pdf" },
       ] as DownloadItem[],
-    }
+    },
   ];
 
   /*---------- Placeholder Analytics Section (Right Panel)----------*/
@@ -231,17 +255,24 @@ const DashboardMapPage: React.FC = () => {
     ];
   const keyInsights = [
     {
-      label: "Flood Risk",
-      description: "Increased by 25% over 5-year period (2020–2025).",
-    },
-    {
-      label: "Green Index",
-      description: "Current trajectory shows 29% improvement trend toward 2030 targets.",
-    },
-    {
-      label: "Landslide Risk",
+      label: "Calamity Risk Trend",
       description:
-        "Western upland and foothill areas show higher susceptibility, especially during prolonged heavy rainfall.",
+        "Citywide calamity risk has trended upward since 2020, with 2024–2025 showing the steepest increase. Forecasts indicate that risk remains elevated through 2030 unless flood, landslide, and drainage mitigation are scaled up in high‑exposure barangays.",
+    },
+    {
+      label: "Green Index Trajectory",
+      description:
+        "The green index (NDVI + GAR) shows a steady improvement from 2020 onward, with projections suggesting the city is on track to reach or slightly exceed its 2030 greening targets if current urban tree‑planting and open‑space protection programs are maintained.",
+    },
+    {
+      label: "Multi‑Hazard Hotspots",
+      description:
+        "A small cluster of western and river‑adjacent barangays consistently records the highest multi‑hazard index scores, while several inland barangays remain below the city average. Prioritizing structural upgrades and early‑warning coverage in these hotspots would yield the greatest risk reduction.",
+    },
+    {
+      label: "Extreme Events Pattern",
+      description:
+        "Earthquake and typhoon counts stay relatively stable year‑to‑year, but recent seasons include fewer events with higher intensity. These rare but strong events are responsible for sharp spikes in the hazard index, underscoring the need for preparedness even in years with lower event frequency.",
     },
   ];
 
@@ -262,8 +293,66 @@ const DashboardMapPage: React.FC = () => {
     },
   ]
 
-  const handleDownload = (item: ExportItem, sectionTitle: string) => {
+  const MODEL_ARTIFACT_ENDPOINTS: Record<string, string> = {
+    "Green Index Model (ZIP)": "/api/hazard/models/green/artifacts.zip",
+    "Hazard Index Model (ZIP)": "/api/hazard/models/hazard/artifacts.zip",
+    "Calamity Risk Model (ZIP)": "/api/hazard/models/calamity_risk/artifacts.zip",
+    "LSTM Forecasting Bundle (ZIP)": "/api/hazard/models/lstm/all_artifacts.zip",
+  };
+
+  const handleDownload = async (
+    item: ExportItem,
+    sectionTitle: string,
+  ) => {
     if (sectionTitle === "Recent Downloads") return;
+
+    // Model artifacts: download ZIPs directly from backend
+    if (sectionTitle === "Model Artifacts") {
+      const label =
+        typeof item === "string"
+          ? item
+          : Array.isArray(item)
+          ? item[0]
+          : item.name;
+
+      const zipName = label.toLowerCase().endsWith(".zip")
+        ? label
+        : `${label}.zip`;
+
+      const endpoint =
+        MODEL_ARTIFACT_ENDPOINTS[label] ??
+        `/api/hazard/models/download?name=${encodeURIComponent(label)}`;
+
+      try {
+        const a = document.createElement("a");
+        a.href = endpoint;
+        a.download = zipName;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        const downloadedItem: DownloadItem = {
+          name: zipName,
+          type: "report",
+        };
+
+        setRecentDownloads((prev) => {
+          const exists = prev.some(
+            (d) => d.name === downloadedItem.name && d.type === downloadedItem.type
+          );
+          if (exists) return prev;
+          return [downloadedItem, ...prev].slice(0, 5);
+        });
+      } catch (err) {
+        console.error("Failed to trigger model artifact download", err);
+        toast.error("Unable to download model artifacts. Please try again.");
+      }
+      return;
+    }
+
+    // Always use PNG format
+    const format: ChartExportFormat = "png";
 
     // Handle different item types
     let name: string;
@@ -271,16 +360,29 @@ const DashboardMapPage: React.FC = () => {
       // ReportItem: [title, meta]
       name = item[0];
     } else if (typeof item === "string") {
-      // ChartItem: string
+      // ChartItem: string (chart export)
       name = item;
+      const ok = await exportChartImageByName(name, format);
+      if (!ok) {
+        toast.error(
+          "Chart could not be exported. It may still be loading—wait a few seconds and try again."
+        );
+        return;
+      }
+      toast.success(`Downloaded ${name}`);
     } else {
       // DownloadItem: { name, type }
       name = item.name;
     }
 
+    const lower = name.toLowerCase();
+    const hasExtension = lower.endsWith(".png");
+    const finalName = hasExtension ? name : `${name}.png`;
+
     const downloadedItem: DownloadItem = {
-      name,
+      name: finalName,
       type: sectionTitle === "Reports" ? "report" : "chart",
+      format: "png",
     };
 
     setRecentDownloads((prev) => {
@@ -340,6 +442,13 @@ const DashboardMapPage: React.FC = () => {
           universalHazardAvg={universalHazardAvg}
           greenChangeFromLastYear={greenChangeFromLastYear}
           hazardChangeFromLastYear={hazardChangeFromLastYear}
+          universalCalamityAvg={universalCalamityAvg}
+          greenCityAverage={greenAvg}
+          hazardCityAverage={hazardAvg}
+          calamityCityAverage={calamityAvg}
+          getGreenIndexColor={getGreenIndexColor}
+          getHazardIndexColor={getHazardIndexColor}
+          getCalamityRiskColor={getCalamityRiskColor}
           insights={leftInsights}
           mapView={mapView}
           setMapView={setMapView}
@@ -459,6 +568,10 @@ const DashboardMapPage: React.FC = () => {
           mapView={mapView}
           selected={selectedLayer}
           year={year}
+          // Full per-barangay data for KPI summaries
+          greenDataByBarangay={universalGreenData}
+          hazardDataByBarangay={universalHazardData}
+          calamityDataByBarangay={universalCalamityData}
           greenCityAverage={greenAvg}
           hazardCityAverage={hazardAvg}
           calamityCityAverage={calamityAvg}

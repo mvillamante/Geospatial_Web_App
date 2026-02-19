@@ -9,104 +9,275 @@ import {
 import "../../DashboardMapPage.css";
 
 interface Props {
+  year?: number;
+  mapView?: string;
+  selected?: string;
   universalGreenAvg?: number | null;
   universalHazardAvg?: number | null;
   universalCalamityAvg?: number | null;
-  mapView?: string;
-  selected?: string;
-  year?: number;
-  greenCityAverage?: number | null;
-  hazardCityAverage?: number | null;
-  calamityCityAverage?: number | null;
-  getGreenIndexColor?: (val: number) => string;
-  getCalamityRiskColor?: (val: number) => string;
+  greenDataByBarangay?: Record<string, any> | null;
+  hazardDataByBarangay?: Record<string, any> | null;
+  calamityDataByBarangay?: Record<string, any> | null;
+}
+
+type IndexSummary = {
+  mostName: string;
+  mostValue: number;
+  lowestName: string;
+  lowestValue: number;
+  avg: number;
+  belowAvgCount: number;
+};
+
+function computeIndexSummary(
+  data: Record<string, any> | null | undefined,
+  valueKey: "green_index" | "hazard_index" | "calamity_risk",
+  fallbackAvg: number | null | undefined,
+): IndexSummary | null {
+  if (!data) return null;
+  const entries = Object.entries(data);
+  if (!entries.length) return null;
+
+  let mostName = entries[0][0];
+  let mostValue = (entries[0][1] as any)?.[valueKey] ?? 0;
+  let lowestName = mostName;
+  let lowestValue = mostValue;
+  let sum = 0;
+  let count = 0;
+
+  entries.forEach(([name, raw]) => {
+    const value = (raw as any)?.[valueKey];
+    if (typeof value !== "number") return;
+    if (value > mostValue) {
+      mostValue = value;
+      mostName = name;
+    }
+    if (value < lowestValue) {
+      lowestValue = value;
+      lowestName = name;
+    }
+    sum += value;
+    count += 1;
+  });
+
+  const avg = count > 0 ? sum / count : fallbackAvg ?? 0;
+  const belowAvgCount = entries.reduce((acc, [, raw]) => {
+    const value = (raw as any)?.[valueKey];
+    if (typeof value !== "number") return acc;
+    return value < avg ? acc + 1 : acc;
+  }, 0);
+
+  return {
+    mostName,
+    mostValue,
+    lowestName,
+    lowestValue,
+    avg,
+    belowAvgCount,
+  };
 }
 
 const DbChartsSection: React.FC<Props> = ({
+  year,
+  mapView,
+  selected,
   universalGreenAvg,
   universalHazardAvg,
   universalCalamityAvg,
-  mapView,
-  selected,
-  year,
-  greenCityAverage,
-  hazardCityAverage,
-  calamityCityAverage,
-  getGreenIndexColor,
-  getCalamityRiskColor,
+  greenDataByBarangay,
+  hazardDataByBarangay,
+  calamityDataByBarangay,
 }) => {
+  const showKpis = mapView === "choropleth" && selected && selected !== "none";
+  const showSelectLayerComment =
+    mapView === "choropleth" && (!selected || selected === "none");
+
+  const isChoroplethGreen = mapView === "choropleth" && selected === "green";
+  const isChoroplethHazard = mapView === "choropleth" && selected === "hazard";
+  const isChoroplethCalamity = mapView === "choropleth" && selected === "calamity";
+
+  const greenSummary =
+    showKpis && selected === "green"
+      ? computeIndexSummary(greenDataByBarangay ?? null, "green_index", universalGreenAvg)
+      : null;
+
+  const hazardSummary =
+    showKpis && selected === "hazard"
+      ? computeIndexSummary(hazardDataByBarangay ?? null, "hazard_index", universalHazardAvg)
+      : null;
+
+  const calamitySummary =
+    showKpis && selected === "calamity"
+      ? computeIndexSummary(calamityDataByBarangay ?? null, "calamity_risk", universalCalamityAvg)
+      : null;
+
+  const activeSummary =
+    selected === "green"
+      ? greenSummary
+      : selected === "hazard"
+      ? hazardSummary
+      : selected === "calamity"
+      ? calamitySummary
+      : null;
+
+  const indexLabel =
+    selected === "green"
+      ? "Green Index"
+      : selected === "hazard"
+      ? "Hazard Index"
+      : selected === "calamity"
+      ? "Calamity Risk Likelihood"
+      : "";
+
+  const kpiThemeClass =
+    selected === "green"
+      ? "index-kpi-green"
+      : selected === "hazard"
+      ? "index-kpi-hazard"
+      : selected === "calamity"
+      ? "index-kpi-calamity"
+      : "";
+
   return (
     <>
         <h4>Data Visualization</h4>
-        <div className="rowpanel-card">
-            {/* Avg Risk Index */}
-            <div className={`panel-card idx-summary-card ${universalCalamityAvg != null ? "idx-active calamity-active" : ""}`}>
-            <span className="panel-card-sub-title">Avg Risk Index</span>
-            <span className="panel-card-value idx-value calamity-idx-value">
-                {universalCalamityAvg != null ? universalCalamityAvg.toFixed(1) + "%" : "—"}
-            </span>
-            </div>
-
-            {/* Green Index */}
-            <div className={`panel-card idx-summary-card ${universalGreenAvg != null ? "idx-active green-active" : ""}`}>
-            <span className="panel-card-sub-title">Green Index</span>
-            <span className="panel-card-value idx-value green-idx-value">
-                {universalGreenAvg != null ? universalGreenAvg.toFixed(1) : "—"}
-            </span>
-            </div>
-
-            {/* Hazard Index */}
-            <div className={`panel-card idx-summary-card ${universalHazardAvg != null ? "idx-active hazard-active" : ""}`}>
-            <span className="panel-card-sub-title">Hazard Index</span>
-            <span className="panel-card-value idx-value hazard-idx-value">
-                {universalHazardAvg != null ? universalHazardAvg.toFixed(1) : "—"}
-            </span>
-            </div>
-        </div>
-
-        {/* City-specific detail cards (for choropleth view) */}
-        {mapView === "choropleth" && selected === "hazard" && (
-            <div className="panel-card hazard-city-avg-card">
-                <div className="hazard-city-avg-label">City Average Hazard Index</div>
-                <div className="hazard-city-avg-value">
-                    {hazardCityAverage != null
-                    ? hazardCityAverage.toFixed(1) 
-                    : "—"}
-                    </div>
-                <div className="hazard-city-avg-subtitle">LSTM Hazard Assessment (2020–2030)</div>
-            </div>
+        {showSelectLayerComment && (
+          <p className="right-panel-select-hint">
+            Select a layer to view this.
+          </p>
         )}
 
-        {mapView === "choropleth" && selected === "green" && (
-            <div className="panel-card green-city-avg-card">
-                <div className="green-city-avg-label">City Average Green Index</div>
-                <div className="green-city-avg-value" style={{ color: greenCityAverage != null ? getGreenIndexColor?.(greenCityAverage) : "#27ae60" }}>
-                    {greenCityAverage != null
-                        ? greenCityAverage.toFixed(1)
-                        : "—"}
-                </div>
-                <div className="green-city-avg-subtitle">NDVI Vegetation Assessment (2020–2030)</div>
+        {showKpis && activeSummary && (
+          <div className={`index-kpi-grid ${kpiThemeClass}`}>
+            <div className="index-kpi-card">
+              <div className="index-kpi-label">Most {indexLabel} Barangay</div>
+              <div className="index-kpi-value">
+                {activeSummary.mostName || "—"}
+              </div>
+              <div className="index-kpi-meta">
+                {activeSummary.mostValue.toFixed(1)} {selected === "calamity" ? "%" : ""}
+              </div>
             </div>
-        )}
 
-        {mapView === "choropleth" && selected === "calamity" && (
-            <div className="panel-card calamity-city-avg-card">
-                <div className="calamity-city-avg-label">City Average Calamity Risk Likelihood</div>
-                <div className="calamity-city-avg-value" style={{ color: getCalamityRiskColor?.(calamityCityAverage ?? 0) }}>
-                    {calamityCityAverage != null
-                        ? calamityCityAverage.toFixed(1) + "%"
-                        : "—"}
-                </div>
-                <div className="calamity-city-avg-subtitle">Multi-Source Geospatial Analytics | Hazard, Exposure, Green Index (2020–2030)</div>
+            <div className="index-kpi-card">
+              <div className="index-kpi-label">Lowest {indexLabel} Barangay</div>
+              <div className="index-kpi-value">
+                {activeSummary.lowestName || "—"}
+              </div>
+              <div className="index-kpi-meta">
+                {activeSummary.lowestValue.toFixed(1)} {selected === "calamity" ? "%" : ""}
+              </div>
             </div>
+
+            <div className="index-kpi-card">
+              <div className="index-kpi-label">Projected {indexLabel}</div>
+              <div className="index-kpi-value">
+                {activeSummary.avg.toFixed(1)}
+                {selected === "calamity" ? "%" : ""}
+              </div>
+              <div className="index-kpi-meta">
+                Projection year: {year ?? "—"}
+              </div>
+            </div>
+
+            <div className="index-kpi-card">
+              <div className="index-kpi-label">
+                No. of Barangays Below {indexLabel}
+              </div>
+              <div className="index-kpi-value">
+                {activeSummary.belowAvgCount}
+              </div>
+              <div className="index-kpi-meta">Compared to city average</div>
+            </div>
+          </div>
         )}
 
         {/* Charts */}
-        <div className="panel-card"><span className="panel-card-title">Green Index Scores</span><GreenIndexScoresChart /></div>
-        <div className="panel-card"><span className="panel-card-title">Hazard Index by Barangay</span><HazardIndexBarangayChart year={year} /></div>
-        <div className="panel-card"><span className="panel-card-title">Calamity Risk Likelihood</span><CalamityRiskBarangayChart /></div>
-        <div className="panel-card"><span className="panel-card-title">Earthquake Frequency</span><EarthquakeFrequencyChart /></div>
-        <div className="panel-card"><span className="panel-card-title">Typhoon Frequency & Intensity</span><TyphoonFrequencyChart /></div>
+        {isChoroplethGreen && (
+          <>
+            <div className="panel-card">
+              <span className="panel-card-title">Green Index Scores</span>
+              <GreenIndexScoresChart chartId="chart-green-index-scores" />
+            </div>
+          </>
+        )}
+
+        {isChoroplethHazard && (
+          <>
+            <div className="panel-card">
+              <span className="panel-card-title">Hazard Index by Barangay</span>
+              <HazardIndexBarangayChart
+                year={year}
+                chartId="chart-hazard-index-barangay"
+              />
+            </div>
+            <div className="panel-card">
+              <span className="panel-card-title">Earthquake Frequency</span>
+              <EarthquakeFrequencyChart chartId="chart-earthquake-frequency" />
+            </div>
+            <div className="panel-card">
+              <span className="panel-card-title">Typhoon Frequency & Intensity</span>
+              <TyphoonFrequencyChart chartId="chart-typhoon-frequency" />
+            </div>
+          </>
+        )}
+
+        {isChoroplethCalamity && (
+          <>
+            <div className="panel-card">
+              <span className="panel-card-title">Calamity Risk Likelihood</span>
+              <CalamityRiskBarangayChart chartId="chart-calamity-risk-barangay" />
+            </div>
+            <div className="panel-card">
+              <span className="panel-card-title">Green Index Scores</span>
+              <GreenIndexScoresChart chartId="chart-green-index-scores" />
+            </div>
+            <div className="panel-card">
+              <span className="panel-card-title">Hazard Index by Barangay</span>
+              <HazardIndexBarangayChart
+                year={year}
+                chartId="chart-hazard-index-barangay"
+              />
+            </div>
+            <div className="panel-card">
+              <span className="panel-card-title">Earthquake Frequency</span>
+              <EarthquakeFrequencyChart chartId="chart-earthquake-frequency" />
+            </div>
+            <div className="panel-card">
+              <span className="panel-card-title">Typhoon Frequency & Intensity</span>
+              <TyphoonFrequencyChart chartId="chart-typhoon-frequency" />
+            </div>
+          </>
+        )}
+
+        {/* Default (interactive view or other states): show all charts */}
+        {mapView !== "choropleth" && (
+          <>
+            <div className="panel-card">
+              <span className="panel-card-title">Green Index Scores</span>
+              <GreenIndexScoresChart chartId="chart-green-index-scores" />
+            </div>
+            <div className="panel-card">
+              <span className="panel-card-title">Hazard Index by Barangay</span>
+              <HazardIndexBarangayChart
+                year={year}
+                chartId="chart-hazard-index-barangay"
+              />
+            </div>
+            <div className="panel-card">
+              <span className="panel-card-title">Calamity Risk Likelihood</span>
+              <CalamityRiskBarangayChart chartId="chart-calamity-risk-barangay" />
+            </div>
+            <div className="panel-card">
+              <span className="panel-card-title">Earthquake Frequency</span>
+              <EarthquakeFrequencyChart chartId="chart-earthquake-frequency" />
+            </div>
+            <div className="panel-card">
+              <span className="panel-card-title">Typhoon Frequency & Intensity</span>
+              <TyphoonFrequencyChart chartId="chart-typhoon-frequency" />
+            </div>
+          </>
+        )}
     </>
   );
 };

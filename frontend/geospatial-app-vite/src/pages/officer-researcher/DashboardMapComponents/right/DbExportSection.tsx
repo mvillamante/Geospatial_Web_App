@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 import "../../DashboardMapPage.css";
 import { FiDownload } from "react-icons/fi";
 import { HiOutlineDocumentReport, HiOutlineChartBar } from "react-icons/hi";
 
-import type { DownloadItem, ReportItem, ChartItem, ExportItem } from "../../../../types/dashboard.types";
+import type {
+  DownloadItem,
+  ReportItem,
+  ChartItem,
+  ExportItem,
+} from "../../../../types/dashboard.types";
 
 
 interface ExportSection {
@@ -22,13 +27,6 @@ const DbExportSection: React.FC<ExportSectionProps> = ({
   recentDownloads,
   handleDownload,
 }) => {
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-
-  const toggleSelection = (name: string) => {
-    setSelectedItems((prev) =>
-      prev.includes(name) ? prev.filter((i) => i !== name) : [...prev, name]
-    );
-  };
 
   return (
     <div className="right-panel-content">
@@ -82,9 +80,16 @@ const DbExportSection: React.FC<ExportSectionProps> = ({
                     {/* TEXT */}
                     <div className="export-text">
                       {isRecent ? (
-                        <span className="export-title">
-                          {(item as DownloadItem).name}
-                        </span>
+                        <>
+                          <span className="export-title">
+                            {(item as DownloadItem).name}
+                          </span>
+                          {(item as DownloadItem).format && (
+                            <span className="export-meta">
+                              {(item as DownloadItem).format?.toUpperCase()}
+                            </span>
+                          )}
+                        </>
                       ) : Array.isArray(item) ? (
                         <>
                           <span className="export-title">

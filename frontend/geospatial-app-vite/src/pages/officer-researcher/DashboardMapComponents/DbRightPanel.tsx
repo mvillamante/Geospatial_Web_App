@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, type JSX } from "react";
 import DbChartsSection from "./right/DbChartsSection";
 import DbAnalyticsSection from "./right/DbAnalyticsSection";
 import DbExportSection from "./right/DbExportSection";
+import ChartExportPool from "./right/ChartExportPool";
 import "../DashboardMapPage.css";
 
 interface RightPanelProps {
   isOpen: boolean;
   toggle: () => void;
-  rightNav: "charts" | "analytics" | "export";
-  setRightNav: (val: "charts" | "analytics" | "export") => void;
+  rightNav: "analytics" | "export";
+  setRightNav: (val: "analytics" | "export") => void;
   exportSections: any[];
   recentDownloads: any[];
   handleDownload: (item: any, section: string) => void;
@@ -22,6 +23,11 @@ interface RightPanelProps {
   greenCityAverage?: number | null;
   hazardCityAverage?: number | null;
   calamityCityAverage?: number | null;
+
+  // Per-barangay data for KPI summaries
+  greenDataByBarangay?: Record<string, any> | null;
+  hazardDataByBarangay?: Record<string, any> | null;
+  calamityDataByBarangay?: Record<string, any> | null;
 
   getHazardIndexColor?: (val: number) => string;
   getGreenIndexColor?: (val: number) => string;
@@ -88,6 +94,11 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
 
   if (!isOpen) return null;
 
+  const shouldBlurAnalytics =
+    rightNav === "analytics" &&
+    props.mapView === "choropleth" &&
+    (!props.selected || props.selected === "none");
+
   return (
     <aside className={`dbmright-panel ${isRightPanelOpen ? "open" : "closed"}`}>
       {/* Tabs */}
@@ -96,14 +107,14 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
           {isRightPanelOpen ? "→" : "←"}
         </button>
 
-        <div className="segmented-control small slide three">
+        <div className="segmented-control small slide two">
           <span className={`slider ${rightNav}`} />
 
-          {["charts", "analytics", "export"].map((tab) => (
+          {["analytics", "export"].map((tab) => (
             <button
               key={tab}
               className={rightNav === tab ? "active" : ""}
-              onClick={() => setRightNav(tab as "charts" | "analytics" | "export")}
+              onClick={() => setRightNav(tab as "analytics" | "export")}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
@@ -113,30 +124,46 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
 
       {/* Content */}
       <div className="right-panel-content">
-        {rightNav === "charts" && (
-          <DbChartsSection {...props} />
-        )}
         {rightNav === "analytics" && (
-          <DbAnalyticsSection
-            keyInsights={keyInsights}
-            colors={colors}
-            insightIcons={insightIcons}
-            userRole2={userRole2}
-            showEdaModal={showEdaModal}
-            setShowEdaModal={setShowEdaModal}
-            edaSect={edaSect}
-            setEdaSect={setEdaSect}
-            statisticalSummaryItems={statisticalSummaryItems}
-            keyFindings={keyFindings}
-            modelHealthItems={modelHealthItems}
-          />
+          <div>
+            {shouldBlurAnalytics ? (
+              <div className="right-panel-empty-state">
+                <p className="right-panel-empty-title">
+                  Choose a layer to view this section.
+                </p>
+              </div>
+            ) : (
+              <>
+                <DbChartsSection {...props} />
+                <DbAnalyticsSection
+                  keyInsights={keyInsights}
+                  colors={colors}
+                  insightIcons={insightIcons}
+                  userRole2={userRole2}
+                  mapView={props.mapView}
+                  selected={props.selected}
+                  showEdaModal={showEdaModal}
+                  setShowEdaModal={setShowEdaModal}
+                  edaSect={edaSect}
+                  setEdaSect={setEdaSect}
+                  statisticalSummaryItems={statisticalSummaryItems}
+                  keyFindings={keyFindings}
+                  modelHealthItems={modelHealthItems}
+                />
+              </>
+            )}
+          </div>
         )}
+
         {rightNav === "export" && (
-          <DbExportSection
-            sections={exportSections}
-            recentDownloads={recentDownloads}
-            handleDownload={handleDownload}
-          />
+          <>
+            <ChartExportPool visible={true} year={props.year} />
+            <DbExportSection
+              sections={exportSections}
+              recentDownloads={recentDownloads}
+              handleDownload={handleDownload}
+            />
+          </>
         )}
       </div>
     </aside>

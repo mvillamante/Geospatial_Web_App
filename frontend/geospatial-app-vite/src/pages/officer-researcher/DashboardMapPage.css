@@ -43,6 +43,58 @@
   margin-bottom: 18px;
 }
 
+/* Index KPI grid (right panel, Data Visualization) */
+.index-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.index-kpi-card {
+  border-radius: 8px;
+  padding: 8px 10px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #ffffff;
+}
+
+.index-kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.index-kpi-value {
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.index-kpi-meta {
+  font-size: 11px;
+  color: #607d8b;
+  margin-top: 2px;
+}
+
+/* KPI text color themes based on active data layer */
+.index-kpi-grid.index-kpi-green .index-kpi-label,
+.index-kpi-grid.index-kpi-green .index-kpi-value {
+  color: #166534;
+}
+
+.index-kpi-grid.index-kpi-hazard .index-kpi-label,
+.index-kpi-grid.index-kpi-hazard .index-kpi-value {
+  color: #c05621;
+}
+
+.index-kpi-grid.index-kpi-calamity .index-kpi-label,
+.index-kpi-grid.index-kpi-calamity .index-kpi-value {
+  color: #b91c1c;
+}
+
 .panel-btn-eda {
   margin-bottom: 0;
   cursor: pointer;
@@ -108,28 +160,28 @@
 }
 
 .panel-card.hazard {
-  background-color: #f1dbdb;
-  border-left: 5px solid #ef4444;
+  background-color: #fff3e0;
+  border-left: 5px solid #ff9800;
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.1);
+  box-shadow: 0 2px 6px rgba(255, 152, 0, 0.15);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .panel-card.hazard:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(239, 68, 68, 0.25);
+  box-shadow: 0 6px 12px rgba(255, 152, 0, 0.3);
 }
 
 .panel-card.hazard .panel-card-sub-title {
-  color: #a01616;
+  color: #c05621;
 }
 
 .panel-card.hazard .panel-card-value {
-  color: #b91c1c;
+  color: #ff9800;
 }
 
 .panel-card.hazard .panel-card-meta {
-  color: #dc2626;
+  color: #fb923c;
 }
 
 /*----Index summary cards (right panel top row)----*/
@@ -166,6 +218,7 @@
 
 .hazard-city-avg-card {
   padding: 14px 16px;
+  text-align: center;
 }
 .hazard-city-avg-label {
   font-size: 11px;
@@ -175,7 +228,7 @@
   margin-bottom: 4px;
 }
 .hazard-city-avg-value {
-  font-size: 20px;
+  font-size: 32px;
   font-weight: 800;
   color: #ff9800;
   line-height: 1.2;
@@ -303,6 +356,103 @@
 
 .segmented-control {
   width: 100%;
+}
+
+.mapview-help-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: none;
+  background: #f97316;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  margin-top: -10px;
+}
+
+.mapview-help-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.mapview-help-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: auto;
+  width: 240px;
+  background: #ffffff;
+  color: #111827;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  z-index: 10;
+}
+
+.mapview-help-tooltip::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: 12px;
+  left: auto;
+  border-width: 0 6px 6px 6px;
+  border-style: solid;
+  border-color: transparent transparent #ffffff transparent;
+}
+
+.mapview-header-with-help {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  position: relative;
+}
+
+.field-header-with-help {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.field-help-tooltip {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: auto;
+  width: 240px;
+  background: #ffffff;
+  color: #111827;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 10;
+}
+
+.field-help-tooltip::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: 12px;
+  left: auto;
+  border-width: 0 6px 6px 6px;
+  border-style: solid;
+  border-color: transparent transparent #ffffff transparent;
+}
+
+.field-header-with-help .mapview-help-wrap:hover .field-help-tooltip {
+  display: block;
 }
 
 .segmented-control.slide {
@@ -776,8 +926,8 @@ li.critical::before { background: var(--criticalrisk-color); }
 /* Hazard Index: Barangay Details panel (top-right) */
 .hazard-map-barangay-details {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 65px;
+  right: 0;
   z-index: 1000;
   width: 280px;
   max-height: calc(100vh - 100px);
@@ -785,7 +935,7 @@ li.critical::before { background: var(--criticalrisk-color); }
   padding: 14px 16px;
   background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(10px);
-  border-radius: 12px;
+  border-radius: 0;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   border: 1px solid rgba(0, 0, 0, 0.08);
   font-size: 13px;
@@ -882,13 +1032,13 @@ li.critical::before { background: var(--criticalrisk-color); }
 
 .hazard-map-risk-scale {
   position: absolute;
-  bottom: 20px;
-  right: 16px;
+  right: 0;
+  bottom: 10px;
   z-index: 1000;
   padding: 10px 14px;
   background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(10px);
-  border-radius: 10px;
+  border-radius: 0;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.06);
 }
@@ -1035,6 +1185,27 @@ li.critical::before { background: var(--criticalrisk-color); }
   margin-bottom: 5px;
 }
 
+.right-panel-select-hint {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 10px;
+  font-style: italic;
+}
+
+.right-panel-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.right-panel-empty-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4b5563;
+  text-align: center;
+}
+
 .right-panel-content h5 {
   font-weight: 400;
   color: rgb(77, 76, 76);
@@ -1063,6 +1234,17 @@ li.critical::before { background: var(--criticalrisk-color); }
 }
 .dbmright-panel .segmented-control.slide.three .slider.export {
     transform: translateX(200%);
+}
+
+/* slide two (Analytics / Export) */
+.dbmright-panel .segmented-control.slide.two .slider {
+  width: calc(50% - 4px);
+}
+.dbmright-panel .segmented-control.slide.two .slider.analytics {
+  transform: translateX(0%);
+}
+.dbmright-panel .segmented-control.slide.two .slider.export {
+  transform: translateX(100%);
 }
 
 .rowpanel-card {
@@ -1819,8 +2001,8 @@ li.critical::before { background: var(--criticalrisk-color); }
 /* Barangay Details panel (top-right, inside map) */
 .green-map-barangay-details {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 65px;
+  right: 0;
   z-index: 1000;
   width: 260px;
   max-height: calc(100vh - 100px);
@@ -1828,7 +2010,7 @@ li.critical::before { background: var(--criticalrisk-color); }
   padding: 14px 16px;
   background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(10px);
-  border-radius: 12px;
+  border-radius: 0;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   border: 1px solid rgba(0, 0, 0, 0.08);
   font-size: 13px;
@@ -1888,13 +2070,13 @@ li.critical::before { background: var(--criticalrisk-color); }
 /* Green Index Scale legend (bottom-right, inside map) */
 .green-map-legend {
   position: absolute;
-  bottom: 20px;
-  right: 16px;
+  right: 0;
+  bottom: 10px;
   z-index: 1000;
   padding: 12px 14px;
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(10px);
-  border-radius: 10px;
+  border-radius: 0;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.06);
 }
@@ -1992,8 +2174,8 @@ li.critical::before { background: var(--criticalrisk-color); }
 /* Barangay Details panel (top-right, inside map) */
 .calamity-map-barangay-details {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 65px;
+  right: 0;
   z-index: 1000;
   width: 280px;
   max-height: calc(100vh - 100px);
@@ -2001,7 +2183,7 @@ li.critical::before { background: var(--criticalrisk-color); }
   padding: 14px 16px;
   background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(10px);
-  border-radius: 12px;
+  border-radius: 0;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   border: 1px solid rgba(0, 0, 0, 0.08);
   font-size: 13px;
@@ -2107,13 +2289,13 @@ li.critical::before { background: var(--criticalrisk-color); }
 /* Calamity Risk Scale legend (bottom-right, inside map) */
 .calamity-map-risk-scale {
   position: absolute;
-  bottom: 20px;
-  right: 16px;
+  right: 0;
+  bottom: 10px;
   z-index: 1000;
   padding: 10px 14px;
   background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(10px);
-  border-radius: 10px;
+  border-radius: 0;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.06);
 }
@@ -2179,6 +2361,7 @@ li.critical::before { background: var(--criticalrisk-color); }
 
 .calamity-city-avg-card {
   padding: 14px 16px;
+  text-align: center;
 }
 
 .calamity-city-avg-label {
@@ -2190,8 +2373,9 @@ li.critical::before { background: var(--criticalrisk-color); }
 }
 
 .calamity-city-avg-value {
-  font-size: 20px;
+  font-size: 32px;
   font-weight: 800;
+  color: #b91c1c;
   line-height: 1.2;
   margin: 4px 0;
 }

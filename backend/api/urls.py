@@ -22,6 +22,10 @@ from .backend_views.hazard_views import (
     eda_summary,
     earthquake_freq,
     typhoon_freq,
+    green_artifacts_zip,
+    hazard_artifacts_zip,
+    calamity_risk_artifacts_zip,
+    lstm_bundle_zip,
 )
 from .backend_views.password_reset_views import *
 from .backend_views.tomtom_views import tomtom_roads_tile, tomtom_traffic_tile
@@ -97,6 +101,12 @@ urlpatterns = [
     path("hazard/eda/summary/", eda_summary, name="hazard_eda_summary"),
     path("hazard/datasets/earthquake-freq/", earthquake_freq, name="hazard_earthquake_freq"),
     path("hazard/datasets/typhoon-freq/", typhoon_freq, name="hazard_typhoon_freq"),
+
+    # Model artifacts downloads (ZIP)
+    path("hazard/models/green/artifacts.zip", green_artifacts_zip, name="hazard_models_green_artifacts_zip"),
+    path("hazard/models/hazard/artifacts.zip", hazard_artifacts_zip, name="hazard_models_hazard_artifacts_zip"),
+    path("hazard/models/calamity_risk/artifacts.zip", calamity_risk_artifacts_zip, name="hazard_models_calamity_artifacts_zip"),
+    path("hazard/models/lstm/all_artifacts.zip", lstm_bundle_zip, name="hazard_models_lstm_bundle_zip"),
 
     # TomTom Tiles
     path("tomtom/roads/<int:z>/<int:x>/<int:y>.png", tomtom_roads_tile, name="tomtom_roads_tile"),

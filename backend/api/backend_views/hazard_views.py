@@ -28,14 +28,16 @@ Endpoint summary
 from __future__ import annotations
 
 import csv
+import io
 import json
 import logging
 from pathlib import Path
 from typing import Any, Dict, Optional, List
 import math
+import zipfile
 
 from django.conf import settings
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 
@@ -226,6 +228,73 @@ def _load_csv_as_json(csv_path: Path) -> List[Dict[str, Any]]:
             rows.append(out)
     return rows
 
+def _zip_response_from_files(
+    *,
+    zip_filename: str,
+    files: List[tuple[Path, str]],
+) -> HttpResponse:
+    """
+    Create an in-memory ZIP and return it as an HTTP attachment.
+
+    `files`: list of (path_on_disk, arcname_in_zip).
+    """
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for file_path, arcname in files:
+            try:
+                if not file_path.exists() or not file_path.is_file():
+                    continue
+                zf.write(file_path, arcname=arcname)
+            except Exception as exc:
+                logger.warning("Failed to add %s to zip: %s", file_path, exc)
+                continue
+    data = buf.getvalue()
+    resp = HttpResponse(data, content_type="application/zip")
+    resp["Content-Disposition"] = f'attachment; filename="{zip_filename}"'
+    resp["Content-Length"] = str(len(data))
+    return resp
+
+
+def _collect_artifact_files(
+    *,
+    prefix: str,
+    candidates: List[Path],
+    filenames: List[str],
+) -> List[tuple[Path, str]]:
+    """
+    Collect specific artifact filenames from candidate directories.
+    First directory that contains a filename wins for that filename.
+    """
+    out: List[tuple[Path, str]] = []
+    included: set[str] = set()
+    for name in filenames:
+        if name in included:
+            continue
+        for base in candidates:
+            p = base / name
+            if p.exists() and p.is_file():
+                out.append((p, f"{prefix}/{name}"))
+                included.add(name)
+                break
+    return out
+
+
+def _collect_entire_dir(
+    *,
+    prefix: str,
+    directory: Path,
+) -> List[tuple[Path, str]]:
+    """Zip every file inside a directory recursively."""
+    if not directory.exists() or not directory.is_dir():
+        return []
+    out: List[tuple[Path, str]] = []
+    for p in directory.rglob("*"):
+        if not p.is_file():
+            continue
+        rel = p.relative_to(directory).as_posix()
+        out.append((p, f"{prefix}/{rel}"))
+    return out
+
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
@@ -320,6 +389,129 @@ def model_info(request):
     }
 
     return JsonResponse(info)
+
+
+# ---------------------------------------------------------------------------
+# Model artifact downloads (ZIP)
+# ---------------------------------------------------------------------------
+
+GREEN_ARTIFACT_FILES = [
+    "gi_model_config.json",
+    "lstm_green_index.keras",
+    "gi_feature_scaler.joblib",
+    "gi_target_scaler.joblib",
+    "rf_green_index.joblib",
+    "gb_green_index.joblib",
+]
+
+HAZARD_ARTIFACT_FILES = [
+    "model_config.json",
+    "training_history.json",
+    "residuals.json",
+    "lstm_hazard_index.keras",
+    "hi_feature_scaler.joblib",
+    "hi_target_scaler.joblib",
+]
+
+CALAMITY_ARTIFACT_FILES = [
+    "model_config.json",
+    "lstm_calamity_model.keras",
+    "feature_scaler.joblib",
+    "target_scaler.joblib",
+]
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def green_artifacts_zip(request):
+    """
+    Download Green Index model artifacts as a ZIP.
+    """
+    # Prefer a dedicated green_index/model_artifacts folder when present,
+    # otherwise pull known filenames from the canonical hazard/workspace folders.
+    files = _collect_entire_dir(prefix="green_index", directory=GREEN_INDEX_ARTIFACTS)
+    if not files:
+        files = _collect_artifact_files(
+            prefix="green_index",
+            candidates=[GREEN_INDEX_ARTIFACTS, HAZARD_ARTIFACTS, WORKSPACE_ARTIFACTS],
+            filenames=GREEN_ARTIFACT_FILES,
+        )
+    if not files:
+        return JsonResponse({"error": "Green Index artifacts not found."}, status=404)
+    return _zip_response_from_files(zip_filename="green_index_model_artifacts.zip", files=files)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def hazard_artifacts_zip(request):
+    """
+    Download Hazard Index model artifacts as a ZIP.
+    """
+    files = _collect_entire_dir(prefix="hazard_index", directory=HAZARD_INDEX_ARTIFACTS)
+    if not files:
+        files = _collect_artifact_files(
+            prefix="hazard_index",
+            candidates=[HAZARD_INDEX_ARTIFACTS, HAZARD_ARTIFACTS, WORKSPACE_ARTIFACTS],
+            filenames=HAZARD_ARTIFACT_FILES,
+        )
+    if not files:
+        return JsonResponse({"error": "Hazard Index artifacts not found."}, status=404)
+    return _zip_response_from_files(zip_filename="hazard_index_model_artifacts.zip", files=files)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def calamity_risk_artifacts_zip(request):
+    """
+    Download Calamity Risk model artifacts as a ZIP.
+    """
+    files = _collect_entire_dir(prefix="calamity_risk", directory=CALAMITY_RISK_ARTIFACTS)
+    if not files:
+        files = _collect_artifact_files(
+            prefix="calamity_risk",
+            candidates=[CALAMITY_RISK_ARTIFACTS, WORKSPACE_ARTIFACTS],
+            filenames=CALAMITY_ARTIFACT_FILES,
+        )
+    if not files:
+        return JsonResponse({"error": "Calamity Risk artifacts not found."}, status=404)
+    return _zip_response_from_files(zip_filename="calamity_risk_model_artifacts.zip", files=files)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def lstm_bundle_zip(request):
+    """
+    Download a combined ZIP of all LSTM-related artifacts (green, hazard, calamity).
+    """
+    files: List[tuple[Path, str]] = []
+    files += _collect_artifact_files(
+        prefix="green_index",
+        candidates=[GREEN_INDEX_ARTIFACTS, HAZARD_ARTIFACTS, WORKSPACE_ARTIFACTS],
+        filenames=[f for f in GREEN_ARTIFACT_FILES if f.startswith("lstm_") or f.endswith(".joblib") or f.endswith(".json")],
+    )
+    files += _collect_artifact_files(
+        prefix="hazard_index",
+        candidates=[HAZARD_INDEX_ARTIFACTS, HAZARD_ARTIFACTS, WORKSPACE_ARTIFACTS],
+        filenames=[f for f in HAZARD_ARTIFACT_FILES if f.startswith("lstm_") or f.endswith(".joblib") or f.endswith(".json")],
+    )
+    files += _collect_artifact_files(
+        prefix="calamity_risk",
+        candidates=[CALAMITY_RISK_ARTIFACTS, WORKSPACE_ARTIFACTS],
+        filenames=[f for f in CALAMITY_ARTIFACT_FILES if f.startswith("lstm_") or f.endswith(".joblib") or f.endswith(".json")],
+    )
+
+    # de-dup by arcname
+    seen: set[str] = set()
+    deduped: List[tuple[Path, str]] = []
+    for p, arc in files:
+        if arc in seen:
+            continue
+        seen.add(arc)
+        deduped.append((p, arc))
+
+    if not deduped:
+        return JsonResponse({"error": "LSTM artifact bundle not found."}, status=404)
+    return _zip_response_from_files(zip_filename="lstm_model_artifacts_bundle.zip", files=deduped)
 
 
 @api_view(["GET"])

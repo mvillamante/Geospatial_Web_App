@@ -3,16 +3,41 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.utils.timezone import now
 from django.db.models import Q
+from datetime import timedelta
 from rest_framework import status
 from api.models import Notification, NotificationRead
-from api.serializer import NotificationSerializer
+from api.serializer import NotificationSerializer, ResidentVerificationRequest
+from api.models import IncidentReport
+from django.db.models import Q
 
 class NotificationList(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self,request):
-        qs = Notification.objects.all().order_by("-created_at")[:200]
-        return Response(NotificationSerializer(qs, many=True, context={"request": request}).data)
+    def get(self, request):
+        verification = ResidentVerificationRequest.objects.filter(
+            user=request.user,
+            status="approved"
+        ).first()
+
+        user_barangay = verification.barangay if verification else None
+
+        # Get all report IDs owned by the user
+        user_report_ids = IncidentReport.objects.filter(
+            user=request.user
+        ).values_list("id", flat=True)
+
+        qs = Notification.objects.filter(
+            Q(barangay=user_barangay) |
+            Q(barangay__isnull=True) |
+            Q(report_id__in=user_report_ids)
+        ).distinct().order_by("-created_at")[:200]
+
+        return Response(
+            NotificationSerializer(qs, many=True, context={"request": request}).data
+        )
+
+
+
     
 class MarkNotificationRead(APIView):
     permission_classes = [IsAuthenticated]
@@ -72,10 +97,14 @@ class UnreadNotificationCount(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        unread_count = Notification.objects.exclude(
-        read__user=request.user,
-        read__is_read=True
-    ).count()
+        today = now().date()
+
+        unread_count = Notification.objects.filter(
+            created_at__date=today
+        ).exclude(
+            read__user=request.user,
+            read__is_read=True
+        ).count()
 
         return Response({"unread_count": unread_count})
 

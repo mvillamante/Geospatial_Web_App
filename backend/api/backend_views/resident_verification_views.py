@@ -57,6 +57,7 @@ class ApproveRejectResidentVerificationView(generics.UpdateAPIView):
 
             user = verification.user
             user.is_resident_verified = True
+            user.barangay = verification.barangay
             user.save()
 
         else:

@@ -6,6 +6,7 @@ from rest_framework import status, generics, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from django.db.models.functions import Lower
+from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
 from api.serializer import *
@@ -137,6 +138,22 @@ class IncidentReportPatchView(generics.UpdateAPIView):
     def patch(self, request, *args, **kwargs):
         report = self.get_object()
         data = request.data.copy()
+        user=request.user
+
+        if data.get("assignToMe"):
+            if report.assigned_officer:
+                raise ValidationError({
+                    "assigned": "Report is already assigned."
+                })
+            report.assigned_officer = user
+            report.save()
+
+            report.refresh_from_db()
+
+            return Response(
+                IncidentReportQueueSerializer(report).data,
+                status=status.HTTP_200_OK
+            )
 
         old_status = report.status
 
@@ -149,6 +166,7 @@ class IncidentReportPatchView(generics.UpdateAPIView):
             raise ValidationError({
                 "verifiedRisk": "Verified critical level is required before setting this status."
             })
+            
 
         serializer = self.get_serializer(report, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -207,10 +225,33 @@ class VerifiedIncidentReportsView(generics.ListAPIView):
         if getattr(user, "role", None) == "officer":
             return self.base_queryset()
 
-        if user.is_resident_verified:
-            return self.base_queryset()
+        if not user.is_resident_verified:
+            return IncidentReport.objects.none()
+        
+        verification = ResidentVerificationRequest.objects.filter(
+            user = user,
+            status="approved"
+        ).first()
 
-        return IncidentReport.objects.none()
+        if not verification:
+            return IncidentReport.objects.none()
+        
+        print("VERIFICATION BARANGAY:", verification.barangay)
+        
+        full_barangay = verification.barangay
+        barangay_part = full_barangay.split(",")[0]
+
+        barangay_clean = barangay_part.replace("Brgy.", "").replace("Barangay", "").strip()
+
+        print("CLEANED BARANGAY:", barangay_clean)
+
+        sample_locations = IncidentReport.objects.values_list("location_display", flat=True)[:5]
+        print("REPORT LOCATION SAMPLE:", list(sample_locations))
+        
+        return IncidentReport.objects.filter(
+            verified_critical_level__isnull=False,
+            location_display__icontains=barangay_clean
+        ).order_by("-created_at") 
 
     def base_queryset(self):
         return (

@@ -75,10 +75,25 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
 
   ...props
 }) => {
-  const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
-  const toggleRightPanel = () => {
-    setIsRightPanelOpen((prev) => !prev);
-  };
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(
+  props.mapView === "choropleth"
+);
+
+const toggleRightPanel = () => {
+  setIsRightPanelOpen((prev) => !prev);
+};
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    if (props.mapView === "choropleth") {
+      setIsRightPanelOpen(true);
+    } else if (props.mapView === "interactive") {
+      setIsRightPanelOpen(false);
+    }
+  }, 0);
+
+  return () => clearTimeout(timer);
+}, [props.mapView]);
 
   useEffect(() => { /* automatically closes */
     const handleResize = () => {
@@ -132,24 +147,30 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
                   Choose a layer to view this section.
                 </p>
               </div>
+            ) : props.mapView === "interactive" ? (
+              <div className="right-panel-empty-state">
+                <p className="right-panel-empty-title">
+                  Click the <strong>Choropleth</strong> map to view this section.
+                </p>
+              </div>
             ) : (
               <>
                 <DbChartsSection {...props} />
                 <DbAnalyticsSection
                   keyInsights={keyInsights}
-                  colors={colors}
-                  insightIcons={insightIcons}
-                  userRole2={userRole2}
-                  mapView={props.mapView}
-                  selected={props.selected}
-                  showEdaModal={showEdaModal}
-                  setShowEdaModal={setShowEdaModal}
-                  edaSect={edaSect}
-                  setEdaSect={setEdaSect}
-                  statisticalSummaryItems={statisticalSummaryItems}
-                  keyFindings={keyFindings}
-                  modelHealthItems={modelHealthItems}
-                />
+                    colors={colors}
+                    insightIcons={insightIcons}
+                    userRole2={userRole2}
+                    mapView={props.mapView}
+                    selected={props.selected}
+                    showEdaModal={showEdaModal}
+                    setShowEdaModal={setShowEdaModal}
+                    edaSect={edaSect}
+                    setEdaSect={setEdaSect}
+                    statisticalSummaryItems={statisticalSummaryItems}
+                    keyFindings={keyFindings}
+                    modelHealthItems={modelHealthItems}
+                  />
               </>
             )}
           </div>

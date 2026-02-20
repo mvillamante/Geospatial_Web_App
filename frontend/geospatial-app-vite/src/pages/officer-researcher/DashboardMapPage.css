@@ -360,7 +360,7 @@
   height: 20px;
   border-radius: 999px;
   border: none;
-  background: #f97316;
+  background: #4483d6e0;
   color: #ffffff;
   font-size: 13px;
   font-weight: 700;
@@ -2400,7 +2400,7 @@
 .index-block {
   position: relative;
   flex: 1;
-  padding: 16px 14px;
+  padding: 16px 10px;
   border-radius: 12px;
   color: #333;
   display: flex;
@@ -2452,11 +2452,13 @@
 }
 
 /* Arrows */
-.index-meta .up {
+.index-block.green .index-meta .up,
+.index-block.hazard .index-meta .down {
   color: #2e7d32c2;
 }
 
-.index-meta .down {
+.index-block.green .index-meta .down,
+.index-block.hazard .index-meta .up {
   color: #c62828c2;
 }
 

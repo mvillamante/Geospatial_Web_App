@@ -6,19 +6,6 @@ interface DbRiskLegendProps {
 }
 
 const DbRiskLegend: React.FC<DbRiskLegendProps> = ({ selectedLayer }) => {
-  if (!selectedLayer || selectedLayer === "none") {
-    return (
-      <div className="risklegend-container panel-card index-legend-none">
-        <h4>Index Legend</h4>
-        <ul className="index-legend-three">
-          <li><span className="legend-swatch index-green" /> Green Index</li>
-          <li><span className="legend-swatch index-hazard" /> Hazard Index</li>
-          <li><span className="legend-swatch index-crl" /> Calamity Risk Likelihood</li>
-        </ul>
-      </div>
-    );
-  }
-
   switch (selectedLayer) {
     case "hazard":
       return (
@@ -57,18 +44,6 @@ const DbRiskLegend: React.FC<DbRiskLegendProps> = ({ selectedLayer }) => {
               <li className="low"><span className="calamity-map-legend-color" /> 20–39%: Low</li>
               <li className="very-low"><span className="calamity-map-legend-color" /> 0–19%: Very Low</li>
             </ul>
-        </div>
-      );
-    default:
-      return (
-        <div className="risklegend-container panel-card">
-          <h4>Index Legend</h4>
-          <ul>
-            <li className="low">Low Risk</li>
-            <li className="moderate">Moderate Risk</li>
-            <li className="high">High Risk</li>
-            <li className="critical">Critical Risk</li>
-          </ul>
         </div>
       );
   }

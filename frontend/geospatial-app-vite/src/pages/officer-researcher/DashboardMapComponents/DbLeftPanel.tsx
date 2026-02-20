@@ -126,54 +126,30 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
     const hasHazardIdx = hazardIdxValue != null;
     const hasCalamityIdx = calamityIdxValue != null;
 
-    const [hoveredIndex, setHoveredIndex] = useState<"green" | "hazard" | null>(null);
+    const getRecommendation = (type: "green" | "hazard" | null) => {
+      if (!type) return null;
+      if (type === "hazard" && hazardChangeFromLastYear != null) {
+          if (hazardChangeFromLastYear > 0) {
+              return { title: "Hazard: Rising Risk", text: "Hazard exposure is increasing — review zoning controls, improve drainage systems, and strengthen early warning mechanisms.", tone: "warning" };
+          } else if (hazardChangeFromLastYear < 0) {
+              return { title: "Hazard: Decreasing Risk", text: "Hazard exposure is decreasing — continue monitoring high-risk zones and maintain preparedness programs.", tone: "safe" };
+          } else {
+              return { title: "Hazard: Stable", text: "Hazard levels are stable — maintain current disaster preparedness and infrastructure monitoring.", tone: "safe" };
+          }
+      }
 
-    const getRecommendation = (type: "green" | "hazard") => {
-        if (type === "hazard" && hazardChangeFromLastYear != null) {
-            if (hazardChangeFromLastYear > 0) {
-                return {
-                    title: "Hazard: Rising Risk",
-                    text: "Hazard exposure is increasing — review zoning controls, improve drainage systems, and strengthen early warning mechanisms.",
-                    tone: "warning"
-                };
-            } else if (hazardChangeFromLastYear < 0) {
-                return {
-                    title: "Hazard: Decreasing Risk",
-                    text: "Hazard exposure is decreasing — continue monitoring high-risk zones and maintain preparedness programs.",
-                    tone: "safe"
-                };
-            } else {
-                return {
-                    title: "Hazard: Stable",
-                    text: "Hazard levels are stable — maintain current disaster preparedness and infrastructure monitoring.",
-                    tone: "safe"
-                };
-            }
-        }
+      if (type === "green" && greenChangeFromLastYear != null) {
+          if (greenChangeFromLastYear < 0) {
+              return { title: "Green: Declining Coverage", text: "Vegetation coverage is decreasing — strengthen tree planting, protect existing vegetation, and promote urban greening initiatives.", tone: "warning" };
+          } else if (greenChangeFromLastYear > 0) {
+              return { title: "Green: Improving Coverage", text: "Green coverage is increasing — continue sustainability efforts and expand conservation programs.", tone: "safe" };
+          } else {
+              return { title: "Green: Stable Coverage", text: "Green coverage remains stable — maintain current sustainability and urban greening initiatives.", tone: "safe" };
+          }
+      }
 
-        if (type === "green" && greenChangeFromLastYear != null) {
-            if (greenChangeFromLastYear < 0) {
-                return {
-                    title: "Green: Declining Coverage",
-                    text: "Vegetation coverage is decreasing — strengthen tree planting, protect existing vegetation, and promote urban greening initiatives.",
-                    tone: "warning"
-                };
-            } else if (greenChangeFromLastYear > 0) {
-                return {
-                    title: "Green: Improving Coverage",
-                    text: "Green coverage is increasing — continue sustainability efforts and expand conservation programs.",
-                    tone: "safe"
-                };
-            } else {
-                return {
-                    title: "Green: Stable Coverage",
-                    text: "Green coverage remains stable — maintain current sustainability and urban greening initiatives.",
-                    tone: "safe"
-                };
-            }
-        }
-        return null;
-    };
+      return null;
+  };
 
     return (
         <aside className="dbmleft-panel">
@@ -247,93 +223,85 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
             {mapView === "interactive" ? (
                 <>
                     <div className="panel-card indices-card">
-                        <h4>Current Indices as of {currentYear}</h4>
+                      <h4>Current Indices as of {currentYear}</h4>
+                      <div className="indices-content">
+                        {/* Green Index Row */}
+                        <div className="index-block green">
+                          <div className="index-label">Green Index</div>
 
-                        <div className="indices-content">
+                          <div className="index-value">
+                            {universalGreenAvg != null ? universalGreenAvg.toFixed(1) : "—"}
+                            <span className="unit">%</span>
+                          </div>
 
-                            {/* Green */}
-                            <div
-                                className="index-block green"
-                                onMouseEnter={() => setHoveredIndex("green")}
-                                onMouseLeave={() => setHoveredIndex(null)}
-                            >
-                                <div className="index-label">Green Index</div>
+                          <div className="index-divider-line" />
 
-                                <div className="index-value">
-                                    {universalGreenAvg != null ? universalGreenAvg.toFixed(1) : "—"}
-                                    <span className="unit">%</span>
-                                </div>
+                          <div className="index-meta">
+                            {greenChangeFromLastYear != null ? (
+                              <span className={greenChangeFromLastYear >= 0 ? "up" : "down"}>
+                                {greenChangeFromLastYear >= 0 ? "↑" : "↓"}{" "}
+                                {Math.abs(greenChangeFromLastYear).toFixed(1)}%
+                              </span>
+                            ) : "—"}
+                          </div>
+                      
+                      </div>
 
-                                <div className="index-divider-line"/>
+                      <div className="index-divider" />
 
-                                <div className="index-meta">
-                                    {greenChangeFromLastYear != null ? (
-                                        <span className={greenChangeFromLastYear >= 0 ? "up" : "down"}>
-                                            {greenChangeFromLastYear >= 0 ? "↑" : "↓"}{" "}
-                                            {Math.abs(greenChangeFromLastYear).toFixed(1)}%
-                                        </span>
-                                    ) : "—"}
-                                </div>
-                            </div>
+                      {/* Hazard Index Row */}
+                      <div className="index-block hazard">
+                          <div className="index-label">Hazard Index</div>
 
-                            {/* Divider */}
-                            <div className="index-divider" />
+                          <div className="index-value">
+                            {universalHazardAvg != null ? universalHazardAvg.toFixed(1) : "—"}
+                            <span className="unit">%</span>
+                          </div>
 
-                            {/* Hazard */}
-                            <div
-                                className="index-block hazard"
-                                onMouseEnter={() => setHoveredIndex("hazard")}
-                                onMouseLeave={() => setHoveredIndex(null)}
-                            >
-                                <div className="index-label">Hazard Index</div>
+                          <div className="index-divider-line" />
 
-                                <div className="index-value">
-                                    {universalHazardAvg != null ? universalHazardAvg.toFixed(1) : "—"}
-                                    <span className="unit">%</span>
-                                </div>
-
-                                <div className="index-divider-line"/>
-                                
-                                <div className="index-meta">
-                                    {hazardChangeFromLastYear != null ? (
-                                        <span className={hazardChangeFromLastYear >= 0 ? "up" : "down"}>
-                                            {hazardChangeFromLastYear >= 0 ? "↑" : "↓"}{" "}
-                                            {Math.abs(hazardChangeFromLastYear).toFixed(1)}%
-                                        </span>
-                                    ) : "—"}
-                                </div>
-                            </div>
-
+                          <div className="index-meta">
+                            {hazardChangeFromLastYear != null ? (
+                              <span className={hazardChangeFromLastYear >= 0 ? "up" : "down"}>
+                                {hazardChangeFromLastYear >= 0 ? "↑" : "↓"}{" "}
+                                {Math.abs(hazardChangeFromLastYear).toFixed(1)}%
+                              </span>
+                            ) : "—"}
+                          </div>
                         </div>
-                        <div className="index-note">
-                            Hover for more insights and recommendations.
+                      </div>
+
+                      <div className="recommendation-card green">
+                        {(() => {
+                          const rec = getRecommendation("green");
+                          if (!rec) return null;
+                          return (
+                            <>
+                              <div className="recommendation-title">{rec.title}</div>
+                              <div className="recommendation-text">{rec.text}</div>
+                              <div className="recommendation-note">
+                                * Automatically generated — please have an expert review for final assessment.
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                      <div className="recommendation-card hazard">
+                          {(() => {
+                            const rec = getRecommendation("hazard");
+                            if (!rec) return null;
+                            return (
+                              <>
+                                <div className="recommendation-title">{rec.title}</div>
+                                <div className="recommendation-text">{rec.text}</div>
+                                <div className="recommendation-note">
+                                  * Automatically generated — please have an expert review for final assessment.
+                                </div>
+                              </>
+                            );
+                          })()}
                         </div>
                     </div>
-
-                    {hoveredIndex && getRecommendation(hoveredIndex) && (
-                        <div className={`panel-card recommendation-card ${hoveredIndex}`}>
-                            {(() => {
-                            const rec = getRecommendation(hoveredIndex);
-                            if (!rec) return null;
-
-                            return (
-                                <>
-                                    <div className="recommendation-title">
-                                        {rec.title}
-                                    </div>
-
-                                    <div className="recommendation-text">
-                                        {rec.text}
-                                    </div>
-
-                                    <div className="recommendation-note">
-                                        * Automatically generated — please have an expert review for final assessment.
-                                    </div>
-                                </>
-                            );
-                            })()}
-                        </div>
-                    )}
                 </>
             ) : mapView === "choropleth" ? (
                 <>

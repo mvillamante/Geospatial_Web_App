@@ -112,7 +112,6 @@ const DashboardMapPage: React.FC = () => {
 
   /*---------- Layer Options----------*/
   const layerOptions: { value: string; label: string }[] = [
-    { value: "none", label: "None" },
     { value: "green", label: "Green Index" },
     { value: "hazard", label: "Hazard Index" },
     { value: "calamity", label: "Calamity Risk Likelihood" },

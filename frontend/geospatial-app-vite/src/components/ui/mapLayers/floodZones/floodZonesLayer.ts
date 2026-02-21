@@ -1,5 +1,5 @@
 import L from "leaflet";
-import { floodZonesData, floodZoneColors } from "./floodZonesData";
+import { floodZonesData, floodZoneColors, getFloodZoneRings } from "./floodZonesData";
 import floodZoneIcon from "../../../../assets/icons/floodzone.png";
 
 /**
@@ -12,30 +12,36 @@ export function createFloodZonesLayer(map: L.Map): L.LayerGroup {
 
   floodZonesData.forEach((zone) => {
     const colors = floodZoneColors[zone.riskLevel];
+    const rings = getFloodZoneRings(zone);
 
-    // Create the flood zone polygon
-    const polygon = L.polygon(zone.coordinates, {
-      color: colors.stroke,
-      weight: 3,
-      opacity: 0.9,
-      fillColor: colors.fill,
-      fillOpacity: 0.4,
-      dashArray: zone.riskLevel === "high" ? undefined : "8, 4",
-    }).addTo(floodZonesGroup);
-
-    // Add wave-like pattern overlay for high risk zones
-    if (zone.riskLevel === "high") {
-      L.polygon(zone.coordinates, {
-        color: "transparent",
-        weight: 0,
+    // Create flood zone polygon(s) — one per ring for full barangay bounds (Poblacion may have multiple)
+    const polygons: L.Polygon[] = [];
+    rings.forEach((ring) => {
+      const polygon = L.polygon(ring, {
+        color: colors.stroke,
+        weight: 3,
+        opacity: 0.9,
         fillColor: colors.fill,
-        fillOpacity: 0.2,
-        className: "flood-zone-pulse",
+        fillOpacity: 0.4,
+        dashArray: zone.riskLevel === "high" ? undefined : "8, 4",
       }).addTo(floodZonesGroup);
+      polygons.push(polygon);
+    });
+
+    // Add wave-like pattern overlay for high risk zones (each ring)
+    if (zone.riskLevel === "high") {
+      rings.forEach((ring) => {
+        L.polygon(ring, {
+          color: "transparent",
+          weight: 0,
+          fillColor: colors.fill,
+          fillOpacity: 0.2,
+          className: "flood-zone-pulse",
+        }).addTo(floodZonesGroup);
+      });
     }
 
-    // Bind popup with zone information
-    polygon.bindPopup(`
+    const popupContent = `
       <div class="flood-zone-popup" style="min-width: 240px;">
         <h3 style="margin: 0 0 10px 0; color: ${colors.stroke}; font-size: 15px; font-weight: 600;">
           <img src="${floodZoneIcon}" alt="" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 6px;" />${zone.name}
@@ -72,9 +78,11 @@ export function createFloodZonesLayer(map: L.Map): L.LayerGroup {
           </p>
         </div>
       </div>
-    `);
+    `;
+    polygons.forEach((p) => p.bindPopup(popupContent));
 
-    // Bind tooltip for quick identification on hover
+    // Bind tooltip to first polygon for quick identification on hover
+    const polygon = polygons[0];
     polygon.bindTooltip(`
       <div style="text-align: center;">
         <img src="${floodZoneIcon}" alt="" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;" /><strong>${zone.name}</strong><br>
@@ -86,8 +94,9 @@ export function createFloodZonesLayer(map: L.Map): L.LayerGroup {
       className: `flood-zone-tooltip ${zone.riskLevel}`,
     });
 
-    // Calculate centroid for the label
-    const bounds = polygon.getBounds();
+    // Calculate centroid for the label (combined bounds if multi-ring)
+    let bounds = polygons[0].getBounds();
+    for (let i = 1; i < polygons.length; i++) bounds = bounds.extend(polygons[i].getBounds());
     const center = bounds.getCenter();
 
     // Add a label marker at the center of each flood zone

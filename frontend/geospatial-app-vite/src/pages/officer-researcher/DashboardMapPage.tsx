@@ -104,9 +104,20 @@ const DashboardMapPage: React.FC = () => {
   // ---------- Toggle Layer ----------
   const [activeLayers, setActiveLayers] = useState<string[]>([]);
   const toggleLayer = (layer: string) => {
-    setActiveLayers((prev) =>
-      prev.includes(layer) ? prev.filter((l) => l !== layer) : [...prev, layer]
-    );
+    setActiveLayers((prev) => {
+      const isCurrentlyActive = prev.includes(layer);
+      if (isCurrentlyActive) {
+        return prev.filter((l) => l !== layer);
+      }
+      // Turning on: only one of Flood Zones or Landslide Risk can be on at a time
+      if (layer === "Flood Zones") {
+        return [...prev.filter((l) => l !== "Landslide Risk"), layer];
+      }
+      if (layer === "Landslide Risk") {
+        return [...prev.filter((l) => l !== "Flood Zones"), layer];
+      }
+      return [...prev, layer];
+    });
   };
 
   /*---------- Layer Options----------*/
@@ -119,6 +130,15 @@ const DashboardMapPage: React.FC = () => {
   /*---------- Placeholder Map Layers (Left Panel) ----------*/
   const layerDisplayNames: Record<string, string> = {
     "NDVI": "Green Index",
+  };
+
+  const layerTooltips: Record<string, string> = {
+    "Fault Lines": "Shows active and potentially active fault lines from Carmona to Cabuyao. Toggle on to see fault segments and borders; click a line for details.",
+    "Flood Zones": "Areas with higher flood susceptibility. Use this layer to assess flood risk.",
+    "Landslide Risk": "Areas with elevated landslide susceptibility based on slope and soil data.",
+    "Verified Reports": "Verified hazard reports (Hazard Location) from the field.",
+    "Evacuation Centers": "Locations of evacuation centers for disaster response.",
+    "Traffic Conditions": "Current or historical traffic conditions on road networks.",
   };
 
   const mapLayers = [
@@ -541,6 +561,7 @@ const DashboardMapPage: React.FC = () => {
           layerOptions={layerOptions}
           visibleMapLayers={visibleMapLayers}
           layerDisplayNames={layerDisplayNames}
+          layerTooltips={layerTooltips}
         />
 
         {/* Map */}

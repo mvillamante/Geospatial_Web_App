@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "../DashboardMapPage.css";
 
 import DbDataLayer from "./left/DbDataLayer";
 import DbMapLayers from "./left/DbMapLayers";
 import DbRiskLegend from "./left/DbRiskLegend";
+import PortalTooltip from "./left/PortalTooltip";
 
 import { getEnvironmentalRecommendation } from "../../../utils/getEnvironmentalRecommendation";
 
@@ -62,6 +63,7 @@ interface DbLeftPanelProps {
 
   visibleMapLayers: { group: string; items: MapLayerItem[] }[];
   layerDisplayNames: Record<string, string>;
+  layerTooltips?: Record<string, string>;
 }
 
 const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
@@ -96,12 +98,18 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
   maxYear,
   layerOptions,
   visibleMapLayers,
-  layerDisplayNames
+  layerDisplayNames,
+  layerTooltips = {},
 }) => {
     const [showMapViewHelp, setShowMapViewHelp] = useState(false);
     const [showGreenHelp, setShowGreenHelp] = useState(false);
     const [showHazardHelp, setShowHazardHelp] = useState(false);
     const [showResilienceHelp, setShowResilienceHelp] = useState(false);
+
+    const mapViewHelpRef = useRef<HTMLButtonElement>(null);
+    const resilienceHelpRef = useRef<HTMLButtonElement>(null);
+    const greenHelpRef = useRef<HTMLButtonElement>(null);
+    const hazardHelpRef = useRef<HTMLButtonElement>(null);
 
     // Derived state for choropleth index summary behavior
     const isChoropleth = mapView === "choropleth";
@@ -156,6 +164,7 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
                 onMouseLeave={() => setShowMapViewHelp(false)}
               >
                 <button
+                  ref={mapViewHelpRef}
                   type="button"
                   className="help-icon"
                   onClick={() => setShowMapViewHelp((prev) => !prev)}
@@ -163,11 +172,15 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
                 >
                   ?
                 </button>
-                {showMapViewHelp && (
-                  <div className="help-tooltip">
-                    Use this toggle to switch between <strong>Interactive</strong> (explore layers and overlays) and <strong>Choropleth</strong> (view citywide index maps like Green, Hazard, and Risk).
-                  </div>
-                )}
+                <PortalTooltip
+                  show={showMapViewHelp}
+                  triggerRef={mapViewHelpRef}
+                  content={
+                    <>
+                      Use this toggle to switch between <strong>Interactive</strong> (explore layers and overlays) and <strong>Choropleth</strong> (view citywide index maps like Green, Hazard, and Risk).
+                    </>
+                  }
+                />
               </div>
             </div>
             <div className="segmented-control slide one">
@@ -230,20 +243,24 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
                             onMouseLeave={() => setShowResilienceHelp(false)}
                           >
                             <button
+                              ref={resilienceHelpRef}
                               type="button"
                               className="help-icon small"
                               onClick={() => setShowResilienceHelp(prev => !prev)}
                             >
                               ?
                             </button>
-
-                            {showResilienceHelp && (
-                              <div className="help-tooltip">
-                                <strong>Composite Resilience Score</strong> Formula:
-                                <br />
-                                (0.6 × Green Index) + (0.4 × (100 − Hazard Index))
-                              </div>
-                            )}
+                            <PortalTooltip
+                              show={showResilienceHelp}
+                              triggerRef={resilienceHelpRef}
+                              content={
+                                <>
+                                  <strong>Composite Resilience Score</strong> Formula:
+                                  <br />
+                                  (0.6 × Green Index) + (0.4 × (100 − Hazard Index))
+                                </>
+                              }
+                            />
                           </div>
                         </div>
 
@@ -267,20 +284,24 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
                                 onMouseLeave={() => setShowGreenHelp(false)}
                               >
                                 <button
+                                  ref={greenHelpRef}
                                   type="button"
                                   className="help-icon small"
                                   onClick={() => setShowGreenHelp(prev => !prev)}
                                 >
                                   ?
                                 </button>
-
-                                {showGreenHelp && (
-                                  <div className="help-tooltip">
-                                    <strong>Green Index</strong> includes:
-                                    <br />• Normalized Difference Vegetation Index (NDVI)
-                                    <br />• Green Area Ratio (GAR)
-                                  </div>
-                                )}
+                                <PortalTooltip
+                                  show={showGreenHelp}
+                                  triggerRef={greenHelpRef}
+                                  content={
+                                    <>
+                                      <strong>Green Index</strong> includes:
+                                      <br />• Normalized Difference Vegetation Index (NDVI)
+                                      <br />• Green Area Ratio (GAR)
+                                    </>
+                                  }
+                                />
                               </div>
                             </div>
 
@@ -314,25 +335,29 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
                               onMouseLeave={() => setShowHazardHelp(false)}
                             >
                               <button
+                                ref={hazardHelpRef}
                                 type="button"
                                 className="help-icon small"
                                 onClick={() => setShowHazardHelp(prev => !prev)}
                               >
                                 ?
                               </button>
-
-                              {showHazardHelp && (
-                                <div className="help-tooltip">
-                                  <strong>Hazard Index</strong> includes:
-                                  <br />• Earthquake Frequency
-                                  <br />• Flood Susceptibility
-                                  <br />• Typhoon Frequency
-                                  <br />• Landslide Susceptibility
-                                  <br />• Infrastructure
-                                  <br />• Population
-                                  <br />• Weather Data
-                                </div>
-                              )}
+                              <PortalTooltip
+                                show={showHazardHelp}
+                                triggerRef={hazardHelpRef}
+                                content={
+                                  <>
+                                    <strong>Hazard Index</strong> includes:
+                                    <br />• Earthquake Frequency
+                                    <br />• Flood Susceptibility
+                                    <br />• Typhoon Frequency
+                                    <br />• Landslide Susceptibility
+                                    <br />• Infrastructure
+                                    <br />• Population
+                                    <br />• Weather Data
+                                  </>
+                                }
+                              />
                             </div>
                           </div>
 
@@ -458,6 +483,7 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
                   <DbMapLayers
                     visibleMapLayers={visibleMapLayers}
                     layerDisplayNames={layerDisplayNames}
+                    layerTooltips={layerTooltips}
                     activeLayers={activeLayers}
                     toggleLayer={toggleLayer}
                   />

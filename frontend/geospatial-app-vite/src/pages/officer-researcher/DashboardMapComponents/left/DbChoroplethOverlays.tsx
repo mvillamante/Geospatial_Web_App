@@ -1,6 +1,5 @@
 import React from "react";
 import type { HazardBarangayData, GreenIndexBarangayData, CalamityRiskBarangayData } from "../../../../components/ui/LeafletMap";
-import "./DbChoroplethOverlays.css";
 
 type Props = {
   selectedLayer: string;

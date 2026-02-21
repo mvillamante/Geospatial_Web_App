@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "../../DashboardMapPage.css";
+import PortalTooltip from "./PortalTooltip";
 
 interface LayerOption {
   value: string;
@@ -43,6 +44,7 @@ const DbDataLayer: React.FC<MapControlsProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [showFieldHelp, setShowFieldHelp] = useState(false);
+  const fieldHelpRef = useRef<HTMLButtonElement>(null);
 
   const handleSelect = (value: string) => {
     setSelectedLayer(value);
@@ -78,6 +80,7 @@ const DbDataLayer: React.FC<MapControlsProps> = ({
             onMouseLeave={() => setShowFieldHelp(false)}
           >
             <button
+              ref={fieldHelpRef}
               type="button"
               className="help-icon"
               onClick={() => setShowFieldHelp((prev) => !prev)}
@@ -85,11 +88,11 @@ const DbDataLayer: React.FC<MapControlsProps> = ({
             >
               ?
             </button>
-            {showFieldHelp && (
-              <div className="help-tooltip">
-                Choose which index or risk layer to visualize in the choropleth map. This controls what the year slider and map colors represent.
-              </div>
-            )}
+            <PortalTooltip
+              show={showFieldHelp}
+              triggerRef={fieldHelpRef}
+              content="Choose which index or risk layer to visualize in the choropleth map. This controls what the year slider and map colors represent."
+            />
           </div>
         </div>
         <div

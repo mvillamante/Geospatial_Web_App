@@ -25,12 +25,15 @@ interface AlertsPanelProps {
     onSelectReport?: (report: Report) => void;
     onBarangaySearch?: (barangay: string, severity: string | null) => void;
     initialOpenIncidentId?: number;
+    isVerified: boolean | null;
+    userBarangay: string;
+    isVerificationLoading?: boolean;
 }
 
 
 
 
-export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch, initialOpenIncidentId }: AlertsPanelProps) {
+export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch, initialOpenIncidentId, isVerified, userBarangay, isVerificationLoading }: AlertsPanelProps) {
     const hasAutoOpenedRef = useRef(false);
 
     console.log("initialOpenIncidentId:", initialOpenIncidentId);
@@ -49,7 +52,8 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
         useState<"all" | "low" | "moderate" | "high" | "critical">("all");
     const [selectedStatus, setSelectedStatus] = useState<"all" | "in_progress" | "resolved">("all");
 
-    const [selectedBarangay, setSelectedBarangay] = useState("");
+    const [barangayFilter, setBarangayFilter] = useState<"all" | "my">("all");
+    const [searchBarangay, setSearchBarangay] = useState("");
     const [sortNewest, setSortNewest] = useState<boolean>(true);
     const [reports, setReports] = useState<Report[]>([]);
 
@@ -84,7 +88,7 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
 
         setIsLoading(true);
         try {
-            const res = await fetch("/api/incident-reports/verified/", {
+            const res = await fetch("http://localhost:8000/api/incident-reports/verified/", {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`,
@@ -97,6 +101,8 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
             }
 
             const data = await res.json();
+
+
 
             const mappedReports: Report[] = (data.results || []).map((r: any) => {
                 let lat = r.lat ?? r.latitude;
@@ -151,6 +157,12 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
     }, []);
 
     useEffect(() => {
+        if (searchBarangay.trim() !== "") {
+            setBarangayFilter("all");
+        }
+    }, [searchBarangay]);
+
+    useEffect(() => {
         const onResize = () => {
             const mobile = window.innerWidth <= 768;
             setFiltersOpen(!mobile);
@@ -160,32 +172,52 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
         return () => window.removeEventListener("resize", onResize);
     }, []);
 
-    const handleBarangaySearch = (value: string) => {
-        setSelectedBarangay(value);
-        if (onBarangaySearch) {
-            const matchingReports = reports.filter(r =>
-                r.barangay.toLowerCase().includes(value.toLowerCase())
-            );
+    // const handleBarangaySearch = (value: string) => {
+    //     setSelectedBarangay(value);
+    //     if (onBarangaySearch) {
+    //         const matchingReports = reports.filter(r =>
+    //             r.barangay.toLowerCase().includes(value.toLowerCase())
+    //         );
 
-            let highestSeverity: string | null = null;
-            if (matchingReports.length > 0) {
-                const sorted = matchingReports.sort((a, b) =>
-                    severityPriority[b.verified_critical_level] - severityPriority[a.verified_critical_level]
-                );
-                highestSeverity = sorted[0].verified_critical_level;
-            }
+    //         let highestSeverity: string | null = null;
+    //         if (matchingReports.length > 0) {
+    //             const sorted = matchingReports.sort((a, b) =>
+    //                 severityPriority[b.verified_critical_level] - severityPriority[a.verified_critical_level]
+    //             );
+    //             highestSeverity = sorted[0].verified_critical_level;
+    //         }
 
-            onBarangaySearch(value, highestSeverity);
-        }
-    };
+    //         onBarangaySearch(value, highestSeverity);
+    //     }
+    // };
+
+    const normalize = (s: string) =>
+        s
+            .toLowerCase()
+            .replace(/brgy\.?/g, "")
+            .replace(/barangay/g, "")
+            .replace(/[^a-z0-9\s]/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
 
     const filteredReports = reports
         .filter(r => (r.assigned_officer_id != null) || (r.status === "resolved"))
         .filter(r => selectedCategory === "all" || r.incident_type.toLowerCase() === selectedCategory)
-        .filter(r => selectedSeverity === "all" || r.verified_critical_level === selectedSeverity.toLowerCase())
+        .filter(r => selectedSeverity === "all" || r.verified_critical_level === selectedSeverity)
         .filter(r => selectedStatus === "all" || (r.status ?? "in_progress") === selectedStatus)
-        .filter(r => selectedBarangay === "" || r.barangay.toLowerCase().includes(selectedBarangay.toLowerCase()));
+        .filter(r => {
+            const normalizedReport = normalize(r.barangay);
 
+            if (searchBarangay.trim() !== "") {
+                return normalizedReport.includes(normalize(searchBarangay));
+            }
+
+            if (barangayFilter === "my" && userBarangay) {
+                return normalizedReport === normalize(userBarangay);
+            }
+
+            return true;
+        });
 
     const sortedReports = useMemo(() => {
         return [...filteredReports].sort((a, b) => {
@@ -208,7 +240,7 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
         setSelectedCategory("all");
         setSelectedSeverity("all");
         setSelectedStatus("all");
-        setSelectedBarangay("");
+        setBarangayFilter("all");
 
     }, [reports, initialOpenIncidentId]);
 
@@ -331,14 +363,14 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
                         <input
                             type="text"
                             placeholder="Search barangay..."
-                            value={selectedBarangay}
-                            onChange={(e) => handleBarangaySearch(e.target.value)}
+                            value={searchBarangay}
+                            onChange={(e) => setSearchBarangay(e.target.value)}
                         />
-                        {selectedBarangay && (
+                        {searchBarangay && (
                             <button
                                 type="button"
                                 className="search-clear-btn"
-                                onClick={() => handleBarangaySearch("")}
+                                onClick={() => setSearchBarangay("")}
                                 aria-label="Clear search"
                                 title="Clear"
                             >
@@ -398,6 +430,29 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
                             </button>
                         ))}
                     </div>
+
+                    <div className="chip-row">
+                        <span className="chip-label">Barangay</span>
+
+                        <button
+                            type="button"
+                            className={chipClass(barangayFilter === "all")}
+                            onClick={() => setBarangayFilter("all")}
+                        >
+                            All Barangays
+                        </button>
+
+                        {isVerified === true && userBarangay && (
+                            <button
+                                type="button"
+                                className={chipClass(barangayFilter === "my")}
+                                onClick={() => setBarangayFilter("my")}
+                            >
+                                My Barangay
+                            </button>
+                        )}
+
+                    </div>
                 </div>
 
 
@@ -425,8 +480,12 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
             </div> */}
 
                 {/* CTA */}
-                <button className="report-btn" onClick={onReport}>
-                    + Report Incident
+                <button
+                    className="report-btn"
+                    onClick={onReport}
+                    disabled={isVerificationLoading}
+                >
+                    {isVerificationLoading ? "Checking..." : "+ Report Incident"}
                 </button>
             </div>
 
@@ -439,7 +498,7 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
                         <button className="clear-filters-btn" onClick={() => {
                             setSelectedCategory("all");
                             setSelectedSeverity("all");
-                            setSelectedBarangay("");
+                            setBarangayFilter("all");
                         }}>Clear Filters</button>
                     </div>
                 ) : (

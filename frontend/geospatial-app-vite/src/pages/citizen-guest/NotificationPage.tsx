@@ -4,7 +4,7 @@ import { MdReport, MdInfo } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import "./NotificationPage.css";
 
-type NotificationType = "official" | "incident" | "report";
+type NotificationType = "official" | "incident" | "report" | "verification";
 
 type Severity = "low" | "moderate" | "high" | "critical";
 
@@ -15,6 +15,8 @@ type IncidentEvent =
 
 
 type ReportStatus = "pending" | "in_progress" | "needs_info" | "resolved" | "rejected";
+
+type TimeFilter = "today" | "7days" | "all";
 
 export interface NotificationItem {
     id: string;
@@ -72,6 +74,8 @@ const NotificationPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<"all" | NotificationType>("all");
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [timeFilter, setTimeFilter] = useState<TimeFilter>("7days");
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -83,17 +87,17 @@ const NotificationPage: React.FC = () => {
                 });
                 const data = await res.json();
 
-                const recentOnly = data.filter((n: any) => {
-                    if (!n.created_at) return false;
-                    const created = new Date(n.created_at);
-                    const now = new Date();
-                    const diffMs = now.getTime() - created.getTime();
-                    const diffDays = diffMs / (1000 * 60 * 60 * 24);
-                    return diffDays <= 7;   
-                });
+                // const recentOnly = data.filter((n: any) => {
+                //     if (!n.created_at) return false;
+                //     const created = new Date(n.created_at);
+                //     const now = new Date();
+                //     const diffMs = now.getTime() - created.getTime();
+                //     const diffDays = diffMs / (1000 * 60 * 60 * 24);
+                //     return diffDays <= 7;
+                // });
 
 
-                setNotifications(recentOnly.map((n: any) => ({
+                setNotifications(data.map((n: any) => ({
                     id: String(n.id),
                     type: n.type,
                     title: n.title,
@@ -166,9 +170,50 @@ const NotificationPage: React.FC = () => {
             return current === "high" || current === "critical";
         });
 
-    const listForPage = activeTab === "all"
-        ? incidentOnlyHighCritical(filtered)
-        : incidentOnlyHighCritical(filtered);
+    const listForPage = useMemo(() => {
+        let base =
+            activeTab === "all"
+                ? notifications
+                : notifications.filter(n => n.type === activeTab);
+
+        base = base.filter(n => {
+            if (n.type !== "incident") return true;
+            const current = n.severityTo ?? n.severity;
+            return current === "high" || current === "critical";
+        });
+
+        const now = new Date();
+
+        base = base.filter(n => {
+            if (!n.createdAt) return false;
+            const created = new Date(n.createdAt);
+
+            if (timeFilter === "all") return true;
+
+            const diffMs = now.getTime() - created.getTime();
+            const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+            if (timeFilter === "today") {
+                return (
+                    created.getFullYear() === now.getFullYear() &&
+                    created.getMonth() === now.getMonth() &&
+                    created.getDate() === now.getDate()
+                );
+            };
+
+            if (timeFilter === "7days") {
+                return diffDays <= 7;
+            }
+
+            return true;
+        });
+
+        return base.sort((a, b) => {
+            const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return bTime - aTime;
+        });
+    }, [activeTab, notifications, timeFilter]);
 
     const openNotification = async (n: NotificationItem) => {
         if (n.isUnread) {
@@ -229,17 +274,22 @@ const NotificationPage: React.FC = () => {
         };
     }
 
-    const isToday = (iso?: string) => {
-        if (!iso) return false;
-        const d = new Date(iso);
-        const now = new Date();
+    // const isToday = (iso?: string) => {
+    //     if (!iso) return false;
+    //     const d = new Date(iso);
+    //     const now = new Date();
 
-        return (
-            d.getFullYear() === now.getFullYear() &&
-            d.getMonth() === now.getMonth() &&
-            d.getDate() === now.getDate()
-        );
-    };
+    //     return (
+    //         d.getFullYear() === now.getFullYear() &&
+    //         d.getMonth() === now.getMonth() &&
+    //         d.getDate() === now.getDate()
+    //     );
+    // };
+
+    const isAllEmpty =
+        grouped.official.length === 0 &&
+        incidentOnlyHighCritical(grouped.incident).length === 0 &&
+        grouped.report.length === 0;
 
     return (
         <div className="notif-page">
@@ -300,45 +350,77 @@ const NotificationPage: React.FC = () => {
                         <span className="tab-badge">{counts.unreadReport}</span>
                     )}
                 </button>
+            </div>
 
+            {/* Time Filter */}
+            <div className="notif-time-filter">
+                <div
+                    className={`dropdown ${isDropdownOpen ? "open" : ""}`}
+                >
+                    <div
+                        className="dropdown-selected"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsDropdownOpen(prev => !prev);
+                        }}
+                    >
+                        {timeFilter === "today" && "Today"}
+                        {timeFilter === "7days" && "Last 7 Days"}
+                        {timeFilter === "all" && "All Time"}
+                        <span className="dropdown-arrow">▾</span>
+                    </div>
+
+                    {isDropdownOpen && (
+                        <div className="dropdown-menu">
+                            <div
+                                className="dropdown-item"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setTimeFilter("today");
+                                    setIsDropdownOpen(false);
+                                }}
+                            >
+                                Today
+                            </div>
+
+                            <div
+                                className="dropdown-item"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setTimeFilter("7days");
+                                    setIsDropdownOpen(false);
+                                }}
+                            >
+                                Last 7 Days
+                            </div>
+
+                            <div
+                                className="dropdown-item"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setTimeFilter("all");
+                                    setIsDropdownOpen(false);
+                                }}
+                            >
+                                All Time
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Content */}
             <div className="notif-content">
-                {activeTab === "all" ? (
-                    sectionOrder.map((section) => {
-                        const sectionItems =
-                            section === "official" ? grouped.official :
-                                section === "incident" ? incidentOnlyHighCritical(grouped.incident) :
-                                    grouped.report;
-
-                        if (sectionItems.length === 0) return null;
-
-                        return (
-                            <div className="notif-section" key={section}>
-                                <div className="notif-section-header">
-                                    <h2>{sectionTitle[section]}</h2>
-                                    <span className="muted">{sectionItems.length}</span>
-                                </div>
-
-                                <div className="notif-list">
-                                    {sectionItems.map((n) => (
-                                        <NotificationCard
-                                            key={n.id}
-                                            n={n}
-                                            onOpen={() => openNotification(n)}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        );
-                    })
+                {loading ? (
+                    <LoadingState />
                 ) : (
                     <div className="notif-section">
-                        <div className="notif-section-header">
-                            <h2>{sectionTitle[activeTab]}</h2>
-                            <span className="muted">{listForPage.length}</span>
-                        </div>
+                        {activeTab !== "all" && (
+                            <div className="notif-section-header">
+                                <h2>{sectionTitle[activeTab]}</h2>
+                                <span className="muted">{listForPage.length}</span>
+                            </div>
+                        )}
 
                         <div className="notif-list">
                             {listForPage.length === 0 ? (
@@ -433,6 +515,8 @@ function NotificationCard({ n, onOpen }: { n: NotificationItem; onOpen?: () => v
             const sev = incidentUI?.pillSeverity ?? n.severity ?? "high";
             return <span className={`pill pill-${sev}`}>{sev.toUpperCase()}</span>;
         }
+        if (n.type === "verification")
+            return <span className="pill pill-verification">Verification</span>
         return <span className="pill pill-report">Report</span>
     })();
 
@@ -536,5 +620,22 @@ function EmptyState() {
             </div>
         </div>
     )
+}
+
+function LoadingState() {
+    return (
+        <div className="notif-list">
+            {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="notif-card skeleton">
+                    <div className="skeleton-pill" />
+                    <div className="skeleton-content">
+                        <div className="skeleton-line short" />
+                        <div className="skeleton-line" />
+                        <div className="skeleton-line tiny" />
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
 }
 export default NotificationPage;

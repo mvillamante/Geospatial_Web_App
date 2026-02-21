@@ -67,7 +67,7 @@ const fetchDepartments = async () => {
     console.log("Departments API response:", data);
 
     if (Array.isArray(data.results)) {
-      setDepartments(data.results); // <-- use the results array
+      setDepartments(data.results);
     } else {
       setDepartments([]);
     }
@@ -256,7 +256,7 @@ useEffect(() => {
                 <option value="" disabled>Select role</option>
                 <option value="admin">Admin</option>
                 <option value="officer">Officer</option>
-                <option value="researcher">Researcher</option>
+                {/* <option value="researcher">Researcher</option> */}
               </select>
             </div>
 

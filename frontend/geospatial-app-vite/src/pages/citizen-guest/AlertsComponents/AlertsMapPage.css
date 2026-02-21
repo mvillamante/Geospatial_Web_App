@@ -13,6 +13,76 @@
   position: relative;
 }
 
+.main-layout-map .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.main-layout-map .modal-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 420px;
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  animation: slideUp 0.25s ease;
+}
+
+.main-layout-map h3 {
+  margin: 0 0 10px;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.main-layout-map .modal-card p {
+  margin: 0 0 20px;
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.main-layout-map .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.main-layout-map .save-btn {
+  background: #1e88e5;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s ease;
+}
+
+.main-layout-map .save-btn:hover {
+  background: #1565c0;
+}
+
+.main-layout-map .cancel-btn {
+  background: #f1f1f1;
+  color: #333;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.main-layout-map .cancel-btn:hover {
+  background: #e0e0e0;
+}
+
 .dashboard-container {
   position: relative;
   display: flex;
@@ -104,6 +174,7 @@
   align-items: center;
   gap: 10px;
 }
+
 
 .alerts-header-right {
   display: flex;

@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import "./AlertsMapPage.css";
 import LeafletMap from "../../../components/ui/LeafletMap";
@@ -13,15 +13,20 @@ interface SelectedReportWithTimestamp {
 }
 
 const AlertsMapPage: React.FC = () => {
+  const navigate = useNavigate();
   const location = useLocation();
   const openIncidentId = location.state?.openIncidentId;
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [panelCollapsed, setPanelCollapsed] = useState(true);
 
+  const [userBarangay, setUserBarangay] = useState("");
+
   const [searchedBarangay, setSearchedBarangay] = useState("");
   const [searchedSeverity, setSearchedSeverity] = useState<string | null>(null);
   const [selectedReportData, setSelectedReportData] = useState<SelectedReportWithTimestamp | null>(null);
+
+  const [showVerifyPrompt, setShowVerifyPrompt] = useState(false);
 
   const activeLayers = useMemo(() => ["Verified Reports"], []);
 
@@ -47,6 +52,9 @@ const AlertsMapPage: React.FC = () => {
     async function checkVerification() {
       const token = localStorage.getItem("access_token");
 
+      console.log("isVerified:", isVerified);
+      console.log("userBarangay:", userBarangay);
+
       if (!token) {
         setIsVerified(false);
         return;
@@ -63,11 +71,10 @@ const AlertsMapPage: React.FC = () => {
         return;
       }
 
+
       const data = await res.json();
-      const rawStatus = (data.verification_status || "").toLowerCase();
-
-      setIsVerified(rawStatus === "approved" || rawStatus === "verified");
-
+      setIsVerified(!!data.is_resident_verified);
+      setUserBarangay(data.barangay || "");
     }
 
     checkVerification();
@@ -87,13 +94,13 @@ const AlertsMapPage: React.FC = () => {
             activeLayers={activeLayers}
           />
 
-          {isVerified === false && (
+          {/* {isVerified === false && (
             <div className="map-overlay">
               <div className="verification-message">
                 Verify your account to view hazards near your area.
               </div>
             </div>
-          )}
+          )} */}
         </div>
 
         <div
@@ -115,21 +122,30 @@ const AlertsMapPage: React.FC = () => {
 
 
           {/* Alerts Panel */}
-          {isVerified && (
-            <AlertsPanel
-              onReport={() => setIsDrawerOpen(true)}
-              onBarangaySearch={(b, s) => {
-                setPanelCollapsed(false);
-                handleBarangaySearch(b, s);
-              }}
-              onSelectReport={(r) => {
-                setPanelCollapsed(false);
-                handleSelectReport(r);
-                setSelectedReport(r);
-              }}
-              initialOpenIncidentId={openIncidentId}
-            />
-          )}
+          <AlertsPanel
+            onReport={() => {
+              if (isVerified === null) {
+                return;
+              }
+              if (isVerified === false) {
+                setShowVerifyPrompt(true);
+                return;
+              }
+              setIsDrawerOpen(true);
+            }}
+            onBarangaySearch={(b, s) => {
+              setPanelCollapsed(false);
+              handleBarangaySearch(b, s);
+            }}
+            onSelectReport={(r) => {
+              setPanelCollapsed(false);
+              handleSelectReport(r);
+              setSelectedReport(r);
+            }}
+            initialOpenIncidentId={openIncidentId}
+            isVerified={isVerified}
+            userBarangay={userBarangay}
+          />
 
 
         </div>
@@ -150,6 +166,37 @@ const AlertsMapPage: React.FC = () => {
           open={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
         />
+
+        {showVerifyPrompt && (
+          <div className="modal-overlay" role="dialog" aria-modal="true">
+            <div className="modal-card">
+              <h3>Verification Required</h3>
+              <p>
+                You need to get verified as a Cabuyao resident before you can report incidents.
+              </p>
+              <div className="modal-actions">
+                <button
+                  className="save-btn"
+                  onClick={() => {
+                    setShowVerifyPrompt(false);
+                    navigate("/main/citizen/profile", {
+                      state: { openVerifyModal: true }
+                    });
+                  }}
+                >
+                  Get Verified
+                </button>
+
+                <button
+                  className="cancel-btn"
+                  onClick={() => setShowVerifyPrompt(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div >
 

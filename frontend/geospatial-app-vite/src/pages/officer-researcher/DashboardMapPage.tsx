@@ -104,7 +104,6 @@ const DashboardMapPage: React.FC = () => {
   // ---------- Toggle Layer ----------
   const [activeLayers, setActiveLayers] = useState<string[]>([]);
   const toggleLayer = (layer: string) => {
-    console.log("test", layer)
     setActiveLayers((prev) =>
       prev.includes(layer) ? prev.filter((l) => l !== layer) : [...prev, layer]
     );
@@ -136,7 +135,6 @@ const DashboardMapPage: React.FC = () => {
       group: "Infrastructure and Road Networks",
       items: [
         { key: "Evacuation Centers", name: "Evacuation Centers" },
-        { key: "Roads", name: "Roads" },
         { key: "Traffic Conditions", name: "Traffic Conditions" },
       ],
     },

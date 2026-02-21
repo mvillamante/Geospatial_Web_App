@@ -32,6 +32,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
   keyInsights = [],
   colors = [],
   insightIcons = [],
+  userRole2,
   showEdaModal = false,
   setShowEdaModal,
   edaSect = "edastats",
@@ -492,7 +493,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
             </div>
         </div>
 
-        {/*userRole2?.[0] === "Researcher" && (*/}
+        {userRole2?.[0] === "Researcher" && (
             <div
             className="panel-card researcher"
             onClick={async () => {
@@ -505,7 +506,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
             >
             <span className="panel-btn-eda">{loadingEda ? "Loading EDA..." : "View EDA & Model Performance"}</span>
             </div>
-        {/*)*/}
+        )}
         </div>
         
         {/* EDA Modal */}

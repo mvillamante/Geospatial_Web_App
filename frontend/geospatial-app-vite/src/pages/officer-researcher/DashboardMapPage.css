@@ -1,13 +1,14 @@
 
 /*---------------------LEFT PANEL----------------------*/
 .dbmleft-panel {
-  width: 300px;
+  width: 350px;
   padding: 12px;
   background: #f9fafb;
   border-right: 1px solid var(--light-gray-border);
 
   height: 100vh;
   overflow-y: auto;
+  overflow: visible;  
 }
 
 .panel-card {
@@ -353,103 +354,6 @@
 
 .segmented-control {
   width: 100%;
-}
-
-.mapview-help-icon {
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  border: none;
-  background: #4483d6e0;
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
-  margin-top: -10px;
-}
-
-.mapview-help-wrap {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
-
-.mapview-help-tooltip {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  left: auto;
-  width: 240px;
-  background: #ffffff;
-  color: #111827;
-  padding: 8px 10px;
-  border-radius: 8px;
-  font-size: 12px;
-  line-height: 1.4;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-  z-index: 10;
-}
-
-.mapview-help-tooltip::after {
-  content: "";
-  position: absolute;
-  top: -6px;
-  right: 12px;
-  left: auto;
-  border-width: 0 6px 6px 6px;
-  border-style: solid;
-  border-color: transparent transparent #ffffff transparent;
-}
-
-.mapview-header-with-help {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-  position: relative;
-}
-
-.field-header-with-help {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: relative;
-}
-
-.field-help-tooltip {
-  display: none;
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  left: auto;
-  width: 240px;
-  background: #ffffff;
-  color: #111827;
-  padding: 8px 10px;
-  border-radius: 8px;
-  font-size: 12px;
-  line-height: 1.4;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  z-index: 10;
-}
-
-.field-help-tooltip::after {
-  content: "";
-  position: absolute;
-  top: -6px;
-  right: 12px;
-  left: auto;
-  border-width: 0 6px 6px 6px;
-  border-style: solid;
-  border-color: transparent transparent #ffffff transparent;
-}
-
-.field-header-with-help .mapview-help-wrap:hover .field-help-tooltip {
-  display: block;
 }
 
 .segmented-control.slide {
@@ -2098,9 +2002,11 @@
 }
 
 .green-city-avg-label {
-  font-size: 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   color: #6b7280;
-  font-weight: 500;
+  margin-bottom: 4px;
 }
 
 .green-city-avg-value {
@@ -2379,14 +2285,10 @@
 .indices-card {
   cursor: pointer;
   transition: all 0.25s ease;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
 }
 
-.indices-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-}
 
 /* layout */
 .indices-card .indices-content {
@@ -2394,13 +2296,12 @@
   align-items: stretch;
   margin-top: 16px;
   border-radius: 10px;
-  overflow: hidden;
 }
 
 .index-block {
   position: relative;
   flex: 1;
-  padding: 16px 10px;
+  padding: 11px;
   border-radius: 12px;
   color: #333;
   display: flex;
@@ -2408,15 +2309,10 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  cursor: pointer;
+  cursor: default;
 
   background: #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.index-block:hover {
-  transform: translateY(-4px) scale(1.03);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .indices-card .index-block.green {
@@ -2427,21 +2323,21 @@
   background: linear-gradient(135deg, #fff3e0, #fff8ec);
   border-top: 1px solid #ef6c00;
 } 
-
-.index-value {
-  font-size: 28px;
-  font-weight: 700;
-  margin-top: 2px;
-  color: #212121;
-}
+.indices-card .index-block.resilience_score {
+  border-top: 1px solid #6a5acd;
+  background: linear-gradient(135deg, #f3f1ff, #ffffff);
+} 
 
 .index-meta {
   font-size: 14px;
   font-weight: 600;
-  margin-top: 6px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
+  background: #ffffff;
+  padding: 2px 8px;
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
 .index-note {
@@ -2476,6 +2372,13 @@
   border-radius: 1px;
 }
 
+.indices-card .index-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
 /* labels */
 .indices-card .index-label {
   font-size: 11px;
@@ -2490,21 +2393,25 @@
 .indices-card .index-block.hazard .index-label {
   color: #ef6c00;
 }
+.indices-card .index-block.resilience_score .index-label {
+  color: #6a5acd;
+}
 
 /* values */
 .indices-card .index-value {
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
   margin-top: 6px;
 }
 
 .index-block.green .index-value {
-  color: #27ae60;
   color: #052b14c4;
 }
 .index-block.hazard .index-value {
-  color: #ff9800;
   color: #d14007c4;
+}
+.index-block.resilience_score .index-value {
+  color: #463b8d;
 }
 
 /* change meta */
@@ -2529,31 +2436,48 @@
   padding: 16px 18px;
   border-radius: 14px;
   background: #ffffff;
+  border: 1px solid #e6e8e9;
   border-left: 4px solid #607d8b;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
   animation: fadeSlide 0.25s ease;
+  cursor: default;
 }
 
-.recommendation-card.green {
+.recommendation-card.safe {
   border-left: 4px solid #2e7d32;
   background: linear-gradient(135deg, #f1f8f4, #ffffff);
 }
 
-.recommendation-card.hazard {
+.recommendation-card.warning {
   border-left: 4px solid #ef6c00;
   background: linear-gradient(135deg, #fff8ec, #ffffff);
 }
 
 .recommendation-card .recommendation-title {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 11px;
   margin-bottom: 10px;
+  color: #91939e;
 }
 
-.recommendation-card.green .recommendation-title {
+.recommendation-card.safe .recommendation-title {
   color: #2e7d32;
 }
-.recommendation-card.hazard .recommendation-title {
+.recommendation-card.warning .recommendation-title {
+  color: #ef6c00;
+}
+
+.recommendation-card .recommendation-sub-title {
+  font-weight: 700;
+  font-size: 13px;
+  margin: 10px auto;
+  color: #475285;
+}
+
+.recommendation-card.safe .recommendation-sub-title {
+  color: #2e7d32;
+}
+.recommendation-card.warning .recommendation-sub-title {
   color: #ef6c00;
 }
 
@@ -2561,6 +2485,14 @@
   font-size: 12.5px;
   line-height: 1.6;
   color: rgb(53, 52, 52);
+}
+
+.recommendation-card.resilience_score .recommendation-text {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 0.5;
+  text-align: center;
+  color: rgb(15, 56, 134);
 }
 
 .recommendation-card ul {

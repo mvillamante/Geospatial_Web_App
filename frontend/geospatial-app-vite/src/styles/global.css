@@ -530,3 +530,71 @@ body {
   color: #f9fafb;
   font-weight: 600;
 }
+
+/* =====================
+   TOOLTIP
+===================== */
+.help-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: none;
+  background: #4483d6e0;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  margin-top: -10px;
+}
+.help-icon.small {
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  margin-top: -4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.18);
+}
+
+.help-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.help-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: auto;
+  width: 240px;
+  background: #ffffff;
+  color: #111827;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  z-index: 9999;
+}
+
+.help-tooltip::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 12px;
+  right: auto;
+  border-width: 0 6px 6px 6px;
+  border-style: solid;
+  border-color: transparent transparent #ffffff transparent;
+}
+
+.header-with-help {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  position: relative;
+}

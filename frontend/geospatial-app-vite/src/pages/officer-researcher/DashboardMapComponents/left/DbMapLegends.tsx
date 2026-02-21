@@ -72,7 +72,7 @@ const MapLegends: React.FC<MapLegendsProps> = ({ activeLayers }) => {
       )}
 
       {/* Roads Legend */}
-      {activeLayers.includes("Roads") && (
+      {/*activeLayers.includes("Roads") && (
         <div className="roads-legend">
             <h4>🛣️ Roads & Bridges</h4>
             <div className="roads-legend-subtitle">Cabuyao, Laguna</div>
@@ -128,7 +128,7 @@ const MapLegends: React.FC<MapLegendsProps> = ({ activeLayers }) => {
                 <span>Click on roads for details</span>
             </div>
         </div>
-      )}
+      )*/}
     </div>
   );
 };

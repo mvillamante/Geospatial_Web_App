@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import DbInsightsPanel from "./left/DbInsightsPanel";
 import "../DashboardMapPage.css";
 
 import DbDataLayer from "./left/DbDataLayer";
 import DbMapLayers from "./left/DbMapLayers";
 import DbRiskLegend from "./left/DbRiskLegend";
+
+import { getEnvironmentalRecommendation } from "../../../utils/getEnvironmentalRecommendation";
 
 interface LayerOption {
   value: string;
@@ -98,6 +99,9 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
   layerDisplayNames
 }) => {
     const [showMapViewHelp, setShowMapViewHelp] = useState(false);
+    const [showGreenHelp, setShowGreenHelp] = useState(false);
+    const [showHazardHelp, setShowHazardHelp] = useState(false);
+    const [showResilienceHelp, setShowResilienceHelp] = useState(false);
 
     // Derived state for choropleth index summary behavior
     const isChoropleth = mapView === "choropleth";
@@ -126,52 +130,41 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
     const hasHazardIdx = hazardIdxValue != null;
     const hasCalamityIdx = calamityIdxValue != null;
 
-    const getRecommendation = (type: "green" | "hazard" | null) => {
-      if (!type) return null;
-      if (type === "hazard" && hazardChangeFromLastYear != null) {
-          if (hazardChangeFromLastYear > 0) {
-              return { title: "Hazard: Rising Risk", text: "Hazard exposure is increasing — review zoning controls, improve drainage systems, and strengthen early warning mechanisms.", tone: "warning" };
-          } else if (hazardChangeFromLastYear < 0) {
-              return { title: "Hazard: Decreasing Risk", text: "Hazard exposure is decreasing — continue monitoring high-risk zones and maintain preparedness programs.", tone: "safe" };
-          } else {
-              return { title: "Hazard: Stable", text: "Hazard levels are stable — maintain current disaster preparedness and infrastructure monitoring.", tone: "safe" };
-          }
-      }
+    const [insightStatus, setInsightStatus] = useState<"loading" | "success" | "error">("loading");
+    const combinedRec = getEnvironmentalRecommendation(
+      greenChangeFromLastYear,
+      hazardChangeFromLastYear
+    );
+    const insightLoading = combinedRec === null;
+    const insightFailed = combinedRec === null;
 
-      if (type === "green" && greenChangeFromLastYear != null) {
-          if (greenChangeFromLastYear < 0) {
-              return { title: "Green: Declining Coverage", text: "Vegetation coverage is decreasing — strengthen tree planting, protect existing vegetation, and promote urban greening initiatives.", tone: "warning" };
-          } else if (greenChangeFromLastYear > 0) {
-              return { title: "Green: Improving Coverage", text: "Green coverage is increasing — continue sustainability efforts and expand conservation programs.", tone: "safe" };
-          } else {
-              return { title: "Green: Stable Coverage", text: "Green coverage remains stable — maintain current sustainability and urban greening initiatives.", tone: "safe" };
-          }
-      }
-
-      return null;
-  };
+    const compositeResilienceScore =
+      universalGreenAvg != null && universalHazardAvg != null
+        ? (0.6 * universalGreenAvg) +
+          (0.4 * (100 - universalHazardAvg))
+        : null;
 
     return (
         <aside className="dbmleft-panel">
             {/* Map View Toggle */}
             <div className="panel-card mapview-container">
-            <div className="mapview-header-with-help">
+            <div className="header-with-help">
               <h4>Map View</h4>
               <div
-                className="mapview-help-wrap"
+                className="help-wrap"
                 onMouseEnter={() => setShowMapViewHelp(true)}
                 onMouseLeave={() => setShowMapViewHelp(false)}
               >
                 <button
                   type="button"
-                  className="mapview-help-icon"
+                  className="help-icon"
                   onClick={() => setShowMapViewHelp((prev) => !prev)}
                   aria-label="What does Map View do?"
                 >
                   ?
                 </button>
                 {showMapViewHelp && (
-                  <div className="mapview-help-tooltip">
+                  <div className="help-tooltip">
                     Use this toggle to switch between <strong>Interactive</strong> (explore layers and overlays) and <strong>Choropleth</strong> (view citywide index maps like Green, Hazard, and Risk).
                   </div>
                 )}
@@ -224,10 +217,72 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
                 <>
                     <div className="panel-card indices-card">
                       <h4>Current Indices as of {currentYear}</h4>
+
+                      {/* Overall Resilience Score */}
+                      <div className="index-block resilience_score">
+                        <div className="header-with-help index-header">
+                          <div className="index-label">
+                            Composite Resilience Score
+                          </div>
+
+                          <div className="help-wrap"
+                            onMouseEnter={() => setShowResilienceHelp(true)}
+                            onMouseLeave={() => setShowResilienceHelp(false)}
+                          >
+                            <button
+                              type="button"
+                              className="help-icon small"
+                              onClick={() => setShowResilienceHelp(prev => !prev)}
+                            >
+                              ?
+                            </button>
+
+                            {showResilienceHelp && (
+                              <div className="help-tooltip">
+                                <strong>Composite Resilience Score</strong> Formula:
+                                <br />
+                                (0.6 × Green Index) + (0.4 × (100 − Hazard Index))
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="index-value">
+                          {compositeResilienceScore != null
+                            ? compositeResilienceScore.toFixed(1)
+                            : "—"}
+                          <span style={{ fontSize: "14px", marginLeft: 4 }}>%</span>
+                        </div>
+                      </div>
+
+                      {/* Green and Hazard Indices */}
                       <div className="indices-content">
                         {/* Green Index Row */}
                         <div className="index-block green">
-                          <div className="index-label">Green Index</div>
+                          <div className="header-with-help index-header">
+                            <div className="index-label">Green Index</div>
+
+                              <div className="help-wrap"
+                                onMouseEnter={() => setShowGreenHelp(true)}
+                                onMouseLeave={() => setShowGreenHelp(false)}
+                              >
+                                <button
+                                  type="button"
+                                  className="help-icon small"
+                                  onClick={() => setShowGreenHelp(prev => !prev)}
+                                >
+                                  ?
+                                </button>
+
+                                {showGreenHelp && (
+                                  <div className="help-tooltip">
+                                    <strong>Green Index</strong> includes:
+                                    <br />• Normalized Difference Vegetation Index (NDVI)
+                                    <br />• Green Area Ratio (GAR)
+                                  </div>
+                                )}
+                              </div>
+                            </div>
 
                           <div className="index-value">
                             {universalGreenAvg != null ? universalGreenAvg.toFixed(1) : "—"}
@@ -251,7 +306,35 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
 
                       {/* Hazard Index Row */}
                       <div className="index-block hazard">
+                        <div className="header-with-help index-header">
                           <div className="index-label">Hazard Index</div>
+
+                          <div className="help-wrap"
+                              onMouseEnter={() => setShowHazardHelp(true)}
+                              onMouseLeave={() => setShowHazardHelp(false)}
+                            >
+                              <button
+                                type="button"
+                                className="help-icon small"
+                                onClick={() => setShowHazardHelp(prev => !prev)}
+                              >
+                                ?
+                              </button>
+
+                              {showHazardHelp && (
+                                <div className="help-tooltip">
+                                  <strong>Hazard Index</strong> includes:
+                                  <br />• Earthquake Frequency
+                                  <br />• Flood Susceptibility
+                                  <br />• Typhoon Frequency
+                                  <br />• Landslide Susceptibility
+                                  <br />• Infrastructure Condition
+                                  <br />• Population Exposure
+                                  <br />• Weather Risk Indicators
+                                </div>
+                              )}
+                            </div>
+                          </div>
 
                           <div className="index-value">
                             {universalHazardAvg != null ? universalHazardAvg.toFixed(1) : "—"}
@@ -271,36 +354,29 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
                         </div>
                       </div>
 
-                      <div className="recommendation-card green">
-                        {(() => {
-                          const rec = getRecommendation("green");
-                          if (!rec) return null;
-                          return (
-                            <>
-                              <div className="recommendation-title">{rec.title}</div>
-                              <div className="recommendation-text">{rec.text}</div>
-                              <div className="recommendation-note">
-                                * Automatically generated — please have an expert review for final assessment.
-                              </div>
-                            </>
-                          );
-                        })()}
-                      </div>
-                      <div className="recommendation-card hazard">
-                          {(() => {
-                            const rec = getRecommendation("hazard");
-                            if (!rec) return null;
-                            return (
-                              <>
-                                <div className="recommendation-title">{rec.title}</div>
-                                <div className="recommendation-text">{rec.text}</div>
-                                <div className="recommendation-note">
-                                  * Automatically generated — please have an expert review for final assessment.
-                                </div>
-                              </>
-                            );
-                          })()}
+                      {/* Combined Recommendations */}
+                      {combinedRec === null ? (
+                        <div className="recommendation-card loading">
+                          <div className="recommendation-title">Loading Recommendations...</div>
+                          <div className="recommendation-text">Analyzing index changes to provide insights.</div>
+                        </div>                        
+                      ) : combinedRec ? (
+                        <div className={`recommendation-card ${combinedRec.tone}`}>
+                          {/* Successfully Loaded */}
+                          <div className="recommendation-title">GENERATED INSIGHTS</div>
+                          <div className="index-divider-line" />
+                          <div className="recommendation-sub-title">{combinedRec.title}</div>
+                          <div className="recommendation-text">{combinedRec.text}</div>
+                          <div className="recommendation-note">
+                            * Automatically generated — please have an expert review for final assessment.
+                          </div>
                         </div>
+                      ) : (
+                        <div className="recommendation-card error">
+                          <div className="recommendation-title">Error Generating Recommendations</div>
+                          <div className="recommendation-text">An error occurred while analyzing the data. Please try again later.</div>
+                        </div>
+                      )}
                     </div>
                 </>
             ) : mapView === "choropleth" ? (
@@ -321,36 +397,6 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
                   />
 
                   {/* Global indices summary for choropleth view */}
-                  <div className="rowpanel-card">
-                    {/*<div className={`panel-card idx-summary-card ${hasGreenIdx ? "idx-active green-active" : ""}`}>
-                      <span className="panel-card-sub-title">Green Index</span>
-                      <span className="panel-card-value idx-value green-idx-value">
-                        {hasGreenIdx ? greenIdxValue!.toFixed(1) : "-"}
-                      </span>
-                    </div>
-
-                    <div className={`panel-card idx-summary-card ${hasHazardIdx ? "idx-active hazard-active" : ""}`}>
-                      <span className="panel-card-sub-title">Hazard Index</span>
-                      <span className="panel-card-value idx-value hazard-idx-value">
-                        {hasHazardIdx ? hazardIdxValue!.toFixed(1) : "-"}
-                      </span>
-                    </div>
-
-                    <div className={`panel-card idx-summary-card ${hasCalamityIdx ? "idx-active calamity-active" : ""}`}>
-                      <span className="panel-card-sub-title">Avg Risk Index</span>
-                      <span
-                        className="panel-card-value idx-value calamity-idx-value"
-                        style={
-                          hasCalamityIdx && getCalamityRiskColor
-                            ? { color: getCalamityRiskColor(calamityIdxValue!) }
-                            : undefined
-                        }
-                      >
-                        {hasCalamityIdx ? `${calamityIdxValue!.toFixed(1)}%` : "-"}
-                      </span>
-                    </div>*/}
-                  </div>
-
                   {selectedLayer === "green" && (
                     <div className="panel-card green-city-avg-card">
                       <div className="green-city-avg-label">City Average Green Index</div>
@@ -406,20 +452,15 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
                 </>
             ) : null}
 
-            {/* Map Layers Control - only for interactive view */}
-            {mapView === "interactive" && (
-              <DbMapLayers
-                visibleMapLayers={visibleMapLayers}
-                layerDisplayNames={layerDisplayNames}
-                activeLayers={activeLayers}
-                toggleLayer={toggleLayer}
-              />
-            )}
-
-            {/* Insights Panel && Risk Legendes */}
+            {/* Map Layers Control && Risk Legendes */}
             {mapView === "interactive" ? (
                 <>
-                    {/*<DbInsightsPanel insights={insights} />*/}
+                  <DbMapLayers
+                    visibleMapLayers={visibleMapLayers}
+                    layerDisplayNames={layerDisplayNames}
+                    activeLayers={activeLayers}
+                    toggleLayer={toggleLayer}
+                  />
                 </>
             ) : mapView === "choropleth" ? (
                 <DbRiskLegend selectedLayer={selectedLayer} />

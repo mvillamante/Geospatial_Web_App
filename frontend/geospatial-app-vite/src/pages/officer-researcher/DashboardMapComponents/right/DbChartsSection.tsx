@@ -25,14 +25,11 @@ type IndexSummary = {
   mostValue: number;
   lowestName: string;
   lowestValue: number;
-  avg: number;
-  belowAvgCount: number;
 };
 
 function computeIndexSummary(
   data: Record<string, any> | null | undefined,
   valueKey: "green_index" | "hazard_index" | "calamity_risk",
-  fallbackAvg: number | null | undefined,
 ): IndexSummary | null {
   if (!data) return null;
   const entries = Object.entries(data);
@@ -42,8 +39,6 @@ function computeIndexSummary(
   let mostValue = (entries[0][1] as any)?.[valueKey] ?? 0;
   let lowestName = mostName;
   let lowestValue = mostValue;
-  let sum = 0;
-  let count = 0;
 
   entries.forEach(([name, raw]) => {
     const value = (raw as any)?.[valueKey];
@@ -56,24 +51,13 @@ function computeIndexSummary(
       lowestValue = value;
       lowestName = name;
     }
-    sum += value;
-    count += 1;
   });
-
-  const avg = count > 0 ? sum / count : fallbackAvg ?? 0;
-  const belowAvgCount = entries.reduce((acc, [, raw]) => {
-    const value = (raw as any)?.[valueKey];
-    if (typeof value !== "number") return acc;
-    return value < avg ? acc + 1 : acc;
-  }, 0);
 
   return {
     mostName,
     mostValue,
     lowestName,
     lowestValue,
-    avg,
-    belowAvgCount,
   };
 }
 
@@ -81,9 +65,6 @@ const DbChartsSection: React.FC<Props> = ({
   year,
   mapView,
   selected,
-  universalGreenAvg,
-  universalHazardAvg,
-  universalCalamityAvg,
   greenDataByBarangay,
   hazardDataByBarangay,
   calamityDataByBarangay,
@@ -98,17 +79,17 @@ const DbChartsSection: React.FC<Props> = ({
 
   const greenSummary =
     showKpis && selected === "green"
-      ? computeIndexSummary(greenDataByBarangay ?? null, "green_index", universalGreenAvg)
+      ? computeIndexSummary(greenDataByBarangay ?? null, "green_index")
       : null;
 
   const hazardSummary =
     showKpis && selected === "hazard"
-      ? computeIndexSummary(hazardDataByBarangay ?? null, "hazard_index", universalHazardAvg)
+      ? computeIndexSummary(hazardDataByBarangay ?? null, "hazard_index")
       : null;
 
   const calamitySummary =
     showKpis && selected === "calamity"
-      ? computeIndexSummary(calamityDataByBarangay ?? null, "calamity_risk", universalCalamityAvg)
+      ? computeIndexSummary(calamityDataByBarangay ?? null, "calamity_risk")
       : null;
 
   const activeSummary =
@@ -168,27 +149,6 @@ const DbChartsSection: React.FC<Props> = ({
                 {activeSummary.lowestValue.toFixed(1)} {selected === "calamity" ? "%" : ""}
               </div>
             </div>
-
-            <div className="index-kpi-card">
-              <div className="index-kpi-label">Projected {indexLabel}</div>
-              <div className="index-kpi-value">
-                {activeSummary.avg.toFixed(1)}
-                {selected === "calamity" ? "%" : ""}
-              </div>
-              <div className="index-kpi-meta">
-                Projection year: {year ?? "—"}
-              </div>
-            </div>
-
-            <div className="index-kpi-card">
-              <div className="index-kpi-label">
-                No. of Barangays Below {indexLabel}
-              </div>
-              <div className="index-kpi-value">
-                {activeSummary.belowAvgCount}
-              </div>
-              <div className="index-kpi-meta">Compared to city average</div>
-            </div>
           </div>
         )}
 
@@ -226,7 +186,7 @@ const DbChartsSection: React.FC<Props> = ({
           <>
             <div className="panel-card">
               <span className="panel-card-title">Calamity Risk Likelihood</span>
-              <CalamityRiskBarangayChart chartId="chart-calamity-risk-barangay" />
+              <CalamityRiskBarangayChart year={year} chartId="chart-calamity-risk-barangay" />
             </div>
             <div className="panel-card">
               <span className="panel-card-title">Green Index Scores</span>
@@ -266,7 +226,7 @@ const DbChartsSection: React.FC<Props> = ({
             </div>
             <div className="panel-card">
               <span className="panel-card-title">Calamity Risk Likelihood</span>
-              <CalamityRiskBarangayChart chartId="chart-calamity-risk-barangay" />
+              <CalamityRiskBarangayChart year={year} chartId="chart-calamity-risk-barangay" />
             </div>
             <div className="panel-card">
               <span className="panel-card-title">Earthquake Frequency</span>

@@ -658,6 +658,7 @@ export function GreenIndexScoresChart({ chartId }: { chartId?: string }) {
 function calamityToBarangaySeries(
   formula: CalamityData,
   forecast: CalamityData | null,
+  referenceYear?: number | string,
 ): { chartData: Record<string, number | string>[]; barangays: string[] } {
   const combined: Record<string, CalamityYearData> = { ...formula };
 
@@ -673,28 +674,35 @@ function calamityToBarangaySeries(
     .filter((y) => /^\d{4}$/.test(y))
     .sort();
 
-  const barangayAgg: Record<string, { sum: number; count: number }> = {};
+  let barangays: string[];
 
-  allYears.forEach((year) => {
-    const bar = combined[year] || {};
-    Object.entries(bar).forEach(([barangay, { calamity_risk }]) => {
-      if (typeof calamity_risk !== "number") return;
-      if (!barangayAgg[barangay]) {
-        barangayAgg[barangay] = { sum: 0, count: 0 };
-      }
-      barangayAgg[barangay].sum += calamity_risk;
-      barangayAgg[barangay].count += 1;
+  const yearKey = referenceYear != null ? String(referenceYear) : null;
+  if (yearKey && combined[yearKey]) {
+    // Top 5 by CRL in the selected year (slider)
+    barangays = Object.entries(combined[yearKey])
+      .map(([name, r]) => ({ name, cr: typeof (r?.calamity_risk) === "number" ? r.calamity_risk : 0 }))
+      .sort((a, b) => b.cr - a.cr)
+      .slice(0, FIRST_N_BARANGAYS)
+      .map((b) => b.name);
+  } else {
+    const barangayAgg: Record<string, { sum: number; count: number }> = {};
+    allYears.forEach((year) => {
+      const bar = combined[year] || {};
+      Object.entries(bar).forEach(([barangay, { calamity_risk }]) => {
+        if (typeof calamity_risk !== "number") return;
+        if (!barangayAgg[barangay]) {
+          barangayAgg[barangay] = { sum: 0, count: 0 };
+        }
+        barangayAgg[barangay].sum += calamity_risk;
+        barangayAgg[barangay].count += 1;
+      });
     });
-  });
-
-  const barangays = Object.entries(barangayAgg)
-    .map(([name, { sum, count }]) => ({
-      name,
-      avg: count > 0 ? sum / count : 0,
-    }))
-    .sort((a, b) => b.avg - a.avg)
-    .slice(0, FIRST_N_BARANGAYS)
-    .map((b) => b.name);
+    barangays = Object.entries(barangayAgg)
+      .map(([name, { sum, count }]) => ({ name, avg: count > 0 ? sum / count : 0 }))
+      .sort((a, b) => b.avg - a.avg)
+      .slice(0, FIRST_N_BARANGAYS)
+      .map((b) => b.name);
+  }
 
   const chartData = allYears.map((year) => {
     const row: Record<string, number | string> = { year };
@@ -710,9 +718,12 @@ function calamityToBarangaySeries(
 
 export function CalamityRiskBarangayChart({
   chartId,
+  year: referenceYear,
 }: {
   chartId?: string;
+  year?: number;
 }) {
+  const [rawData, setRawData] = useState<{ formula: CalamityData; forecast: CalamityData | null } | null>(null);
   const [chartData, setChartData] = useState<Record<string, number | string>[]>([]);
   const [barangays, setBarangays] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -731,10 +742,9 @@ export function CalamityRiskBarangayChart({
         const formulaTyped = formula as CalamityData | null;
         const forecastTyped = forecast as CalamityData | null;
         if (formulaTyped && Object.keys(formulaTyped).length > 0) {
-          const { chartData: data, barangays: brgys } = calamityToBarangaySeries(formulaTyped, forecastTyped);
-          setChartData(data);
-          setBarangays(brgys);
+          setRawData({ formula: formulaTyped, forecast: forecastTyped });
         } else {
+          setRawData(null);
           setChartData([]);
           setBarangays([]);
         }
@@ -744,9 +754,25 @@ export function CalamityRiskBarangayChart({
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    if (!rawData) return;
+    const { chartData: data, barangays: brgys } = calamityToBarangaySeries(
+      rawData.formula,
+      rawData.forecast,
+      referenceYear,
+    );
+    setChartData(data);
+    setBarangays(brgys);
+  }, [rawData, referenceYear]);
+
   if (loading) return <div className="analytics-chart analytics-chart--loading"><span>Loading calamity risk data…</span></div>;
   if (error) return <div className="analytics-chart analytics-chart--error"><span>{error}</span></div>;
   if (chartData.length === 0) return <div className="analytics-chart analytics-chart--empty"><span>No calamity risk data. Run the pipeline.</span></div>;
+
+  const caption =
+    referenceYear != null && referenceYear >= 2020 && referenceYear <= 2030
+      ? `Top 5 barangays by CRL in ${referenceYear} (highest to lowest). Full series: historical + LSTM (2026–2030).`
+      : "Calamity risk likelihood — Top 5 barangays (highest to lowest), historical + LSTM (2026–2030).";
 
   return (
     <div
@@ -760,14 +786,26 @@ export function CalamityRiskBarangayChart({
           <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} stroke="#555" width={28} tickFormatter={(v: number) => `${v}%`} />
           <Tooltip contentStyle={{ fontSize: 11 }} formatter={(v: number | undefined) => [v != null ? `${v.toFixed(1)}%` : "0%", ""]} labelFormatter={(l: string) => `Year ${l}`} />
           <ReferenceLine x="2025.5" stroke="#c62828" strokeDasharray="4 4" />
-          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Legend
+            wrapperStyle={{ fontSize: 10 }}
+            content={() => (
+              <div className="recharts-legend-wrapper" style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px 16px", marginTop: 8 }}>
+                {barangays.map((b, i) => (
+                  <span key={b} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    <span style={{ width: 12, height: 2, background: BARANGAY_COLORS[i % BARANGAY_COLORS.length] }} />
+                    <span>{b}</span>
+                  </span>
+                ))}
+              </div>
+            )}
+          />
           {barangays.map((b, i) => (
             <Line key={b} type="monotone" dataKey={b} name={b} stroke={BARANGAY_COLORS[i % BARANGAY_COLORS.length]} strokeWidth={1.5} dot={{ r: 2 }} activeDot={{ r: 4 }} />
           ))}
         </LineChart>
       </ResponsiveContainer>
       <div className="analytics-chart-caption">
-        Calamity risk likelihood — Top 5 barangays (highest to lowest), historical + LSTM (2026–2030).
+        {caption}
       </div>
     </div>
   );

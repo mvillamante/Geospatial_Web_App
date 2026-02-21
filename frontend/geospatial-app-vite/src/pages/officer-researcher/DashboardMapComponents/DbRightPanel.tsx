@@ -163,6 +163,7 @@ useEffect(() => {
                     userRole2={userRole2}
                     mapView={props.mapView}
                     selected={props.selected}
+                    year={props.year}
                     showEdaModal={showEdaModal}
                     setShowEdaModal={setShowEdaModal}
                     edaSect={edaSect}

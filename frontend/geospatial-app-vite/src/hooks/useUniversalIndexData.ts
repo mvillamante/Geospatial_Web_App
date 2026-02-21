@@ -67,10 +67,14 @@ export const useUniversalIndexData = (year: number): UniversalIndexData => {
     return () => { cancelled = true; };
   }, [year]);
 
-  // Fetch previous year data for year-over-year
+  // Fetch previous year data for year-over-year (data is only 2020–2030)
   useEffect(() => {
     const prevYear = year - 1;
-    if (prevYear < 2000) { setPrevGreenData(null); setPrevHazardData(null); return; }
+    if (prevYear < 2020 || prevYear > 2030) {
+      setPrevGreenData(null);
+      setPrevHazardData(null);
+      return;
+    }
     let cancelled = false;
 
     const fetchPrev = async () => {

@@ -277,21 +277,25 @@ const DashboardMapPage: React.FC = () => {
       label: "Calamity Risk Trend",
       description:
         "Citywide calamity risk has trended upward since 2020, with 2024–2025 showing the steepest increase. Forecasts indicate that risk remains elevated through 2030 unless flood, landslide, and drainage mitigation are scaled up in high‑exposure barangays.",
+      category: "calamity",
     },
     {
       label: "Green Index Trajectory",
       description:
         "The green index (NDVI + GAR) shows a steady improvement from 2020 onward, with projections suggesting the city is on track to reach or slightly exceed its 2030 greening targets if current urban tree‑planting and open‑space protection programs are maintained.",
+      category: "green",
     },
     {
       label: "Multi‑Hazard Hotspots",
       description:
         "A small cluster of western and river‑adjacent barangays consistently records the highest multi‑hazard index scores, while several inland barangays remain below the city average. Prioritizing structural upgrades and early‑warning coverage in these hotspots would yield the greatest risk reduction.",
+      category: "hazard",
     },
     {
       label: "Extreme Events Pattern",
       description:
         "Earthquake and typhoon counts stay relatively stable year‑to‑year, but recent seasons include fewer events with higher intensity. These rare but strong events are responsible for sharp spikes in the hazard index, underscoring the need for preparedness even in years with lower event frequency.",
+      category: "hazard",
     },
   ];
 

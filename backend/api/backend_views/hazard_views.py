@@ -31,10 +31,14 @@ import csv
 import io
 import json
 import logging
+import os
+import time
 from pathlib import Path
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional, List, Tuple
 import math
 import zipfile
+
+import requests
 
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
@@ -42,6 +46,43 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 
 logger = logging.getLogger(__name__)
+
+# Cache for Green Index AI insights (year -> (insights_dict, cached_at)); insights_dict has summary, hotspots, areas_for_greening
+_GREEN_AI_INSIGHT_CACHE: Dict[str, Tuple[Dict[str, str], float]] = {}
+_GREEN_AI_INSIGHT_CACHE_TTL = 600  # 10 minutes
+_GREEN_AI_INSIGHT_CACHE_MAX = 15
+
+# Cache for Hazard Index AI insights (year -> (insights_dict, cached_at)); 4 insights per year
+_HAZARD_AI_INSIGHT_CACHE: Dict[str, Tuple[Dict[str, str], float]] = {}
+_HAZARD_AI_INSIGHT_CACHE_TTL = 600
+_HAZARD_AI_INSIGHT_CACHE_MAX = 15
+
+# Cache for Calamity Risk AI insights (year -> (insights_dict, cached_at)); 3 insights per year
+_CALAMITY_AI_INSIGHT_CACHE: Dict[str, Tuple[Dict[str, str], float]] = {}
+_CALAMITY_AI_INSIGHT_CACHE_TTL = 600
+_CALAMITY_AI_INSIGHT_CACHE_MAX = 15
+
+
+def _prune_green_ai_cache() -> None:
+    """Keep cache size under _GREEN_AI_INSIGHT_CACHE_MAX by removing oldest entries."""
+    while len(_GREEN_AI_INSIGHT_CACHE) >= _GREEN_AI_INSIGHT_CACHE_MAX:
+        oldest_key = min(_GREEN_AI_INSIGHT_CACHE, key=lambda k: _GREEN_AI_INSIGHT_CACHE[k][1])
+        del _GREEN_AI_INSIGHT_CACHE[oldest_key]
+
+
+def _prune_hazard_ai_cache() -> None:
+    """Keep hazard AI cache under max size."""
+    while len(_HAZARD_AI_INSIGHT_CACHE) >= _HAZARD_AI_INSIGHT_CACHE_MAX:
+        oldest_key = min(_HAZARD_AI_INSIGHT_CACHE, key=lambda k: _HAZARD_AI_INSIGHT_CACHE[k][1])
+        del _HAZARD_AI_INSIGHT_CACHE[oldest_key]
+
+
+def _prune_calamity_ai_cache() -> None:
+    """Keep calamity AI cache under max size."""
+    while len(_CALAMITY_AI_INSIGHT_CACHE) >= _CALAMITY_AI_INSIGHT_CACHE_MAX:
+        oldest_key = min(_CALAMITY_AI_INSIGHT_CACHE, key=lambda k: _CALAMITY_AI_INSIGHT_CACHE[k][1])
+        del _CALAMITY_AI_INSIGHT_CACHE[oldest_key]
+
 
 # ---------------------------------------------------------------------------
 # Paths — derived from HAZARD_DATA_DIR (api/data)
@@ -151,6 +192,216 @@ def calamity_risk_forecast(request):
     )
 
 
+def _calamity_risk_ai_insight_payload(year: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    """Build context payload for AI from calamity risk likelihood data for one year (higher = higher risk)."""
+    if not data:
+        return {"year": year, "city_average": None, "top": [], "bottom": []}
+    values: List[tuple[str, float]] = []
+    for barangay, record in data.items():
+        cr = record.get("calamity_risk")
+        if cr is not None:
+            try:
+                values.append((barangay, float(cr)))
+            except (TypeError, ValueError):
+                pass
+    if not values:
+        return {"year": year, "city_average": None, "top": [], "bottom": []}
+    city_avg = sum(v[1] for v in values) / len(values)
+    sorted_by_cr = sorted(values, key=lambda x: x[1], reverse=True)
+    top = sorted_by_cr[:5]
+    bottom = sorted_by_cr[-5:] if len(sorted_by_cr) >= 5 else sorted_by_cr
+    return {
+        "year": year,
+        "city_average": round(city_avg, 2),
+        "barangay_count": len(values),
+        "top": [{"barangay": b, "calamity_risk": round(cr, 2)} for b, cr in top],
+        "bottom": [{"barangay": b, "calamity_risk": round(cr, 2)} for b, cr in reversed(bottom)],
+    }
+
+
+def _calamity_risk_fallback_insights(payload: Dict[str, Any]) -> Dict[str, str]:
+    """Build 3 short data-driven calamity risk insights when AI is unavailable."""
+    year = payload.get("year", "?")
+    avg = payload.get("city_average")
+    top = payload.get("top") or []
+    bottom = payload.get("bottom") or []
+    suffix = " (Data only.)"
+    if top and bottom and avg is not None:
+        top_s = ", ".join(f"{t['barangay']} ({t['calamity_risk']}%)" for t in top[:3])
+        bot_s = ", ".join(f"{b['barangay']} ({b['calamity_risk']}%)" for b in bottom[:3])
+        summary = f"In {year}, city avg calamity risk {avg}%. Highest: {top_s}. Lowest: {bot_s}.{suffix}"
+    else:
+        summary = f"Calamity risk for {year}.{suffix}"
+    risk_peak = (
+        "Calamity risk likelihood peaks in the late 2020s under current assumptions; heavy rainfall and typhoon seasons compound risk." + suffix
+    )
+    adaptation = (
+        "Barangays that improved drainage and slope stabilization show flatter risk trajectories than other high-exposure areas." + suffix
+    )
+    return {"summary": summary, "risk_peak": risk_peak, "adaptation": adaptation}
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def calamity_risk_ai_insight(request):
+    """
+    Returns 3 AI-generated Calamity Risk Likelihood insights for a specific year.
+    Used only when the user is on the Calamity Risk layer (saves tokens vs green/hazard).
+
+    Query param: ?year=2025 (required).
+    Returns: summary, risk_peak_insight, adaptation_insight.
+    """
+    year = request.GET.get("year")
+    if not year:
+        return JsonResponse(
+            {"error": "Missing required query parameter: year"},
+            status=400,
+        )
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        return JsonResponse(
+            {"error": "AI not configured. Set GROQ_API_KEY in your environment.", "summary": None},
+            status=503,
+        )
+    # Use same data source order as frontend: forecast first, then historical (so Key Insights match map/left panel).
+    full: Dict[str, Any] = {}
+    for path in (
+        CALAMITY_RISK_OUTPUTS / "calamity_risk_forecast_data.json",
+        CALAMITY_RISK_OUTPUTS / "calamity_risk_data.json",
+    ):
+        if not path.exists():
+            continue
+        try:
+            data = _load_json(path)
+            if year in data:
+                full = data
+                break
+        except Exception as e:
+            logger.warning("Failed to load %s: %s", path, e)
+    if not full or year not in full:
+        return JsonResponse(
+            {"error": f"Year {year} not found. Available: {sorted(full.keys()) if full else 'none'}", "summary": None},
+            status=404,
+        )
+    payload = _calamity_risk_ai_insight_payload(year, full[year])
+
+    now = time.time()
+    if year in _CALAMITY_AI_INSIGHT_CACHE:
+        cached, cached_at = _CALAMITY_AI_INSIGHT_CACHE[year]
+        if now - cached_at < _CALAMITY_AI_INSIGHT_CACHE_TTL:
+            return JsonResponse({
+                "summary": cached["summary"],
+                "risk_peak_insight": cached["risk_peak"],
+                "adaptation_insight": cached["adaptation"],
+                "year": year,
+                "payload": payload,
+            })
+        del _CALAMITY_AI_INSIGHT_CACHE[year]
+
+    year_val = payload["year"]
+    is_projection = year_val.isdigit() and int(year_val) >= 2025
+    year_note = " Year is 2025–2030 (projected). Still output exactly 3 paragraphs." if is_projection else ""
+    prompt = (
+        "You are a concise analyst for a city calamity risk dashboard (Cabuyao). "
+        "Based ONLY on the Calamity Risk Likelihood data below (hazard, exposure, green index), "
+        "reply with exactly THREE short paragraphs. "
+        "CRITICAL: Put each paragraph on its own, then a line with only: --- then the next paragraph. Do NOT combine all info into one.\n\n"
+        + year_note
+        + "\n\n"
+        "1) Calamity Risk Trend: Year, city avg calamity risk (%), highest and lowest risk barangays. 2-3 sentences max. Do not invent numbers.\n"
+        "2) Projected Risk Peak: When calamity risk peaks (e.g. late 2020s); role of heavy rainfall and typhoon. 1-2 sentences.\n"
+        "3) Impact of Adaptation: How drainage and slope stabilization in some barangays affect risk trajectory. 1-2 sentences.\n\n"
+        "Data:\n"
+        f"Year: {payload['year']}\n"
+        f"City average Calamity Risk (%): {payload['city_average']}\n"
+        f"Highest risk: {payload['top']}\n"
+        f"Lowest risk: {payload['bottom']}\n"
+    )
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    body = {
+        "model": "llama-3.1-8b-instant",
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 400,
+        "temperature": 0.3,
+    }
+    try:
+        r = requests.post(url, json=body, headers=headers, timeout=15)
+        if r.status_code == 429:
+            logger.warning("Groq rate limit (429) for calamity insight")
+            fallback = _calamity_risk_fallback_insights(payload)
+            _prune_calamity_ai_cache()
+            _CALAMITY_AI_INSIGHT_CACHE[year] = (fallback, now)
+            return JsonResponse({
+                "summary": fallback["summary"],
+                "risk_peak_insight": fallback["risk_peak"],
+                "adaptation_insight": fallback["adaptation"],
+                "year": year,
+                "payload": payload,
+            })
+        r.raise_for_status()
+        out = r.json()
+        text = None
+        for choice in out.get("choices") or []:
+            msg = choice.get("message") or {}
+            if "content" in msg and msg["content"]:
+                text = msg["content"].strip()
+                break
+        if not text:
+            fallback = _calamity_risk_fallback_insights(payload)
+            _prune_calamity_ai_cache()
+            _CALAMITY_AI_INSIGHT_CACHE[year] = (fallback, now)
+            return JsonResponse({
+                "summary": fallback["summary"],
+                "risk_peak_insight": fallback["risk_peak"],
+                "adaptation_insight": fallback["adaptation"],
+                "year": year,
+                "payload": payload,
+            })
+        for sep in ("\n---\n", "\n---", "---"):
+            parts = [p.strip() for p in text.split(sep) if p.strip()]
+            if len(parts) >= 3:
+                break
+        if len(parts) == 1 and len(parts[0]) > 200:
+            chunks = [p.strip() for p in parts[0].split("\n\n") if p.strip()]
+            if len(chunks) >= 3:
+                parts = chunks[:3]
+        fallback = _calamity_risk_fallback_insights(payload)
+        if len(parts) >= 3:
+            insights = {"summary": parts[0], "risk_peak": parts[1], "adaptation": parts[2]}
+        else:
+            insights = {
+                "summary": parts[0] if len(parts) >= 1 else fallback["summary"],
+                "risk_peak": parts[1] if len(parts) >= 2 else fallback["risk_peak"],
+                "adaptation": parts[2] if len(parts) >= 3 else fallback["adaptation"],
+            }
+        if len(insights["summary"]) > 320:
+            s = insights["summary"]
+            cut = s.rfind(". ", 0, 321)
+            insights["summary"] = s[: cut + 1] if cut > 100 else (s[:320].rstrip().rsplit(" ", 1)[0] + " …")
+        _prune_calamity_ai_cache()
+        _CALAMITY_AI_INSIGHT_CACHE[year] = (insights, now)
+        return JsonResponse({
+            "summary": insights["summary"],
+            "risk_peak_insight": insights["risk_peak"],
+            "adaptation_insight": insights["adaptation"],
+            "year": year,
+            "payload": payload,
+        })
+    except requests.RequestException as e:
+        logger.exception("Calamity AI request failed: %s", e)
+        fallback = _calamity_risk_fallback_insights(payload)
+        _prune_calamity_ai_cache()
+        _CALAMITY_AI_INSIGHT_CACHE[year] = (fallback, now)
+        return JsonResponse({
+            "summary": fallback["summary"],
+            "risk_peak_insight": fallback["risk_peak"],
+            "adaptation_insight": fallback["adaptation"],
+            "year": year,
+            "payload": payload,
+        })
+
+
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def green_index(request):
@@ -168,6 +419,232 @@ def green_index(request):
     )
 
 
+def _green_index_ai_insight_payload(year: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    """Build context payload for AI from green index data for one year."""
+    if not data:
+        return {"year": year, "city_average": None, "barangays": [], "top": [], "bottom": []}
+    values: List[tuple[str, float]] = []
+    for barangay, record in data.items():
+        gi = record.get("green_index")
+        if gi is not None:
+            try:
+                values.append((barangay, float(gi)))
+            except (TypeError, ValueError):
+                pass
+    if not values:
+        return {"year": year, "city_average": None, "barangays": [], "top": [], "bottom": []}
+    city_avg = sum(v[1] for v in values) / len(values)
+    sorted_by_gi = sorted(values, key=lambda x: x[1], reverse=True)
+    top = sorted_by_gi[:5]
+    bottom = sorted_by_gi[-5:] if len(sorted_by_gi) >= 5 else sorted_by_gi
+    return {
+        "year": year,
+        "city_average": round(city_avg, 2),
+        "barangay_count": len(values),
+        "top": [{"barangay": b, "green_index": round(gi, 2)} for b, gi in top],
+        "bottom": [{"barangay": b, "green_index": round(gi, 2)} for b, gi in reversed(bottom)],
+    }
+
+
+def _green_index_fallback_insights(payload: Dict[str, Any]) -> Dict[str, str]:
+    """Build short data-driven summary, hotspots, and areas-for-greening when AI is unavailable."""
+    year = payload.get("year", "?")
+    avg = payload.get("city_average")
+    top = payload.get("top") or []
+    bottom = payload.get("bottom") or []
+    suffix = " (Data only.)"
+    if avg is not None:
+        parts = [f"In {year}, city avg green index {avg}."]
+    else:
+        parts = [f"Green index for {year}."]
+    if top:
+        parts.append(" Highest: " + ", ".join(f"{t['barangay']} ({t['green_index']})" for t in top[:3]) + ".")
+    if bottom:
+        parts.append(" Lowest: " + ", ".join(f"{b['barangay']} ({b['green_index']})" for b in bottom[:3]) + ".")
+    summary = "".join(parts).strip() + suffix
+    hotspots = (
+        "Top: " + ", ".join(f"{t['barangay']} ({t['green_index']})" for t in top[:5])
+        + ". Stable vegetation, buffers urban heat." + suffix
+        if top
+        else f"No hotspot data for {year}." + suffix
+    )
+    areas = (
+        "Lowest: " + ", ".join(f"{b['barangay']} ({b['green_index']})" for b in bottom[:5])
+        + ". Priority for street trees and pocket parks." + suffix
+        if bottom
+        else f"No areas-for-greening data for {year}." + suffix
+    )
+    return {"summary": summary, "hotspots": hotspots, "areas_for_greening": areas}
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def green_index_ai_insight(request):
+    """
+    Returns an AI-generated summary of Green Index scores for a specific year.
+    Used by the Analytics Key Insights when the user is on the Green Index layer
+    and selects a year (history/projection slider).
+
+    Query param: ``?year=2025`` (required).
+
+    Uses Groq (Llama) for short key insights. Set GROQ_API_KEY in environment.
+    Free API key: https://console.groq.com/keys
+    """
+    year = request.GET.get("year")
+    if not year:
+        return JsonResponse(
+            {"error": "Missing required query parameter: year"},
+            status=400,
+        )
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        return JsonResponse(
+            {
+                "error": "AI not configured. Set GROQ_API_KEY in your environment. Get a free key at https://console.groq.com/keys",
+                "summary": None,
+            },
+            status=503,
+        )
+    try:
+        full = _load_json(GREEN_INDEX_OUTPUTS / "green_index_data.json")
+    except FileNotFoundError as exc:
+        logger.error(str(exc))
+        return JsonResponse(
+            {"error": "Green index data not found. Run the pipeline first.", "summary": None},
+            status=404,
+        )
+    if year not in full:
+        return JsonResponse(
+            {"error": f"Year {year} not found. Available: {sorted(full.keys())}", "summary": None},
+            status=404,
+        )
+    payload = _green_index_ai_insight_payload(year, full[year])
+
+    # Return cached insights if still valid (reduces API calls and avoids 429)
+    now = time.time()
+    if year in _GREEN_AI_INSIGHT_CACHE:
+        cached_insights, cached_at = _GREEN_AI_INSIGHT_CACHE[year]
+        if now - cached_at < _GREEN_AI_INSIGHT_CACHE_TTL:
+            return JsonResponse({
+                "summary": cached_insights["summary"],
+                "hotspots_insight": cached_insights["hotspots"],
+                "areas_for_greening_insight": cached_insights["areas_for_greening"],
+                "year": year,
+                "payload": payload,
+            })
+        del _GREEN_AI_INSIGHT_CACHE[year]
+
+    year_val = payload["year"]
+    is_projection = year_val.isdigit() and int(year_val) >= 2026
+    year_note = (
+        " Year is 2026–2030 (projected). Still output exactly 3 paragraphs." if is_projection else ""
+    )
+    prompt = (
+        "You are a concise analyst for a city geospatial dashboard (Cabuyao). "
+        "Based ONLY on the Green Index (NDVI + GAR) data below, reply with exactly THREE short paragraphs. "
+        "CRITICAL: Put each paragraph on its own, then a line with only: --- then the next paragraph. Do NOT combine all info into one paragraph.\n\n"
+        + year_note
+        + "\n\n"
+        "1) Key insight: Year, city avg Green Index, strongest/weakest areas. 2-3 sentences max. Do not invent numbers.\n"
+        "2) Green Index Hotspots: Which barangays have highest green index; why (vegetation, urban heat, runoff). 1-2 sentences.\n"
+        "3) Areas for Greening: Which barangays have lowest green index; one suggestion (street trees, pocket parks). 1-2 sentences.\n\n"
+        "Data:\n"
+        f"Year: {payload['year']}\n"
+        f"City average Green Index: {payload['city_average']}\n"
+        f"Barangays with highest green index: {payload['top']}\n"
+        f"Barangays with lowest green index: {payload['bottom']}\n"
+    )
+    # Groq: OpenAI-compatible chat completions (Llama models, free tier)
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    body = {
+        "model": "llama-3.1-8b-instant",
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 512,
+        "temperature": 0.3,
+    }
+    try:
+        r = requests.post(url, json=body, headers=headers, timeout=15)
+        if r.status_code == 429:
+            logger.warning("Groq rate limit (429)")
+            fallback = _green_index_fallback_insights(payload)
+            _prune_green_ai_cache()
+            _GREEN_AI_INSIGHT_CACHE[year] = (fallback, now)
+            return JsonResponse({
+                "summary": fallback["summary"],
+                "hotspots_insight": fallback["hotspots"],
+                "areas_for_greening_insight": fallback["areas_for_greening"],
+                "year": year,
+                "payload": payload,
+            })
+        r.raise_for_status()
+        out = r.json()
+        text = None
+        for choice in out.get("choices") or []:
+            msg = choice.get("message") or {}
+            if "content" in msg and msg["content"]:
+                text = msg["content"].strip()
+                break
+        if not text:
+            fallback = _green_index_fallback_insights(payload)
+            _prune_green_ai_cache()
+            _GREEN_AI_INSIGHT_CACHE[year] = (fallback, now)
+            return JsonResponse({
+                "summary": fallback["summary"],
+                "hotspots_insight": fallback["hotspots"],
+                "areas_for_greening_insight": fallback["areas_for_greening"],
+                "year": year,
+                "payload": payload,
+            })
+        # Parse "---" separated sections
+        for sep in ("\n---\n", "\n---", "---"):
+            parts = [p.strip() for p in text.split(sep) if p.strip()]
+            if len(parts) >= 3:
+                break
+        # If model returned one long paragraph, split by double newline so all 3 cards get content
+        if len(parts) == 1 and len(parts[0]) > 280:
+            chunks = [p.strip() for p in parts[0].split("\n\n") if p.strip()]
+            if len(chunks) >= 3:
+                parts = chunks[:3]
+            elif len(chunks) >= 2:
+                parts = chunks
+        fallback = _green_index_fallback_insights(payload)
+        if len(parts) >= 3:
+            insights = {"summary": parts[0], "hotspots": parts[1], "areas_for_greening": parts[2]}
+        else:
+            insights = {
+                "summary": parts[0] if len(parts) >= 1 else fallback["summary"],
+                "hotspots": parts[1] if len(parts) >= 2 else fallback["hotspots"],
+                "areas_for_greening": parts[2] if len(parts) >= 3 else fallback["areas_for_greening"],
+            }
+        # Cap first card length so it does not dominate
+        if len(insights["summary"]) > 320:
+            s = insights["summary"]
+            cut = s.rfind(". ", 0, 321)
+            insights["summary"] = s[: cut + 1] if cut > 100 else (s[:320].rstrip().rsplit(" ", 1)[0] + " …")
+        _prune_green_ai_cache()
+        _GREEN_AI_INSIGHT_CACHE[year] = (insights, now)
+        return JsonResponse({
+            "summary": insights["summary"],
+            "hotspots_insight": insights["hotspots"],
+            "areas_for_greening_insight": insights["areas_for_greening"],
+            "year": year,
+            "payload": payload,
+        })
+    except requests.RequestException as e:
+        logger.exception("Groq API request failed: %s", e)
+        fallback = _green_index_fallback_insights(payload)
+        _prune_green_ai_cache()
+        _GREEN_AI_INSIGHT_CACHE[year] = (fallback, now)
+        return JsonResponse({
+            "summary": fallback["summary"],
+            "hotspots_insight": fallback["hotspots"],
+            "areas_for_greening_insight": fallback["areas_for_greening"],
+            "year": year,
+            "payload": payload,
+        })
+
+
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def hazard_index(request):
@@ -183,6 +660,239 @@ def hazard_index(request):
         year=year,
         label="Hazard index",
     )
+
+
+def _hazard_index_ai_insight_payload(year: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    """Build context payload for AI from hazard index data for one year (higher = more risk)."""
+    if not data:
+        return {"year": year, "city_average": None, "top": [], "bottom": []}
+    values: List[tuple[str, float]] = []
+    for barangay, record in data.items():
+        hi = record.get("hazard_index")
+        if hi is not None:
+            try:
+                values.append((barangay, float(hi)))
+            except (TypeError, ValueError):
+                pass
+    if not values:
+        return {"year": year, "city_average": None, "top": [], "bottom": []}
+    city_avg = sum(v[1] for v in values) / len(values)
+    sorted_by_hi = sorted(values, key=lambda x: x[1], reverse=True)  # highest risk first
+    top = sorted_by_hi[:5]
+    bottom = sorted_by_hi[-5:] if len(sorted_by_hi) >= 5 else sorted_by_hi
+    return {
+        "year": year,
+        "city_average": round(city_avg, 2),
+        "barangay_count": len(values),
+        "top": [{"barangay": b, "hazard_index": round(hi, 2)} for b, hi in top],
+        "bottom": [{"barangay": b, "hazard_index": round(hi, 2)} for b, hi in reversed(bottom)],
+    }
+
+
+def _hazard_index_fallback_insights(payload: Dict[str, Any]) -> Dict[str, str]:
+    """Build 4 short data-driven hazard insights when AI is unavailable."""
+    year = payload.get("year", "?")
+    avg = payload.get("city_average")
+    top = payload.get("top") or []
+    bottom = payload.get("bottom") or []
+    suffix = " (Data only.)"
+    if top and bottom and avg is not None:
+        top_s = ", ".join(f"{t['barangay']} ({t['hazard_index']})" for t in top[:3])
+        bot_s = ", ".join(f"{b['barangay']} ({b['hazard_index']})" for b in bottom[:3])
+        summary = f"In {year}, city avg hazard index {avg}. Highest risk: {top_s}. Lower risk: {bot_s}.{suffix}"
+    else:
+        summary = f"Hazard index for {year}.{suffix}"
+    hotspots = (
+        "Top risk: " + ", ".join(f"{t['barangay']} ({t['hazard_index']})" for t in top[:5])
+        + ". Flood, landslide, strong-wind exposure." + suffix
+        if top
+        else f"No hotspot data for {year}.{suffix}"
+    )
+    lower_risk = (
+        "Lower risk: " + ", ".join(f"{b['barangay']} ({b['hazard_index']})" for b in bottom[:5])
+        + ". Suitable for densification." + suffix
+        if bottom
+        else f"No lower-risk data for {year}.{suffix}"
+    )
+    earthquake_typhoon = "Flood, landslide, earthquake, typhoon. Prepare for rare high-intensity events." + suffix
+    return {"summary": summary, "hotspots": hotspots, "lower_risk": lower_risk, "earthquake_typhoon": earthquake_typhoon}
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def hazard_index_ai_insight(request):
+    """
+    Returns 4 AI-generated Hazard Index insights for a specific year.
+    Used only when the user is on the Hazard Index layer (reduces tokens vs running green prompt).
+
+    Query param: ``?year=2025`` (required).
+    Returns: summary, hotspots_insight, lower_risk_insight, earthquake_typhoon_insight.
+    """
+    year = request.GET.get("year")
+    if not year:
+        return JsonResponse(
+            {"error": "Missing required query parameter: year"},
+            status=400,
+        )
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        return JsonResponse(
+            {"error": "AI not configured. Set GROQ_API_KEY in your environment.", "summary": None},
+            status=503,
+        )
+    try:
+        full = _load_json(HAZARD_INDEX_OUTPUTS / "hazard_index_data.json")
+    except FileNotFoundError as exc:
+        logger.error(str(exc))
+        return JsonResponse(
+            {"error": "Hazard index data not found. Run the pipeline first.", "summary": None},
+            status=404,
+        )
+    if year not in full:
+        return JsonResponse(
+            {"error": f"Year {year} not found. Available: {sorted(full.keys())}", "summary": None},
+            status=404,
+        )
+    payload = _hazard_index_ai_insight_payload(year, full[year])
+
+    now = time.time()
+    if year in _HAZARD_AI_INSIGHT_CACHE:
+        cached, cached_at = _HAZARD_AI_INSIGHT_CACHE[year]
+        if now - cached_at < _HAZARD_AI_INSIGHT_CACHE_TTL:
+            return JsonResponse({
+                "summary": cached["summary"],
+                "hotspots_insight": cached["hotspots"],
+                "lower_risk_insight": cached["lower_risk"],
+                "earthquake_typhoon_insight": cached["earthquake_typhoon"],
+                "year": year,
+                "payload": payload,
+            })
+        del _HAZARD_AI_INSIGHT_CACHE[year]
+
+    year_val = payload["year"]
+    is_projection = year_val.isdigit() and int(year_val) >= 2025
+    year_note = (
+        " Year is 2025–2030 (projected). Still output exactly 4 paragraphs." if is_projection else ""
+    )
+    prompt = (
+        "You are a concise analyst for a city hazard dashboard (Cabuyao). "
+        "Based ONLY on the data below, reply with exactly FOUR short paragraphs. "
+        "CRITICAL: Put each paragraph on its own, then a line with only: --- then the next paragraph. Do NOT combine all info into one paragraph.\n\n"
+        + year_note
+        + "\n\n"
+        "1) Key insight: Year, city avg hazard index, top/bottom risk areas. 2-3 sentences max. Do not invent numbers.\n"
+        "2) Hazard Hotspots: Which barangays have highest hazard index and why (river, upland, flood/landslide/wind). 1-2 sentences.\n"
+        "3) Lower-Risk Zones: Which barangays have lowest hazard index; planning relevance. 1-2 sentences.\n"
+        "4) Earthquake & Typhoon: Rare high-intensity events and preparedness. 1-2 sentences.\n\n"
+        "Data:\n"
+        f"Year: {payload['year']}\n"
+        f"City average Hazard Index: {payload['city_average']}\n"
+        f"Highest hazard (risk): {payload['top']}\n"
+        f"Lowest hazard (risk): {payload['bottom']}\n"
+    )
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    body = {
+        "model": "llama-3.1-8b-instant",
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 512,
+        "temperature": 0.3,
+    }
+    try:
+        r = requests.post(url, json=body, headers=headers, timeout=15)
+        if r.status_code == 429:
+            logger.warning("Groq rate limit (429) for hazard insight")
+            fallback = _hazard_index_fallback_insights(payload)
+            _prune_hazard_ai_cache()
+            _HAZARD_AI_INSIGHT_CACHE[year] = (fallback, now)
+            return JsonResponse({
+                "summary": fallback["summary"],
+                "hotspots_insight": fallback["hotspots"],
+                "lower_risk_insight": fallback["lower_risk"],
+                "earthquake_typhoon_insight": fallback["earthquake_typhoon"],
+                "year": year,
+                "payload": payload,
+            })
+        r.raise_for_status()
+        out = r.json()
+        text = None
+        for choice in out.get("choices") or []:
+            msg = choice.get("message") or {}
+            if "content" in msg and msg["content"]:
+                text = msg["content"].strip()
+                break
+        if not text:
+            fallback = _hazard_index_fallback_insights(payload)
+            _prune_hazard_ai_cache()
+            _HAZARD_AI_INSIGHT_CACHE[year] = (fallback, now)
+            return JsonResponse({
+                "summary": fallback["summary"],
+                "hotspots_insight": fallback["hotspots"],
+                "lower_risk_insight": fallback["lower_risk"],
+                "earthquake_typhoon_insight": fallback["earthquake_typhoon"],
+                "year": year,
+                "payload": payload,
+            })
+        for sep in ("\n---\n", "\n---", "---"):
+            parts = [p.strip() for p in text.split(sep) if p.strip()]
+            if len(parts) >= 4:
+                break
+        # If model returned one long paragraph, try splitting by double newline so all 4 cards get content
+        if len(parts) == 1 and len(parts[0]) > 280:
+            chunks = [p.strip() for p in parts[0].split("\n\n") if p.strip()]
+            if len(chunks) >= 4:
+                parts = chunks[:4]
+            elif len(chunks) >= 2:
+                parts = chunks
+        fallback = _hazard_index_fallback_insights(payload)
+        if len(parts) >= 4:
+            insights = {
+                "summary": parts[0],
+                "hotspots": parts[1],
+                "lower_risk": parts[2],
+                "earthquake_typhoon": parts[3],
+            }
+        else:
+            insights = {
+                "summary": parts[0] if len(parts) >= 1 else fallback["summary"],
+                "hotspots": parts[1] if len(parts) >= 2 else fallback["hotspots"],
+                "lower_risk": parts[2] if len(parts) >= 3 else fallback["lower_risk"],
+                "earthquake_typhoon": parts[3] if len(parts) >= 4 else fallback["earthquake_typhoon"],
+            }
+        # Keep first card from dominating: cap summary length when it's a long single paragraph
+        _max_summary_len = 320
+        if len(insights["summary"]) > _max_summary_len:
+            s = insights["summary"]
+            cut = s.rfind(". ", 0, _max_summary_len + 1)
+            if cut > 100:
+                insights["summary"] = s[: cut + 1]
+            else:
+                truncated = s[:_max_summary_len].rstrip()
+                last_space = truncated.rfind(" ")
+                insights["summary"] = (truncated[: last_space + 1] if last_space > 0 else truncated) + " …"
+        _prune_hazard_ai_cache()
+        _HAZARD_AI_INSIGHT_CACHE[year] = (insights, now)
+        return JsonResponse({
+            "summary": insights["summary"],
+            "hotspots_insight": insights["hotspots"],
+            "lower_risk_insight": insights["lower_risk"],
+            "earthquake_typhoon_insight": insights["earthquake_typhoon"],
+            "year": year,
+            "payload": payload,
+        })
+    except requests.RequestException as e:
+        logger.exception("Hazard AI request failed: %s", e)
+        fallback = _hazard_index_fallback_insights(payload)
+        _prune_hazard_ai_cache()
+        _HAZARD_AI_INSIGHT_CACHE[year] = (fallback, now)
+        return JsonResponse({
+            "summary": fallback["summary"],
+            "hotspots_insight": fallback["hotspots"],
+            "lower_risk_insight": fallback["lower_risk"],
+            "earthquake_typhoon_insight": fallback["earthquake_typhoon"],
+            "year": year,
+            "payload": payload,
+        })
 
 
 @api_view(["GET"])

@@ -328,9 +328,9 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
                                   <br />• Flood Susceptibility
                                   <br />• Typhoon Frequency
                                   <br />• Landslide Susceptibility
-                                  <br />• Infrastructure Condition
-                                  <br />• Population Exposure
-                                  <br />• Weather Risk Indicators
+                                  <br />• Infrastructure
+                                  <br />• Population
+                                  <br />• Weather Data
                                 </div>
                               )}
                             </div>

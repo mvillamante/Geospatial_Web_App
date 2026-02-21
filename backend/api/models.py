@@ -470,24 +470,20 @@ class ResearcherRequest(models.Model):
         ('rejected', 'Rejected'),
     ]
 
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='researcher_requests'
-    )
-    purpose = models.TextField(blank=True, null=True)
+    full_name = models.CharField(max_length=255, blank=True, null=True)
+    email = models.EmailField(blank=False, null=False)
     orgSchool = models.CharField(max_length=255, blank=True, null=True)
+    purpose = models.TextField(blank=True, null=True)
     attachment = models.FileField(upload_to="researcher_attachments/", blank=True, null=True)
-
-    reviewed_at = models.DateTimeField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
+    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     rejection_reason = models.TextField(blank=True, null=True)
-    
+    reviewed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-created_at"]
 
+    def __str__(self):
+        return f"{self.full_name} ({self.email}) - {self.status}"

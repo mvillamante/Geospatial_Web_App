@@ -640,13 +640,13 @@ class PublicLandingPageSerializer(serializers.Serializer):
     avgResponseTimeMinutes = serializers.FloatField()
     
 class ResearcherRequestSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username', read_only=True)
-    email = serializers.CharField(source='user.email', read_only=True)
-    
     class Meta:
         model = ResearcherRequest
-        fields = ['id', 'user', 'username', 'email', 'status','purpose', 'orgSchool', 'attachment','created_at', 'rejection_reason', 'reviewed_at']
-        read_only_fields = ['id', 'user', 'username', 'email', 'created_at', 'reviewed_at']
+        fields = [
+            'id', 'full_name', 'email', 'orgSchool', 'purpose', 'attachment',
+            'status', 'rejection_reason', 'reviewed_at', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'status', 'rejection_reason', 'reviewed_at', 'created_at', 'updated_at']
 
 class ResidentVerificationRequestSerializer(serializers.ModelSerializer):
     citizen_id = serializers.IntegerField(source='user.id', read_only=True)

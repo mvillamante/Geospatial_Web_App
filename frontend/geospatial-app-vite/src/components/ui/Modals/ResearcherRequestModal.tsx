@@ -1,83 +1,138 @@
-import React from "react";
-import './ResearcherRequestModal.css';
+import React, { useState } from "react";
+import "./ResearcherRequestModal.css";
 
 interface Props {
-    onClose: () => void;
+  onClose: () => void;
 }
 
-
-// Dummy email
-const email = "cdrrmo@example.com";
-
-const emailTemplate = `Subject: Researcher Access Request - Hazspot
-
-Good day,
-
-I would like to formally request Researcher access to the Hazspot platform.
-
-Full Name:
-Institution / Organization:
-Research Purpose:
-Duration of Access:
-
-
-Thank you for your time and consideration.
-
-Sincerely,
-[Your Name]
-`;
-
 const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
-    const handleCopy = () => {
-        navigator.clipboard.writeText(emailTemplate);
-        alert("Email template copied to clipboard.");
-    };
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [institution, setInstitution] = useState("");
+  const [purpose, setPurpose] = useState("");
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
 
-    return (
-        <div className="researcher-modal-wrapper">
-            <div className="researcher-overlay">
-                <div className="researcher-modal">
-                    <button className="modal-close" onClick={onClose}>×</button>
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-                    <h2>Researcher Access Request</h2>
+    if (!fullName || !email || !institution || !purpose) {
+      alert("Please complete all required fields.");
+      return;
+    }
 
-                    <p className="modal-description">
-                        To gain Researcher/Analyst access, please submit a formal letter or email request
-                        to the Cabuyao City Disaster Risk Reduction and Management Office (CDRRMO).
-                    </p>
+    setLoading(true);
 
-                    <div className="info-box">
-                        <span className="info-label">Official email</span>
-                        <span className="info-value">{email}</span>
-                    </div>
+    try {
+      const formData = new FormData();
+        formData.append("full_name", fullName);
+        formData.append("email", email);
+        formData.append("orgSchool", institution);
+        formData.append("purpose", purpose);
+        if (proofFile) formData.append("attachment", proofFile);
 
-                    <div className="requirements">
-                        <h4>Include the following details:</h4>
-                        <ul>
-                            <li>Full Name</li>
-                            <li>Institution / Organization</li>
-                            <li>Research Purpose</li>
-                            <li>Requested Duration of Access</li>
-                        </ul>
-                    </div>
+      const response = await fetch("http://127.0.0.1:8000/api/researcher/request/", {
+        method: "POST",
+        body: formData,
+      });
 
-                    <div className="modal-actions">
-                        <button className="btn btn-outline" onClick={handleCopy}>
-                            Copy Email Template
-                        </button>
-                        <a
-                            href={`mailto:${email}?subject=Researcher Access Request - HazSpot Platform`}
-                        >
-                            <button className="btn btn-primary">
-                                Send Email
-                            </button>
-                        </a>
-                    </div>
-                </div>
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Researcher request submitted successfully.");
+        onClose();
+      } else {
+        alert("Error submitting request: " + JSON.stringify(data));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="researcher-modal-wrapper">
+      <div className="researcher-overlay">
+        <div className="researcher-modal">
+          <button className="modal-close" onClick={onClose}>×</button>
+
+          <h2>Researcher Access Request</h2>
+
+          <p className="modal-description">
+            Please fill out the form below to request Researcher/Analyst access.
+          </p>
+
+          <form className="researcher-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Full Name *</label>
+                <input
+                type="text"
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                />
             </div>
-        </div>
 
-    );
+            <div className="form-group">
+              <label>Email *</label>
+                <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                />
+            </div>
+
+            <div className="form-group">
+              <label>Institution / Organization *</label>
+                <input
+                type="text"
+                placeholder="Institution / Organization"
+                value={institution}
+                onChange={(e) => setInstitution(e.target.value)}
+                />
+            </div>
+
+            <div className="form-group">
+              <label>Research Purpose *</label>
+                <textarea
+                placeholder="Research Purpose"
+                value={purpose}
+                onChange={(e) => setPurpose(e.target.value)}
+                rows={3}
+                />
+            </div>
+
+            <div className="form-group">
+              <label>Proof of Affiliation (Optional)</label>
+                <input
+                type="file"
+                accept="image/*,.pdf"
+                onChange={(e) => setProofFile(e.target.files ? e.target.files[0] : null)}
+                />
+              <small>Upload school/company ID or endorsement letter (optional).</small>
+            </div>
+
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={onClose}
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? "Submitting..." : "Submit Request"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default ResearcherRequestModal;

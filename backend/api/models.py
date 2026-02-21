@@ -8,6 +8,7 @@ from django.utils.timezone import now
 from api.supabase_storage import delete_cms_photo
 
 from django.utils.html import strip_tags
+from django.conf import settings
 
 import uuid
 import hashlib
@@ -30,6 +31,7 @@ class Department(models.Model):
 # Custom User model ------------------------------------------------------------------
 class CustomUser(AbstractUser):
     # Custom fields
+    barangay = models.CharField(max_length=100, null=True, blank=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=True, null=True)
     extra_roles = models.JSONField(default=list, blank=True)
     phone = models.CharField(max_length=20, unique=True, null=True, blank=True)
@@ -384,6 +386,7 @@ class Notification(models.Model):
         ("official", "Official"),
         ("incident", "Incident"),
         ("report", "Report"),
+        ("verification", "Verification"),
     ]
     
     EVENT_CHOICES = [
@@ -391,7 +394,7 @@ class Notification(models.Model):
         ("severity_changed", "Severity Changed"),
         ("resolved", "Resolved"),
     ]
-
+    target_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     event = models.CharField(max_length = 30, choices=EVENT_CHOICES, null=True, blank=True)
     category = models.CharField(max_length=40, null=True, blank=True)

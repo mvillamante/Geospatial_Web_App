@@ -41,6 +41,7 @@ class MeSerializer(serializers.ModelSerializer):
             "role",
             "extra_roles",
             "staff_id",
+            "barangay",
             "is_resident_verified",
             "verification_status",
             "verification_rejection_reason",
@@ -50,6 +51,7 @@ class MeSerializer(serializers.ModelSerializer):
                             "role", 
                             "extra_roles", 
                             "staff_id",
+                            "barangay",
                             "verification_status",
                             "verification_rejection_reason",
                             )

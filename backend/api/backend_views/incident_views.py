@@ -185,6 +185,7 @@ class IncidentReportPatchView(generics.UpdateAPIView):
 
             notif_kwargs = {
                 "type": "report",
+                "target_user": report.user,
                 "title": title_map.get(report.status, "Report status updated"),
                 "status_from": old_status,
                 "status_to": report.status,
@@ -220,38 +221,7 @@ class VerifiedIncidentReportsView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-
-        if getattr(user, "role", None) == "officer":
-            return self.base_queryset()
-
-        if not user.is_resident_verified:
-            return IncidentReport.objects.none()
-        
-        verification = ResidentVerificationRequest.objects.filter(
-            user = user,
-            status="approved"
-        ).first()
-
-        if not verification:
-            return IncidentReport.objects.none()
-        
-        print("VERIFICATION BARANGAY:", verification.barangay)
-        
-        full_barangay = verification.barangay
-        barangay_part = full_barangay.split(",")[0]
-
-        barangay_clean = barangay_part.replace("Brgy.", "").replace("Barangay", "").strip()
-
-        print("CLEANED BARANGAY:", barangay_clean)
-
-        sample_locations = IncidentReport.objects.values_list("location_display", flat=True)[:5]
-        print("REPORT LOCATION SAMPLE:", list(sample_locations))
-        
-        return IncidentReport.objects.filter(
-            verified_critical_level__isnull=False,
-            location_display__icontains=barangay_clean
-        ).order_by("-created_at") 
+        return self.base_queryset()
 
     def base_queryset(self):
         return (
@@ -263,7 +233,6 @@ class VerifiedIncidentReportsView(generics.ListAPIView):
             )
             .order_by("-created_at")
         )
-    
     
 
 

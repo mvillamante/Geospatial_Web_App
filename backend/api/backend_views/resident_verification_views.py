@@ -41,7 +41,7 @@ class ApproveRejectResidentVerificationView(generics.UpdateAPIView):
 
     def patch(self, request, *args, **kwargs):
         verification = self.get_object()
-        action = request.data.get("action")  
+        action = request.data.get("action")
 
         if action not in ["approve", "reject"]:
             return Response(
@@ -49,31 +49,44 @@ class ApproveRejectResidentVerificationView(generics.UpdateAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        user = verification.user
+
         if action == "approve":
             verification.status = "approved"
             verification.reviewed_by = request.user
             verification.reviewed_at = timezone.now()
             verification.save()
 
-            user = verification.user
             user.is_resident_verified = True
             user.barangay = verification.barangay
             user.save()
 
+            Notification.objects.create(
+                user=user,
+                type="verification",
+                title="Resident Verification Approved",
+                body="Your resident verification request has been approved."
+            )
+
         else:
-            verification.status = "rejected"  
+            verification.status = "rejected"
             verification.rejection_reason = request.data.get("reason", "")
             verification.reviewed_by = request.user
             verification.reviewed_at = timezone.now()
             verification.save()
 
-            user = verification.user
             user.is_resident_verified = False
             user.save()
 
+            Notification.objects.create(
+                user=user,
+                type="verification",
+                title="Resident Verification Rejected",
+                body=f"Your verification was rejected. Reason: {verification.rejection_reason}"
+            )
+
         serializer = self.get_serializer(verification)
         return Response(serializer.data)
-
 
 class ResidentVerificationRequestView(APIView):
     permission_classes = [IsAuthenticated]

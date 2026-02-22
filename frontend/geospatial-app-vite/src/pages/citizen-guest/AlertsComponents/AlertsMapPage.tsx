@@ -86,13 +86,23 @@ const AlertsMapPage: React.FC = () => {
 
         <div className="alerts-map">
           <LeafletMap
-            height="100vh"
             searchedBarangay={searchedBarangay}
             searchedSeverity={searchedSeverity}
             selectedReport={selectedReportData?.report || null}
             reportClickTimestamp={selectedReportData?.clickedAt || null}
             activeLayers={activeLayers}
           />
+
+          {/* Floating Controls */}
+          <div className="map-legend-box">
+            <h4>Severity Level</h4>
+            <ul>
+              <li className="low">Low Risk</li>
+              <li className="moderate">Moderate Risk</li>
+              <li className="high">High Risk</li>
+              <li className="critical">Critical Risk</li>
+            </ul>
+          </div>
 
           {/* {isVerified === false && (
             <div className="map-overlay">
@@ -150,16 +160,6 @@ const AlertsMapPage: React.FC = () => {
 
         </div>
 
-        {/* Floating Controls */}
-        <div className="map-legend-box">
-          <h4>Severity Level</h4>
-          <ul>
-            <li className="low">Low Risk</li>
-            <li className="moderate">Moderate Risk</li>
-            <li className="high">High Risk</li>
-            <li className="critical">Critical Risk</li>
-          </ul>
-        </div>
 
         {/* Drawer */}
         <ReportDrawer

@@ -125,7 +125,7 @@ interface LeafletMapProps {
 
 export default function LeafletMap(props: LeafletMapProps) {
   const {
-    height = "600px",
+    height = "100%",
     width = "100%",
     mapView = "interactive",
     mapType = "basic",

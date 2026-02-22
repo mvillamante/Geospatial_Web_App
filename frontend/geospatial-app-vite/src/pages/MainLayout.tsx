@@ -6,6 +6,8 @@ import { NavigationMenu } from "../components";
 import { getUserRoleAndDisplayName } from "../libr/auth";
 import "./MainLayout.css";
 
+import NavHeader from "../components/ui/NavHeader";
+
 type AppNotifType = "post" | "verified_incident" | "my_report" | "evac_center";
 
 type AppNotif = {
@@ -54,6 +56,8 @@ const MainLayout: React.FC = () => {
 
       {/* App column */}
       <div className="main-layout-app"> 
+        {/* Header */}
+        <NavHeader />
 
         {/* Content */}
         <div className="main-content">

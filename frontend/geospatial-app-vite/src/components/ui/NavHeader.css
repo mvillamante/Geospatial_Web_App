@@ -1,0 +1,26 @@
+.nav-header {
+    background-color: var(--white-bg);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    border-bottom: 1px solid var(--light-gray-border);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    z-index: 2000;
+}
+
+.nav-header-logo {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.nav-header-logo-img {
+    height: 100px;
+    width: auto;
+    object-fit: contain;
+}

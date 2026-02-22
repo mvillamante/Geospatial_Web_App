@@ -333,6 +333,7 @@
 
 /* Map container */
 .dashboard-map-container {
+    height: 500px;
     margin-top: 1.25rem;
     border-radius: var(--radius-md);
     overflow: hidden;

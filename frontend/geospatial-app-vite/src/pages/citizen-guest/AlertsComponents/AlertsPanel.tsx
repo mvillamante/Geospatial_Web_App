@@ -328,7 +328,7 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
             <div className="alerts-controls">
                 <div className="alerts-header">
                     <div className="alerts-header-left">
-                        <h3 className="alerts-title">Verified Reports</h3>
+                        <h1 className="alerts-title">Verified Reports</h1>
                         <span className="alerts-subtitle">
                             {lastUpdated ? `Last updated ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Not updated yet"}
                         </span>

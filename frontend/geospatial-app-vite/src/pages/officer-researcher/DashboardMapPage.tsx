@@ -568,7 +568,6 @@ const DashboardMapPage: React.FC = () => {
         {mapView === "interactive" ? (
           <div className="dashboardview-map">
             <LeafletMap
-              height="100vh"
               mapView="interactive"
               mapType={mapType}
               activeLayers={activeLayers}
@@ -596,7 +595,6 @@ const DashboardMapPage: React.FC = () => {
                 </div>
 
                 <LeafletMap
-                  height="93vh"
                   mapView="choropleth"
                   mapType={mapType}
                   activeLayers={activeLayers}
@@ -632,7 +630,6 @@ const DashboardMapPage: React.FC = () => {
             ) : (
               <div className="map-disabled-wrapper">
                 <LeafletMap
-                  height="100vh"
                   mapView="choropleth"
                 />
 

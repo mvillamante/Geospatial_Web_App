@@ -36,7 +36,14 @@
   padding: 16px 0;
   border-right: 1px solid var(--light-gray-border);
   overflow: visible;
+  z-index: 2500;
 }
+
+.navigation nav {
+  display: flex;
+  flex-direction: column;
+  margin-top: 50px;
+} 
 
 .navigation .nav-item {
   position: relative;
@@ -83,7 +90,7 @@
   position: absolute;
   left: 115%;
   color: #222;
-  top: 50%;
+  top: 45%;
   transform: translateY(-50%);
   background: var(--white-bg);
   font-size: 0.875rem;

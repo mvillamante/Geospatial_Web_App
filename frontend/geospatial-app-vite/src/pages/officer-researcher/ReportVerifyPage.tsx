@@ -684,7 +684,6 @@ const ReportVerifyPage: React.FC = () => {
 
         <section className="verify-map">
           <LeafletMap
-            height="100%"
             selectedReport={selectedReportForMap}
             activeLayers={["Verified Reports"]}
           />

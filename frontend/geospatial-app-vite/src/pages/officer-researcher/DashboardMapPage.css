@@ -7,7 +7,7 @@
   padding: 12px;
   background: #f9fafb;
   border-right: 1px solid var(--light-gray-border);
-  height: 100vh;
+  height: 95vh;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
@@ -760,7 +760,27 @@
 .dashboardmap-container .choroplethview-map {
     position: relative;
     flex: 1;
-    height: 100%;
+}
+
+.dashboardmap-container .dashboardview-map,
+.dashboardmap-container .choroplethview-map .map-disabled-wrapper {
+    height: 95vh;
+}
+
+.dashboardmap-container .choroplethview-map {
+    height: 88vh;
+}
+
+@media (max-height: 800px) {
+
+    .dashboardmap-container .dashboardview-map,
+    .dashboardmap-container .choroplethview-map .map-disabled-wrapper {
+        height: 93.1vh;
+    }
+
+    .dashboardmap-container .choroplethview-map {
+        height: 84vh;
+    }
 }
 
 /* Floating Projection Display (top-right) */
@@ -812,7 +832,7 @@
 .green-map-barangay-details,
 .calamity-map-barangay-details {
   position: absolute;
-  bottom: 25px;
+  bottom: -36px;
   z-index: 1000;
   width: 280px;
   max-height: calc(100vh - 100px);
@@ -1048,7 +1068,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 95vh;
 }
 
 .dbmright-panel.closed {

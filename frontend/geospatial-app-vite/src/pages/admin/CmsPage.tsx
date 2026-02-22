@@ -51,6 +51,19 @@ type cmsStatuses = 'All' | 'Published' | 'Draft' | 'Archived';
 type cmsTypes = 'All' | 'advisory' | 'announcement' | 'guide';
 
 const CmsPage: React.FC = () => {
+  const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    const updatePageSize = () => {
+      setPageSize(window.innerHeight <= 800 ? 7 : 10);
+    };
+
+    updatePageSize();
+    window.addEventListener("resize", updatePageSize);
+
+    return () => window.removeEventListener("resize", updatePageSize);
+  }, []);
+
   const [guides, setGuides] = useState<Guide[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -105,7 +118,6 @@ const CmsPage: React.FC = () => {
   const [isPublishing, setIsPublishing] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
 
   const fetchGuides = async () => {
     setIsLoading(true);

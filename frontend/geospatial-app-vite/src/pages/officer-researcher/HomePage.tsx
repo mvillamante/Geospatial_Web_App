@@ -1,12 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import "./HomePage.css";
 
+import { GiPlantRoots } from "react-icons/gi";
+import { MdWarningAmber, MdLocalFireDepartment  } from "react-icons/md";
+
+// Index Card Component for Indices Section
 type IndexCardProps = {
   title: string;
   value: string;
   description: string;
   color: "green" | "orange" | "red";
-  icon: string;
+  icon: React.ReactNode;
 };
 
 const IndexCard: React.FC<IndexCardProps> = ({
@@ -18,19 +22,74 @@ const IndexCard: React.FC<IndexCardProps> = ({
 }) => {
   return (
     <div className={`index-card ${color}`}>
-      <div className="index-header">
-        <div>
-          <h4>{title}</h4>
-          <h2>{value}</h2>
-        </div>
-        <div className="icon">{icon}</div>
+      <div className="background-icon">{icon}</div>
+
+      <div className="index-content">
+        <h4>{title}</h4>
+        <h2>{value}</h2>
+        <p>{description}</p>
       </div>
-      <p>{description}</p>
     </div>
   );
 };
 
+// Info Box Component for Understanding Section
+type InfoBoxProps = {
+  title: string;
+  description: string;
+  points?: string[];
+  formula?: string;
+  variant: "green" | "orange" | "red";
+};
+
+const InfoBox: React.FC<InfoBoxProps> = ({
+  title,
+  description,
+  points,
+  formula,
+  variant,
+}) => {
+  return (
+    <div className={`info-box ${variant}`}>
+      <h4>{title}</h4>
+      <p>{description}</p>
+
+      {points && (
+        <div className="info-points">
+          {points?.map((point, index) => (
+            <span key={index} className={`info-point-item ${variant}`}>
+              {point}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {formula && (
+        <div className={`formula ${variant}`}>
+          {formula}
+        </div>
+      )}
+    </div>
+  );
+};
+
+import { useUniversalIndexData } from "../../hooks/useUniversalIndexData";
+
 const HomePage: React.FC = () => {
+
+  /*---------- Time ----------*/
+  const currentYear = new Date().getFullYear();
+  const minYear = 2020;
+  const maxYear = 2030;
+  const initialYear = Math.min(maxYear, Math.max(minYear, currentYear));
+  const [year, setYear] = useState(initialYear);
+
+  const {
+    universalGreenAvg,
+    universalHazardAvg,
+    universalCalamityAvg,
+  } = useUniversalIndexData(year);
+
   return (
     <div className="home-page">
       {/* Header */}
@@ -45,28 +104,28 @@ const HomePage: React.FC = () => {
 
       {/* Indices */}
       <section className="section">
-        <h3 className="section-title">Indices as of 2026</h3>
+        <h3 className="section-title">Indices as of {currentYear}</h3>
         <div className="indices-grid">
           <IndexCard
             title="Green Index"
-            value="86.3"
+            value={universalGreenAvg != null ? universalGreenAvg.toFixed(1) : "—"}
             description="Environmental resilience indicator"
             color="green"
-            icon=""
+            icon={<GiPlantRoots />}
           />
           <IndexCard
             title="Hazard Index"
-            value="38.5"
+            value={universalHazardAvg != null ? universalHazardAvg.toFixed(1) : "—"}
             description="Multi-factor hazard exposure level"
             color="orange"
-            icon=""
+            icon={<MdWarningAmber />}
           />
           <IndexCard
             title="Calamity Risk Likelihood"
-            value="39.9"
+            value={universalCalamityAvg != null ? universalCalamityAvg.toFixed(1) : "—"}
             description="Derived risk probability score"
             color="red"
-            icon=""
+            icon={<MdLocalFireDepartment  />}
           />
         </div>
       </section>
@@ -75,48 +134,40 @@ const HomePage: React.FC = () => {
       <section className="section info-card">
         <h3 className="section-title">Understanding the Indices</h3>
 
-        <div className="info-grid">
-          <div>
-            <h4 className="green-text">Green Index</h4>
-            <p>
-              Evaluates environmental sustainability and vegetation health using
-              satellite-derived land-use indicators.
-            </p>
-            <ul>
-              <li>NDVI (Normalized Difference Vegetation Index)</li>
-              <li>Green Area Ratio (GAR)</li>
-            </ul>
-          </div>
+        <div className="info-row">
+          <InfoBox
+            title="Green Index"
+            description="Evaluates environmental sustainability and vegetation health using satellite-derived land-use indicators."
+            points={[
+              "NDVI (Normalized Difference Vegetation Index)",
+              "Green Area Ratio (GAR)",
+            ]}
+            variant="green"
+          />
 
-          <div>
-            <h4 className="orange-text">Hazard Index</h4>
-            <p>
-              Represents exposure to environmental threats using multi-factor
-              disaster indicators.
-            </p>
-            <ul>
-              <li>Earthquake Frequency</li>
-              <li>Flood Susceptibility</li>
-              <li>Typhoon Intensity</li>
-              <li>Population Density</li>
-            </ul>
-          </div>
+          <InfoBox
+            title="Hazard Index"
+            description="Represents exposure to environmental threats using multi-factor disaster indicators."
+            points={[
+              "Earthquake Frequency",
+              "Flood Susceptibility",
+              "Typhoon Intensity",
+              "Population Density",
+            ]}
+            variant="orange"
+          />
 
-          <div>
-            <h4 className="red-text">Calamity Risk Likelihood</h4>
-            <p>
-              Computed from interaction between Hazard Exposure and Environmental
-              Resilience.
-            </p>
-            <p className="formula">
-              Calamity Risk ≈ α(Hazard Index) − β(Green Index)
-            </p>
-          </div>
+          <InfoBox
+            title="Calamity Risk Likelihood"
+            description="Computed from interaction between Hazard Exposure and Environmental Resilience."
+            formula="Calamity Risk ≈ α(Hazard Index) − β(Green Index)"
+            variant="red"
+          />
         </div>
       </section>
 
       {/* Data Sources */}
-      <section className="section">
+      <section className="section data-sources">
         <h3 className="section-title">Data Sources</h3>
         <p className="data-description">
           Integrated datasets from national agencies and trusted open-data
@@ -124,10 +175,25 @@ const HomePage: React.FC = () => {
         </p>
 
         <div className="sources-grid">
-          <div className="source">PAGASA</div>
-          <div className="source">PHIVOLCS</div>
-          <div className="source">NAMRIA</div>
-          <div className="source">Open Meteo</div>
+          <div className="source">
+            <img src="/datasource_logos/PAGASA_logo.png" alt="PAGASA" />
+            <span>PAGASA</span>
+          </div>
+
+          <div className="source">
+            <img src="/datasource_logos/PHIVOLCS_logo.png" alt="PHIVOLCS" />
+            <span>PHIVOLCS</span> 
+          </div>
+
+          <div className="source">
+            <img src="/datasource_logos/NAMRIA_logo.png" alt="NAMRIA" />
+            <span>NAMRIA</span>
+          </div>
+
+          <div className="source">
+            <img src="/datasource_logos/OPENMETEO_logo.png" alt="Open Meteo" />
+            <span>Open Meteo</span>
+          </div>
         </div>
       </section>
     </div>

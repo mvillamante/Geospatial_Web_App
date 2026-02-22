@@ -127,7 +127,19 @@ const normalizeStatus = (raw: any): ReportStatus => {
 
 
 const ReportsMgmtPage: React.FC = () => {
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    const updatePageSize = () => {
+      setPageSize(window.innerHeight <= 800 ? 7 : 10);
+    };
+
+    updatePageSize();
+    window.addEventListener("resize", updatePageSize);
+
+    return () => window.removeEventListener("resize", updatePageSize);
+  }, []);
+
   const [currentPage, setCurrentPage] = useState(1);
 
   const [viewArchived, setViewArchived] = useState(false);

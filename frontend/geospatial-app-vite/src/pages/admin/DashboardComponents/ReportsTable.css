@@ -31,9 +31,6 @@
 }
 
 /* Table */
-.reports-card .reports-table-wrapper {
-    overflow-x: auto;
-}
 
 .reports-card .reports-table {
     width: 100%;

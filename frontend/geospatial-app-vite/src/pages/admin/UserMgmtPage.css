@@ -54,65 +54,6 @@
 /* =====================
    TABLE CARD
 ===================== */
-
-.user-page table {
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
-}
-
-/*
-.table-loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.4);
-  z-index: 10;
-  pointer-events: all;
-}*/
-
-.user-page .user-table-wrapper,
-.user-page .requests-table-wrapper,
-.user-page .verification-table-wrapper {
-  border: 1px solid var(--light-gray-border);
-  border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  overflow-y: auto;
-  margin-top: 1.7rem;
-  margin-bottom: 1.7rem;
-  height: 68.5vh; /*68.3vh if no email*/
-}
-.user-page th {
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-}
-
-.user-page td {
-  padding: 0.85rem 1rem;
-  border-top: 1px solid var(--light-gray-border);
-  vertical-align: middle;
-  text-align: center;
-}
-
-.user-page th:first-child,
-.user-page td:first-child {
-  text-align: center;
-  vertical-align: middle;
-}
-
-.user-page tbody tr:hover {
-  background: #f9fafb;
-}
-
-.user-page .muted {
-  font-size: 0.8rem;
-  color: (--muted-text);
-}
-
-.user-page .user-email {
-  font-size: 12px;
-}
-
 .badge {
   display: inline-block;
   padding: 0.25rem 0.65rem;

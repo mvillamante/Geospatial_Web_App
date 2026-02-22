@@ -35,11 +35,11 @@ export const roleToBasePath = (role: Role | string) => {
     case "Admin":
       return "/main/admin/dashboard";
     case "Officer":
-      return "/main/officer/dashboard-map";
+      return "/main/officer/home";
     case "Citizen":
       return "/main/citizen/community-feed";
     case "Researcher":
-      return "/main/researcher/dashboard-map";
+      return "/main/researcher/home";
     default:
       return "/main/guest/community-feed";
   }

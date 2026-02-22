@@ -42,6 +42,7 @@ body {
 .reportverify-page,
 .profile-page,
 .notif-page,
+.home-page,
 .sys-page {
   height: 100vh;
   background: #f8fafc;

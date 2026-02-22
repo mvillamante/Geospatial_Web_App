@@ -1,20 +1,21 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { 
+import {
   MainLayout, LandingPage,
   EvacCenterPage, CommunityFeedPage,
   CmsPage, DashboardPage, ReportsMgmtPage, SysMonitoringPage, UserMgmtPage,
   AlertsMapPage, ProfilePage, NotificationPage,
   DashboardMapPage, OldDashboardMapPage, ReportVerifyPage,
-  PwaAuthPage
- } from "./pages";
+  PwaAuthPage,
+  HomePage
+} from "./pages";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 const App: React.FC = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LandingPage />} /> 
+        <Route path="/" element={<LandingPage />} />
         {/* PWA Routes  */}
         {/* <Route path="/" element={<PwaLandingPage />} /> */}
 
@@ -24,56 +25,66 @@ const App: React.FC = () => {
 
           {/* Admin Routes - Protected */}
           <Route path="admin" element={<Navigate to="admin/dashboard" replace />} />
-          <Route 
-            path="admin/dashboard" 
+          <Route
+            path="admin/dashboard"
             element={
               <ProtectedRoute allowedRoles={["Admin"]}>
                 <DashboardPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="admin/manage-user" 
+          <Route
+            path="admin/manage-user"
             element={
               <ProtectedRoute allowedRoles={["Admin"]}>
                 <UserMgmtPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="admin/manage-reports" 
+          <Route
+            path="admin/manage-reports"
             element={
               <ProtectedRoute allowedRoles={["Admin"]}>
                 <ReportsMgmtPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="admin/system-monitoring" 
+          <Route
+            path="admin/system-monitoring"
             element={
               <ProtectedRoute allowedRoles={["Admin"]}>
                 <SysMonitoringPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="admin/cms" 
+          <Route
+            path="admin/cms"
             element={
               <ProtectedRoute allowedRoles={["Admin"]}>
                 <CmsPage />
               </ProtectedRoute>
-            } 
+            }
           />
 
           {/* LGU Officer Routes - Protected */}
-          <Route path="officer" element={<Navigate to="officer/dashboard-map" replace />} />
-          <Route 
-            path="officer/dashboard-map" 
+          <Route path="officer" element={<Navigate to="officer/home" replace />} />
+
+          <Route
+            path="officer/home"
+            element={
+              <ProtectedRoute allowedRoles={["Officer"]}>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="officer/dashboard-map"
             element={
               <ProtectedRoute allowedRoles={["Officer"]}>
                 <DashboardMapPage />
               </ProtectedRoute>
-            } 
+            }
           />
           {/* Testing lang ito
           <Route 
@@ -84,33 +95,42 @@ const App: React.FC = () => {
               </ProtectedRoute>
             } 
           />*/}
-          <Route 
-            path="officer/report-verify" 
+          <Route
+            path="officer/report-verify"
             element={
               <ProtectedRoute allowedRoles={["Officer"]}>
                 <ReportVerifyPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="officer/evac-center" 
+          <Route
+            path="officer/evac-center"
             element={
               <ProtectedRoute allowedRoles={["Officer"]}>
                 <EvacCenterPage />
               </ProtectedRoute>
-            } 
+            }
           />
           <Route path="officer/profile" element={<ProfilePage />} />
 
           {/* Researcher Routes - Protected */}
-          <Route path="researcher" element={<Navigate to="researcher/dashboard-map" replace />} />
-          <Route 
-            path="researcher/dashboard-map" 
+          <Route path="researcher" element={<Navigate to="researcher/home" replace />} />
+
+          <Route
+            path="officer/researcher"
+            element={
+              <ProtectedRoute allowedRoles={["Researcher"]}>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="researcher/dashboard-map"
             element={
               <ProtectedRoute allowedRoles={["Researcher"]}>
                 <DashboardMapPage />
               </ProtectedRoute>
-            } 
+            }
           />
           <Route path="researcher/profile" element={<ProfilePage />} />
 

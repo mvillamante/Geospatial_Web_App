@@ -232,7 +232,7 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
                       <h4>Current Indices as of {currentYear}</h4>
 
                       {/* Overall Resilience Score */}
-                      <div className="index-block resilience_score">
+                      {/* <div className="index-block resilience_score">
                         <div className="header-with-help index-header">
                           <div className="index-label">
                             Composite Resilience Score
@@ -270,7 +270,7 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
                             : "—"}
                           <span style={{ fontSize: "14px", marginLeft: 4 }}>%</span>
                         </div>
-                      </div>
+                      </div> */}
 
                       {/* Green and Hazard Indices */}
                       <div className="indices-content">

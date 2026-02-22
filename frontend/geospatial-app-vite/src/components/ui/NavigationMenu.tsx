@@ -5,7 +5,7 @@ import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { getUserRoleAndDisplayName, clearUserSession } from "../../libr/auth";
 
 import type { IconType } from "react-icons";
-import { FaCog, FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt, FaMapMarked, FaBell } from "react-icons/fa";
+import { FaHome, FaCog, FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt, FaMapMarked, FaBell } from "react-icons/fa";
 import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdOutlineMonitorHeart, MdKeyboardArrowUp } from "react-icons/md";
 import { PiUsersBold } from "react-icons/pi";
 import { TbFileReport } from "react-icons/tb";
@@ -131,11 +131,14 @@ const NavigationMenu: React.FC = () => {
       { label: "Content Management System", path: "admin/cms", icon: FiEdit },
     ],
     Officer: [
+      { label: "Home", path: "officer/home", icon: FaHome },
       { label: "Dashboard & Map", path: "officer/dashboard-map", icon: FaMapMarkedAlt },
       { label: "Report Verification", path: "officer/report-verify", icon: MdReport },
       { label: "Evacuation Center", path: "officer/evac-center", icon: MdPlace },
     ],
-    Researcher: [{ label: "Dashboard & Map", path: "researcher/dashboard-map", icon: FaMapMarked }],
+    Researcher: [
+      { label: "Home", path: "researcher/home", icon: FaHome },
+      { label: "Dashboard & Map", path: "researcher/dashboard-map", icon: FaMapMarked }],
     Citizen: [
       { label: "Community Feed", path: "citizen/community-feed", icon: FaBullhorn },
       { label: "Reports & Map", path: "citizen/alerts-map", icon: FaMapMarkedAlt },

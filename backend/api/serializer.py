@@ -1,4 +1,5 @@
 from django.utils import timezone
+from datetime import timedelta
 from api.models import *
 from api.supabase_storage import upload_private_photo, upload_reply_photo, create_signed_url, upload_cms_photo
 from django.utils.timesince import timesince
@@ -175,7 +176,8 @@ class AdminUserListSerializer(serializers.ModelSerializer):
     date_joined_display = serializers.SerializerMethodField()
     last_login_display = serializers.SerializerMethodField()
     department = serializers.CharField(source="department.name", read_only=True)
-    
+    status = serializers.SerializerMethodField()
+
     class Meta:
         model = CustomUser
         fields = [
@@ -190,11 +192,22 @@ class AdminUserListSerializer(serializers.ModelSerializer):
             'extra_roles',
             'department',
             'is_active',
+            'status',
             'date_joined_display',
             'last_login',
             'last_login_display',
         ]
 
+    def get_status(self, obj):
+        if not obj.is_active:
+            return "Inactive"
+
+        if obj.last_login:
+            # if last login was more than 90 days ago
+            if obj.last_login < timezone.now() - timedelta(days=90):
+                return "Inactive"
+
+        return "Active"
         
     def get_date_joined_display(self, obj):
         return obj.date_joined.strftime("%b %d, %Y")
@@ -640,10 +653,13 @@ class PublicLandingPageSerializer(serializers.Serializer):
     avgResponseTimeMinutes = serializers.FloatField()
     
 class ResearcherRequestSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+
     class Meta:
         model = ResearcherRequest
         fields = [
-            'id', 'full_name', 'email', 'orgSchool', 'purpose', 'attachment',
+            'id', 'first_name', 'last_name', 'email', 'orgSchool', 'purpose', 'attachment',
             'status', 'rejection_reason', 'reviewed_at', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'status', 'rejection_reason', 'reviewed_at', 'created_at', 'updated_at']
@@ -702,6 +718,7 @@ class CmsGuideAttachmentCreateSerializer(serializers.Serializer):
              
 class CreateStaffUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    phone = serializers.CharField(required=False, allow_blank=True)
     staff_id = serializers.CharField(read_only=True)
     department = serializers.PrimaryKeyRelatedField(
         queryset=Department.objects.all(),
@@ -733,6 +750,7 @@ class CreateStaffUserSerializer(serializers.ModelSerializer):
         return value_lower
 
     def create(self, validated_data):
+        phone = validated_data.pop("phone", "---")
         role = validated_data.pop("role")
         password = validated_data.pop("password")
         
@@ -740,6 +758,7 @@ class CreateStaffUserSerializer(serializers.ModelSerializer):
 
         user = CustomUser(
             **validated_data,
+            phone=phone,
             is_staff=True,
             is_active=True,
         )

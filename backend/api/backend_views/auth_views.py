@@ -1,5 +1,6 @@
 import jwt
 
+from datetime import timedelta
 from django.utils import timezone
 from django.http import JsonResponse
 from django.db import IntegrityError
@@ -77,7 +78,16 @@ def login_user(request):
             user = CustomUser.objects.get(email=username_or_phone)
         else:
             user = CustomUser.objects.get(phone=username_or_phone)
-            
+
+        # automatic deactivation for inactive Researchers
+        if "Researcher" in (user.extra_roles or []) and user.last_login:
+            if timezone.now() - user.last_login > timedelta(days=90):
+                user.is_active = False
+                user.save(update_fields=['is_active'])
+                return JsonResponse({
+                    "error": "Your account has been deactivated due to 90 days of inactivity. Contact admin to reactivate."
+                }, status=403)
+
         if not user.is_active:
             return JsonResponse({"error": "Account is inactive. Please contact an administrator."}, status=403)
 

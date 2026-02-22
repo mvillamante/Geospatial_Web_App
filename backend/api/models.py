@@ -470,12 +470,12 @@ class ResearcherRequest(models.Model):
         ('rejected', 'Rejected'),
     ]
 
-    full_name = models.CharField(max_length=255, blank=True, null=True)
-    email = models.EmailField(blank=False, null=False)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField()
     orgSchool = models.CharField(max_length=255, blank=True, null=True)
     purpose = models.TextField(blank=True, null=True)
     attachment = models.FileField(upload_to="researcher_attachments/", blank=True, null=True)
-    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     rejection_reason = models.TextField(blank=True, null=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)
@@ -485,5 +485,9 @@ class ResearcherRequest(models.Model):
     class Meta:
         ordering = ["-created_at"]
 
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+        
     def __str__(self):
-        return f"{self.full_name} ({self.email}) - {self.status}"
+        return f"{self.first_name} {self.last_name} ({self.email}) - {self.status}"

@@ -15,10 +15,18 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ResearcherRequest',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(primary_key=True, auto_created=True)),
+                ('first_name', models.CharField(max_length=100)),
+                ('last_name', models.CharField(max_length=100)),
+                ('email', models.EmailField()),
+                ('orgSchool', models.CharField(max_length=255, blank=True, null=True)),
+                ('purpose', models.TextField(blank=True, null=True)),
+                ('attachment', models.FileField(blank=True, null=True, upload_to='researcher_attachments/')),
+                ('status', models.CharField(max_length=20, choices=[('pending','Pending'),('approved','Approved'),('rejected','Rejected')], default='pending')),
+                ('rejection_reason', models.TextField(blank=True, null=True)),
+                ('reviewed_at', models.DateTimeField(blank=True, null=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('status', models.CharField(choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected')], default='Pending', max_length=20)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='researcher_requests', to=settings.AUTH_USER_MODEL)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
             ],
         ),
     ]

@@ -257,7 +257,7 @@ const DashboardMapPage: React.FC = () => {
       title: "Charts",
       items: [
         "Calamity Risk Likelihood (City Average)",
-        "Green Index Projection (City Average)",
+        "Green Index Trends and Projection (City Average)",
         "Hazard Index Trend (City Average)",
         "Green Index Scores by Barangay",
         "Calamity Risk Likelihood by Barangay",

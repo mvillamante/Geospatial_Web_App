@@ -61,7 +61,18 @@ const UserMgmtPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [allRequests, setAllRequests] = useState<ResearcherRequest[]>([]);
 
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
+
+    useEffect(() => {
+      const updatePageSize = () => {
+        setPageSize(window.innerHeight <= 800 ? 7 : 10);
+      };
+
+      updatePageSize();
+      window.addEventListener("resize", updatePageSize);
+
+      return () => window.removeEventListener("resize", updatePageSize);
+    }, []);
   const [tab, setTab] = useState<'users' | 'requests' | 'verification'>('users');
   const [openMenu, setOpenMenu] = useState<number | null>(null);
   const [roleFilter, setRoleFilter] = useState<Role | 'All'>('All');
@@ -114,21 +125,33 @@ const UserMgmtPage: React.FC = () => {
       const data = await res.json();
       console.log("raw data", data)
 
-      const mappedUsers: User[] = data.results.map((u: BackendUser) => ({
-        id: u.id,
-        staff_id: u.staff_id,
-        username: u.username,
-        name: `${u.first_name} ${u.last_name}`,
-        email: u.email,
-        phone: u.phone,
-        role: u.role ? u.role.charAt(0).toUpperCase() + u.role.slice(1) : "",
-        extra_roles: u.extra_roles ?? [],
-        department: u.department ?? "---",
-        status: u.is_active ? "Active" : "Inactive",
-        dateJoined: u.date_joined_display,
-        lastLogin: u.last_login ?? "",
-        lastLoginDisplay: u.last_login_display ?? "Never",
-      }));
+      const mappedUsers: User[] = data.results.map((u: BackendUser) => {
+        const lastLoginDate = u.last_login ? new Date(u.last_login) : null;
+        const ninetyDaysAgo = new Date();
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+        const status: Status = !u.is_active
+          ? "Inactive"
+          : lastLoginDate && lastLoginDate < ninetyDaysAgo
+            ? "Inactive"
+            : "Active";
+
+        return {
+          id: u.id,
+          staff_id: u.staff_id,
+          username: u.username,
+          name: `${u.first_name} ${u.last_name}`,
+          email: u.email,
+          phone: u.phone,
+          role: u.role ? u.role.charAt(0).toUpperCase() + u.role.slice(1) : "",
+          extra_roles: u.extra_roles ?? [],
+          department: u.department ?? "---",
+          status,
+          dateJoined: u.date_joined_display,
+          lastLogin: u.last_login ?? "",
+          lastLoginDisplay: u.last_login_display ?? "Never",
+        };
+      });
 
       setUsers(mappedUsers);
       console.log("eto map", mappedUsers);
@@ -167,11 +190,13 @@ const UserMgmtPage: React.FC = () => {
 
         const mapped: ResearcherRequest[] = data.results.map((r: any) => ({
           id: r.id,
-          userId: r.user,
-          userName: r.username,
+          fullName: r.full_name || "Anonymous",
+          email: r.email || "Unknown",
           date: r.created_at
             ? formatDistanceToNow(new Date(r.created_at), { addSuffix: true })
             : "Unknown",
+          purpose: r.purpose,
+          orgSchool: r.orgSchool,
           status: (r.status.charAt(0).toUpperCase() + r.status.slice(1)) as
             | "Pending"
             | "Approved"
@@ -252,10 +277,10 @@ const UserMgmtPage: React.FC = () => {
       {/* Tabs */}
       <div className="user-tabs" ref={tabsRef}>
         <button ref={el => { tabRefs.current[0] = el; }} onClick={() => setTab('users')} className={tab === 'users' ? 'tab active' : 'tab'}>Users</button>
-        {/* <button ref={el => { tabRefs.current[1] = el; }} onClick={() => setTab('requests')} className={tab === 'requests' ? 'tab active' : 'tab'}>
+        <button ref={el => { tabRefs.current[1] = el; }} onClick={() => setTab('requests')} className={tab === 'requests' ? 'tab active' : 'tab'}>
           Researcher Requests
           {pendingCount > 0 && <span className="request-count">{pendingCount}</span>}
-        </button> */}
+        </button>
         <button ref={el => { tabRefs.current[2] = el; }} onClick={() => setTab('verification')} className={tab === 'verification' ? 'tab active' : 'tab'}>
           Citizen Requests
           {/*pendingCount > 0 && <span className="request-count">{pendingCount}</span>*/}
@@ -362,8 +387,8 @@ const UserMgmtPage: React.FC = () => {
                     </td>
                   </tr>
                 ) : (
-                  users.map((user, index) => {
-                    const alreadyRequested = allRequests.some(r => r.userId === user.id && r.status === "Pending");
+                  users.map((user) => {
+                    const alreadyRequested = allRequests.some(r => r.email === user.email && r.status === "Pending");
                     const displayRole = user.role === "Citizen" && !user.extra_roles?.some(r => r.toLowerCase() === "researcher")
                     ? "Citizen"
                     : user.extra_roles?.some(r => r.toLowerCase() === "researcher")

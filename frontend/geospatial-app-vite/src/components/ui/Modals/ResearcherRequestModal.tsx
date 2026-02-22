@@ -6,7 +6,8 @@ interface Props {
 }
 
 const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [institution, setInstitution] = useState("");
   const [purpose, setPurpose] = useState("");
@@ -16,7 +17,7 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!fullName || !email || !institution || !purpose) {
+    if (!firstName || !lastName || !email || !institution || !purpose) {
       alert("Please complete all required fields.");
       return;
     }
@@ -25,11 +26,12 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
 
     try {
       const formData = new FormData();
-        formData.append("full_name", fullName);
-        formData.append("email", email);
-        formData.append("orgSchool", institution);
-        formData.append("purpose", purpose);
-        if (proofFile) formData.append("attachment", proofFile);
+      formData.append("first_name", firstName);
+      formData.append("last_name", lastName);
+      formData.append("email", email);
+      formData.append("orgSchool", institution);
+      formData.append("purpose", purpose);
+      if (proofFile) formData.append("attachment", proofFile);
 
       const response = await fetch("http://127.0.0.1:8000/api/researcher/request/", {
         method: "POST",
@@ -66,52 +68,62 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
 
           <form className="researcher-form" onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Full Name *</label>
-                <input
+              <label>First Name *</label>
+              <input
                 type="text"
-                placeholder="Full Name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                />
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Last Name *</label>
+              <input
+                type="text"
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
             </div>
 
             <div className="form-group">
               <label>Email *</label>
-                <input
+              <input
                 type="email"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                />
+              />
             </div>
 
             <div className="form-group">
               <label>Institution / Organization *</label>
-                <input
+              <input
                 type="text"
                 placeholder="Institution / Organization"
                 value={institution}
                 onChange={(e) => setInstitution(e.target.value)}
-                />
+              />
             </div>
 
             <div className="form-group">
               <label>Research Purpose *</label>
-                <textarea
+              <textarea
                 placeholder="Research Purpose"
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value)}
                 rows={3}
-                />
+              />
             </div>
 
             <div className="form-group">
               <label>Proof of Affiliation (Optional)</label>
-                <input
+              <input
                 type="file"
                 accept="image/*,.pdf"
                 onChange={(e) => setProofFile(e.target.files ? e.target.files[0] : null)}
-                />
+              />
               <small>Upload school/company ID or endorsement letter (optional).</small>
             </div>
 

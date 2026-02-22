@@ -117,7 +117,7 @@ const App: React.FC = () => {
           <Route path="researcher" element={<Navigate to="researcher/home" replace />} />
 
           <Route
-            path="officer/researcher"
+            path="researcher/home"
             element={
               <ProtectedRoute allowedRoles={["Researcher"]}>
                 <HomePage />

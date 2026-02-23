@@ -436,11 +436,11 @@ const DbAnalyticsSection: React.FC<Props> = ({
               <RiskLikelihoodChart chartId="chart-risk-likelihood" />
             </div>
             <div className="panel-card">
-              <span className="panel-card-title">Green Index Projection (2020–2030)</span>
+              <span className="panel-card-title">Green Index Trends and Projection (2020–2030)</span>
               <GreenIndexProjectionChart chartId="chart-green-index-projection" />
             </div>
             <div className="panel-card">
-              <span className="panel-card-title">Hazard Index Trend (2020–2030)</span>
+              <span className="panel-card-title">Hazard Index Trends and Projection (2020–2030)</span>
               <HazardIndexTrendChart chartId="chart-hazard-index-trend" />
             </div>
           </>
@@ -449,7 +449,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
         {/* Green layer: only green index projection */}
         {isGreenLayer && (
           <div className="panel-card">
-            <span className="panel-card-title">Green Index Projection (2020–2030)</span>
+            <span className="panel-card-title">Green Index Trends and Projection (2020–2030)</span>
             <GreenIndexProjectionChart chartId="chart-green-index-projection" />
           </div>
         )}
@@ -457,7 +457,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
         {/* Hazard layer: only hazard index trend */}
         {isHazardLayer && (
           <div className="panel-card">
-            <span className="panel-card-title">Hazard Index Trend (2020–2030)</span>
+            <span className="panel-card-title">Hazard Index Trends and Projection (2020–2030)</span>
             <HazardIndexTrendChart chartId="chart-hazard-index-trend" />
           </div>
         )}
@@ -470,11 +470,11 @@ const DbAnalyticsSection: React.FC<Props> = ({
               <RiskLikelihoodChart chartId="chart-risk-likelihood" />
             </div>
             <div className="panel-card">
-              <span className="panel-card-title">Green Index Projection (2020–2030)</span>
+              <span className="panel-card-title">Green Index Trends and Projection (2020–2030)</span>
               <GreenIndexProjectionChart chartId="chart-green-index-projection" />
             </div>
             <div className="panel-card">
-              <span className="panel-card-title">Hazard Index Trend (2020–2030)</span>
+              <span className="panel-card-title">Hazard Index Trends and Projection (2020–2030)</span>
               <HazardIndexTrendChart chartId="chart-hazard-index-trend" />
             </div>
           </>

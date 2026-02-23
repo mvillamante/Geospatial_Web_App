@@ -438,7 +438,7 @@ export function GreenIndexProjectionChart({
 }
 
 // ---------------------------------------------------------------------------
-// Hazard Index Trend (2020–2030): from hazard_index outputs
+// Hazard Index Trends and Projection (2020–2030): from hazard_index outputs
 // ---------------------------------------------------------------------------
 
 type HazardYearData = Record<string, { hazard_index: number }>;

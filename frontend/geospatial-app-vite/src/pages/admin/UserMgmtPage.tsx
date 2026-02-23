@@ -459,8 +459,18 @@ const UserMgmtPage: React.FC = () => {
                             {openMenu === user.id && (
                               <div className="menu-dropdown">
                                 {alreadyRequested && <div className="menu-item disabled">Pending request</div>}
-                                <button className="menu-item" onClick={() => { if (!window.confirm("Are you sure you want to deactivate this user?")) return; toggleStatus(user.id); setOpenMenu(null); }}>
-                                  {user.status === 'Active' ? <PowerOff size={14} /> : <Power size={14} />} {user.status === 'Active' ? 'Deactivate' : 'Activate'}
+                                <button
+                                  className="menu-item"
+                                  onClick={() => {
+                                    const action = user.status === 'Active' ? 'deactivate' : 'activate';
+                                    if (!window.confirm(`Are you sure you want to ${action} this user?`)) return;
+
+                                    toggleStatus(user.id);
+                                    setOpenMenu(null);
+                                  }}
+                                >
+                                  {user.status === 'Active' ? <PowerOff size={14} /> : <Power size={14} />}
+                                  {user.status === 'Active' ? 'Deactivate' : 'Activate'}
                                 </button>
                                 {user.role === "Citizen" && user.extra_roles?.some(r => r.toLowerCase() === "researcher") && (
                                   <button className="menu-item danger" onClick={() => { if (!window.confirm("Are you sure you want to revoke Researcher access from this user?")) return; revokeResearcher(user.id); setOpenMenu(null); }}>

@@ -13,6 +13,7 @@ from api.admin_permissions import IsAdminRole
 from django.db.models import Q
 from django.core.mail import send_mail
 from django.conf import settings
+from django.utils import timezone
 
 from .pagination import AdminUserPagination
 
@@ -102,10 +103,20 @@ class ToggleUserStatusView(generics.UpdateAPIView):
 
     def patch(self, request, *args, **kwargs):
         user = self.get_object()
+
         if user == request.user:
             raise PermissionDenied("Admins cannot deactivate themselves.")
-        user.is_active = not user.is_active
+
+        if not user.is_active:
+            # Activating user
+            user.is_active = True
+            user.last_login = None  # Reset inactivity timer
+        else:
+            # Deactivating user
+            user.is_active = False
+
         user.save()
+
         return Response({
             "id": user.id,
             "status": "Active" if user.is_active else "Inactive"

@@ -12,7 +12,7 @@ export interface NDVILayerOptions {
   imageHeight?: number;
 }
 
-const API_URL = import.meta.env.VITE_API_URL;
+// const API_URL = import.meta.env.VITE_API_URL;
 
 // Cabuyao, Laguna (expanded to include Casile)
 const DEFAULT_BBOX: [number, number, number, number] = [120.97, 14.14, 121.22, 14.36];

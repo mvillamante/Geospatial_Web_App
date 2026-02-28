@@ -8,7 +8,6 @@ import Pagination from "../../components/ui/Pagination";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-
 interface Attachment {
   id: number;
   file_url: string;
@@ -125,7 +124,7 @@ const CmsPage: React.FC = () => {
   const fetchGuides = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`{${API_URL}/api/cms/guides/`, {
+      const res = await fetch(`${API_URL}/api/cms/guides/`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },

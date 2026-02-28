@@ -14,12 +14,12 @@ export interface EvacCenterAPI {
   coordinates: [number, number];
 }
 export async function fetchEvacCenters() {
-  const res = await fetch(`${API_URL}/evacuation-centers/`);
+  const res = await fetch(`${API_URL}/api//evacuation-centers/`);
   return res.json();
 }
 
 export async function createEvacCenter(data: any) {
-  const res = await fetch(`${API_URL}/evacuation-centers/`, {
+  const res = await fetch(`${API_URL}/api//evacuation-centers/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -28,7 +28,7 @@ export async function createEvacCenter(data: any) {
 }
 
 export async function updateEvacCenter(id: number, data: any) {
-  const res = await fetch(`${API_URL}/evacuation-centers/${id}/`, {
+  const res = await fetch(`${API_URL}/api/evacuation-centers/${id}/`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -37,7 +37,7 @@ export async function updateEvacCenter(id: number, data: any) {
 }
 
 export async function deleteEvacCenter(id: number) {
-  await fetch(`${API_URL}/evacuation-centers/${id}/`, {
+  await fetch(`${API_URL}/api/evacuation-centers/${id}/`, {
     method: "DELETE",
   });
 }

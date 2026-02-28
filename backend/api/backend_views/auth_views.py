@@ -20,7 +20,7 @@ from supabase import create_client, Client
 
 # Supabase client initialization
 url = settings.SUPABASE_URL
-key = settings.SUPABASE_KEY
+key = settings.SUPABASE_SERVICE_ROLE_KEY
 supabase: Client = create_client(url, key)
 
 class MyTokenObtainPairView(TokenObtainPairView):

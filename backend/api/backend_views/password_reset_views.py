@@ -11,6 +11,8 @@ from api.serializer import *
 
 from api.utils import *
 
+import hmac
+
 User = get_user_model()
 
 def find_user_by_email_or_phone(email_or_phone: str):
@@ -51,8 +53,12 @@ class PasswordResetRequestOTP(APIView):
         otp_hash = PasswordResetOTP.hash_otp(otp)
         expires_at = make_expiry()
 
+        PasswordResetOTP.objects.filter(
+            email_or_phone=email_or_phone
+        ).delete()
+
         PasswordResetOTP.objects.create(
-            email_or_phone=email_or_phone,
+            user=user,
             otp_hash=otp_hash,
             expires_at=expires_at
         )
@@ -104,7 +110,7 @@ class PasswordResetConfirmOTP(APIView):
             return Response({"detail": "Too many attempts. Please request a new OTP."}, status=status.HTTP_400_BAD_REQUEST)
 
         incoming_hash = PasswordResetOTP.hash_otp(otp)
-        if incoming_hash != record.otp_hash:
+        if not hmac.compare_digest(incoming_hash, record.otp_hash):
             record.attempts += 1
             record.save(update_fields=["attempts"])
             return Response({"detail": "Invalid OTP or expired."}, status=status.HTTP_400_BAD_REQUEST)

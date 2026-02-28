@@ -294,10 +294,10 @@ const NotificationPage: React.FC = () => {
     return (
         <div className="notif-page">
             <div className="notif-header">
-                <div>
+                {/* <div>
                     <h1>Notifications</h1>
                     <p className="notif-header-desc">Updates from LGU, verified hazards, and your report status.</p>
-                </div>
+                </div> */}
 
                 <div className="notif-actions">
                     <button
@@ -309,6 +309,63 @@ const NotificationPage: React.FC = () => {
                         Mark all as read
                     </button>
                 </div>
+                {/* Time Filter */}
+                <div className="notif-time-filter">
+                    <div
+                        className={`dropdown ${isDropdownOpen ? "open" : ""}`}
+                    >
+                        <div
+                            className="dropdown-selected"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsDropdownOpen(prev => !prev);
+                            }}
+                        >
+                            {timeFilter === "today" && "Today"}
+                            {timeFilter === "7days" && "Last 7 Days"}
+                            {timeFilter === "all" && "All Time"}
+                            <span className="dropdown-arrow">▾</span>
+                        </div>
+
+                        {isDropdownOpen && (
+                            <div className="dropdown-menu">
+                                <div
+                                    className="dropdown-item"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setTimeFilter("today");
+                                        setIsDropdownOpen(false);
+                                    }}
+                                >
+                                    Today
+                                </div>
+
+                                <div
+                                    className="dropdown-item"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setTimeFilter("7days");
+                                        setIsDropdownOpen(false);
+                                    }}
+                                >
+                                    Last 7 Days
+                                </div>
+
+                                <div
+                                    className="dropdown-item"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setTimeFilter("all");
+                                        setIsDropdownOpen(false);
+                                    }}
+                                >
+                                    All Time
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
             </div>
 
             {/* Tabs */}
@@ -352,62 +409,6 @@ const NotificationPage: React.FC = () => {
                 </button>
             </div>
 
-            {/* Time Filter */}
-            <div className="notif-time-filter">
-                <div
-                    className={`dropdown ${isDropdownOpen ? "open" : ""}`}
-                >
-                    <div
-                        className="dropdown-selected"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setIsDropdownOpen(prev => !prev);
-                        }}
-                    >
-                        {timeFilter === "today" && "Today"}
-                        {timeFilter === "7days" && "Last 7 Days"}
-                        {timeFilter === "all" && "All Time"}
-                        <span className="dropdown-arrow">▾</span>
-                    </div>
-
-                    {isDropdownOpen && (
-                        <div className="dropdown-menu">
-                            <div
-                                className="dropdown-item"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setTimeFilter("today");
-                                    setIsDropdownOpen(false);
-                                }}
-                            >
-                                Today
-                            </div>
-
-                            <div
-                                className="dropdown-item"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setTimeFilter("7days");
-                                    setIsDropdownOpen(false);
-                                }}
-                            >
-                                Last 7 Days
-                            </div>
-
-                            <div
-                                className="dropdown-item"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setTimeFilter("all");
-                                    setIsDropdownOpen(false);
-                                }}
-                            >
-                                All Time
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
 
             {/* Content */}
             <div className="notif-content">

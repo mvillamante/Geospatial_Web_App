@@ -147,10 +147,10 @@ export default function CommunityFeedPage() {
                 {/* Main */}
                 <main className="feed-main">
                     <header className="feed-topbar">
-                        <div className="feed-title">
+                        {/* <div className="feed-title">
                             <h1>Community Feed</h1>
                             <p className="feed-header-desc">Latest advisories, announcements, and guides</p>
-                        </div>
+                        </div> */}
 
                         <div className="feed-controls">
                             <label className="search">

@@ -47,7 +47,7 @@ interface QuickContact {
   phones: ContactPhone[];
 }
 
-type cmsStatuses = 'All' | 'Published' | 'Draft' | 'Archived';
+type cmsStatuses = 'All' | 'Published' | 'Draft' ;
 type cmsTypes = 'All' | 'advisory' | 'announcement' | 'guide';
 
 const CmsPage: React.FC = () => {
@@ -106,7 +106,7 @@ const CmsPage: React.FC = () => {
   const [originalAttachments, setOriginalAttachments] = useState<Attachment[]>([]);
   const [tempEditImages, setTempEditImages] = useState<Attachment[]>([]);
 
-  const cmsStatuses: Array<'Published' | 'Draft' | 'Archived'> = ['Published', 'Draft', 'Archived'];
+  const cmsStatuses: Array<'Published' | 'Draft'> = ['Published', 'Draft'];
   const cmsTypes: Array<'advisory' | 'announcement' | 'guide'> = ['advisory', 'announcement', 'guide'];
   const [statusFilter, setStatusFilter] = useState<cmsStatuses | 'All'>('All');
   const [typeFilter, setTypeFilter] = useState<cmsTypes | 'All'>('All');
@@ -432,7 +432,7 @@ const CmsPage: React.FC = () => {
     <div className="cms-page">
       {/* Page Head */}
       <div className="page-head">
-        <h1>Content Management System</h1>
+
 
         {/* Tab Actions */}
         <div className="page-actions">
@@ -548,7 +548,7 @@ const CmsPage: React.FC = () => {
           <thead>
             <tr>
               <th className="center">Content ID</th>
-              <th className="">Title</th>
+              <th className="center">Title</th>
               <th className="center">Type</th>
               <th className="center">Status</th>
               <th className="center">Created At</th>
@@ -618,7 +618,7 @@ const CmsPage: React.FC = () => {
 
                         {/* Dropdown */}
                         {openMenuId === guide.postId && (
-                          <div className="dropdown-menu">
+                          <div className="kebab-dropdown">
                             {!viewArchived ? (
                               <>
                                 <button

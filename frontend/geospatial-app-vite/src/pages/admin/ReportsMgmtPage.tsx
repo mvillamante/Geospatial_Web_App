@@ -398,9 +398,6 @@ const ReportsMgmtPage: React.FC = () => {
   return (
     <div className="reportsmgmt-page">
       <div className="page-head">
-        <div>
-          <h1>Reports Management</h1>
-        </div>
 
         <div className="page-actions">
           <div

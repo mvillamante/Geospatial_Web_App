@@ -25,11 +25,11 @@ const DbRiskLegend: React.FC<DbRiskLegendProps> = ({ selectedLayer }) => {
         <div className="risklegend-container panel-card">
           <div className="green-map-legend-title">Green Index Scale</div>
           <ul className="green-map-legend-list">
-            <li className="green-map-legend-item"><span className="green-map-legend-color" style={{ background: "#006400" }} /> 90–100: Dense Forest / Parks</li>
-            <li className="green-map-legend-item"><span className="green-map-legend-color" style={{ background: "#228B22" }} /> 70–89: Healthy Vegetation</li>
-            <li className="green-map-legend-item"><span className="green-map-legend-color" style={{ background: "#7CCD7C" }} /> 50–69: Moderate Greenery</li>
-            <li className="green-map-legend-item"><span className="green-map-legend-color" style={{ background: "#CDCD00" }} /> 30–49: Sparse Vegetation</li>
-            <li className="green-map-legend-item"><span className="green-map-legend-color" style={{ background: "#8B6914" }} /> 0–29: Urbanized / Built-up</li>
+            <li className="green-map-legend-item"><span className="green-map-legend-color" style={{ background: "#006400" }} /> 80–100: Very Dense Forest / Parks</li>
+            <li className="green-map-legend-item"><span className="green-map-legend-color" style={{ background: "#228B22" }} /> 60-79: Dense Vegetation</li>
+            <li className="green-map-legend-item"><span className="green-map-legend-color" style={{ background: "#7CCD7C" }} /> 11-59: Sparse Vegetation</li>
+            <li className="green-map-legend-item"><span className="green-map-legend-color" style={{ background: "#CDCD00" }} /> 1-10: Rocks / Sand</li>
+            <li className="green-map-legend-item"><span className="green-map-legend-color" style={{ background: "#8B6914" }} /> -1-0: Water /Clouds / Barren Areas</li>
           </ul>
         </div>
       );

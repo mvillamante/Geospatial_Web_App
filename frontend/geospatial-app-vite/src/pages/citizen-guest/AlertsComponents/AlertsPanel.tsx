@@ -328,7 +328,7 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
             <div className="alerts-controls">
                 <div className="alerts-header">
                     <div className="alerts-header-left">
-                        <h1 className="alerts-title">Verified Reports</h1>
+                        {/* <h1 className="alerts-title">Verified Reports</h1> */}
                         <span className="alerts-subtitle">
                             {lastUpdated ? `Last updated ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Not updated yet"}
                         </span>
@@ -499,6 +499,7 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
                             setSelectedCategory("all");
                             setSelectedSeverity("all");
                             setBarangayFilter("all");
+                            setSelectedStatus("all");
                         }}>Clear Filters</button>
                     </div>
                 ) : (

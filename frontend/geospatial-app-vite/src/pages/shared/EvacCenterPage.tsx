@@ -242,7 +242,7 @@ function EvacCenterPage() {
 
   return (
     <div className="evac-page">
-      <div className="evac-header">
+      {/* <div className="evac-header">
         <div className="evac-header-title">
           <h1>Evacuation Centers</h1>
         </div>
@@ -254,7 +254,7 @@ function EvacCenterPage() {
               ? "Find the nearest evacuation center in your barangay"
               : null}
         </p>
-      </div>
+      </div> */}
 
       <div className="evac-map-wrapper">
         <div className="evac-side-content">
@@ -325,10 +325,14 @@ function EvacCenterPage() {
                 <span>⚠️</span> Important Reminders
               </h3>
               <ul className="evac-reminders-list">
-                <li>Bring essential items: water, food, medicines, and important documents</li>
-                <li>Follow instructions from local authorities and evacuation center staff</li>
-                <li>Register upon arrival at the evacuation center</li>
-                <li>Keep your mobile phone charged for emergency communications</li>
+                <li>Bring essential items such as water, ready-to-eat food, medicines, and important documents (ID, birth certificate, medical records).</li>
+  <li>Pack hygiene supplies including face masks, alcohol, toiletries, and sanitary items.</li>
+  <li>Register immediately upon arrival at the evacuation center.</li>
+  <li>Follow instructions from local authorities and evacuation center personnel at all times.</li>
+  <li>Inform staff of any medical conditions, disabilities, or special needs.</li>
+  <li>Keep your mobile phone charged for emergency updates and communication.</li>
+  <li>Maintain cleanliness and respect shared spaces within the evacuation center.</li>
+  <li>Keep personal belongings secure and do not leave valuables unattended.</li>
               </ul>
             </div>
         ) : null }

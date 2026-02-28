@@ -63,7 +63,7 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
           <h2>Researcher Access Request</h2>
 
           <p className="modal-description">
-            Please fill out the form below to request Researcher/Analyst access.
+            Please fill out the form below to request Researcher access.
           </p>
 
           <form className="researcher-form" onSubmit={handleSubmit}>

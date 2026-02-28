@@ -36,12 +36,12 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="dashboard-page">
       {/* Header */}
-      <div className="dashboard-header">
+      {/* <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Admin Dashboard</h1>
           <div className="dashboard-subtitle">Overview of users, reports, and community content</div>
         </div>
-      </div>
+      </div> */}
 
       {/* KPI Cards */}
       <section className="stats-grid">

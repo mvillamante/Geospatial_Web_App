@@ -35,13 +35,13 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
   const [modalVerification, setModalVerification] = useState<Verification | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
 
-  /* =========================
-     FETCH FROM BACKEND
-  ========================= */
   const fetchVerifications = async (page = 1) => {
     try {
+      setLoading(true);
+      
       const token = localStorage.getItem("access_token");
       const res = await fetch(
         `http://127.0.0.1:8000/api/admin/resident-verifications/?page=${page}&page_size=${pageSize}`,
@@ -73,6 +73,8 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
       }
     } catch (err) {
       console.error("Error fetching verifications:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -197,9 +199,15 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
           </thead>
 
           <tbody>
-            {verifications.length === 0 ? (
+            {loading ? (
               <tr>
-                <td colSpan={9} className="empty">No citizen request found.</td>
+                <td colSpan={7} className='empty'>
+                  Loading verification requests...
+                </td>
+              </tr>
+            ) :  verifications.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="empty">No citizen request found.</td>
               </tr>
             ) : (
               verifications.map((v, index) => (

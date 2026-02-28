@@ -11,6 +11,7 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
     const navigate = useNavigate();
     const { refreshUser } = useAuth();
 
+    const [otpValues, setOtpValues] = useState(["","", "", ""]);
     const [resetTarget, setResetTarget] = useState("");
     const [resetOtp, setResetOtp] = useState("");
     const [resetNewPass, setResetNewPass] = useState("");
@@ -81,6 +82,19 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
         }
     };
 
+    const handleOtpChange = (value: string, index: number) => {
+        if (!/^\d?$/.test(value)) return;
+
+        const newOtp = [...otpValues];
+        newOtp[index] = value;
+        setOtpValues(newOtp);
+
+        if (value && index < 3) {
+            const nextInput = document.getElementById(`otp-${index-1}`);
+            nextInput?.focus();
+        }
+    }
+
     const formatName = (firstName, lastName) =>
         `${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}.${lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase()
         }`;
@@ -136,15 +150,13 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                 body: JSON.stringify({ email_or_phone: resetTarget.trim() }),
             });
 
-            const text = await res.text();
-            console.log("RESET OTP status:", res.status);
-            console.log("RESET OTP raw response:", text);
+            const data = await res.json().catch(() => ({}));
 
-            let data: any = {};
-            try { data = JSON.parse(text); } catch { }
-            if (!res.ok) throw new Error(data.detail || text || "Failed to send OTP");
+            if (!res.ok)
+                throw new Error(data.detail || "Failed to send OTP");
 
-
+            alert ("OTP sent successfully");
+            switchModal("verifyOtp");
         } catch (e: any) {
             alert(e?.message || "Failed to send OTP");
         } finally {

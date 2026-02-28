@@ -272,17 +272,17 @@ const UserMgmtPage: React.FC = () => {
 
   return (
     <div className="user-page">
-      <h1>User Management</h1>
+      {/* <h1>User Management</h1> */}
 
       {/* Tabs */}
       <div className="user-tabs" ref={tabsRef}>
-        <button ref={el => { tabRefs.current[0] = el; }} onClick={() => setTab('users')} className={tab === 'users' ? 'tab active' : 'tab'}>Users</button>
+        <button ref={el => { tabRefs.current[0] = el; }} onClick={() => setTab('users')} className={tab === 'users' ? 'tab active' : 'tab'}>Staff</button>
         <button ref={el => { tabRefs.current[1] = el; }} onClick={() => setTab('requests')} className={tab === 'requests' ? 'tab active' : 'tab'}>
-          Researcher Requests
+          Researchers 
           {pendingCount > 0 && <span className="request-count">{pendingCount}</span>}
         </button>
         <button ref={el => { tabRefs.current[2] = el; }} onClick={() => setTab('verification')} className={tab === 'verification' ? 'tab active' : 'tab'}>
-          Citizen Requests
+          Residents
           {/*pendingCount > 0 && <span className="request-count">{pendingCount}</span>*/}
         </button>
         <span className="tab-underline" style={{ left: underlineStyle.left, width: underlineStyle.width }} />

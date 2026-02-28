@@ -182,7 +182,7 @@ const LandingPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="stat-card">w
+              <div className="stat-card">
                 <div className="stat-label">Response Time</div>
                 <div className="stat-value">
                   {stats ? `${stats.avgResponseTimeMinutes}m` : "—"}

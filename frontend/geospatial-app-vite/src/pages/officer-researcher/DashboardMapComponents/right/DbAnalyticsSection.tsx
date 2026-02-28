@@ -327,7 +327,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
       ? {
           label: `Green Index — ${year}`,
           description: greenAiInsightLoading
-            ? "Loading AI summary…"
+            ? "Loading..."
             : greenAiInsightError
               ? greenAiInsightError
               : greenAiInsight ?? "No summary available.",
@@ -341,7 +341,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
       ? {
           label: `Hazard Index — ${year}`,
           description: hazardAiInsightLoading
-            ? "Loading AI summary…"
+            ? "Loading..."
             : hazardAiInsightError
               ? hazardAiInsightError
               : hazardAiSummary ?? "No summary available.",
@@ -384,7 +384,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
       ? {
           label: `Calamity Risk — ${year}`,
           description: calamityAiInsightLoading
-            ? "Loading AI summary…"
+            ? "Loading…"
             : calamityAiInsightError
               ? calamityAiInsightError
               : calamityAiSummary ?? "No summary available.",
@@ -424,8 +424,8 @@ const DbAnalyticsSection: React.FC<Props> = ({
   return (
     <>
         <div>
-        <h4>Analytics Section</h4>
-        <h5>Forecasting and Trends</h5>
+        {/* <h4>Analytics Section</h4>
+        <h5>Forecasting and Trends</h5> */}
 
         {/* Layer-aware forecasting cards */}
         {/* Default / non-choropleth / no selection: show all three */}

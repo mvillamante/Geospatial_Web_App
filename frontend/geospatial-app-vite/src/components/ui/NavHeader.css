@@ -1,26 +1,26 @@
 .nav-header {
-    background-color: var(--white-bg);
-    backdrop-filter: blur(18px);
-    border-bottom: 1px solid rgba(226, 232, 240, 0.85);
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
-    border-bottom: 1px solid var(--light-gray-border);
-    position: fixed;
-    top: 0;
-    width: 100%;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    z-index: 2000;
+  height: 80px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e6e6e6;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
 }
 
-.nav-header-logo {
-    display: flex;
-    align-items: center;
-    height: 100%;
+.nav-header-content {
+  display: flex;
+  flex-direction: column;
 }
 
-.nav-header-logo-img {
-    height: 100px;
-    width: auto;
-    object-fit: contain;
+.nav-header-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: #222;
+}
+
+.nav-header-subtitle {
+  font-size: 13px;
+  color: #777;
+  margin-top: 4px;
 }

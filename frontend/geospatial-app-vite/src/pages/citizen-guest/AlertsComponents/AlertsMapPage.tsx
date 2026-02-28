@@ -18,7 +18,7 @@ const AlertsMapPage: React.FC = () => {
   const openIncidentId = location.state?.openIncidentId;
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [panelCollapsed, setPanelCollapsed] = useState(true);
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
 
   const [userBarangay, setUserBarangay] = useState("");
 

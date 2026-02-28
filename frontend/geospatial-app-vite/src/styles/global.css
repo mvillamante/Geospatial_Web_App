@@ -43,9 +43,7 @@ body {
 .profile-page,
 .notif-page,
 .sys-page {
-  height: 95vh;
   background: #f8fafc;
-  overflow-y: auto;
   padding: 1.5rem 2.5rem 2rem 2.5rem;
   min-height: 50vh;
 }
@@ -62,11 +60,6 @@ body {
 .notif-header h1 {
   font-size: 1.8rem;
   color: #0f172a;
-}
-
-.reportverify-page {
-  width: 100%;
-  min-height: 100vh;
 }
 
 .reportverify-header,

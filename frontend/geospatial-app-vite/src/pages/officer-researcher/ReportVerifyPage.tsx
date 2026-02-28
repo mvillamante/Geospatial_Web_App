@@ -543,12 +543,12 @@ const ReportVerifyPage: React.FC = () => {
   return (
     <div className="reportverify-page">
       {/* Header */}
-      <div className="reportverify-header">
+      {/* <div className="reportverify-header">
         <div className="reportverify-header-title">
           <h1>Report Verification</h1>
         </div>
         <p className="reportverify-header-desc">Review, validate, and update citizen hazard reports</p>
-      </div>
+      </div> */}
 
       {/* Stats */}
       <div className="reportverify-stat-container">
@@ -594,7 +594,7 @@ const ReportVerifyPage: React.FC = () => {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search title, barangay, location..."
+                placeholder="Search barangay..."
               />
               <Search className="queue-search-icon" />
             </div>

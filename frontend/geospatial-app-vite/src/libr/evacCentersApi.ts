@@ -14,7 +14,7 @@ export interface EvacCenterAPI {
   coordinates: [number, number];
 }
 export async function fetchEvacCenters() {
-  const res = await fetch(`${API_URL}/api//evacuation-centers/`);
+  const res = await fetch(`${API_URL}/api/evacuation-centers/`);
   return res.json();
 }
 

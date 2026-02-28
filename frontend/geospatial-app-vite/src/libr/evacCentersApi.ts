@@ -19,7 +19,7 @@ export async function fetchEvacCenters() {
 }
 
 export async function createEvacCenter(data: any) {
-  const res = await fetch(`${API_URL}/api//evacuation-centers/`, {
+  const res = await fetch(`${API_URL}/api/evacuation-centers/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

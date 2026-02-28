@@ -8,6 +8,8 @@ import "../../DashboardMapPage.css";
 
 import DbEdaModal from "../right/DbEdaModal";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface Props {
   keyInsights?: any[];
   colors?: string[];
@@ -181,7 +183,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
     setHazardHotspotsInsight(null);
     setHazardLowerRiskInsight(null);
     setHazardEarthquakeTyphoonInsight(null);
-    fetch(`/api/hazard/hazard-index/ai-insight/?year=${year}`)
+    fetch(`${API_URL}/api/hazard/hazard-index/ai-insight/?year=${year}`)
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return;

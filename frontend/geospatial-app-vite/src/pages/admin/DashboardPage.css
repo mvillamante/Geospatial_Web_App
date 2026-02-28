@@ -1,0 +1,145 @@
+/* Grids */
+.dashboard-page .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.dashboard-page .middle-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.dashboard-page .bottom-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+}
+
+.dashboard-page .span-2 {
+    grid-column: span 1;
+}
+
+/* Quick Actions */
+
+.dashboard-page .quick-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.dashboard-page .qa-btn {
+    border: 1px solid rgba(0,0,0,0.12);
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.04);
+}
+
+.dashboard-page .qa-btn:hover {
+    background: rgba(0,0,0,0.04);
+    box-shadow: 0 12px 22px rgba(0,0,0,0.08);
+}
+
+.dashboard-page .panel {
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+    transition: all 0.2s ease;
+}
+
+.dashboard-page .panel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+}
+
+
+.dashboard-page .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.dashboard-page .panel-title {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.dashboard-page .panel-link {
+    border: none;
+    background: transparent;
+    color: #ea580c;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.dashboard-page .panel-link:hover {
+    text-decoration: underline;
+}
+
+.dashboard-page .action-center {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.dashboard-page .action-center .action-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;             
+}
+
+
+.dashboard-page .action-item {
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 14px;
+    padding: 16px;
+    background: linear-gradient(
+        135deg,
+        #fff 0%,
+        #fff7ed 100%
+    );
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px 16px;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+
+.dashboard-page .action-title {
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.dashboard-page .action-sub {
+    grid-column: 1 / 2;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.dashboard-page .action-btn {
+    grid-column: 2 / 3;
+    grid-row: 1 / 3;
+    align-self: center;
+    border: none;
+    background: #ea580c;
+    color: #fff;
+    padding: 8px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+}

@@ -1,0 +1,76 @@
+/* =============================================
+   Roads Layer Styles
+   ============================================= */
+
+.road-popup {
+  font-family: "Inter", sans-serif;
+}
+
+.road-tooltip {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 6px 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+/* Bridge Marker Styles */
+.bridge-marker-wrapper {
+  background: transparent;
+  border: none;
+}
+
+.bridge-marker {
+  width: 28px;
+  height: 28px;
+  background: rgba(8, 145, 178, 0.15);
+  border: 2px solid #0891b2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(8, 145, 178, 0.25);
+}
+
+.bridge-marker.closed {
+  background: rgba(220, 38, 38, 0.15);
+  border-color: #dc2626;
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.25);
+}
+
+.bridge-icon {
+  font-size: 14px;
+}
+
+/* Closed Road Marker */
+.road-closed-marker-wrapper {
+  background: transparent;
+  border: none;
+}
+
+.road-closed-marker {
+  width: 24px;
+  height: 24px;
+  background: rgba(220, 38, 38, 0.15);
+  border: 2px solid #dc2626;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.25);
+}
+
+.closed-icon {
+  font-size: 12px;
+}
+
+/* Animated dashed line for closed roads */
+.road-closed-animate {
+  animation: dashFlow 1.6s linear infinite;
+}
+
+@keyframes dashFlow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}

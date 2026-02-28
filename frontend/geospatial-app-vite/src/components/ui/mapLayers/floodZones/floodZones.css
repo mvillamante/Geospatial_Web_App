@@ -1,0 +1,117 @@
+/* =============================================
+   Flood Zone Styles
+   ============================================= */
+.flood-zone-label-wrapper {
+  background: transparent !important;
+  border: none !important;
+  pointer-events: none !important;
+}
+
+.flood-zone-label {
+  pointer-events: auto;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+  animation: floodLabelFadeIn 0.5s ease-out;
+}
+
+.flood-zone-label.high {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(29, 78, 216, 0.95));
+  color: var(--text-white);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.flood-zone-label.moderate {
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.95), rgba(37, 99, 235, 0.95));
+  color: var(--text-white);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.flood-zone-label.low {
+  background: linear-gradient(135deg, rgba(147, 197, 253, 0.95), rgba(59, 130, 246, 0.95));
+  color: #1e3a8a;
+  border: 2px solid rgba(59, 130, 246, 0.5);
+}
+
+.flood-zone-label-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.flood-zone-label-text {
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes floodLabelFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Flood Zone Tooltips */
+.flood-zone-tooltip {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  border: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.flood-zone-tooltip.high {
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  color: var(--text-white);
+  border: 2px solid #1e40af;
+}
+
+.flood-zone-tooltip.moderate {
+  background: linear-gradient(135deg, #2563eb, #60a5fa);
+  color: var(--text-white);
+  border: 2px solid #1d4ed8;
+}
+
+.flood-zone-tooltip.low {
+  background: linear-gradient(135deg, #3b82f6, #93c5fd);
+  color: var(--text-white);
+  border: 2px solid #2563eb;
+}
+
+.leaflet-tooltip.flood-zone-tooltip::before {
+  display: none;
+}
+
+/* Flood Zone Popup Styles */
+.flood-zone-popup {
+  line-height: 1.4;
+}
+
+/* Flood zone pulse animation for high risk areas */
+.flood-zone-pulse {
+  animation: floodPulse 2s ease-in-out infinite;
+}
+
+@keyframes floodPulse {
+  0%, 100% {
+    fill-opacity: 0.2;
+  }
+  50% {
+    fill-opacity: 0.4;
+  }
+}

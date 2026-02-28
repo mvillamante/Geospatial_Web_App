@@ -1,0 +1,307 @@
+/* Container card */
+.editor-card{
+  width: 100%;
+  max-width: 880px;
+  margin: 14px auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.08);
+  padding: 18px;
+  box-sizing: border-box;
+  color: #0f172a;
+  border: 1px solid rgba(15,23,42,0.04);
+  position: relative;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+}
+
+/* Header */
+.editor-header{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(15,23,42,0.05);
+  margin-bottom: 14px;
+}
+
+.editor-header .icon{
+  font-size: 22px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: #f1f5f9;
+}
+
+.editor-header .label{
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.role-badge{
+  margin-left: auto;
+  background: #e5e7eb;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* View cards */
+.view-field-group{
+  display: grid;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.view-card{
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+  min-height: 54px;
+}
+
+.view-card.small{
+  padding: 10px;
+  min-height: 48px;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.view-card .label{
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.view-card .value{
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Form */
+.form-group{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.form-group label{
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group select{
+  height: 40px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus{
+  border-color: #0ea5a4;
+  box-shadow: 0 0 0 3px rgba(14,165,164,0.1);
+}
+
+.form-group input[readonly]{
+  background: #f1f5f9;
+  color: #6b7280;
+  cursor: default;
+}
+
+/* Layout rows */
+.form-row{
+  display: grid;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.form-row.two{
+  grid-template-columns: 1fr 280px;
+}
+
+.form-row.three{
+  grid-template-columns: 1fr 1fr 200px;
+}
+
+
+
+@media (max-width: 720px){
+  .form-row.two,
+  .form-row.three{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Coordinates */
+.coord-row{
+  display: flex;
+  gap: 8px;
+}
+
+.coord-row input{
+  flex: 1;
+}
+
+.pick-map-btn{
+  background: #0ea5a4;
+  color: white;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  height: 40px;
+  transition: 0.2s ease;
+}
+
+.pick-map-btn:hover{
+  background: #05989a;
+}
+
+/* Facilities */
+.facilities-card{
+  margin-top: 6px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.facilities-card .title{
+  font-weight: 700;
+  font-size: 14px;
+  margin: 0;
+}
+
+.facility-item{
+  display: inline-block;
+  background: #e5e7eb;
+  padding: 6px 8px;
+  border-radius: 999px;
+  margin: 4px 6px 0 0;
+  font-size: 13px;
+}
+
+.facility-row{
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.facility-row input{
+  flex: 1;
+  height: 38px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.facility-row button{
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.facility-row button:hover{
+  background: #f1f5f9;
+}
+
+.add-facility-btn{
+  align-self: start;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px dashed #d1d5db;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Evacuation banner */
+.evac-banner{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+}
+
+.evac-banner .text{
+  font-weight: 700;
+  color: #92400e;
+}
+
+/* Footer buttons */
+.evac-card-wrapper .modal-actions{
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  justify-content: flex-end;
+} 
+
+.evac-card-wrapper .modal-actions button{
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  height: 40px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.evac-card-wrapper .modal-actions button:first-child{
+  background: #0ea5a4;
+  color: white;
+} 
+
+.evac-card-wrapper .modal-actions button:first-child:hover{
+  background: #05989a;
+}
+
+.evac-card-wrapper .modal-actions button:last-child{
+  background: transparent;
+  border: 1px solid #e5e7eb;
+} 
+
+.evac-card-wrapper .modal-actions button:hover{
+  transform: translateY(-2px);
+} 
+
+
+/* Saving overlay */
+.saving-overlay{
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+.saving-overlay p{
+  padding: 10px 14px;
+  background: white;
+  border-radius: 8px;
+  font-weight: 700;
+}

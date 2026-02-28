@@ -1,0 +1,375 @@
+.reportsmgmt-page h1 {
+    margin-bottom: 2rem;
+}
+
+
+/* Toggle Buttons */
+.reportsmgmt-page .page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.reportsmgmt-page .location-cell {
+  color: #8d8a8a;
+}
+
+
+.reportsmgmt-page .th-actions {
+  width: 120px;
+}
+
+.reportsmgmt-page .location-cell {
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Date/time */
+.dt {
+  line-height: 1.1;
+}
+.dt-date {
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+.dt-time {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.critical-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  display: inline-block;
+}
+
+.critical-badge.low {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.critical-badge.moderate {
+  background: #fef9c3;
+  color: #92400e;
+}
+
+.critical-badge.high {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.critical-badge.critical {
+  background: #7f1d1d;
+  color: #fff;
+}
+.critical-badge.none {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.reportsmgmt-page .table-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.reportsmgmt-page .icon-btn {
+  border: none;
+  background: transparent;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.reportsmgmt-page .icon-btn:hover {
+  background: var(--off-white-bg);
+}
+
+.reportsmgmt-page .icon-btn.assign {
+  color: #2563eb;
+}
+
+
+.muted {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Badges */
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge.pending {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.badge.in_progress {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.badge.rejected {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.badge.resolved {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.badge.archived {
+  background: var(--off-white-bg);
+  color: #4b5563;
+}
+
+/* Empty state */
+.empty {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+/* Modal / Drawer */
+.reportsmgmt-page .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 9999;
+}
+
+.reportsmgmt-page .value.assigned-officer {
+  margin-bottom: 15px;
+}
+
+.reportsmgmt-page .report-modal {
+  width: 720px;
+  max-width: calc(100% - 2rem);
+  max-height: 100vh;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+
+.reportsmgmt-page .modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--light-gray-border);
+}
+
+.reportsmgmt-page .modal-title {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.reportsmgmt-page .modal-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.reportsmgmt-page .modal-body {
+  padding: 14px 20px 18px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden; 
+}
+
+
+.reportsmgmt-page .detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+
+  align-content: start;
+}
+
+.reportsmgmt-page .detail-item.full {
+  grid-column: 1 / -1;
+}
+
+.reportsmgmt-page .detail-item .label {
+  margin-top: 15px;
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0 0 2px 1;
+}
+
+ .reportsmgmt-page .detail-item .value {
+  font-size: 14px;
+}
+
+.reportsmgmt-page .prewrap {
+  white-space: pre-wrap;
+  overflow: hidden;
+  margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 4; 
+  -webkit-box-orient: vertical;
+}
+
+/* Photo */
+.reportsmgmt-page .photo-wrapper {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+
+.reportsmgmt-page .report-photo {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Assign box pinned to bottom */
+.reportsmgmt-page .assign-box {
+  margin-top: auto; 
+  padding-top: 14px;
+  border-top: 1px solid var(--light-gray-border);
+}
+
+.reportsmgmt-page .assign-label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.reportsmgmt-page .assign-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.reportsmgmt-page .select {
+  flex: 1;
+  padding: 10px 10px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+}
+
+.reportsmgmt-page .btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.reportsmgmt-page .btn:hover {
+  background: #1d4ed8;
+}
+
+
+.reportsmgmt-page .icon-btn.verify {
+    color: green;
+}
+
+
+.filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.filters-left {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filters-right {
+  display: flex;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+/* Kebab Menu */
+.reportsmgmt-page .row-menu {
+  position: relative;
+  display: inline-flex;
+  justify-content: flex-end;
+}
+
+/* Confirmation Modal */
+.confirm-modal {
+  width: 420px;
+  max-width: calc(100% - 2rem);
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.confirm-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.confirm-text {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.reportsmgmt-page .btn.secondary {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.reportsmgmt-page .btn.secondary:hover {
+  background: #e5e7eb;
+}
+
+.reportsmgmt-page .btn.danger {
+  background: #b42318;
+}
+
+.reportsmgmt-page .btn.danger:hover {
+  background: #991b1b;
+  color: #ffffff;
+}

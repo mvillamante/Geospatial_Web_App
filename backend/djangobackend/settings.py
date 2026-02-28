@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import dj_database_url
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -35,7 +36,7 @@ SUPABASE_JWT_SECRET= os.getenv("SUPABASE_JWT_SECRET")
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
 
-ALLOWED_HOSTS = [] # !!! change to actual domain names, for production
+ALLOWED_HOSTS = ["*"] # !!! change to actual domain names, for production
 
 
 # Application definition
@@ -59,7 +60,7 @@ INSTALLED_APPS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    "https://hazspot.vercel.app"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -112,13 +113,9 @@ WSGI_APPLICATION = 'djangobackend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv("PGDATABASE"),
-        'USER': os.getenv("PGUSER"),
-        'PASSWORD': os.getenv("PGPASSWORD"),
-        'HOST': os.getenv("PGHOST"),
-        'PORT': os.getenv("PGPORT", "5432"),
-        'OPTIONS': {'sslmode': 'require'},
+        dj_database_url.config(
+            default=os.environ.get("DATABASE_URL")
+        )
     }
 }
 

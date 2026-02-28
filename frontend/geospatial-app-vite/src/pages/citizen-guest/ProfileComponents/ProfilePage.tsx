@@ -32,6 +32,8 @@ import type { Report, ReportStatus } from "../../../types/report";
 //   rejection_reason?: string | null;
 // };
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 type IncidentReportAPI = {
   id: number;
   category: string;
@@ -437,7 +439,7 @@ const ProfilePage: React.FC = () => {
         formData.append("address", address.trim()),
         formData.append("id_image", barangayIdFile);
 
-      const res = await fetch("http://127.0.0.1:8000/api/resident-verification/request/", {
+      const res = await fetch(`${API_URL}/api/resident-verification/request/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

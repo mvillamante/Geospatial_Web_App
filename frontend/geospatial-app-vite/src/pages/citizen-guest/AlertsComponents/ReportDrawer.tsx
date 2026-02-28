@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import PinLocationPicker from "./PinLocationPicker";
 import { isWithinCabuyao } from '../../../../src/utils/validateCabuyao';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface ReportDrawerProps {
   open: boolean;
   onClose: () => void;
@@ -114,7 +116,7 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
 
     setPinLoadingAddress(true);
     try {
-      const response = await fetch(`/api/geocoding/reverse/?lat=${lat}&lon=${lon}`, {
+      const response = await fetch(`${API_URL}/api/geocoding/reverse/?lat=${lat}&lon=${lon}`, {
         signal: controller.signal,
       });
       const data: ReverseGeocodeResponse = await response.json();
@@ -177,7 +179,7 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
         try {
           setLocation("Getting location...");
           const response = await fetch(
-            `/api/geocoding/reverse/?lat=${latitude}&lon=${longitude}`,
+            `${API_URL}/api/geocoding/reverse/?lat=${latitude}&lon=${longitude}`,
             { signal: controller.signal }
           );
           const data: ReverseGeocodeResponse = await response.json();

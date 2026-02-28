@@ -6,6 +6,9 @@ import './CmsPage.css';
 import RichTextEditor from './TextEditor/RichTextEditor';
 import Pagination from "../../components/ui/Pagination";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
+
 interface Attachment {
   id: number;
   file_url: string;
@@ -122,7 +125,7 @@ const CmsPage: React.FC = () => {
   const fetchGuides = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/cms/guides/", {
+      const res = await fetch(`{${API_URL}/api/cms/guides/`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -162,7 +165,7 @@ const CmsPage: React.FC = () => {
 
 
   useEffect(() => {
-    fetch("/api/cms/quick-contacts/", {
+    fetch( `${API_URL}/api/cms/quick-contacts/`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       },
@@ -180,7 +183,7 @@ const CmsPage: React.FC = () => {
   }, [viewArchived]);
 
   const togglePublish = async (postId: number) => {
-    await fetch(`/api/cms/guides/${postId}/publish/`, {
+    await fetch(`${API_URL}/api/cms/guides/${postId}/publish/`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -197,7 +200,7 @@ const CmsPage: React.FC = () => {
   };
 
   const archiveGuide = async (postId: number) => {
-    await fetch(`/api/cms/guides/${postId}/archive/`, {
+    await fetch(`${API_URL}/cms/guides/${postId}/archive/`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -208,7 +211,7 @@ const CmsPage: React.FC = () => {
   };
 
   const restoreGuide = async (postId: number) => {
-    await fetch(`/api/cms/guides/${postId}/restore/`, {
+    await fetch(`${API_URL}/api/cms/guides/${postId}/restore/`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -224,7 +227,7 @@ const CmsPage: React.FC = () => {
   };
 
   const permanentDeleteGuide = async (postId: number) => {
-    await fetch(`/api/cms/guides/${postId}/permanent-delete/`, {
+    await fetch(`${API_URL}/api/cms/guides/${postId}/permanent-delete/`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -262,7 +265,7 @@ const CmsPage: React.FC = () => {
       }
 
       if (publishImmediately) {
-        await fetch(`/api/cms/guides/${created.id}/publish/`, {
+        await fetch(`${API_URL}/api/cms/guides/${created.id}/publish/`, {
           method: "PATCH",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -301,7 +304,7 @@ const CmsPage: React.FC = () => {
   const updateGuide = async () => {
     if (!editingGuide) return;
 
-    const res = await fetch(`/api/cms/guides/${editingGuide.postId}/`, {
+    const res = await fetch(`${API_URL}/api/cms/guides/${editingGuide.postId}/`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -322,7 +325,7 @@ const CmsPage: React.FC = () => {
     const updated = await res.json();
 
     for (const attachmentId of deletedAttachments) {
-      await fetch(`/api/cms/attachments/${attachmentId}/`, {
+      await fetch(`${API_URL}/api/cms/attachments/${attachmentId}/`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -354,7 +357,7 @@ const CmsPage: React.FC = () => {
     formData.append("image", file);
 
     const res = await fetch(
-      `/api/cms/guides/${guideId}/attachments/`,
+      `${API_URL}/api/cms/guides/${guideId}/attachments/`,
       {
         method: "POST",
         headers: {
@@ -1151,7 +1154,7 @@ const CmsPage: React.FC = () => {
               <button
                 className="btn-primary"
                 onClick={async () => {
-                  const res = await fetch(`/api/cms/quick-contacts/${contact.id}/`, {
+                  const res = await fetch(`${API_URL}/api/cms/quick-contacts/${contact.id}/`, {
                     method: "PUT",
                     headers: {
                       "Content-Type": "application/json",

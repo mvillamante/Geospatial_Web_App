@@ -9,6 +9,8 @@ import { ReportsStatusChart } from "./DashboardComponents/ReportsStatusChart";
 import { ActionCenter } from "./DashboardComponents/ActionCenter";
 import "./DashboardPage.css";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState<{
     active_users: number;
@@ -19,7 +21,7 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
-        const res = await fetch("/api/admin/stats/", {
+        const res = await fetch(`${API_URL}/api/admin/stats`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },

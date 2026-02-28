@@ -21,7 +21,8 @@ import {
 import html2canvas from "html2canvas";
 import "./AnalyticsCharts.css";
 
-const API = "/api/hazard";
+const API_URL = import.meta.env.VITE_API_URL;
+const API = `${API_URL}/api/hazard`;
 
 // ---------------------------------------------------------------------------
 // Risk Likelihood (2020–2030): Calamity Risk Likelihood

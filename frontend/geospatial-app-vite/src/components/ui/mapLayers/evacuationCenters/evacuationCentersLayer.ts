@@ -4,6 +4,8 @@ import { evacuationTypeConfig } from "./evacuationCentersTypes";
 import type { EvacuationCenterData, EvacuationCenterType } from "./evacuationCentersTypes";
 import { getEvacuationPopupHTML } from "./evacCenterMapPopup";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 // API response types
 interface EvacuationCenterAPI {
   id: number;
@@ -27,7 +29,7 @@ interface PaginatedResponse<T> {
 
 // Fetch all evacuation centers (ignoring pagination)
 async function fetchEvacuationCenters(): Promise<EvacuationCenterData[]> {
-  const response = await fetch("/api/evacuation-centers/?page_size=1000", {
+  const response = await fetch(`${API_URL}/api/evacuation-centers/?page_size=1000`, {
     credentials: "include",
     headers: { "Accept": "application/json" },
   });

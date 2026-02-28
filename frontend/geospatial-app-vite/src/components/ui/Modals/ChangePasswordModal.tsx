@@ -9,6 +9,8 @@ interface Props {
   onPasswordChanged: () => void;
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const ChangePasswordModal: React.FC<Props> = ({ userId, userName, onClose, onPasswordChanged }) => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -31,7 +33,7 @@ const ChangePasswordModal: React.FC<Props> = ({ userId, userName, onClose, onPas
     try {
       const token = localStorage.getItem("access_token");
       const res = await fetch(
-        `http://127.0.0.1:8000/api/admin/users/${userId}/change-password/`,
+        `${API_URL}/admin/users/${userId}/change-password/`,
         {
           method: "PATCH",
           headers: {

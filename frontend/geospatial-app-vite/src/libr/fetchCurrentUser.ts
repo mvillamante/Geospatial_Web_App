@@ -8,9 +8,11 @@ export interface User {
   extra_roles: string[];
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 //returns full user info.
 export const fetchCurrentUser = async (token: string): Promise<User> => {
-  const response = await fetch("/api/current_user/", {
+  const response = await fetch(`${API_URL}/api/current_user/`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,

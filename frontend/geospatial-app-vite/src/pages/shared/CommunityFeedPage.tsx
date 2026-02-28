@@ -12,6 +12,8 @@ import {
 import { useLocation } from "react-router-dom";
 import "./CommunityFeedPage.css";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 type PostType = "advisory" | "announcement" | "guide";
 
 type FeedPost = {
@@ -99,7 +101,7 @@ export default function CommunityFeedPage() {
     }, [location.state, posts])
 
     useEffect(() => {
-        fetch("/api/cms/quick-contacts/", {
+        fetch(`${API_URL}/api/cms/quick-contacts/`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },

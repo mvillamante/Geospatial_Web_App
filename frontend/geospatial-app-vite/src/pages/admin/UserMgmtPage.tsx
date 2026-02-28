@@ -21,6 +21,9 @@ import ManageDepartmentsModal from '../../components/ui/Modals/ManageDepartments
 type Role = 'Researcher' | 'Officer' | 'Admin';
 type Status = 'Active' | 'Inactive';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
+
 interface User {
   id: number;
   staff_id: string;
@@ -117,7 +120,7 @@ const UserMgmtPage: React.FC = () => {
       }
 
       const res = await fetch(
-        `http://127.0.0.1:8000/api/admin/users/?${params.toString()}`,
+        `${API_URL}/api/admin/users/?${params.toString()}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -183,7 +186,7 @@ const UserMgmtPage: React.FC = () => {
       try {
         const token = localStorage.getItem("access_token");
         const res = await fetch(
-          `http://127.0.0.1:8000/api/admin/researcher_requests/?page=1&page_size=1000`,
+          `${API_URL}/api/admin/researcher_requests/?page=1&page_size=1000`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) throw new Error("Failed to fetch requests");
@@ -232,7 +235,7 @@ const UserMgmtPage: React.FC = () => {
   const toggleStatus = async (id: number) => {
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/users/${id}/toggle-status/`, {
+      const res = await fetch(`${API_URL}/api/admin/users/${id}/toggle-status/`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       });
@@ -245,7 +248,7 @@ const UserMgmtPage: React.FC = () => {
   const updateRole = async (id: number, newRole: Role) => {
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/users/${id}/role/`, {
+      const res = await fetch(`${API_URL}/api/admin/users/${id}/role/`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ role: newRole.toLowerCase() }),

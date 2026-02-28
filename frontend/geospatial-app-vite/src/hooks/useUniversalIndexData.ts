@@ -2,6 +2,8 @@
 import { useState, useEffect, useMemo } from "react";
 import type { HazardBarangayData, GreenIndexBarangayData, CalamityRiskBarangayData } from "../components/ui/LeafletMap";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface UniversalIndexData {
   year: number;
   // Current year data
@@ -38,12 +40,12 @@ export const useUniversalIndexData = (year: number): UniversalIndexData => {
     const fetchAll = async () => {
       try {
         const [greenRes, hazardRes] = await Promise.all([
-          fetch(`/api/hazard/green-index/?year=${year}`),
-          fetch(`/api/hazard/hazard-index/?year=${year}`),
+          fetch(`${API_URL}/api/hazard/green-index/?year=${year}`),
+          fetch(`${API_URL}/api/hazard/hazard-index/?year=${year}`),
         ]);
 
-        let calamityRes = await fetch(`/api/hazard/calamity-risk/forecast/?year=${year}`);
-        if (!calamityRes.ok) calamityRes = await fetch(`/api/hazard/calamity-risk/?year=${year}`);
+        let calamityRes = await fetch(`${API_URL}/api/hazard/calamity-risk/forecast/?year=${year}`);
+        if (!calamityRes.ok) calamityRes = await fetch(`${API_URL}/api/hazard/calamity-risk/?year=${year}`);
 
         if (cancelled) return;
 
@@ -80,8 +82,8 @@ export const useUniversalIndexData = (year: number): UniversalIndexData => {
     const fetchPrev = async () => {
       try {
         const [greenRes, hazardRes] = await Promise.all([
-          fetch(`/api/hazard/green-index/?year=${prevYear}`),
-          fetch(`/api/hazard/hazard-index/?year=${prevYear}`),
+          fetch(`${API_URL}/api/hazard/green-index/?year=${prevYear}`),
+          fetch(`${API_URL}/api/hazard/hazard-index/?year=${prevYear}`),
         ]);
         if (cancelled) return;
 

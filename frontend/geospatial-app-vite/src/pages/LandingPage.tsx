@@ -8,6 +8,8 @@ import AuthModal from "../components/ui/Modals/AuthModal";
 import LeafletMap from "../components/ui/LeafletMap";
 import ResearcherRequestModal from "../components/ui/Modals/ResearcherRequestModal";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 type LandingStats = {
   activeHazards: number;
   criticalAlerts: number;
@@ -59,7 +61,7 @@ const LandingPage: React.FC = () => {
     const fetchLandingStats = async () => {
       try {
         const res = await fetch(
-          `/api/public/landing-page/`
+          `${API_URL}/api/public/landing-page/`
         );
 
         if (!res.ok) throw new Error("Failed to fetch landing stats");

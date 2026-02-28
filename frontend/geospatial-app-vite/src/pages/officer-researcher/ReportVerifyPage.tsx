@@ -148,11 +148,11 @@ const ReportVerifyPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<ReportCategory | "all">("all");
 
   // sorting: newest, citizenRisk, effectiveRisk
-  const [sortMode, setSortMode] = useState<"newest" | "citizenRisk" | "effectiveRisk">("effectiveRisk");
+  // const [sortMode, setSortMode] = useState<"newest" | "citizenRisk" | "effectiveRisk">("effectiveRisk");
 
   // modals
   const [modal, setModal] = useState<ModalType>("none");
-  const [resolveTitle, setResolveTitle] = useState("");
+  // const [resolveTitle, setResolveTitle] = useState("");
   const [rejectReason, setRejectReason] = useState("");
 
   const selected = useMemo(
@@ -184,7 +184,7 @@ const ReportVerifyPage: React.FC = () => {
     myOfficerId != null &&
     selected.assignedOfficerId != null &&
     Number(selected.assignedOfficerId) === myOfficerId;
-  const isAssignedToSomeone = !!selected && !!selected.assignedTo;
+  // const isAssignedToSomeone = !!selected && !!selected.assignedTo;
 
   const effectiveRisk = (r: CitizenReport) => r.verifiedRisk ?? r.citizenRisk;
 
@@ -223,13 +223,13 @@ const ReportVerifyPage: React.FC = () => {
     });
 
     list = [...list].sort((a, b) => {
-      if (sortMode === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      // if (sortMode === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 
-      if (sortMode === "citizenRisk") {
-        const diff = riskOrder[b.citizenRisk] - riskOrder[a.citizenRisk];
-        if (diff !== 0) return diff;
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      }
+      // if (sortMode === "citizenRisk") {
+      //   const diff = riskOrder[b.citizenRisk] - riskOrder[a.citizenRisk];
+      //   if (diff !== 0) return diff;
+      //   return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      // }
 
       // effectiveRisk
       const diff = riskOrder[effectiveRisk(b)] - riskOrder[effectiveRisk(a)];
@@ -238,7 +238,7 @@ const ReportVerifyPage: React.FC = () => {
     });
 
     return list;
-  }, [reports, query, statusFilter, categoryFilter, sortMode, scopeFilter, myOfficerId]);
+  }, [reports, query, statusFilter, categoryFilter, scopeFilter, myOfficerId]);
 
   const updateReport = (id: number, patch: Partial<CitizenReport>) => {
     setReports((prev) =>
@@ -427,20 +427,20 @@ const ReportVerifyPage: React.FC = () => {
 
 
   // Needs info: just set status + store note 
-  const markNeedsInfo = () => {
-    if (!selected) return;
-    if (!selected.officerNote || selected.officerNote.trim().length < 3) {
-      alert("Please type an update/request first (Needs Info message).");
-      return;
-    }
-    setStatus("needs_info");
-  };
+  // const markNeedsInfo = () => {
+  //   if (!selected) return;
+  //   if (!selected.officerNote || selected.officerNote.trim().length < 3) {
+  //     alert("Please type an update/request first (Needs Info message).");
+  //     return;
+  //   }
+  //   setStatus("needs_info");
+  // };
 
   const openResolveModal = () => {
     if (!selected) return;
 
     // prefill a structured post template
-    setResolveTitle(`Update: ${selected.title}`);
+    // setResolveTitle(`Update: ${selected.title}`);
     setModal("resolve");
   };
 

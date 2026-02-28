@@ -5,8 +5,8 @@ import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { getUserRoleAndDisplayName, clearUserSession } from "../../libr/auth";
 
 import type { IconType } from "react-icons";
-import { FaHome, FaCog, FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt, FaMapMarked, FaBell } from "react-icons/fa";
-import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdOutlineMonitorHeart, MdKeyboardArrowUp } from "react-icons/md";
+import { FaHome, FaCog, FaUser, FaMapMarkedAlt, FaBullhorn, FaMapMarked, FaBell } from "react-icons/fa";
+import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdKeyboardArrowUp } from "react-icons/md";
 import { PiUsersBold } from "react-icons/pi";
 import { TbFileReport } from "react-icons/tb";
 import { FiEdit } from "react-icons/fi";

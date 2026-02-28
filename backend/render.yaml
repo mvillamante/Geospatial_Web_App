@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: Geospatial_Web_App
+    env: python
+    buildCommand: |
+      apt-get update && apt-get install -y proj-bin libproj-dev gdal-bin libgdal-dev
+      pip install -r requirements.txt
+    startCommand: gunicorn djangobackend.wsgi:application

@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 
 export interface Report {
     id: number;
+    department_id?: number | null;
     incident_type: "fire" | "flood" | "earthquake" | "typhoon" | "chemical / gas leak" | "fallen tree" | "infrastructure damage" | "landslide" | "vehicular accident" | "others";
     verified_critical_level: "low" | "moderate" | "high" | "critical";
     barangay: string;
@@ -33,7 +34,7 @@ interface AlertsPanelProps {
 
 
 
-export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch, initialOpenIncidentId, isVerified, userBarangay, isVerificationLoading }: AlertsPanelProps) {
+export default function AlertsPanel({ onReport, onSelectReport, initialOpenIncidentId, isVerified, userBarangay, isVerificationLoading }: AlertsPanelProps) {
     const hasAutoOpenedRef = useRef(false);
 
     console.log("initialOpenIncidentId:", initialOpenIncidentId);
@@ -75,12 +76,12 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
 
 
 
-    const severityPriority: Record<Report["verified_critical_level"], number> = {
-        critical: 4,
-        high: 3,
-        moderate: 2,
-        low: 1,
-    };
+    // const severityPriority: Record<Report["verified_critical_level"], number> = {
+    //     critical: 4,
+    //     high: 3,
+    //     moderate: 2,
+    //     low: 1,
+    // };
 
     const fetchReports = async () => {
         const token = localStorage.getItem("access_token");
@@ -288,38 +289,38 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
         return s === "resolved" ? "resolved" : "in_progress";
     };
 
-    function renderLguPost(note: string) {
-        const lines = note.split("\n");
-        const blocks: { title?: string; body: string[] }[] = [];
-        let current: { title?: string; body: string[] } = { title: undefined, body: [] };
+    // function renderLguPost(note: string) {
+    //     const lines = note.split("\n");
+    //     const blocks: { title?: string; body: string[] }[] = [];
+    //     let current: { title?: string; body: string[] } = { title: undefined, body: [] };
 
-        const isHeader = (l: string) =>
-            /^(status|what happened|action taken|advisory to citizens|advisory)\s*:/i.test(l.trim());
+    //     const isHeader = (l: string) =>
+    //         /^(status|what happened|action taken|advisory to citizens|advisory)\s*:/i.test(l.trim());
 
-        for (const raw of lines) {
-            const line = raw.replace(/\r/g, "");
+    //     for (const raw of lines) {
+    //         const line = raw.replace(/\r/g, "");
 
-            if (isHeader(line)) {
-                // push previous
-                if (current.title || current.body.length) blocks.push(current);
-                current = { title: line.replace(/:$/, "").trim(), body: [] };
-            } else {
-                current.body.push(line);
-            }
-        }
-        if (current.title || current.body.length) blocks.push(current);
+    //         if (isHeader(line)) {
+    //             // push previous
+    //             if (current.title || current.body.length) blocks.push(current);
+    //             current = { title: line.replace(/:$/, "").trim(), body: [] };
+    //         } else {
+    //             current.body.push(line);
+    //         }
+    //     }
+    //     if (current.title || current.body.length) blocks.push(current);
 
-        return (
-            <div className="lgu-post">
-                {blocks.map((b, idx) => (
-                    <div className="lgu-post-block" key={idx}>
-                        {b.title && <div className="lgu-post-title">{b.title}</div>}
-                        <div className="lgu-post-body">{b.body.join("\n").trim()}</div>
-                    </div>
-                ))}
-            </div>
-        );
-    }
+    //     return (
+    //         <div className="lgu-post">
+    //             {blocks.map((b, idx) => (
+    //                 <div className="lgu-post-block" key={idx}>
+    //                     {b.title && <div className="lgu-post-title">{b.title}</div>}
+    //                     <div className="lgu-post-body">{b.body.join("\n").trim()}</div>
+    //                 </div>
+    //             ))}
+    //         </div>
+    //     );
+    // }
 
 
     return (

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
     Pin,
     Search,
@@ -70,12 +70,12 @@ const timeAgo = (iso: string) => {
     return `${days}d`;
 };
 
-function initials(name: string) {
-    const parts = name.trim().split(/\s+/);
-    const first = parts[0]?.[0] ?? "?";
-    const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
-    return (first + last).toUpperCase();
-}
+// function initials(name: string) {
+//     const parts = name.trim().split(/\s+/);
+//     const first = parts[0]?.[0] ?? "?";
+//     const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+//     return (first + last).toUpperCase();
+// }
 
 
 export default function CommunityFeedPage() {

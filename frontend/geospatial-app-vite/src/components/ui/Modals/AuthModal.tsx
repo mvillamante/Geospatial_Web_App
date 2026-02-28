@@ -11,7 +11,7 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
     const navigate = useNavigate();
     const { refreshUser } = useAuth();
 
-    const [otpValues, setOtpValues] = useState(["","", "", ""]);
+    // const [otpValues, setOtpValues] = useState(["","", "", ""]);
     const [resetTarget, setResetTarget] = useState("");
     const [resetOtp, setResetOtp] = useState("");
     const [resetNewPass, setResetNewPass] = useState("");
@@ -82,18 +82,18 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
         }
     };
 
-    const handleOtpChange = (value: string, index: number) => {
-        if (!/^\d?$/.test(value)) return;
+    // const handleOtpChange = (value: string, index: number) => {
+    //     if (!/^\d?$/.test(value)) return;
 
-        const newOtp = [...otpValues];
-        newOtp[index] = value;
-        setOtpValues(newOtp);
+    //     const newOtp = [...otpValues];
+    //     newOtp[index] = value;
+    //     setOtpValues(newOtp);
 
-        if (value && index < 3) {
-            const nextInput = document.getElementById(`otp-${index-1}`);
-            nextInput?.focus();
-        }
-    }
+    //     if (value && index < 3) {
+    //         const nextInput = document.getElementById(`otp-${index-1}`);
+    //         nextInput?.focus();
+    //     }
+    // }
 
     const formatName = (firstName, lastName) =>
         `${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}.${lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase()

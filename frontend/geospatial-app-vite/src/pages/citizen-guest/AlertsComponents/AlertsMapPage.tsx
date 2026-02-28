@@ -13,6 +13,8 @@ interface SelectedReportWithTimestamp {
 }
 
 const AlertsMapPage: React.FC = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
+  
   const navigate = useNavigate();
   const location = useLocation();
   const openIncidentId = location.state?.openIncidentId;
@@ -60,7 +62,7 @@ const AlertsMapPage: React.FC = () => {
         return;
       }
 
-      const res = await fetch("http://localhost:8000/api/users/me/", {
+      const res = await fetch(`${API_URL}/api/users/me/`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

@@ -257,7 +257,9 @@ const ReportVerifyPage: React.FC = () => {
   // Patching of report
   async function patchReport(id: number, body: any) {
     const token = localStorage.getItem("access_token");
-    const res = await fetch(`http://localhost:8000/api/reports/${id}/`, {
+    const API_URL = import.meta.env.VITE_API_URL;
+
+    const res = await fetch(`${API_URL}/api/reports/${id}/`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -285,8 +287,8 @@ const ReportVerifyPage: React.FC = () => {
 
         const token = localStorage.getItem("access_token");
         if (!token) throw new Error("No access token found. Please login again.");
-
-        const res = await fetch("http://localhost:8000/api/reports/queue/", {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/reports/queue/`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

@@ -188,7 +188,9 @@ const ProfilePage: React.FC = () => {
       setProfileError(null);
       try {
         const token = localStorage.getItem("access_token");
-        const res = await fetch("http://localhost:8000/api/users/me/", {
+        const API_URL = import.meta.env.VITE_API_URL;
+
+        const res = await fetch(`${API_URL}/api/users/me/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -237,9 +239,9 @@ const ProfilePage: React.FC = () => {
 
       try {
         const token = localStorage.getItem("access_token");
+        const API_URL = import.meta.env.VITE_API_URL;
 
-
-        const res = await fetch("http://localhost:8000/api/reports/my/", {
+        const res = await fetch(`${API_URL}/api/reports/my/`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -319,8 +321,8 @@ const ProfilePage: React.FC = () => {
   const saveProfile = async () => {
     try {
       const token = localStorage.getItem("access_token");
-
-      const res = await fetch("http://localhost:8000/api/users/me/", {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_URL}/api/users/me/`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -365,7 +367,9 @@ const ProfilePage: React.FC = () => {
     setPasswordLoading(true);
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch("http://localhost:8000/api/users/change-password/", {
+      const API_URL = import.meta.env.VITE_API_URL;
+
+      const res = await fetch(`${API_URL}/api/users/change-password/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

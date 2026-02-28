@@ -24,7 +24,7 @@ type Report = {
     status?: ApiStatus;
 };
 
-const API_BASE = "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 function normalizeStatus(raw: any) {
     const s = String(raw ?? "").toLowerCase();
@@ -49,7 +49,7 @@ export const ReportsStatusChart: React.FC = () => {
 
             try {
                 setLoading(true);
-                const res = await fetch(`${API_BASE}/api/reports/list/`, {
+                const res = await fetch(`${API_URL}/api/reports/list/`, {
                     headers: {Authorization: `Bearer ${token}`},
                 });
 

@@ -71,6 +71,8 @@ const timeAgo = (iso: string) => {
 };
 
 const NotificationPage: React.FC = () => {
+    const API_URL = import.meta.env.VITE_API_URL;
+
     const [activeTab, setActiveTab] = useState<"all" | NotificationType>("all");
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -82,7 +84,7 @@ const NotificationPage: React.FC = () => {
         (async () => {
             try {
                 setLoading(true)
-                const res = await fetch("http://localhost:8000/api/notifications/", {
+                const res = await fetch(`${API_URL}/api/notifications/`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` }
                 });
                 const data = await res.json();
@@ -243,7 +245,7 @@ const NotificationPage: React.FC = () => {
         setNotifications((prev) => prev.map((x) => ({ ...x, isUnread: false })));
 
         try {
-            await fetch("http://localhost:8000/api/notifications/read/all/", {
+            await fetch(`${API_URL}/api/notifications/read/all/`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -261,7 +263,7 @@ const NotificationPage: React.FC = () => {
         );
 
         try {
-            await fetch("http://localhost:8000/api/notifications/read/", {
+            await fetch(`${API_URL}/api/notifications/read/`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("access_token")}`,

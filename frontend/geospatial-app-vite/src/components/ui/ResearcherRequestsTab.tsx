@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { CheckCircle, XCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export type RequestStatus = 'Pending' | 'Approved' | 'Rejected';
 
 export interface ResearcherRequest {
@@ -34,7 +36,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
   const fetchRequests = async (page = 1) => {
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/researcher_requests/?page=${page}&page_size=${pageSize}`, {
+      const res = await fetch(`${API_URL}/api/admin/researcher_requests/?page=${page}&page_size=${pageSize}`, {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       });
 
@@ -87,7 +89,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
 
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/researcher_requests/${id}/`, {
+      const res = await fetch(`${API_URL}/api/admin/researcher_requests/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -125,7 +127,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
 
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/researcher_requests/${id}/`, {
+      const res = await fetch(`${API_URL}/api/admin/researcher_requests/${id}/`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,

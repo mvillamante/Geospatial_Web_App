@@ -6,6 +6,8 @@ import { FiEye, FiX } from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
 import placeholderImg from '../../assets/placeholder_img/SampleID.png';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export type VerificationStatus = "Pending" | "Approved" | "Rejected";
 
 export interface Verification {
@@ -41,10 +43,10 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
   const fetchVerifications = async (page = 1) => {
     try {
       setLoading(true);
-      
+
       const token = localStorage.getItem("access_token");
       const res = await fetch(
-        `http://127.0.0.1:8000/api/admin/resident-verifications/?page=${page}&page_size=${pageSize}`,
+        `${API_URL}/api/admin/resident-verifications/?page=${page}&page_size=${pageSize}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) throw new Error("Failed to fetch");
@@ -89,14 +91,12 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
       const token = localStorage.getItem("access_token");
 
       // Get relative path
-      const relativePath = modalVerification.id_image.replace(
-        /^http:\/\/127\.0\.0\.1:8000\//,
-        ""
-      );
+      const url = new URL(modalVerification.id_image);
+      const relativePath = url.pathname;
 
       try {
         const res = await fetch(
-          `http://127.0.0.1:8000/api/get-signed-url/?path=${encodeURIComponent(relativePath)}`,
+          `${API_URL}/api/get-signed-url/?path=${encodeURIComponent(relativePath)}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) throw new Error("Failed to fetch signed URL");
@@ -117,7 +117,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
   const updateStatus = async (id: number, action: "approve" | "reject", reason?: string) => {
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/resident-verifications/${id}/`, {
+      const res = await fetch(`${API_URL}/api/admin/resident-verifications/${id}/`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ action, reason }),
@@ -178,7 +178,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
       </div>
     </div>
   );
-  
+
 
   return (
     <>
@@ -205,7 +205,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
                   Loading verification requests...
                 </td>
               </tr>
-            ) :  verifications.length === 0 ? (
+            ) : verifications.length === 0 ? (
               <tr>
                 <td colSpan={7} className="empty">No citizen request found.</td>
               </tr>
@@ -294,7 +294,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
 
             {modalVerification.status === "Pending" && (
               <div className="verification-modal-actions" style={{ display: "flex", gap: "10px", alignItems: "flex-start", marginTop: "10px" }}>
-                
+
                 {/* Approve Button */}
                 <button
                   className="approve-btn"

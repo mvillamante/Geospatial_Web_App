@@ -46,7 +46,7 @@ interface Report {
   photo_url?: string | null;
 }
 
-const API_BASE = "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const reportCategory = (c: string) =>
   c ? c.charAt(0).toUpperCase() + c.slice(1) : "";

@@ -294,8 +294,9 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
 
       // Photo
       if (photoFile) form.append("photo", photoFile);
-
-      const res = await fetch("http://localhost:8000/api/reports/", {
+      
+      const API_URL = import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_URL}0/api/reports/`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: form,

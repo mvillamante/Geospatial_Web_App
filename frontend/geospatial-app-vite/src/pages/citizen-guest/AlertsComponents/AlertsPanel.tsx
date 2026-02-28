@@ -84,11 +84,12 @@ export default function AlertsPanel({ onReport, onSelectReport, onBarangaySearch
 
     const fetchReports = async () => {
         const token = localStorage.getItem("access_token");
+        const API_URL = import.meta.env.VITE_API_URL;
         if (!token) return;
 
         setIsLoading(true);
         try {
-            const res = await fetch("http://localhost:8000/api/incident-reports/verified/", {
+            const res = await fetch(`${API_URL}/api/incident-reports/verified/`, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`,

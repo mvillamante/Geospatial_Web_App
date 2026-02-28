@@ -16,13 +16,15 @@ export function ReportsTable() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const API_URL = import.meta.env.VITE_API_URL;
+
     const fetchReports = async () => {
       const token = localStorage.getItem("access_token");
       if (!token) return;
 
       try {
         setLoading(true);
-        const res = await fetch("http://localhost:8000/api/reports/list/", {
+        const res = await fetch(`${API_URL}/api/reports/list/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

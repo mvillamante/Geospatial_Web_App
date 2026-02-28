@@ -113,7 +113,8 @@ export default function CommunityFeedPage() {
         const fetchFeed = async () => {
             try {
                 setLoading(true);
-                const res = await fetch("http://localhost:8000/api/community-feed/");
+                const API_URL = import.meta.env.VITE_API_URL;
+                const res = await fetch(`${API_URL}/api/community-feed/`);
                 if (!res.ok) throw new Error("Failed to fetch feed");
 
                 const data = await res.json();

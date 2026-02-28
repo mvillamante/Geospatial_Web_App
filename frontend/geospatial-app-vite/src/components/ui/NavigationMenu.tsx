@@ -18,6 +18,8 @@ interface NavItem {
 }
 
 const NavigationMenu: React.FC = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
@@ -34,7 +36,7 @@ const NavigationMenu: React.FC = () => {
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/notifications/unread-count/", {
+        const res = await fetch(`${API_URL}/api/notifications/unread-count/`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}`},
         });
         if (!res.ok) return;

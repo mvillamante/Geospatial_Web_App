@@ -8,6 +8,7 @@ import "./GlobalModal.css";
 import type { User } from "../../../libr/fetchCurrentUser";
 
 const AuthModal = ({ type = "login", onClose, switchModal }) => {
+    const API_URL = import.meta.env.VITE_API_URL;
     const navigate = useNavigate();
     const { refreshUser } = useAuth();
 
@@ -56,7 +57,7 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
         if (!loginInput || !loginPassword) return alert("Please fill in all fields");
 
         try {
-            const response = await fetch("http://localhost:8000/api/login_user/", {
+            const response = await fetch(`${API_URL}/api/login_user/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -118,7 +119,7 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                 role: "citizen",
             };
 
-            const response = await fetch('http://localhost:8000/api/sign_up/', {
+            const response = await fetch(`${API_URL}/api/sign_up/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData),
@@ -144,7 +145,7 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
 
         setResetLoading(true);
         try {
-            const res = await fetch("http://localhost:8000/api/password-reset/request/", {
+            const res = await fetch(`${API_URL}/api/password-reset/request/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email_or_phone: resetTarget.trim() }),
@@ -173,7 +174,7 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
 
         setResetLoading(true);
         try {
-            const res = await fetch("http://localhost:8000/api/password-reset/confirm/", {
+            const res = await fetch(`${API_URL}/api/password-reset/confirm/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

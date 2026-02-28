@@ -1,0 +1,1 @@
+web: gunicorn GEOSPATIAL_WEB_APP-backend.wsgi

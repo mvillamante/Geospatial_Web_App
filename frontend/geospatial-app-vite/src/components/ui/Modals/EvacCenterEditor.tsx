@@ -1,4 +1,4 @@
-import React from "react";
+// import React from "react";
 import { getCabuyaoBarangays } from "../../../constants";
 import "./EvacCenterEditor.css";
 
@@ -35,9 +35,9 @@ export default function EvacCenterEditor({
   onPickCoordinates,
   isSaving = false,
 }: EvacCenterEditorProps) {
-  const typeLabel = center.type
-    ? center.type.charAt(0).toUpperCase() + center.type.slice(1)
-    : "Unknown";
+  // const typeLabel = center.type
+  //   ? center.type.charAt(0).toUpperCase() + center.type.slice(1)
+  //   : "Unknown";
 
   return (
     <div className="editor-card-wrapper">

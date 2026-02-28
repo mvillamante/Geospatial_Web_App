@@ -21,9 +21,13 @@ export interface EvacuationTypeConfig {
   bgColor: string;
 }
 
-export const evacuationTypeConfig: Record<EvacuationCenterType, EvacuationTypeConfig> = {
+export const evacuationTypeConfig: Record<
+  EvacuationCenterType,
+  EvacuationTypeConfig
+> = {
   school: { icon: "🏫", label: "School", color: "#2563eb", bgColor: "#dbeafe" },
   court: { icon: "🏀", label: "Covered Court", color: "#059669", bgColor: "#d1fae5" },
   hall: { icon: "🏛️", label: "Multi-Purpose Hall", color: "#7c3aed", bgColor: "#ede9fe" },
   gymnasium: { icon: "🏟️", label: "Gymnasium", color: "#dc2626", bgColor: "#fee2e2" },
+  others: { icon: "📍", label: "Others", color: "#6b7280", bgColor: "#f3f4f6" },
 };

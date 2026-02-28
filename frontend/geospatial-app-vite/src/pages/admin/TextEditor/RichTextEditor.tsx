@@ -1,12 +1,13 @@
 import React from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $getRoot, EditorState, TextNode, ParagraphNode } from 'lexical';
+import { $getRoot, TextNode, ParagraphNode } from 'lexical';
+import type { EditorState } from 'lexical';
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
-
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListNode, ListItemNode } from '@lexical/list';
 import { CodeNode } from '@lexical/code';
@@ -90,6 +91,7 @@ const RichTextEditor: React.FC<Props> = ({
           <ContentEditable className="editor-input" />
         }
         placeholder={null}
+        ErrorBoundary={LexicalErrorBoundary}
       />
 
       <HtmlChangePlugin onChange={onChange} />

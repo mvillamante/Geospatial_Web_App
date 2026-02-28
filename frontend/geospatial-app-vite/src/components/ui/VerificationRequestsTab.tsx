@@ -10,7 +10,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export type VerificationStatus = "Pending" | "Approved" | "Rejected";
 
-export interface Verification {
+export interface VerificationRequest {
   id: number;
   citizen_id: number;
   citizen_name: string;
@@ -30,11 +30,11 @@ interface Props {
 }
 
 const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCountChange }) => {
-  const [verifications, setVerifications] = useState<Verification[]>([]);
+  const [verifications, setVerifications] = useState<VerificationRequest[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   // const [openMenuId, setOpenMenuId] = useState<number | null>(null);
-  const [modalVerification, setModalVerification] = useState<Verification | null>(null);
+  const [modalVerification, setModalVerification] = useState<VerificationRequest | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -52,7 +52,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
       if (!res.ok) throw new Error("Failed to fetch");
 
       const data = await res.json();
-      const mapped: Verification[] = data.results.map((v: any) => ({
+      const mapped: VerificationRequest[] = data.results.map((v: any) => ({
         id: v.id,
         citizen_id: v.citizen_id,
         citizen_name: v.citizen_name,
@@ -127,7 +127,10 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
       // Update local state
       const updated = verifications.map(v =>
         v.id === id
-          ? { ...v, status: action === "approve" ? "Approved" : "Rejected" }
+          ? {
+            ...v,
+            status: (action === "approve" ? "Approved" : "Rejected") as VerificationStatus
+          }
           : v
       );
       setVerifications(updated);
@@ -210,7 +213,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
                 <td colSpan={7} className="empty">No citizen request found.</td>
               </tr>
             ) : (
-              verifications.map((v, index) => (
+              verifications.map((v) => (
                 <tr key={v.id}>
                   {/* <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td> */}
                   <td className="center muted">{v.citizen_id}</td>

@@ -1,9 +1,9 @@
 // Main Layout for all Users (navigations, tabs, map...etc)
 import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import { Bell } from "lucide-react";
+// import { Bell } from "lucide-react";
 import { NavigationMenu } from "../components";
-import { getUserRoleAndDisplayName } from "../libr/auth";
+// import { getUserRoleAndDisplayName } from "../libr/auth";
 import "./MainLayout.css";
 
 import NavHeader from "../components/ui/NavHeader";
@@ -45,9 +45,9 @@ const MainLayout: React.FC = () => {
     ]);
   }, []);
 
-  const unreadCount = notifs.filter((n) => !n.read).length;
+  // const unreadCount = notifs.filter((n) => !n.read).length;
 
-  const { userRole, userRole2 } = getUserRoleAndDisplayName();
+  // const { userRole, userRole2 } = getUserRoleAndDisplayName();
 
   return (
     <div className="main-layout">

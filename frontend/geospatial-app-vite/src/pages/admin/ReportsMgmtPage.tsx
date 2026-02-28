@@ -43,6 +43,7 @@ interface Report {
   status?: ReportStatus;
   assigned_officer_label?: string | null;
   assigned_officer_id?: number | null;
+  department_id?: number | null;
   photo_url?: string | null;
 }
 
@@ -167,7 +168,7 @@ const ReportsMgmtPage: React.FC = () => {
     if (status && ["Pending", "In Progress", "Rejected", "Resolved", "Archived"].includes(status)) {
       setStatusFilter(status as any);
     }
-}, [searchParams]);
+  }, [searchParams]);
 
 
   useEffect(() => {
@@ -371,7 +372,7 @@ const ReportsMgmtPage: React.FC = () => {
 
   /* Tabs */
   const indicatorRef = useRef<HTMLDivElement>(null);
-  const tabRefs = useRef<{[key: string]: HTMLButtonElement | null}>({});
+  const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   const activeTabRef = (isArchived: boolean) => (el: HTMLButtonElement | null) => {
     tabRefs.current[isArchived ? "archived" : "active"] = el;
@@ -485,7 +486,7 @@ const ReportsMgmtPage: React.FC = () => {
               <th className="center">Location</th>
               <th onClick={toggleSort} className="sort-header center">
                 Submitted{" "}
-               {sortOrder === "asc" ? (
+                {sortOrder === "asc" ? (
                   <HiChevronUp />
                 ) : sortOrder === "desc" ? (
                   <HiChevronDown />
@@ -724,16 +725,19 @@ const ReportsMgmtPage: React.FC = () => {
                     className="select"
                     value={selectedOfficer}
                     onChange={(e) => setSelectedOfficer(e.target.value)}
+                    disabled={loadingOfficers}
                   >
-                    <option value="" disabled>Select Officer..</option>
+                    <option value="" disabled>
+                      {loadingOfficers ? "Loading officers..." : "Select Officer.."}
+                    </option>
 
-                  {officers
-                    .filter(o => o.department_id === selectedReport.department_id)
-                    .map((o) => (
-                      <option key={o.id} value={String(o.id)}>
-                        {o.label}
-                      </option>
-                    ))}
+                    {officers
+                      .filter(o => o.department_id === selectedReport.department_id)
+                      .map((o) => (
+                        <option key={o.id} value={String(o.id)}>
+                          {o.label}
+                        </option>
+                      ))}
                   </select>
 
 

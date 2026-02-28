@@ -1,16 +1,17 @@
 import './UserMgmtPage.css';
 import { formatDistanceToNow } from 'date-fns';
-
-import { useEffect, useRef, useState, useCallback  } from "react";
+import VerificationRequestsTab 
+from "../../components/ui/VerificationRequestsTab";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Power, PowerOff, CircleChevronDown } from 'lucide-react';
 import { LuEllipsis } from "react-icons/lu";
-import { FaUserSlash } from "react-icons/fa";
+// import { FaUserSlash } from "react-icons/fa";
 import { FiSearch, FiPlus, FiUser, FiCheckCircle } from "react-icons/fi";
 import { HiChevronUpDown, HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
 
 import ResearcherRequestsTab, { type ResearcherRequest } from "../../components/ui/ResearcherRequestsTab";
-import VerificationRequestsTab, { type VerificationRequest } from "../../components/ui/VerificationRequestsTab";
+// import VerificationRequestsTab, { type VerificationRequest } from "../../components/ui/VerificationRequestsTab";
 
 import CreateUserModal from '../../components/ui/Modals/CreateUserModal';
 import Pagination from "../../components/ui/Pagination";
@@ -63,16 +64,16 @@ const UserMgmtPage: React.FC = () => {
 
   const [pageSize, setPageSize] = useState(10);
 
-    useEffect(() => {
-      const updatePageSize = () => {
-        setPageSize(window.innerHeight <= 800 ? 7 : 10);
-      };
+  useEffect(() => {
+    const updatePageSize = () => {
+      setPageSize(window.innerHeight <= 800 ? 7 : 10);
+    };
 
-      updatePageSize();
-      window.addEventListener("resize", updatePageSize);
+    updatePageSize();
+    window.addEventListener("resize", updatePageSize);
 
-      return () => window.removeEventListener("resize", updatePageSize);
-    }, []);
+    return () => window.removeEventListener("resize", updatePageSize);
+  }, []);
   const [tab, setTab] = useState<'users' | 'requests' | 'verification'>('users');
   const [openMenu, setOpenMenu] = useState<number | null>(null);
   const [roleFilter, setRoleFilter] = useState<Role | 'All'>('All');
@@ -174,7 +175,7 @@ const UserMgmtPage: React.FC = () => {
 
   useEffect(() => {
     fetchUsers(1);
-  }, [fetchUsers]);
+  }, [fetchUsers, departmentRefreshKey]);
 
   /* FETCH RESEARCHER REQUESTS HIDDEN ON MOUNT */
   useEffect(() => {
@@ -278,7 +279,7 @@ const UserMgmtPage: React.FC = () => {
       <div className="user-tabs" ref={tabsRef}>
         <button ref={el => { tabRefs.current[0] = el; }} onClick={() => setTab('users')} className={tab === 'users' ? 'tab active' : 'tab'}>Staff</button>
         <button ref={el => { tabRefs.current[1] = el; }} onClick={() => setTab('requests')} className={tab === 'requests' ? 'tab active' : 'tab'}>
-          Researchers 
+          Researchers
           {pendingCount > 0 && <span className="request-count">{pendingCount}</span>}
         </button>
         <button ref={el => { tabRefs.current[2] = el; }} onClick={() => setTab('verification')} className={tab === 'verification' ? 'tab active' : 'tab'}>
@@ -296,8 +297,8 @@ const UserMgmtPage: React.FC = () => {
             <div className="filters-left">
               <div className="select-wrapper">
                 <FiUser className="select-icon" />
-                <select 
-                  value={roleFilter} 
+                <select
+                  value={roleFilter}
                   onChange={(e) => {
                     setRoleFilter(e.target.value as Role | "All");
                   }}
@@ -390,12 +391,12 @@ const UserMgmtPage: React.FC = () => {
                   users.map((user) => {
                     const alreadyRequested = allRequests.some(r => r.email === user.email && r.status === "Pending");
                     const displayRole = user.role === "Citizen" && !user.extra_roles?.some(r => r.toLowerCase() === "researcher")
-                    ? "Citizen"
-                    : user.extra_roles?.some(r => r.toLowerCase() === "researcher")
-                      ? "Researcher"
-                      : user.role;
+                      ? "Citizen"
+                      : user.extra_roles?.some(r => r.toLowerCase() === "researcher")
+                        ? "Researcher"
+                        : user.role;
 
-                  const roleClass = displayRole.charAt(0).toUpperCase() + displayRole.slice(1);
+                    const roleClass = displayRole.charAt(0).toUpperCase() + displayRole.slice(1);
 
                     return (
                       <tr key={user.id}>
@@ -430,7 +431,7 @@ const UserMgmtPage: React.FC = () => {
                                   }}
                                   aria-label={`Change role for ${user.name}`}
                                   disabled={
-                                    userRole !== "Admin" || 
+                                    userRole !== "Admin" ||
                                     (user.role?.toLowerCase() === "citizen" && user.extra_roles?.some(r => r.toLowerCase() === "researcher"))
                                   }
                                 >
@@ -453,7 +454,7 @@ const UserMgmtPage: React.FC = () => {
                         <td className="center muted">{user.lastLoginDisplay}</td>
                         <td className="right actions">
                           <div className="action-menu">
-                            <button className="menu-button" onClick={ () => setOpenMenu(openMenu === user.id ? null : user.id)}>
+                            <button className="menu-button" onClick={() => setOpenMenu(openMenu === user.id ? null : user.id)}>
                               <LuEllipsis size={20} />
                             </button>
                             {openMenu === user.id && (
@@ -472,11 +473,11 @@ const UserMgmtPage: React.FC = () => {
                                   {user.status === 'Active' ? <PowerOff size={14} /> : <Power size={14} />}
                                   {user.status === 'Active' ? 'Deactivate' : 'Activate'}
                                 </button>
-                                {user.role === "Citizen" && user.extra_roles?.some(r => r.toLowerCase() === "researcher") && (
+                                {/* {user.role === "Citizen" && user.extra_roles?.some(r => r.toLowerCase() === "researcher") && (
                                   <button className="menu-item danger" onClick={() => { if (!window.confirm("Are you sure you want to revoke Researcher access from this user?")) return; revokeResearcher(user.id); setOpenMenu(null); }}>
                                     <FaUserSlash size={14} /> Revoke Researcher
                                   </button>
-                                )}
+                                )} */}
                                 {(user.role === "Researcher" || user.extra_roles?.some(r => r.toLowerCase() === "researcher")) && (
                                   <button
                                     className="menu-item"
@@ -485,7 +486,7 @@ const UserMgmtPage: React.FC = () => {
                                       setOpenMenu(null);
                                     }}
                                   >
-                                  Change Password
+                                    Change Password
                                   </button>
                                 )}
                               </div>
@@ -494,12 +495,12 @@ const UserMgmtPage: React.FC = () => {
                         </td>
                       </tr>
                     );
-                })
-              )}
+                  })
+                )}
               </tbody>
             </table>
           </div>
-          
+
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -510,7 +511,11 @@ const UserMgmtPage: React.FC = () => {
 
       {/* Requests Tab */}
       {tab === 'requests' && (
-        <ResearcherRequestsTab pageSize={pageSize} onPendingCountChange={setPendingCount} />
+        <ResearcherRequestsTab
+          requests={allRequests}
+          pageSize={pageSize}
+          onPendingCountChange={setPendingCount}
+        />
       )}
 
       {/* verification Tab */}
@@ -520,10 +525,14 @@ const UserMgmtPage: React.FC = () => {
 
       {/* Create User Modal */}
       {showCreateModal && (
-        <CreateUserModal onClose={() => setShowCreateModal(false)} onCreated={async () => {
-          await fetchUsers(currentPage);
-          setShowCreateModal(false);
-        }} />
+        <CreateUserModal
+          departmentRefreshKey={departmentRefreshKey}
+          onClose={() => setShowCreateModal(false)}
+          onCreated={async () => {
+            await fetchUsers(currentPage);
+            setShowCreateModal(false);
+          }}
+        />
       )}
       {/* Manage Departments Modal */}
       {showDeptModal && (

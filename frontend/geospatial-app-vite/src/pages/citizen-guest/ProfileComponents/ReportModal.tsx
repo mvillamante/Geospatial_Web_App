@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Report } from "../../../../types/report";
+import type { Report } from "../../../types/report";
 
 interface ReportModalProps {
   report: Report;
@@ -113,7 +113,7 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
             <strong>Status:</strong> <span>{formatStatus(report.status)}</span>
           </div>
           <div className="modal-row">
-            <strong>Location:</strong> <span>{report.location}</span>
+            <strong>Location:</strong> <span>{report.location_display}</span>
           </div>
           <div className="modal-row">
             <strong>Date:</strong> <span>{report.date}</span>
@@ -179,7 +179,7 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
 
 
         {/* Reply Section */}
-        {localReport.status === "needs_info" && report.needs_info_note && (
+        {localReport.status === "Needs Info" && report.needs_info_note && (
           <div className="note-card needs-info-card">
             <div className="note-header">Officer Note</div>
             <div className="note-content">{report.needs_info_note}</div>

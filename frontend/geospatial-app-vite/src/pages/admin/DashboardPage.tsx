@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { Users, FileText, Clock, AlertTriangle, Shield, Newspaper } from "lucide-react";
+import { Users, FileText, Clock, AlertTriangle } from "lucide-react";
 import { StatsCard } from "./DashboardComponents/StatsCard";
 import { ReportsTable } from "./DashboardComponents/ReportsTable";
 import { UserDistributionChart } from "./DashboardComponents/UserDistributionChart";

@@ -56,12 +56,12 @@ async function fetchEvacuationCenters(): Promise<EvacuationCenterData[]> {
 // Create Leaflet layer
 export async function createEvacuationCentersLayer(
   map: L.Map,
-  options?: { 
-    showOnMap?: boolean; 
-    showPopupOnMap?: boolean; 
+  options?: {
+    showOnMap?: boolean;
+    showPopupOnMap?: boolean;
     onSelectCenter?: (center: EvacuationCenterData) => void;
   }
-): Promise<L.LayerGroup> {
+): Promise<L.LayerGroup | null> {
   const { showOnMap = true, showPopupOnMap = true, onSelectCenter } = options || {};
 
   const oldLayer = (map as any)._evacuationLayer as L.LayerGroup | undefined;
@@ -105,8 +105,8 @@ export async function createEvacuationCentersLayer(
       const marker = L.marker(center.coordinates, { icon: markerIcon }).addTo(evacuationCentersGroup);
       marker.bindPopup(getEvacuationPopupHTML(center, showPopupOnMap));
       marker.on("click", () => {
-        if (options?.onSelectCenter) {
-          options.onSelectCenter(center); 
+        if (onSelectCenter) {
+          onSelectCenter(center);
         }
       });
 

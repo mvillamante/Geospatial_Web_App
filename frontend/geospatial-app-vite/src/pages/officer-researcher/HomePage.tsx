@@ -82,7 +82,7 @@ const HomePage: React.FC = () => {
   const minYear = 2020;
   const maxYear = 2030;
   const initialYear = Math.min(maxYear, Math.max(minYear, currentYear));
-  const [year, setYear] = useState(initialYear);
+  const [year] = useState(initialYear);
 
   const {
     universalGreenAvg,

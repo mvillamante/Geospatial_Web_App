@@ -71,14 +71,14 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
   universalHazardAvg,
   greenChangeFromLastYear,
   hazardChangeFromLastYear,
-  universalCalamityAvg,
+  // universalCalamityAvg,
   greenCityAverage,
   hazardCityAverage,
   calamityCityAverage,
   getGreenIndexColor,
   getHazardIndexColor,
   getCalamityRiskColor,
-  insights,
+  // insights,
   mapView,
   setMapView,
   mapType,
@@ -104,53 +104,53 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
     const [showMapViewHelp, setShowMapViewHelp] = useState(false);
     const [showGreenHelp, setShowGreenHelp] = useState(false);
     const [showHazardHelp, setShowHazardHelp] = useState(false);
-    const [showResilienceHelp, setShowResilienceHelp] = useState(false);
+    // const [showResilienceHelp, setShowResilienceHelp] = useState(false);
 
     const mapViewHelpRef = useRef<HTMLButtonElement>(null);
-    const resilienceHelpRef = useRef<HTMLButtonElement>(null);
+    // const resilienceHelpRef = useRef<HTMLButtonElement>(null);
     const greenHelpRef = useRef<HTMLButtonElement>(null);
     const hazardHelpRef = useRef<HTMLButtonElement>(null);
 
     // Derived state for choropleth index summary behavior
-    const isChoropleth = mapView === "choropleth";
-    const isNoLayerSelected = !selectedLayer || selectedLayer === "none";
+    // const isChoropleth = mapView === "choropleth";
+    // const isNoLayerSelected = !selectedLayer || selectedLayer === "none";
 
-    let greenIdxValue: number | null = null;
-    let hazardIdxValue: number | null = null;
-    let calamityIdxValue: number | null = null;
+    // let greenIdxValue: number | null = null;
+    // let hazardIdxValue: number | null = null;
+    // let calamityIdxValue: number | null = null;
 
-    if (isChoropleth && !isNoLayerSelected) {
-      if (selectedLayer === "green") {
-        // Only Green Index highlighted; others blank
-        greenIdxValue = greenCityAverage ?? universalGreenAvg ?? null;
-      } else if (selectedLayer === "hazard") {
-        // Only Hazard Index highlighted; others blank
-        hazardIdxValue = hazardCityAverage ?? universalHazardAvg ?? null;
-      } else if (selectedLayer === "calamity") {
-        // When viewing Calamity Risk, show all three averages together
-        greenIdxValue = greenCityAverage ?? universalGreenAvg ?? null;
-        hazardIdxValue = hazardCityAverage ?? universalHazardAvg ?? null;
-        calamityIdxValue = calamityCityAverage ?? universalCalamityAvg ?? null;
-      }
-    }
+    // if (isChoropleth && !isNoLayerSelected) {
+    //   if (selectedLayer === "green") {
+    //     // Only Green Index highlighted; others blank
+    //     greenIdxValue = greenCityAverage ?? universalGreenAvg ?? null;
+    //   } else if (selectedLayer === "hazard") {
+    //     // Only Hazard Index highlighted; others blank
+    //     hazardIdxValue = hazardCityAverage ?? universalHazardAvg ?? null;
+    //   } else if (selectedLayer === "calamity") {
+    //     // When viewing Calamity Risk, show all three averages together
+    //     greenIdxValue = greenCityAverage ?? universalGreenAvg ?? null;
+    //     hazardIdxValue = hazardCityAverage ?? universalHazardAvg ?? null;
+    //     calamityIdxValue = calamityCityAverage ?? universalCalamityAvg ?? null;
+    //   }
+    // }
 
-    const hasGreenIdx = greenIdxValue != null;
-    const hasHazardIdx = hazardIdxValue != null;
-    const hasCalamityIdx = calamityIdxValue != null;
+    // const hasGreenIdx = greenIdxValue != null;
+    // const hasHazardIdx = hazardIdxValue != null;
+    // const hasCalamityIdx = calamityIdxValue != null;
 
-    const [insightStatus, setInsightStatus] = useState<"loading" | "success" | "error">("loading");
+    // const [insightStatus, setInsightStatus] = useState<"loading" | "success" | "error">("loading");
     const combinedRec = getEnvironmentalRecommendation(
       greenChangeFromLastYear,
       hazardChangeFromLastYear
     );
-    const insightLoading = combinedRec === null;
-    const insightFailed = combinedRec === null;
+    // const insightLoading = combinedRec === null;
+    // const insightFailed = combinedRec === null;
 
-    const compositeResilienceScore =
-      universalGreenAvg != null && universalHazardAvg != null
-        ? (0.6 * universalGreenAvg) +
-          (0.4 * (100 - universalHazardAvg))
-        : null;
+    // const compositeResilienceScore =
+    //   universalGreenAvg != null && universalHazardAvg != null
+    //     ? (0.6 * universalGreenAvg) +
+    //       (0.4 * (100 - universalHazardAvg))
+    //     : null;
 
     return (
         <aside className="dbmleft-panel">

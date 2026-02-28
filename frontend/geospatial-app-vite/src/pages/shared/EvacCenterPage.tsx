@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import LeafletMap from "../../components/ui/LeafletMap";
@@ -8,14 +8,14 @@ import { Search, MapPin, Phone, Navigation, Users } from 'lucide-react';
 import { GrLocationPin } from "react-icons/gr";
 import { MdOutlineModeEdit, MdAdd } from "react-icons/md";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
-import { RiDeleteBinFill, RiBuilding4Fill } from "react-icons/ri";
+import { RiDeleteBinFill } from "react-icons/ri";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
 import type { EvacuationCenterData } from "../../components/ui/mapLayers/evacuationCenters";
 import './EvacCenterPage.css';
 
 import AddEvacCenterModal from "../../components/ui/Modals/AddEvacCenterModal";
 import MapPickerModal from '../../components/ui/Modals/MapPickerModal';
-import { getEvacuationPopupHTML } from "../../components/ui/mapLayers/evacuationCenters";
+// import { getEvacuationPopupHTML } from "../../components/ui/mapLayers/evacuationCenters";
 import EvacCenterEditor from '../../components/ui/Modals/EvacCenterEditor';
 
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -58,15 +58,15 @@ const mapApiToCenter = (api: any): EvacuationCenter => ({
 });
 
 
-interface EvacCenterEditorProps {
-  center: EvacuationCenter;
-  onChange: (center: EvacuationCenter) => void;
-  onSave: () => void;
-  onCancel: () => void;
-  readOnly?: boolean;
-  showCoordinatesPicker?: boolean;
-  onPickCoordinates?: () => void;
-}
+// interface EvacCenterEditorProps {
+//   center: EvacuationCenter;
+//   onChange: (center: EvacuationCenter) => void;
+//   onSave: () => void;
+//   onCancel: () => void;
+//   readOnly?: boolean;
+//   showCoordinatesPicker?: boolean;
+//   onPickCoordinates?: () => void;
+// }
 
 /* EVAC CENTER PAGE ----------------------------------------------------- */
 function EvacCenterPage() {
@@ -79,7 +79,7 @@ function EvacCenterPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   //get user role
-  const { userRole, displayName, profilePath } = getUserRoleAndDisplayName();
+  const { userRole } = getUserRoleAndDisplayName();
 
   const handleGetDirections = (coordinates: string) => {
     const [lat, lng] = coordinates.split(', ');
@@ -202,15 +202,15 @@ function EvacCenterPage() {
 
   /* Evacuation Center Map */
   const activeLayers = useMemo(() => ["Evacuation Centers",], []); /* "Barangay Boundaries" */
-  const [isClosing, setIsClosing] = useState(false);
+  // const [isClosing, setIsClosing] = useState(false);
   const [closingId, setClosingId] = useState<number | null>(null);
 
   const handleCloseEditor = () => {
-    setIsClosing(true);
+    // setIsClosing(true);
     setTimeout(() => {
       setEditingCenter(null);
       setSelectedEvacuationCenter(null);
-      setIsClosing(false);
+      // setIsClosing(false);
     }, 250);
   };
 
@@ -262,7 +262,7 @@ function EvacCenterPage() {
           <LeafletMap
             key={mapRefreshKey}
             height="43vh"
-            width="{mapWidth}"
+            width={mapWidth}
             mapView="interactive"
             mapType="basic"
             activeLayers={activeLayers}

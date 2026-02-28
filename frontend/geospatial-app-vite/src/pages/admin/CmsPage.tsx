@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Plus, Edit, Eye, Trash2, Send, ArchiveRestore, Phone, Archive } from 'lucide-react';
+import { Plus, Edit, Eye, Trash2, Send, ArchiveRestore, Archive } from 'lucide-react';
 import { FiCheckCircle, FiSearch } from "react-icons/fi";
 import { LuEllipsis } from "react-icons/lu";
 import './CmsPage.css';
@@ -47,7 +47,7 @@ interface QuickContact {
   phones: ContactPhone[];
 }
 
-type cmsStatuses = 'All' | 'Published' | 'Draft' ;
+type cmsStatuses = 'All' | 'Published' | 'Draft';
 type cmsTypes = 'All' | 'advisory' | 'announcement' | 'guide';
 
 const CmsPage: React.FC = () => {
@@ -470,7 +470,9 @@ const CmsPage: React.FC = () => {
           {/* Filter Status */}
           <div className="select-wrapper">
             <FiCheckCircle className="select-icon" />
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as ReportStatus | 'All')} className="status-select">
+            <select value={statusFilter} onChange={(e) =>
+              setStatusFilter(e.target.value as (typeof cmsStatuses)[number] | 'All')
+            } className="status-select">
               <option value="All">All Status</option>
               {cmsStatuses.map((s) => (
                 <option key={s} value={s}>

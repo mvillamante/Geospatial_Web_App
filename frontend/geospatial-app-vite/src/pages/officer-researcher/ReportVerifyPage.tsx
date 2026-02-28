@@ -148,7 +148,7 @@ const ReportVerifyPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<ReportCategory | "all">("all");
 
   // sorting: newest, citizenRisk, effectiveRisk
-  // const [sortMode, setSortMode] = useState<"newest" | "citizenRisk" | "effectiveRisk">("effectiveRisk");
+  const [sortMode] = useState<"newest" | "citizenRisk" | "effectiveRisk">("effectiveRisk");
 
   // modals
   const [modal, setModal] = useState<ModalType>("none");
@@ -442,7 +442,7 @@ const ReportVerifyPage: React.FC = () => {
     if (!selected) return;
 
     // prefill a structured post template
-    setResolveTitle(`Update: ${selected.title}`);
+    // setResolveTitle(`Update: ${selected.title}`);
     setModal("resolve");
   };
 

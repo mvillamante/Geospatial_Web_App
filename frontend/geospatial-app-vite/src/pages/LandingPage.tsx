@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaUser, FaChartBar, FaUniversity } from "react-icons/fa";
 import "./LandingPage.css";
 import { useAuth } from "../context/AuthContext";
-import { getUserRoleAndDisplayName } from "../libr/auth";
+// import { getUserRoleAndDisplayName } from "../libr/auth";
 import AuthModal from "../components/ui/Modals/AuthModal";
 import LeafletMap from "../components/ui/LeafletMap";
 import ResearcherRequestModal from "../components/ui/Modals/ResearcherRequestModal";
@@ -17,7 +17,7 @@ type LandingStats = {
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, refreshUser } = useAuth(); // Get current user from context
+  const { refreshUser } = useAuth(); // Get current user from context
 
   const [loading, setLoading] = useState(true);
   const [modalType, setModalType] = useState<"login" | "signup" | "forgotPassword" | "verifyOtp" | "researcherRequest" | null>(null);
@@ -84,21 +84,23 @@ const LandingPage: React.FC = () => {
   }
 
   // ===== Get user role and display name from localStorage =====
-  const { userRole, userRole2 } = getUserRoleAndDisplayName();
+  // const { userRole, userRole2 } = getUserRoleAndDisplayName();
 
   return (
     <div
       id="home"
       className={`landing-page ${modalType ? "modal-open" : ""}`}
     >
-      {modalType && (
-        ["login", "signup", "forgotPassword", "verifyOtp"].includes(modalType) && (
-          <AuthModal
-            type={modalType}
-            onClose={closeModal}
-            switchModal={switchModal}
-          />
-        ))}
+      {modalType === "login" ||
+        modalType === "signup" ||
+        modalType === "forgotPassword" ||
+        modalType === "verifyOtp" ? (
+        <AuthModal
+          type={modalType}
+          onClose={closeModal}
+          switchModal={switchModal}
+        />
+      ) : null}
 
       {modalType === "researcherRequest" && (
         <ResearcherRequestModal onClose={closeModal} />

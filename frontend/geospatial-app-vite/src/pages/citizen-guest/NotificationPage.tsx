@@ -145,12 +145,12 @@ const NotificationPage: React.FC = () => {
         return { unreadAll, unreadOfficial, unreadIncident, unreadReport };
     }, [notifications]);
 
-    const grouped = useMemo(() => {
-        const official = notifications.filter(n => n.type === "official");
-        const incident = notifications.filter(n => n.type === "incident");
-        const report = notifications.filter(n => n.type === "report");
-        return { official, incident, report };
-    }, [notifications]);
+    // const grouped = useMemo(() => {
+    //     const official = notifications.filter(n => n.type === "official");
+    //     const incident = notifications.filter(n => n.type === "incident");
+    //     const report = notifications.filter(n => n.type === "report");
+    //     return { official, incident, report };
+    // }, [notifications]);
 
     // const filtered = useMemo(() => {
     //     if (activeTab === "all") return notifications;
@@ -160,17 +160,18 @@ const NotificationPage: React.FC = () => {
     // const sectionOrder: NotificationType[] = ["official", "incident", "report"];
 
     const sectionTitle: Record<NotificationType, string> = {
-        official: "Official Posts",
-        incident: "Verified Incident Alerts",
-        report: "Report Status",
+        official: "Official Announcements",
+        incident: "Incident Reports",
+        report: "Submitted Reports",
+        verification: "Verification Updates",
     };
 
-    const incidentOnlyHighCritical = (list: NotificationItem[]) =>
-        list.filter(n => {
-            if (n.type !== "incident") return true;
-            const current = n.severityTo ?? n.severity;
-            return current === "high" || current === "critical";
-        });
+    // const incidentOnlyHighCritical = (list: NotificationItem[]) =>
+    //     list.filter(n => {
+    //         if (n.type !== "incident") return true;
+    //         const current = n.severityTo ?? n.severity;
+    //         return current === "high" || current === "critical";
+    //     });
 
     const listForPage = useMemo(() => {
         let base =

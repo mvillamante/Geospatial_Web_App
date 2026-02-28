@@ -7,12 +7,24 @@ import { normalizePrimaryRole, normalizeSecondaryRole, roleToBasePath } from "..
 import "./GlobalModal.css";
 import type { User } from "../../../libr/fetchCurrentUser";
 
-const AuthModal = ({ type = "login", onClose, switchModal }) => {
+type AuthModalType = "login" | "signup" | "forgotPassword" | "verifyOtp";
+
+interface AuthModalProps {
+    type?: AuthModalType;
+    onClose: () => void;
+    switchModal: (type: AuthModalType) => void;
+}
+
+const AuthModal: React.FC<AuthModalProps> = ({
+    type = "login",
+    onClose,
+    switchModal,
+}) => {
     const API_URL = import.meta.env.VITE_API_URL;
     const navigate = useNavigate();
     const { refreshUser } = useAuth();
 
-    const [otpValues, setOtpValues] = useState(["","", "", ""]);
+    // const [otpValues, setOtpValues] = useState(["", "", "", ""]);
     const [resetTarget, setResetTarget] = useState("");
     const [resetOtp, setResetOtp] = useState("");
     const [resetNewPass, setResetNewPass] = useState("");
@@ -28,13 +40,12 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
     const [signupEmail, setSignupEmail] = useState("");
     const [signupPassword, setSignupPassword] = useState("");
     const [signupConfirm, setSignupConfirm] = useState("");
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 768);
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
+    // useEffect(() => {
+    //     const handleResize = () => setIsMobile(window.innerWidth < 768);
+    //     window.addEventListener("resize", handleResize);
+    //     return () => window.removeEventListener("resize", handleResize);
+    // }, []);
 
     useEffect(() => {
         document.body.style.overflow = "hidden";
@@ -79,7 +90,11 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
             handleNavigation(result.user);
 
         } catch (error) {
-            alert("Login failed: " + error.message);
+            if (error instanceof Error) {
+                alert("Login failed: " + error.message);
+            } else {
+                alert("Login failed.");
+            }
         }
     };
 
@@ -96,9 +111,9 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
     //     }
     // }
 
-    const formatName = (firstName, lastName) =>
-        `${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}.${lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase()
-        }`;
+    const formatName = (firstName: string, lastName: string): string =>
+        `${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}.` +
+        `${lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase()}`;
 
     const handleSignup = async () => {
         if (!signupFirstName || !signupLastName || !signupPhone || !signupEmail || !signupPassword || !signupConfirm) {
@@ -136,7 +151,9 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                 alert(data.error || "Signup failed.");
             }
         } catch (error) {
-            alert("Signup failed: " + error.message);
+            const message =
+                error instanceof Error ? error.message : "Something went wrong";
+            alert("Signup failed: " + message);
         }
     };
 
@@ -156,7 +173,7 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
             if (!res.ok)
                 throw new Error(data.detail || "Failed to send OTP");
 
-            alert ("OTP sent successfully");
+            alert("OTP sent successfully");
             switchModal("verifyOtp");
         } catch (e: any) {
             alert(e?.message || "Failed to send OTP");

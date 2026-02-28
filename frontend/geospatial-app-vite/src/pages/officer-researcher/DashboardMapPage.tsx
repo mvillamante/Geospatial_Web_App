@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./DashboardMapPage.css";
 import LeafletMap, { type HazardBarangayData, type GreenIndexBarangayData, type CalamityRiskBarangayData } from "../../components/ui/LeafletMap";
 import type {
-  ReportItem, ChartItem, DownloadItem, ExportItem, DatasetsItem,
+  ReportItem, ChartItem, DownloadItem, ExportItem,
   HealthItem, StatItem
 } from "../../types/dashboard.types";
 
@@ -12,7 +12,7 @@ import { getUserRoleAndDisplayName } from "../../libr/auth";
 import {
   DbLeftPanel,
   DbRightPanel,
-  DbEdaModal,
+  // DbEdaModal,
 } from "./DashboardMapComponents";
 import { exportChartImageByName, type ChartExportFormat } from "../../components/ui/AnalyticsCharts";
 import { toast } from "sonner";
@@ -74,11 +74,11 @@ const DashboardMapPage: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const minYear = 2020;
   const maxYear = 2030;
-  const greenMinYear = 2020;
-  const greenMaxYear = 2030;
+  // const greenMinYear = 2020;
+  // const greenMaxYear = 2030;
   const initialYear = Math.min(maxYear, Math.max(minYear, currentYear));
   const [year, setYear] = useState(initialYear);
-  const [selected, setSelected] = useState("");
+  // const [selected, setSelected] = useState("");
   const [ndviOpacity, setNdviOpacity] = useState(0.8);
   const [ndviMonth, setNdviMonth] = useState<number>(1);
 
@@ -90,13 +90,13 @@ const DashboardMapPage: React.FC = () => {
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
 
   // ---------- Data Hooks ----------
-  const { data: hazardData, cityAverage: hazardAvg } =
+  const { cityAverage: hazardAvg } =
     useHazardData(year, selectedLayer === "hazard");
 
-  const { data: greenData, cityAverage: greenAvg } =
+  const { cityAverage: greenAvg } =
     useGreenIndexData(year, selectedLayer === "green");
 
-  const { data: calamityData, cityAverage: calamityAvg } =
+  const { cityAverage: calamityAvg } =
     useCalamityRiskData(year, selectedLayer === "calamity");
 
   const toggleRightPanel = () => setIsRightPanelOpen(prev => !prev);
@@ -188,7 +188,7 @@ const DashboardMapPage: React.FC = () => {
     year: string;
     data: HazardBarangayData;
   } | null>(null);
-  const [hazardYearData, setHazardYearData] = useState<Record<string, HazardBarangayData> | null>(null);
+  // const [hazardYearData, setHazardYearData] = useState<Record<string, HazardBarangayData> | null>(null);
 
   /*----------Green Index (choropleth) details----------*/
   const [selectedGreenBarangay, setSelectedGreenBarangay] = useState<{
@@ -196,7 +196,7 @@ const DashboardMapPage: React.FC = () => {
     year: string;
     data: GreenIndexBarangayData;
   } | null>(null);
-  const [greenYearData, setGreenYearData] = useState<Record<string, GreenIndexBarangayData> | null>(null);
+  // const [greenYearData, setGreenYearData] = useState<Record<string, GreenIndexBarangayData> | null>(null);
   
   /*----------Calamity Risk (choropleth) details----------*/
   const [selectedCalamityBarangay, setSelectedCalamityBarangay] = useState<{
@@ -204,7 +204,7 @@ const DashboardMapPage: React.FC = () => {
     year: string;
     data: CalamityRiskBarangayData;
   } | null>(null);
-  const [calamityYearData, setCalamityYearData] = useState<Record<string, CalamityRiskBarangayData> | null>(null);
+  // const [calamityYearData, setCalamityYearData] = useState<Record<string, CalamityRiskBarangayData> | null>(null);
   
   /*---------- Get Universal Index Data ----------*/
   const {

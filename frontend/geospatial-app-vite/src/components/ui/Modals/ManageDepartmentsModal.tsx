@@ -65,22 +65,22 @@ const ManageDepartmentsModal: React.FC<Props> = ({ onClose, onDepartmentChanged 
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm("Delete this department?")) return;
+  // const handleDelete = async (id: number) => {
+  //   if (!window.confirm("Delete this department?")) return;
 
-    try {
-      const token = localStorage.getItem("access_token");
-      await fetch(`http://127.0.0.1:8000/api/admin/departments/${id}/`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  //   try {
+  //     const token = localStorage.getItem("access_token");
+  //     await fetch(`http://127.0.0.1:8000/api/admin/departments/${id}/`, {
+  //       method: "DELETE",
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
 
-      fetchDepartments();
-      onDepartmentChanged();
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  //     fetchDepartments();
+  //     onDepartmentChanged();
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
 
   return (
     <div className="modal-overlay">

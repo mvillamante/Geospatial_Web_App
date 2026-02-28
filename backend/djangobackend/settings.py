@@ -63,7 +63,12 @@ CORS_ALLOWED_ORIGINS = [
     "https://hazspot.vercel.app"
 ]
 
+
 CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://hazspot.vercel.app",
+]
 
 CKEDITOR_UPLOAD_PATH = "uploads/"  # Directory to store uploaded files
 

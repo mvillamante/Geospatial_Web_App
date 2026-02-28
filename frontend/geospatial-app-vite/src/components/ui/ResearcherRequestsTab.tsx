@@ -24,7 +24,7 @@ interface Props {
   refreshUsers?: () => void; // optional prop to refresh Users table
 }
 
-const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountChange, refreshUsers }) => {
+const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountChange }) => {
   const [requests, setRequests] = useState<ResearcherRequest[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -68,14 +68,14 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
 
   useEffect(() => { fetchRequests(); }, []);
 
-  const generateTempPassword = () => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
-    let password = "";
-    for (let i = 0; i < 10; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return password;
-  };
+  // const generateTempPassword = () => {
+  //   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+  //   let password = "";
+  //   for (let i = 0; i < 10; i++) {
+  //     password += chars.charAt(Math.floor(Math.random() * chars.length));
+  //   }
+  //   return password;
+  // };
 
   // Approve a request
   const approveRequest = async (id: number) => {
@@ -85,7 +85,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
     const confirmed = window.confirm(`Are you sure you want to approve the request from ${req.fullName}?`);
     if (!confirmed) return;
 
-    const tempPassword = generateTempPassword();
+    // const tempPassword = generateTempPassword();
 
     try {
       const token = localStorage.getItem("access_token");
@@ -106,7 +106,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
         throw new Error("Failed to approve request");
       }
 
-      const updated = await res.json();
+      // const updated = await res.json();
 
       setRequests(prev =>
         prev.map(r => r.id === id ? { ...r, status: "Approved" } : r)

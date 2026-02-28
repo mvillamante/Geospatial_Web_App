@@ -1,7 +1,7 @@
 import '../../pages/admin/UserMgmtPage.css';
 import React, { useState, useEffect } from "react";
 import { CheckCircle, XCircle } from "lucide-react";
-import { LuEllipsis } from "react-icons/lu";
+// import { LuEllipsis } from "react-icons/lu";
 import { FiEye, FiX } from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
 import placeholderImg from '../../assets/placeholder_img/SampleID.png';
@@ -33,7 +33,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
   const [verifications, setVerifications] = useState<Verification[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  // const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [modalVerification, setModalVerification] = useState<Verification | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);

@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
-import { FaBullhorn, FaExclamationTriangle } from "react-icons/fa";
-import { MdReport, MdInfo } from "react-icons/md";
+// import { FaBullhorn, FaExclamationTriangle } from "react-icons/fa";
+// import { MdReport, MdInfo } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import "./NotificationPage.css";
 
@@ -50,13 +50,13 @@ export interface NotificationItem {
     createdAt?: string;
 };
 
-const statusLabel: Record<ReportStatus, string> = {
-    pending: "Pending",
-    in_progress: "In Progress",
-    needs_info: "Needs Info",
-    resolved: "Resolved",
-    rejected: "Rejected",
-};
+// const statusLabel: Record<ReportStatus, string> = {
+//     pending: "Pending",
+//     in_progress: "In Progress",
+//     needs_info: "Needs Info",
+//     resolved: "Resolved",
+//     rejected: "Rejected",
+// };
 
 const timeAgo = (iso: string) => {
     const d = new Date(iso);
@@ -152,12 +152,12 @@ const NotificationPage: React.FC = () => {
         return { official, incident, report };
     }, [notifications]);
 
-    const filtered = useMemo(() => {
-        if (activeTab === "all") return notifications;
-        return notifications.filter(n => n.type === activeTab);
-    }, [activeTab, notifications]);
+    // const filtered = useMemo(() => {
+    //     if (activeTab === "all") return notifications;
+    //     return notifications.filter(n => n.type === activeTab);
+    // }, [activeTab, notifications]);
 
-    const sectionOrder: NotificationType[] = ["official", "incident", "report"];
+    // const sectionOrder: NotificationType[] = ["official", "incident", "report"];
 
     const sectionTitle: Record<NotificationType, string> = {
         official: "Official Posts",
@@ -288,10 +288,10 @@ const NotificationPage: React.FC = () => {
     //     );
     // };
 
-    const isAllEmpty =
-        grouped.official.length === 0 &&
-        incidentOnlyHighCritical(grouped.incident).length === 0 &&
-        grouped.report.length === 0;
+    // const isAllEmpty =
+    //     grouped.official.length === 0 &&
+    //     incidentOnlyHighCritical(grouped.incident).length === 0 &&
+    //     grouped.report.length === 0;
 
     return (
         <div className="notif-page">
@@ -550,8 +550,8 @@ function NotificationCard({ n, onOpen }: { n: NotificationItem; onOpen?: () => v
         const category = capitalize(n.reportCategory ?? "Report");
         const barangay = n.reportBarangay ? ` • ${n.reportBarangay}` : "";
 
-        const from = n.statusFrom;
-        const to = n.statusTo;
+        // const from = n.statusFrom;
+        // const to = n.statusTo;
 
         console.log("REPORT STATUS TO:", n.statusTo);
 

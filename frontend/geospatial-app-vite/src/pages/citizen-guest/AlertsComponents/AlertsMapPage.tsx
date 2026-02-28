@@ -14,11 +14,11 @@ interface SelectedReportWithTimestamp {
 
 const AlertsMapPage: React.FC = () => {
   const API_URL = import.meta.env.VITE_API_URL;
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const openIncidentId = location.state?.openIncidentId;
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  // const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [panelCollapsed, setPanelCollapsed] = useState(false);
 
@@ -152,7 +152,6 @@ const AlertsMapPage: React.FC = () => {
             onSelectReport={(r) => {
               setPanelCollapsed(false);
               handleSelectReport(r);
-              setSelectedReport(r);
             }}
             initialOpenIncidentId={openIncidentId}
             isVerified={isVerified}

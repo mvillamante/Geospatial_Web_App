@@ -148,11 +148,11 @@ const ReportVerifyPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<ReportCategory | "all">("all");
 
   // sorting: newest, citizenRisk, effectiveRisk
-  const [sortMode, setSortMode] = useState<"newest" | "citizenRisk" | "effectiveRisk">("effectiveRisk");
+  // const [sortMode, setSortMode] = useState<"newest" | "citizenRisk" | "effectiveRisk">("effectiveRisk");
 
   // modals
   const [modal, setModal] = useState<ModalType>("none");
-  const [resolveTitle, setResolveTitle] = useState("");
+  // const [resolveTitle, setResolveTitle] = useState("");
   const [rejectReason, setRejectReason] = useState("");
 
   const selected = useMemo(
@@ -184,7 +184,7 @@ const ReportVerifyPage: React.FC = () => {
     myOfficerId != null &&
     selected.assignedOfficerId != null &&
     Number(selected.assignedOfficerId) === myOfficerId;
-  const isAssignedToSomeone = !!selected && !!selected.assignedTo;
+  // const isAssignedToSomeone = !!selected && !!selected.assignedTo;
 
   const effectiveRisk = (r: CitizenReport) => r.verifiedRisk ?? r.citizenRisk;
 
@@ -428,15 +428,15 @@ const ReportVerifyPage: React.FC = () => {
   };
 
 
-  // Needs info: just set status + store note 
-  const markNeedsInfo = () => {
-    if (!selected) return;
-    if (!selected.officerNote || selected.officerNote.trim().length < 3) {
-      alert("Please type an update/request first (Needs Info message).");
-      return;
-    }
-    setStatus("needs_info");
-  };
+  // // Needs info: just set status + store note 
+  // const markNeedsInfo = () => {
+  //   if (!selected) return;
+  //   if (!selected.officerNote || selected.officerNote.trim().length < 3) {
+  //     alert("Please type an update/request first (Needs Info message).");
+  //     return;
+  //   }
+  //   setStatus("needs_info");
+  // };
 
   const openResolveModal = () => {
     if (!selected) return;

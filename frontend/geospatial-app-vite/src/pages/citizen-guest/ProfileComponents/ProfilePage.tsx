@@ -120,7 +120,7 @@ const ProfilePage: React.FC = () => {
     normalizedRole2 === "admin" ||
     normalizedRole2 === "officer";
 
-  const [isRequested, setIsRequested] = useState(false);
+  // const [isRequested, setIsRequested] = useState(false);
 
   const [reports, setReports] = useState<ReportCardModel[]>([]);
 
@@ -397,7 +397,7 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const isVerifiedResident = verificationStatus === "verified";
+  // const isVerifiedResident = verificationStatus === "verified";
 
 
   const submitVerificationRequest = async () => {
@@ -459,8 +459,8 @@ const ProfilePage: React.FC = () => {
     );
   };
 
-  const mockAvatarUrl =
-    "https://i.pinimg.com/736x/53/ce/e1/53cee1111732dcf17bb5518213ff215a.jpg";
+  // const mockAvatarUrl =
+  //   "https://i.pinimg.com/736x/53/ce/e1/53cee1111732dcf17bb5518213ff215a.jpg";
 
   return (
     <div className="profile-page">

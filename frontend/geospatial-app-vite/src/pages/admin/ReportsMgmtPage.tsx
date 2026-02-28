@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Eye, UserPlus, RefreshCcw, X } from "lucide-react";
+import { X } from "lucide-react";
 import { FiUser, FiCheckCircle, FiSearch } from "react-icons/fi";
 import { HiChevronUpDown, HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { toast } from "sonner";
@@ -103,14 +103,14 @@ const criticalBadgeClass = (level?: string | null) => {
   }
 };
 
-type ApiStatus =
-  | "pending"
-  | "in_progress"
-  | "needs_info"
-  | "rejected"
-  | "resolved"
-  | "archived"
-  | "verified";
+// type ApiStatus =
+//   | "pending"
+//   | "in_progress"
+//   | "needs_info"
+//   | "rejected"
+//   | "resolved"
+//   | "archived"
+//   | "verified";
 
 const normalizeStatus = (raw: any): ReportStatus => {
   const s = String(raw ?? "").toLowerCase();
@@ -177,7 +177,7 @@ const ReportsMgmtPage: React.FC = () => {
 
       try {
         setLoadingOfficers(true);
-        const res = await fetch(`${API_BASE}/api/reports/list/officers/`, {
+        const res = await fetch(`${API_URL}/api/reports/list/officers/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -204,10 +204,10 @@ const ReportsMgmtPage: React.FC = () => {
   const includes = (value: any, q: string) =>
     String(value ?? "").toLowerCase().includes(q);
 
-  const openDetails = (report: Report) => {
-    const latest = reports.find((r) => r.id === report.id) ?? report;
-    setSelectedReport(latest);
-  };
+  // const openDetails = (report: Report) => {
+  //   const latest = reports.find((r) => r.id === report.id) ?? report;
+  //   setSelectedReport(latest);
+  // };
 
   const archiveReport = async (reportId: number) => {
     try {
@@ -250,7 +250,7 @@ const ReportsMgmtPage: React.FC = () => {
 
       try {
         setLoadingReports(true);
-        const res = await fetch(`${API_BASE}/api/reports/list/`, {
+        const res = await fetch(`${API_URL}/api/reports/list/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -276,7 +276,7 @@ const ReportsMgmtPage: React.FC = () => {
 
   async function patchReport(reportId: number, body: any) {
     const token = localStorage.getItem("access_token");
-    const res = await fetch(`${API_BASE}/api/reports/${reportId}/`, {
+    const res = await fetch(`${API_URL}/api/reports/${reportId}/`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,

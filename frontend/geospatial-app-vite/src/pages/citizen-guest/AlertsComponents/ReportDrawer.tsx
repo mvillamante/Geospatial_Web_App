@@ -76,7 +76,7 @@ function formatStreetBarangayCity(data: ReverseGeocodeResponse): string {
 export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
   const token = localStorage.getItem("access_token");
   const profanityRegex = filipinoBadWords.regex;
-  const [badWords, setBadWords] = useState<string[]>([]);
+  // const [badWords, setBadWords] = useState<string[]>([]);
   const [showProfanityWarning, setShowProfanityWarning] = useState(false);
 
   // Location mode

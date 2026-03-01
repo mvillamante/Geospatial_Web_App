@@ -822,6 +822,7 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
                   )}
                 </>
               )}
+              <p className="import-insight-disclaimer">* Automatically generated — please have an expert review for final assessment.</p>
             </div>
           )}
 
@@ -1059,6 +1060,7 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
                   )}
                 </>
               )}
+              <p className="import-insight-disclaimer">* Automatically generated — please have an expert review for final assessment.</p>
             </div>
           )}
 
@@ -1295,6 +1297,7 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
                   )}
                 </>
               )}
+              <p className="import-insight-disclaimer">* Automatically generated — please have an expert review for final assessment.</p>
             </div>
           )}
 

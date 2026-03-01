@@ -56,6 +56,8 @@ interface DbLeftPanelProps {
   setNdviMonth: (val: number) => void;
   year: number;
   currentYear: number;
+  /** Year shown for "Current Indices" in left panel; fixed to 2026 and unaffected by sliders */
+  indicesYear?: number;
   setYear: (val: number) => void;
   minYear: number;
   maxYear: number;
@@ -93,6 +95,7 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
   setNdviMonth,
   year,
   currentYear,
+  indicesYear = 2026,
   setYear,
   minYear,
   maxYear,
@@ -229,7 +232,7 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
             {mapView === "interactive" ? (
                 <>
                     <div className="panel-card indices-card">
-                      <h4>Current Indices as of {currentYear}</h4>
+                      <h4>Current Indices as of {indicesYear}</h4>
 
                       {/* Overall Resilience Score */}
                       {/* <div className="index-block resilience_score">

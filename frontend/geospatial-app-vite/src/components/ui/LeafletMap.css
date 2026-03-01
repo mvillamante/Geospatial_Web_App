@@ -6,8 +6,17 @@
 /* =============================================
    Map Container
    ============================================= */
+.leaflet-map-wrapper {
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+  /* Prevent map clicks from causing document/header scroll */
+  contain: layout;
+}
+
 #map {
   width: 100%;
+  height: 100%;
   z-index: 1;
 }
 

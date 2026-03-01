@@ -95,6 +95,34 @@ export interface CalamityRiskBarangayData {
   exposure_norm: number;
 }
 
+/** Get calamity data for a barangay; derive Poblacion from Barangay Uno/Dos/Tres when missing. */
+function getCalamityDataForBarangay(
+  slice: Record<string, CalamityRiskBarangayData> | undefined,
+  barangay: string
+): CalamityRiskBarangayData | undefined {
+  const direct = slice?.[barangay];
+  if (direct) return direct;
+  if (barangay !== "Poblacion" || !slice) return undefined;
+  const u = slice["Barangay Uno"];
+  const d = slice["Barangay Dos"];
+  const t = slice["Barangay Tres"];
+  if (!u || !d || !t) return undefined;
+  const n = 3;
+  const crlRaw = (u.calamity_risk_raw + d.calamity_risk_raw + t.calamity_risk_raw) / n;
+  const riskClass =
+    crlRaw < 0.2 ? "Very Low" : crlRaw < 0.4 ? "Low" : crlRaw < 0.6 ? "Moderate" : crlRaw < 0.8 ? "High" : "Very High";
+  return {
+    calamity_risk: Math.round(crlRaw * 100 * 100) / 100,
+    calamity_risk_raw: Math.round(crlRaw * 10000) / 10000,
+    risk_class: riskClass,
+    hazard_index: Math.round((u.hazard_index + d.hazard_index + t.hazard_index) / n * 100) / 100,
+    hazard_index_raw: Math.round((u.hazard_index_raw + d.hazard_index_raw + t.hazard_index_raw) / n * 10000) / 10000,
+    green_index: Math.round((u.green_index + d.green_index + t.green_index) / n * 100) / 100,
+    green_index_raw: Math.round((u.green_index_raw + d.green_index_raw + t.green_index_raw) / n * 10000) / 10000,
+    exposure_norm: Math.round((u.exposure_norm + d.exposure_norm + t.exposure_norm) / n * 10000) / 10000,
+  };
+}
+
 interface LeafletMapProps {
   height?: string;
   width?: string;
@@ -310,6 +338,17 @@ export default function LeafletMap(props: LeafletMapProps) {
       }).addTo(map);
     }
   }, []);
+
+  // In choropleth mode, disable double-click zoom so clicking a barangay doesn't zoom the map
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (mapView === "choropleth") {
+      map.doubleClickZoom.disable();
+    } else {
+      map.doubleClickZoom.enable();
+    }
+  }, [mapView]);
 
   // Handle map type (tile layer) switching
   useEffect(() => {
@@ -912,7 +951,7 @@ export default function LeafletMap(props: LeafletMapProps) {
               const id = L.Util.stamp(layer);
               const brgy = calamityBarangayByLayerIdRef.current[id];
               if (!brgy) return;
-              const d = slice[brgy];
+              const d = getCalamityDataForBarangay(slice, brgy);
               const cr = d?.calamity_risk;
               const fillColor = typeof cr === "number" ? getCalamityRiskColor(cr) : "#cccccc";
               (layer as L.Path).setStyle({
@@ -959,7 +998,7 @@ export default function LeafletMap(props: LeafletMapProps) {
             }
             const rawName = (feature.properties.brgy_name || feature.properties.name) || "";
             const mappedName = mapBrgyName(rawName);
-            const d = initialSlice?.[mappedName];
+            const d = getCalamityDataForBarangay(initialSlice, mappedName);
             const cr = d?.calamity_risk;
             const fillColor = typeof cr === "number" ? getCalamityRiskColor(cr) : "#cccccc";
             return {
@@ -986,7 +1025,7 @@ export default function LeafletMap(props: LeafletMapProps) {
             layer.on("mouseout", () => {
               const yearKey = String(calamityYearRef.current ?? "");
               const slice = calamityDataRef.current?.[yearKey];
-              const d = slice?.[mappedName];
+              const d = getCalamityDataForBarangay(slice, mappedName);
               const cr = d?.calamity_risk;
               const fillColor = typeof cr === "number" ? getCalamityRiskColor(cr) : "#cccccc";
               (layer as L.Path).setStyle({
@@ -1000,7 +1039,7 @@ export default function LeafletMap(props: LeafletMapProps) {
             layer.on("click", () => {
               const yearKey = String(calamityYearRef.current ?? "");
               const slice = calamityDataRef.current?.[yearKey];
-              const d = slice?.[mappedName];
+              const d = getCalamityDataForBarangay(slice, mappedName);
               if (d) {
                 onCalamityRiskBarangaySelectRef.current?.(mappedName, yearKey, d as CalamityRiskBarangayData);
               }
@@ -1066,7 +1105,7 @@ export default function LeafletMap(props: LeafletMapProps) {
       const brgy = calamityBarangayByLayerIdRef.current[id];
       if (!brgy) return;
 
-      const d = slice[brgy];
+      const d = getCalamityDataForBarangay(slice, brgy);
       const cr = d?.calamity_risk;
       const fillColor = typeof cr === "number" ? getCalamityRiskColor(cr) : "#cccccc";
       (layer as L.Path).setStyle({
@@ -1482,7 +1521,16 @@ export default function LeafletMap(props: LeafletMapProps) {
 
 
   return (
-    <div id="map" style={{ height: height, width: width }}></div>
+    <div
+      className="leaflet-map-wrapper"
+      style={{ height, width }}
+      onDoubleClickCapture={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+    >
+      <div id="map" style={{ height: "100%", width: "100%" }}></div>
+    </div>
   );
 }
 

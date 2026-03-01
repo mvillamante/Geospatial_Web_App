@@ -8,7 +8,8 @@ import "../../DashboardMapPage.css";
 
 import DbEdaModal from "../right/DbEdaModal";
 
-const API_URL = import.meta.env.VITE_API_URL;
+// Use same base as Import page so AI-insights hit the same backend (proxy in dev). Import uses relative "/api".
+const API_BASE = "";
 
 interface Props {
   keyInsights?: any[];
@@ -87,7 +88,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
     setEdaError(null);
     setLoadingEda(true);
     try {
-      const res = await fetch(`${API_URL}/api/hazard/eda/summary/`);
+      const res = await fetch(`${API_BASE}/api/hazard/eda/summary/`);
       if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
       const payload = await res.json();
 
@@ -133,7 +134,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
     setGreenAiInsight(null);
     setGreenHotspotsInsight(null);
     setGreenAreasForGreeningInsight(null);
-    fetch(`${API_URL}/api/hazard/green-index/ai-insight/?year=${year}`)
+    fetch(`${API_BASE}/api/hazard/green-index/ai-insight/?year=${year}`)
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return;
@@ -183,7 +184,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
     setHazardHotspotsInsight(null);
     setHazardLowerRiskInsight(null);
     setHazardEarthquakeTyphoonInsight(null);
-    fetch(`${API_URL}/api/hazard/hazard-index/ai-insight/?year=${year}`)
+    fetch(`${API_BASE}/api/hazard/hazard-index/ai-insight/?year=${year}`)
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return;
@@ -231,7 +232,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
     setCalamityAiSummary(null);
     setCalamityRiskPeakInsight(null);
     setCalamityAdaptationInsight(null);
-    fetch(`${API_URL}/api/hazard/calamity-risk/ai-insight/?year=${year}`)
+    fetch(`${API_BASE}/api/hazard/calamity-risk/ai-insight/?year=${year}`)
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return;
@@ -493,6 +494,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
                 </div>
             ))}
             </div>
+            <p className="insight-disclaimer">* Automatically generated — please have an expert review for final assessment.</p>
         </div>
 
         {userRole2?.[0] === "Researcher" && (

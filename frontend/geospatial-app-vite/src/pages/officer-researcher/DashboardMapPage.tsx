@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./DashboardMapPage.css";
 import LeafletMap, { type HazardBarangayData, type GreenIndexBarangayData, type CalamityRiskBarangayData } from "../../components/ui/LeafletMap";
 import type {
@@ -70,6 +70,12 @@ const getCalamityRiskColor = (cr: number): string => {
 const DashboardMapPage: React.FC = () => {
   const { userRole, userRole2 } = getUserRoleAndDisplayName();
 
+  // Mark body so we can reserve scrollbar space and prevent layout shift on double-click
+  useEffect(() => {
+    document.body.classList.add("dashboard-mounted");
+    return () => document.body.classList.remove("dashboard-mounted");
+  }, []);
+
   /*---------- Time ----------*/
   const currentYear = new Date().getFullYear();
   const minYear = 2020;
@@ -88,6 +94,19 @@ const DashboardMapPage: React.FC = () => {
 
   const [selectedLayer, setSelectedLayer] = useState<string>("none");
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
+
+  // Lock outer scroll only when Choropleth view is active.
+  // This hides the long right scrollbar, but keeps page scroll in Interactive view.
+  useEffect(() => {
+    if (mapView === "choropleth") {
+      document.body.classList.add("no-dashboard-body-scroll");
+    } else {
+      document.body.classList.remove("no-dashboard-body-scroll");
+    }
+    return () => {
+      document.body.classList.remove("no-dashboard-body-scroll");
+    };
+  }, [mapView]);
 
   // ---------- Data Hooks ----------
   const { cityAverage: hazardAvg } =
@@ -206,7 +225,7 @@ const DashboardMapPage: React.FC = () => {
   } | null>(null);
   // const [calamityYearData, setCalamityYearData] = useState<Record<string, CalamityRiskBarangayData> | null>(null);
   
-  /*---------- Get Universal Index Data ----------*/
+  /*---------- Get Universal Index Data: left panel indices fixed to 2026 ----------*/
   const {
     universalGreenAvg,
     universalHazardAvg,
@@ -216,7 +235,7 @@ const DashboardMapPage: React.FC = () => {
     greenData: universalGreenData,
     hazardData: universalHazardData,
     calamityData: universalCalamityData,
-  } = useUniversalIndexData(year);
+  } = useUniversalIndexData(2026);
 
   /*---------- Right Panel ----------*/
   const [rightNav, setRightNav] = useState<"analytics" | "export" | "import">("analytics");
@@ -555,6 +574,7 @@ const DashboardMapPage: React.FC = () => {
           setNdviMonth={setNdviMonth}
           year={year}
           currentYear={currentYear}
+          indicesYear={2026}
           setYear={setYear}
           minYear={minYear}
           maxYear={maxYear}

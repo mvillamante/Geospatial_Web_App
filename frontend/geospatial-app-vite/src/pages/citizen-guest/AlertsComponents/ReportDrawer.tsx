@@ -4,6 +4,7 @@ import filipinoBadWords from "filipino-badwords-list";
 import { useEffect, useRef, useState } from "react";
 import PinLocationPicker from "./PinLocationPicker";
 import { isWithinCabuyao } from '../../../../src/utils/validateCabuyao';
+import { INCIDENT_CATEGORY_METADATA } from "../../../constants"
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -331,17 +332,15 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
 
         <div className="drawer-content">
           <label>Category</label>
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
-            <option value="fire">Fire</option>
-            <option value="flood">Flood</option>
-            <option value="landslide">Landslide</option>
-            <option value="typhoon">Typhoon / Severe Weather</option>
-            <option value="earthquake">Earthquake</option>
-            <option value="vehicular_accident">Vehicular Accident</option>
-            <option value="chemical_gas_leak">Chemical / Gas Leak</option>
-            <option value="fallen_tree">Fallen Tree</option>
-            <option value="infrastructure_damage">Infrastructure Damage</option>
-            <option value="others">Others</option>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            {INCIDENT_CATEGORY_METADATA.map((cat) => (
+              <option key={cat.value} value={cat.value}>
+                {cat.label}
+              </option>
+            ))}
           </select>
 
 

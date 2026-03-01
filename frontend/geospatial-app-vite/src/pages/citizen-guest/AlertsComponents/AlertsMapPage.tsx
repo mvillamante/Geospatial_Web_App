@@ -35,6 +35,8 @@ const AlertsMapPage: React.FC = () => {
 
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
 
+  const [reportTimeFilter, setReportTimeFilter] = useState<"all" | "today" | "7days" | "last30days" | "last12months">("all");
+
   const handleBarangaySearch = (barangay: string, severity: string | null) => {
     setSearchedBarangay(barangay);
     setSearchedSeverity(severity);
@@ -93,6 +95,7 @@ const AlertsMapPage: React.FC = () => {
             selectedReport={selectedReportData?.report || null}
             reportClickTimestamp={selectedReportData?.clickedAt || null}
             activeLayers={activeLayers}
+            reportTimeFilter={reportTimeFilter}
           />
 
           {/* Floating Controls */}
@@ -161,6 +164,8 @@ const AlertsMapPage: React.FC = () => {
             initialOpenIncidentId={openIncidentId}
             isVerified={isVerified}
             userBarangay={userBarangay}
+            reportTimeFilter={reportTimeFilter}
+            setReportTimeFilter={setReportTimeFilter}
           />
 
 

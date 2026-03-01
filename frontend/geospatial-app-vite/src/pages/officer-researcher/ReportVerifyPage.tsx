@@ -1,50 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import LeafletMap from "../../components/ui/LeafletMap";
 import "./ReportVerifyPage.css";
-import {
-  MapPin,
-  Users,
-  Search,
-  CheckCircle2,
-  XCircle,
-  Clock3,
-  ArrowRight,
-  MessageSquareText,
-  Filter,
-  UserPlus,
-  ShieldCheck,
+import { MapPin, Users, Search, CheckCircle2, XCircle, Tag,
+  Clock3, ArrowRight, MessageSquareText, Filter, UserPlus, ShieldCheck,
 } from "lucide-react";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
-import type { Report } from "../citizen-guest/AlertsComponents/AlertsPanel"
-
-type ReportCategory =
-  | "fire"
-  | "flood"
-  | "landslide"
-  | "typhoon"
-  | "earthquake"
-  | "vehicular_accident"
-  | "chemical_gas_leak"
-  | "fallen_tree"
-  | "infrastructure_damage"
-  | "others";
-
-const incidentTypeMap: Record<
-  ReportCategory,
-  Report["incident_type"]
-> = {
-  fire: "fire",
-  flood: "flood",
-  landslide: "landslide",
-  typhoon: "typhoon",
-  earthquake: "earthquake",
-  vehicular_accident: "vehicular accident",
-  chemical_gas_leak: "chemical / gas leak",
-  fallen_tree: "fallen tree",
-  infrastructure_damage: "infrastructure damage",
-  others: "others",
-};
-
+import { INCIDENT_CATEGORY_METADATA, getIncidentCategories, type IncidentCategories } from "../../constants"
 
 type ReportStatus = "pending" | "in_progress" | "resolved" | "needs_info" | "rejected";
 type RiskLevel = "low" | "moderate" | "high" | "critical";
@@ -52,7 +13,7 @@ type RiskLevel = "low" | "moderate" | "high" | "critical";
 interface CitizenReport {
   id: number;
   title: string;
-  category: ReportCategory;
+  category: string;
   citizenRisk: RiskLevel;
   verifiedRisk?: RiskLevel;
   location: string;
@@ -113,6 +74,7 @@ function statusIcon(s: ReportStatus) {
 type ModalType = "none" | "resolve" | "reject";
 
 const ReportVerifyPage: React.FC = () => {
+  const [reportTimeFilter, setReportTimeFilter] = useState<"today" | "7days" | "last30days" | "last12months" | "all">("all");
 
   const normalizeRisk = (v: any): RiskLevel => {
     const s = String(v ?? "").toLowerCase();
@@ -145,7 +107,7 @@ const ReportVerifyPage: React.FC = () => {
 
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<ReportStatus | "all">("all");
-  const [categoryFilter, setCategoryFilter] = useState<ReportCategory | "all">("all");
+  const [categoryFilter, setCategoryFilter] = useState<IncidentCategories | "all">("all");
 
   // sorting: newest, citizenRisk, effectiveRisk
   const [sortMode] = useState<"newest" | "citizenRisk" | "effectiveRisk">("effectiveRisk");
@@ -166,7 +128,7 @@ const ReportVerifyPage: React.FC = () => {
 
     return {
       id: selected.id,
-      incident_type: incidentTypeMap[selected.category],
+      incident_type: selected.category  ,
       verified_critical_level: selected.verifiedRisk ?? selected.citizenRisk,
       barangay: selected.barangay,
       created_at: selected.createdAt,
@@ -201,7 +163,30 @@ const ReportVerifyPage: React.FC = () => {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
 
+    const now = new Date();
+    const matchesTimeFilter = (dateString: string) => {
+      if (reportTimeFilter === "all") return true;
+
+      const reportDate = new Date(dateString);
+      const diffMs = now.getTime() - reportDate.getTime();
+      const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+      switch (reportTimeFilter) {
+        case "today":
+          return reportDate.toDateString() === now.toDateString();
+        case "7days":
+          return diffDays <= 7;
+        case "last30days":
+          return diffDays <= 30;
+        case "last12months":
+          return diffDays <= 365;
+        default:
+          return true;
+      }
+    };
+
     let list = reports.filter((r) => {
+      const matchesTime = matchesTimeFilter(r.createdAt);
       const matchesQ =
         q === "" ||
         r.title.toLowerCase().includes(q) ||
@@ -210,7 +195,9 @@ const ReportVerifyPage: React.FC = () => {
         r.reporterName.toLowerCase().includes(q);
 
       const matchesStatus = statusFilter === "all" || r.status === statusFilter;
-      const matchesCategory = categoryFilter === "all" || r.category === categoryFilter;
+      const normalizeCategory = (val: string) => val.toLowerCase().replace(/\s+/g, "_").replace(/[\/\-]/g, "");
+
+      const matchesCategory = categoryFilter === "all" || normalizeCategory(r.category) === normalizeCategory(categoryFilter);
 
       const matchesScope =
         scopeFilter === "all"
@@ -219,7 +206,7 @@ const ReportVerifyPage: React.FC = () => {
             ? myOfficerId != null && r.assignedOfficerId != null && Number(r.assignedOfficerId) === Number(myOfficerId)
             : r.assignedOfficerId == null;
 
-      return matchesQ && matchesStatus && matchesCategory && matchesScope;
+      return matchesQ && matchesStatus && matchesCategory && matchesScope && matchesTime;
     });
 
     list = [...list].sort((a, b) => {
@@ -238,7 +225,7 @@ const ReportVerifyPage: React.FC = () => {
     });
 
     return list;
-  }, [reports, query, statusFilter, categoryFilter, sortMode, scopeFilter, myOfficerId]);
+  }, [reports, query, statusFilter, categoryFilter, sortMode, scopeFilter, myOfficerId, reportTimeFilter]);
 
   const updateReport = (id: number, patch: Partial<CitizenReport>) => {
     setReports((prev) =>
@@ -535,11 +522,30 @@ const ReportVerifyPage: React.FC = () => {
     }
   };
 
-
-
   const saveNeedsInfoNote = (note: string) => {
     if (!selected) return;
     updateReport(selected.id, { needs_info_note: note });
+  };
+
+  const categoryMeta = selected
+  ? INCIDENT_CATEGORY_METADATA.find(
+      c => c.value === selected.category
+    )
+  : null;
+
+  const hasActiveFilters =
+  query.trim() !== "" ||
+  statusFilter !== "all" ||
+  categoryFilter !== "all" ||
+  scopeFilter !== "all" ||
+  reportTimeFilter !== "all";
+
+  const resetFilters = () => {
+    setQuery("");
+    setStatusFilter("all");
+    setCategoryFilter("all");
+    setScopeFilter("all");
+    setReportTimeFilter("all");
   };
 
   return (
@@ -601,58 +607,99 @@ const ReportVerifyPage: React.FC = () => {
               <Search className="queue-search-icon" />
             </div>
 
-            <div className="queue-filter has-icon">
-              <Filter className="queue-filter-icon" />
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)}>
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="in_progress">In Progress</option>
-                <option value="resolved">Resolved</option>
-                <option value="needs_info">Needs Info</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
+            <div className="queue-filters">
+              <div className="queue-filter has-icon">
+                <Filter className="queue-filter-icon" />
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)}>
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="needs_info">Needs Info</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
 
-            <div className="queue-filter">
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value as any)}
-              >
-                <option value="all">All Categories</option>
-                <option value="fire">Fire</option>
-                <option value="flood">Flood</option>
-                <option value="landslide">Landslide</option>
-                <option value="typhoon">Typhoon</option>
-                <option value="earthquake">Earthquake</option>
-                <option value="vehicular_accident">Vehicular Accident</option>
-                <option value="chemical_gas_leak">Chemical / Gas Leak</option>
-                <option value="fallen_tree">Fallen Tree</option>
-                <option value="infrastructure_damage">Infrastructure Damage</option>
-              </select>
-            </div>
+              <div className="queue-filter has-icon">
+                <Tag className="queue-filter-icon" />
+                <select
+                  value={categoryFilter}
+                  onChange={(e) =>
+                    setCategoryFilter(e.target.value as IncidentCategories | "all")
+                  }
+                >
+                  <option value="all">All Categories</option>
+                  {INCIDENT_CATEGORY_METADATA.map((cat) => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
 
-            {/* <div className="queue-filter">
-              <select value={sortMode} onChange={(e) => setSortMode(e.target.value as any)}>
-                <option value="effectiveRisk">Sort: Effective Risk (True)</option>
-                <option value="citizenRisk">Sort: Citizen Suggested Risk</option>
-                <option value="newest">Sort: Newest</option>
-              </select>
-            </div> */}
+              {/* <div className="queue-filter">
+                <select value={sortMode} onChange={(e) => setSortMode(e.target.value as any)}>
+                  <option value="effectiveRisk">Sort: Effective Risk (True)</option>
+                  <option value="citizenRisk">Sort: Citizen Suggested Risk</option>
+                  <option value="newest">Sort: Newest</option>
+                </select>
+              </div> */}
 
-            <div className="queue-filter">
-              <select value={scopeFilter} onChange={(e) => setScopeFilter(e.target.value as any)}>
-                <option value="all">All Reports</option>
-                <option value="mine">My Reports</option>
-                <option value="unassigned">Unassigned</option>
-              </select>
-            </div>
+              <div className="queue-filter has-icon">
+                <Users className="queue-filter-icon" />
+                <select value={scopeFilter} onChange={(e) => setScopeFilter(e.target.value as any)}>
+                  <option value="all">All Reports</option>
+                  <option value="mine">My Reports</option>
+                  <option value="unassigned">Unassigned</option>
+                </select>
+              </div>
+
+              <div className="queue-filter has-icon">
+                <Clock3 className="queue-filter-icon" />
+                <select
+                  value={reportTimeFilter}
+                  onChange={(e) =>
+                    setReportTimeFilter(
+                      e.target.value as
+                        | "today"
+                        | "7days"
+                        | "last30days"
+                        | "last12months"
+                        | "all"
+                    )
+                  }
+                >
+                  <option value="all">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="7days">Last 7 Days</option>
+                  <option value="last30days">Last 30 Days</option>
+                  <option value="last12months">Last 12 Months</option>
+                </select>
+              </div>
+            </div>  
+
+            {hasActiveFilters && (
+              <button className="queue-clear-btn" onClick={resetFilters}>
+                Clear Filters
+              </button>
+            )}
           </div>
 
           <ul className="queue-list">
-            {filtered.map((r) => {
+          {loading ? (
+            <div className="queue-loading">
+              Loading reports…
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="queue-empty">
+              No reports found.
+            </div>
+          ) : (
+            filtered.map((r) => {
               const active = r.id === selectedId;
               const eff = effectiveRisk(r);
+
               return (
                 <li
                   key={r.id}
@@ -664,7 +711,6 @@ const ReportVerifyPage: React.FC = () => {
                     <div className={`queue-risk-pill ${normalizeRisk(eff)}`}>
                       {normalizeRisk(eff).toUpperCase()}
                     </div>
-
                   </div>
 
                   <div className="queue-sub">
@@ -680,14 +726,17 @@ const ReportVerifyPage: React.FC = () => {
                   </div>
                 </li>
               );
-            })}
-          </ul>
+            })
+          )}
+        </ul>
         </section>
 
         <section className="verify-map">
           <LeafletMap
             selectedReport={selectedReportForMap}
             activeLayers={["Verified Reports"]}
+            categoryFilter={categoryFilter}
+            reportTimeFilter={reportTimeFilter}
           />
         </section>
 
@@ -734,7 +783,7 @@ const ReportVerifyPage: React.FC = () => {
                 </div>
 
                 <div className="detail-subline">
-                  <span className="detail-chip">{selected.category}</span>
+                  <span className="detail-chip">{selected.category === "all" ? "All Categories" : categoryMeta?.label ?? selected.category}</span>
                   <span className="detail-chip subtle">{selected.barangay}</span>
                   <span className="detail-chip subtle">ID #{selected.id}</span>
                 </div>

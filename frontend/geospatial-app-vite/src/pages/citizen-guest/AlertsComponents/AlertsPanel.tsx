@@ -4,7 +4,7 @@ import { Search } from 'lucide-react';
 
 export interface Report {
     id: number;
-    incident_type: "fire" | "flood" | "earthquake" | "typhoon" | "chemical / gas leak" | "fallen tree" | "infrastructure damage" | "landslide" | "vehicular accident" | "others";
+    incident_type: string;
     verified_critical_level: "low" | "moderate" | "high" | "critical";
     barangay: string;
     created_at: string;
@@ -28,14 +28,24 @@ interface AlertsPanelProps {
     isVerified: boolean | null;
     userBarangay: string;
     isVerificationLoading?: boolean;
+    reportTimeFilter: "today" | "7days" | "last30days" | "last12months" | "all";
+    setReportTimeFilter: React.Dispatch<React.SetStateAction<"today" | "7days" | "last30days" | "last12months" | "all">>;
 }
 
 
 
 
-export default function AlertsPanel({ onReport, onSelectReport, initialOpenIncidentId, isVerified, userBarangay, isVerificationLoading }: AlertsPanelProps) {
+export default function AlertsPanel({ 
+    onReport, 
+    onSelectReport, 
+    initialOpenIncidentId, 
+    isVerified, 
+    userBarangay, 
+    isVerificationLoading,
+    reportTimeFilter,
+    setReportTimeFilter
+}: AlertsPanelProps) {
     const hasAutoOpenedRef = useRef(false);
-
     const [filtersOpen, setFiltersOpen] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -90,12 +100,19 @@ export default function AlertsPanel({ onReport, onSelectReport, initialOpenIncid
                 "Content-Type": "application/json",
             };
 
+            let url = `${API_URL}/api/incident-reports/verified/`
+
+            if (reportTimeFilter !== "all") {
+                url += `?time_filter=${encodeURIComponent(reportTimeFilter)}`;
+            }
+
+
             // Only attach Authorization if token exists
             if (token) {
                 headers["Authorization"] = `Bearer ${token}`;
             }
 
-            const res = await fetch(`${API_URL}/api/incident-reports/verified/`, {
+            const res = await fetch(url, {
                 headers,
             });
 
@@ -156,7 +173,7 @@ export default function AlertsPanel({ onReport, onSelectReport, initialOpenIncid
 
     useEffect(() => {
         fetchReports();
-    }, []);
+    }, [reportTimeFilter]);
 
     useEffect(() => {
         if (searchBarangay.trim() !== "") {
@@ -229,6 +246,13 @@ export default function AlertsPanel({ onReport, onSelectReport, initialOpenIncid
         });
     }, [filteredReports, sortNewest]);
 
+    const timeFilters = [
+        { value: "all", label: "All Time" },
+        { value: "today", label: "Today" },
+        { value: "7days", label: "7 Days" },
+        { value: "last30days", label: "30 Days" },
+        { value: "last12months", label: "12 Months" },
+    ] as const;
 
     useEffect(() => {
         if (!reports.length) return;
@@ -386,6 +410,7 @@ export default function AlertsPanel({ onReport, onSelectReport, initialOpenIncid
 
                 <div className={`filters-collapse ${filtersOpen ? "open" : ""}`}>
 
+                    {/* Severity Filter */}
                     <div className="chip-row">
                         <span className="chip-label">Severity</span>
                         {(["all", "low", "moderate", "high", "critical"] as const).map((s) => (
@@ -400,7 +425,7 @@ export default function AlertsPanel({ onReport, onSelectReport, initialOpenIncid
                         ))}
                     </div>
 
-
+                    {/* Sort Filter */}
                     <div className="chip-row">
                         <span className="chip-label">Sort</span>
                         <button
@@ -419,6 +444,7 @@ export default function AlertsPanel({ onReport, onSelectReport, initialOpenIncid
                         </button>
                     </div>
 
+                    {/* Status Filter */}
                     <div className="chip-row">
                         <span className="chip-label">Status</span>
                         {(["all", "in_progress", "resolved"] as const).map((st) => (
@@ -433,6 +459,7 @@ export default function AlertsPanel({ onReport, onSelectReport, initialOpenIncid
                         ))}
                     </div>
 
+                    {/* Barangay Filter */}
                     <div className="chip-row">
                         <span className="chip-label">Barangay</span>
 
@@ -454,6 +481,22 @@ export default function AlertsPanel({ onReport, onSelectReport, initialOpenIncid
                             </button>
                         )}
 
+                    </div>
+
+                    {/* Time Filter */}
+                    <div className="chip-row">
+                        <span className="chip-label">Time</span>
+
+                        {timeFilters.map((t) => (
+                            <button
+                                key={t.value}
+                                type="button"
+                                className={chipClass(reportTimeFilter === t.value)}
+                                onClick={() => setReportTimeFilter(t.value)}
+                            >
+                                {t.label}
+                            </button>
+                        ))}
                     </div>
                 </div>
 
@@ -502,6 +545,7 @@ export default function AlertsPanel({ onReport, onSelectReport, initialOpenIncid
                             setSelectedSeverity("all");
                             setBarangayFilter("all");
                             setSelectedStatus("all");
+                            setReportTimeFilter("all");
                         }}>Clear Filters</button>
                     </div>
                 ) : (

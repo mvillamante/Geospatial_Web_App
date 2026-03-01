@@ -16,6 +16,8 @@ import {
   createNDVILayer,
 } from "./mapLayers";
 
+import { getIncidentIcon } from "../../constants"
+
 // Severity colors matching the alerts panel
 const severityColors: Record<"critical" | "high" | "moderate" | "low", { primary: string; secondary: string; border: string; text: string }> = {
   critical: { primary: "#991b1b", secondary: "#dc2626", border: "#9c1515", text: "CRITICAL" },
@@ -104,6 +106,10 @@ interface LeafletMapProps {
   searchedSeverity?: string | null;
   selectedReport?: Report | null;
   reportClickTimestamp?: number | null;
+
+  reportTimeFilter?: string;
+  categoryFilter?: string;
+
   activeLayers?: string[];
   ndviOpacity?: number;
   ndviYear?: number;
@@ -137,6 +143,8 @@ export default function LeafletMap(props: LeafletMapProps) {
     searchedSeverity = null,
     selectedReport = null,
     reportClickTimestamp: _reportClickTimestamp = null, // kept for API compatibility
+    reportTimeFilter = "",
+    categoryFilter = "",
     activeLayers = [],
     ndviOpacity = 0.8,
     ndviYear,
@@ -1385,11 +1393,16 @@ export default function LeafletMap(props: LeafletMapProps) {
 
     const layerGroup = verifiedReportsLayerRef.current;
 
-    fetch(`${API_URL}/api/incident-reports/verified/`, {
-      headers: {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
+    let url = `${API_URL}/api/incident-reports/verified/`
+    if (reportTimeFilter !== "all") {
+      url += `?time_filter=${encodeURIComponent(reportTimeFilter)}`;
+    }
+
+    fetch(url, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
     })
       .then(res => res.json())
       .then(data => {
@@ -1398,7 +1411,18 @@ export default function LeafletMap(props: LeafletMapProps) {
 
         const reports = data.results || [];
 
-        reports.forEach((r: any) => {
+        const normalizedCategory = (val: string) =>
+          val?.toLowerCase().replace(/\s+/g, "_").replace(/[\/\-]/g, "");
+
+        const filteredReports =
+        !categoryFilter || categoryFilter === "all"
+          ? reports
+          : reports.filter((r: any) =>
+              normalizedCategory(r.category) ===
+              normalizedCategory(categoryFilter)
+            );
+
+        filteredReports.forEach((r: any) => {
 
           // Wag parseFloat kasi nageerror sa iba :)
           const lat = r.lat ?? r.latitude;
@@ -1406,24 +1430,12 @@ export default function LeafletMap(props: LeafletMapProps) {
 
           if (lat == null || lng == null) return;
 
-          //console.log("REPORT COORDS:", r.id, r.lat, r.lng);
-
           const severity = (r.verified_critical_level || "low").toLowerCase();
           const colors =
             severityColors[severity as keyof typeof severityColors] ??
             severityColors.low;
 
-          const categoryIcons: Record<string, string> = {
-            fire: "🔥",
-            flood: "🌊",
-            landslide: "⛰️",
-            vehicular_accident: "🚗",
-            chemical_gas_leak: "☣️",
-            fallen_tree: "🌳",
-            infrastructure_damage: "🏗️",
-          };
-
-          const iconEmoji = categoryIcons[r.category] || "⚠️";
+          const iconEmoji = getIncidentIcon(r.category);
 
           const reportIcon = L.divIcon({
             html: `
@@ -1465,7 +1477,7 @@ export default function LeafletMap(props: LeafletMapProps) {
         console.error("Failed to load verified reports:", err);
       });
 
-  }, [activeLayers]);
+  }, [activeLayers, reportTimeFilter, categoryFilter]);
 
 
 

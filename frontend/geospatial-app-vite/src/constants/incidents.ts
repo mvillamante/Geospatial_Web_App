@@ -1,19 +1,56 @@
-const _INCIDENT_CATEGORIES = [
-  "Fire",
-  "Flood",
-  "Typhoon",
-  "Chemical / Gas Leak",
-  "Fallen Tree",
-  "Infrastructure Damage",
-  "Landslide",
-  "Vehicular Accident",
-  "Others",
+export const _INCIDENT_CATEGORIES = [
+  "fire",
+  "flood",
+  "landslide",
+  "typhoon",
+  "earthquake",
+  "vehicular_accident",
+  "chemical_gas_leak",
+  "fallen_tree",
+  "infrastructure_damage",
+  "others",
 ] as const;
 
 export type IncidentCategories = typeof _INCIDENT_CATEGORIES[number];
 
-export function getIncidentCategories(): readonly IncidentCategories[] {
-  return _INCIDENT_CATEGORIES;
+export interface IncidentCategoryMeta {
+  value: IncidentCategories;
+  label: string;
+  icon: string;
 }
 
+export const INCIDENT_CATEGORY_METADATA: readonly IncidentCategoryMeta[] = [
+  { value: "fire", label: "Fire", icon: "🔥" },
+  { value: "flood", label: "Flood", icon: "🌊" },
+  { value: "landslide", label: "Landslide", icon: "⛰️" },
+  { value: "typhoon", label: "Typhoon / Severe Weather", icon: "🌀" },
+  { value: "earthquake", label: "Earthquake", icon: "🌍" },
+  { value: "vehicular_accident", label: "Vehicular Accident", icon: "🚗" },
+  { value: "chemical_gas_leak", label: "Chemical / Gas Leak", icon: "☣️" },
+  { value: "fallen_tree", label: "Fallen Tree", icon: "🌳" },
+  { value: "infrastructure_damage", label: "Infrastructure Damage", icon: "🏗️" },
+  { value: "others", label: "Others", icon: "⚠️" }
+];
 
+export function getIncidentIcon(category: string): string {
+  const normalized = category
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/[\/\-]/g, "");
+
+  return (
+    INCIDENT_CATEGORY_METADATA.find(
+      (c) => c.value === normalized
+    )?.icon || "⚠️"
+  );
+}
+
+export function getIncidentCategories(): readonly IncidentCategories[] {
+  return INCIDENT_CATEGORY_METADATA.map(meta => meta.value) as readonly IncidentCategories[];
+}
+
+export function getIncidentLabel(value: IncidentCategories): string {
+  return (
+    INCIDENT_CATEGORY_METADATA.find((c) => c.value === value)?.label || value
+  );
+}

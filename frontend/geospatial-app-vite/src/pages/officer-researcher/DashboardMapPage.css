@@ -768,22 +768,22 @@
 
 .dashboardmap-container .dashboardview-map,
 .dashboardmap-container .choroplethview-map .map-disabled-wrapper {
-    height: 95vh;
+    height: 91.7vh; 
 }
 
 .dashboardmap-container .choroplethview-map {
-    height: 88vh;
+    height: 84.7vh;
 }
 
 @media (max-height: 800px) {
 
     .dashboardmap-container .dashboardview-map,
     .dashboardmap-container .choroplethview-map .map-disabled-wrapper {
-        height: 90vh;
+        height: 89vh;
     }
 
     .dashboardmap-container .choroplethview-map {
-        height: 84vh;
+        height: 79.8vh;
     }
 }
 
@@ -1072,7 +1072,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: 95vh;
+  height: 100%;
 }
 
 .dbmright-panel.closed {

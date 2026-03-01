@@ -228,16 +228,27 @@ function EvacCenterPage() {
 
   /* Leaflet Width Responsiveness */
   const [mapWidth, setMapWidth] = useState("50%")
+  const [mapHeight, setMapHeight] = useState("59vh");
   useEffect(() => {
-    const updateWidth = () => {
-      if (window.innerWidth < 768) setMapWidth("100%");
-      else if (window.innerWidth < 1024) setMapWidth("70%");
+    const updateSize = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      // Width rules
+      if (w < 768) setMapWidth("100%");
+      else if (w < 1024) setMapWidth("70%");
       else setMapWidth("50%");
+
+      // Height rules
+      if (h < 800) setMapHeight("66vh");
+      else if (h < 1024) setMapHeight("62vh");
+      else setMapHeight("61vh");
     };
 
-    window.addEventListener("resize", updateWidth);
-    updateWidth(); // initial width
-    return () => window.removeEventListener("resize", updateWidth);
+    window.addEventListener("resize", updateSize);
+    updateSize();
+
+    return () => window.removeEventListener("resize", updateSize);
   }, []);
 
   return (
@@ -261,7 +272,7 @@ function EvacCenterPage() {
           {/* Interactive Map Component */}
           <LeafletMap
             key={mapRefreshKey}
-            height="43vh"
+            height={mapHeight}
             width={mapWidth}
             mapView="interactive"
             mapType="basic"
@@ -326,13 +337,13 @@ function EvacCenterPage() {
               </h3>
               <ul className="evac-reminders-list">
                 <li>Bring essential items such as water, ready-to-eat food, medicines, and important documents (ID, birth certificate, medical records).</li>
-  <li>Pack hygiene supplies including face masks, alcohol, toiletries, and sanitary items.</li>
-  <li>Register immediately upon arrival at the evacuation center.</li>
-  <li>Follow instructions from local authorities and evacuation center personnel at all times.</li>
-  <li>Inform staff of any medical conditions, disabilities, or special needs.</li>
-  <li>Keep your mobile phone charged for emergency updates and communication.</li>
-  <li>Maintain cleanliness and respect shared spaces within the evacuation center.</li>
-  <li>Keep personal belongings secure and do not leave valuables unattended.</li>
+                <li>Pack hygiene supplies including face masks, alcohol, toiletries, and sanitary items.</li>
+                <li>Register immediately upon arrival at the evacuation center.</li>
+                <li>Follow instructions from local authorities and evacuation center personnel at all times.</li>
+                <li>Inform staff of any medical conditions, disabilities, or special needs.</li>
+                <li>Keep your mobile phone charged for emergency updates and communication.</li>
+                <li>Maintain cleanliness and respect shared spaces within the evacuation center.</li>
+                <li>Keep personal belongings secure and do not leave valuables unattended.</li>
               </ul>
             </div>
         ) : null }

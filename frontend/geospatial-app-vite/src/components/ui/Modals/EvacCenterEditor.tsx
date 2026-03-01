@@ -60,49 +60,55 @@ export default function EvacCenterEditor({
               </div>
             </div>
 
-            <div className="form-row three">
-              <div className="view-card small">
+            <div className="form-row two">
+              <div className="view-card">
                 <span className="icon">📍</span>
                 <span className="label">Barangay</span>
                 <span className="value">{center.barangay || "-"}</span>
               </div>
 
-              <div className="view-card small">
+              <div className="view-card">
                 <span className="icon">🏠</span>
                 <span className="label">Type</span>
                 <span className="value">{center.type || "-"}</span>
               </div>
+            </div>
 
-              <div className="view-card small">
+            <div className="form-row">
+            <div className="view-card">
+              <span className="icon">📫</span>
+              <span className="value">{center.address || "-"}</span>
+            </div>
+            </div>
+
+            <div className="form-row two">
+              <div className="view-card">
+                <span className="icon">📞</span>
+                <span className="label">Contact</span>
+                <span className="value">{center.contact || "-"}</span>
+              </div>
+
+              <div className="view-card">
                 <span className="icon">👥</span>
                 <span className="label">Capacity</span>
                 <span className="value">{center.capacity || 0} persons</span>
               </div>
             </div>
 
-            <div className="view-card">
-              <span className="icon">📫</span>
-              <span className="value">{center.address || "-"}</span>
-            </div>
-
-            <div className="view-card small">
-              <span className="icon">📞</span>
-              <span className="label">Contact</span>
-              <span className="value">{center.contact || "-"}</span>
-            </div>
-
             {/* Facilities (always included) */}
             <div className="facilities-card">
               <p className="title">🏗️ Facilities:</p>
-              {center.facilities && center.facilities.length > 0 ? (
-                center.facilities.map((f) => (
-                  <span key={f} className="facility-item">
-                    {f}
-                  </span>
-                ))
-              ) : (
-                <p style={{ fontSize: "10px", color: "#6b7280" }}>No facilities</p>
-              )}
+              <div className="facilities-scroll">
+                {center.facilities && center.facilities.length > 0 ? (
+                  center.facilities.map((f) => (
+                    <span key={f} className="facility-item">
+                      {f}
+                    </span>
+                  ))
+                ) : (
+                  <p style={{ fontSize: "10px", color: "#6b7280" }}>No facilities</p>
+                )}
+              </div>
             </div>
           </>
         ) : (
@@ -190,33 +196,34 @@ export default function EvacCenterEditor({
             {/* Facilities */}
             <div className="facilities-card">
               <p className="title">🏗️ Facilities:</p>
-
-              {center.facilities && center.facilities.length > 0 ? (
-                center.facilities.map((f, index) => (
-                  <div key={index} className="facility-row">
-                    <input
-                      value={f}
-                      onChange={(e) => {
-                        const updatedFacilities = [...(center.facilities || [])];
-                        updatedFacilities[index] = e.target.value;
-                        onChange({ ...center, facilities: updatedFacilities });
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const updatedFacilities = [...(center.facilities || [])];
-                        updatedFacilities.splice(index, 1);
-                        onChange({ ...center, facilities: updatedFacilities });
-                      }}
-                    >
-                      ❌
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <p style={{ fontSize: "10px", color: "#6b7280" }}>No facilities</p>
-              )}
+              <div className="facilities-scroll">
+                {center.facilities && center.facilities.length > 0 ? (
+                  center.facilities.map((f, index) => (
+                    <div key={index} className="facility-row">
+                      <input
+                        value={f}
+                        onChange={(e) => {
+                          const updatedFacilities = [...(center.facilities || [])];
+                          updatedFacilities[index] = e.target.value;
+                          onChange({ ...center, facilities: updatedFacilities });
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updatedFacilities = [...(center.facilities || [])];
+                          updatedFacilities.splice(index, 1);
+                          onChange({ ...center, facilities: updatedFacilities });
+                        }}
+                      >
+                        ❌
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p style={{ fontSize: "10px", color: "#6b7280" }}>No facilities</p>
+                )}
+              </div>
 
               {/* Add new facility */}
               <button

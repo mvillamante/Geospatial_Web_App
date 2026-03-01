@@ -176,6 +176,14 @@
   margin: 0;
 }
 
+.facilities-scroll {
+  height: 140px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .facility-item{
   display: inline-block;
   background: #e5e7eb;
@@ -292,4 +300,92 @@
   background: white;
   border-radius: 8px;
   font-weight: 700;
+}
+
+
+@media (max-height: 800px){
+
+  .editor-card{
+    padding: 12px;
+    max-width: 760px;
+    border-radius: 10px;
+  }
+
+  .editor-header{
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+  }
+
+  .editor-header .icon{
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .editor-header .label{
+    font-size: 14px;
+  }
+
+  .view-card{
+    min-height: 42px;
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .view-card .value{
+    font-size: 13px;
+  }
+
+  .form-group{
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .form-group label{
+    font-size: 12px;
+  }
+
+  .form-group input,
+  .form-group select{
+    height: 34px;
+    font-size: 13px;
+    padding: 6px 8px;
+  }
+
+  .form-row{
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .pick-map-btn{
+    height: 34px;
+    font-size: 13px;
+    padding: 6px 8px;
+  }
+
+  .facility-item{
+    padding: 4px 7px;
+    font-size: 12px;
+  }
+
+  .evac-banner{
+    margin-top: 10px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .evac-card-wrapper .modal-actions{
+    margin-top: 10px;
+  }
+
+  .evac-card-wrapper .modal-actions button{
+    height: 34px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  .saving-overlay p{
+    font-size: 13px;
+    padding: 8px 12px;
+  }
 }

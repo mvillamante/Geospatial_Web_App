@@ -208,7 +208,6 @@
 
 .selected-evac-card {
   width: 100%;
-  padding: 15px;
   position: relative;
   max-height: calc(80vh - 2rem);
   overflow-y: auto;
@@ -317,6 +316,7 @@
   padding: 1.5rem;
   border-radius: 12px;
   height: 100%;
+  width: 100%;
 }
 
 .evac-reminders-title {
@@ -334,6 +334,27 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+@media (max-height: 800px){
+
+  .evac-reminders{
+    margin: 0.9rem;
+    padding: 1rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+  }
+
+  .evac-reminders-title{
+    font-size: 14px;
+    margin-bottom: 0.3rem;
+  }
+
+  .evac-reminders-list{
+    gap: 4px;
+    font-size: 0.8rem;
+  }
+
 }
 
 /* =========================
@@ -440,17 +461,19 @@
 /* Officer Stats */
 .evac-map-wrapper {
   display: flex;
-  justify-content: justify;
-  align-items: flex-start;
-}
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  flex: 1;
+} 
 
 .evac-side-content {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: right;
   align-items: center;
   gap: 1rem;
-  width: 100%;
+  width: 80%;
   background-color: var(--white-bg);
   border-radius: 15px;
   box-shadow: 0 6px 16px rgba(163, 169, 182, 0.18);
@@ -463,12 +486,11 @@
 
 .evac-stat-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 1rem;
-  width: 30%;
   padding: 15px;
+  align-items: center;
 }
-
 /* Stat Card */
 .evac-stat-card {
   background: #ffffff;
@@ -779,6 +801,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 0.75rem;
     width: 100%;
+    flex-wrap: wrap;
     padding: 0;
   }
 

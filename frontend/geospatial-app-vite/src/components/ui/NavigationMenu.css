@@ -44,7 +44,7 @@
   display: flex;
   flex-direction: column;
   margin-top: 20px;
-} 
+}
 
 .navigation .nav-item {
   position: relative;
@@ -106,6 +106,27 @@
 
 .navigation .nav-item:hover .nav-label {
   display: inline-block;
+}
+
+.guest-back-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  transition: 0.25s ease;
+  color: #1f2937;
+}
+
+.guest-back-btn:hover {
+  background: #eef4ff;
+}
+
+.guest-back-btn:hover .nav-icon {
+  transform: scale(1.15);
 }
 
 .nav-icon-wrap {

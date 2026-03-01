@@ -39,6 +39,7 @@ body {
 .cms-page,
 .evac-page,
 .user-page,
+.home-page,
 .dashboard-page,
 .reportsmgmt-page,
 .reportverify-page,
@@ -189,6 +190,7 @@ body {
 }
 
 @media (max-height: 800px) {
+
   .user-page .user-table-wrapper,
   .user-page .requests-table-wrapper,
   .user-page .verification-table-wrapper {
@@ -442,11 +444,15 @@ body {
 
 .form-group input:focus,
 .form-group select:focus {
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  font-size: 14px;
-  outline: none;
-  transition: 0.2s ease;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(14, 165, 164, 0.1);
+}
+
+
+.form-group input[readonly]{
+  background: #f1f5f9;
+  color: #6b7280;
+  cursor: default;
 }
 
 /* Form Rows */
@@ -591,15 +597,16 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
   margin-top: -10px;
 }
+
 .help-icon.small {
   width: 16px;
   height: 16px;
   font-size: 10px;
   margin-top: -4px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.18);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
 }
 
 .help-wrap {
@@ -620,7 +627,7 @@ body {
   border-radius: 8px;
   font-size: 12px;
   line-height: 1.4;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   z-index: 9999;
 }
 

@@ -2,15 +2,21 @@ import React, { useState } from "react";
 import "./HomePage.css";
 
 import { GiPlantRoots } from "react-icons/gi";
-import { MdWarningAmber, MdLocalFireDepartment  } from "react-icons/md";
+import { MdWarningAmber, MdLocalFireDepartment } from "react-icons/md";
 
-// Index Card Component for Indices Section
+type TrendType = {
+  direction: "up" | "down" | "same";
+  isImprovement: boolean;
+  percent: string;
+} | null;
+
 type IndexCardProps = {
   title: string;
   value: string;
   description: string;
   color: "green" | "orange" | "red";
   icon: React.ReactNode;
+  trend?: TrendType;
 };
 
 const IndexCard: React.FC<IndexCardProps> = ({
@@ -19,6 +25,7 @@ const IndexCard: React.FC<IndexCardProps> = ({
   description,
   color,
   icon,
+  trend,
 }) => {
   return (
     <div className={`index-card ${color}`}>
@@ -27,6 +34,16 @@ const IndexCard: React.FC<IndexCardProps> = ({
       <div className="index-content">
         <h4>{title}</h4>
         <h2>{value}</h2>
+
+        {trend && trend.direction !== "same" && (
+          <div
+            className={`trend ${trend.isImprovement ? "good" : "bad"
+              }`}
+          >
+            {trend.direction === "up" ? "▲" : "▼"} {trend.percent}%
+            <span> vs last year</span>
+          </div>
+        )}
         <p>{description}</p>
       </div>
     </div>
@@ -82,7 +99,7 @@ const HomePage: React.FC = () => {
   const minYear = 2020;
   const maxYear = 2030;
   const initialYear = Math.min(maxYear, Math.max(minYear, currentYear));
-  const [year] = useState(initialYear);
+  const [year, setYear] = useState(initialYear);
 
   const {
     universalGreenAvg,
@@ -90,42 +107,96 @@ const HomePage: React.FC = () => {
     universalCalamityAvg,
   } = useUniversalIndexData(year);
 
+  const previousYear = year > minYear ? year - 1 : null;
+  const hasPreviousYear = year > minYear;
+
+  const {
+    universalGreenAvg: prevGreen,
+    universalHazardAvg: prevHazard,
+    universalCalamityAvg: prevCalamity,
+  } = useUniversalIndexData(previousYear ?? year);
+
+  const getTrend = (
+    current: number | null,
+    previous: number | null,
+    higherIsBetter: boolean
+  ): TrendType => {
+    if (current == null || previous == null || previous === 0) return null;
+
+    const diff = current - previous;
+    const percent = ((Math.abs(diff) / previous) * 100).toFixed(1);
+
+    if (diff === 0) {
+      return {
+        direction: "same",
+        isImprovement: false,
+        percent: "0",
+      };
+    }
+
+    const isImprovement = higherIsBetter ? diff > 0 : diff < 0;
+
+    return {
+      direction: diff > 0 ? "up" : "down",
+      isImprovement,
+      percent,
+    };
+  };
+
   return (
     <div className="home-page">
       {/* Header */}
-      <section className="header-card">
-        <h1>Environmental Monitoring Overview</h1>
-        <p>
-          Integrated environmental sustainability and hazard analytics supporting
-          researchers and LGU planning, climate adaptation, and disaster risk
-          reduction initiatives.
-        </p>
+      {/* ===== HEADER ===== */}
+      <section className="home-header">
+        <div>
+          <h1>Geospatial Data Analytics Overview</h1>
+          <p>Environmental, Hazard &  Calamity Risk — {year}</p>
+        </div>
+
+        <div className="year-filter">
+          <label>Select Year:</label>
+          <select value={year} onChange={(e) => setYear(Number(e.target.value))}>
+            {Array.from({ length: maxYear - minYear + 1 }, (_, i) => {
+              const y = minYear + i;
+              return (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              );
+            })}
+          </select>
+        </div>
       </section>
 
       {/* Indices */}
       <section className="section">
-        <h3 className="section-title">Indices as of {currentYear}</h3>
+        <h3 className="section-title">Indices as of {year}</h3>
         <div className="indices-grid">
           <IndexCard
             title="Green Index"
-            value={universalGreenAvg != null ? universalGreenAvg.toFixed(1) : "—"}
+            value={universalGreenAvg?.toFixed(1) ?? "—"}
             description="Environmental resilience indicator"
             color="green"
             icon={<GiPlantRoots />}
+            trend={hasPreviousYear ? getTrend(universalGreenAvg, prevGreen, true) : null}
           />
+
           <IndexCard
             title="Hazard Index"
-            value={universalHazardAvg != null ? universalHazardAvg.toFixed(1) : "—"}
+            value={universalHazardAvg?.toFixed(1) ?? "—"}
             description="Multi-factor hazard exposure level"
             color="orange"
             icon={<MdWarningAmber />}
+            trend={hasPreviousYear ? getTrend(universalHazardAvg, prevHazard, false) : null}
           />
+
           <IndexCard
             title="Calamity Risk Likelihood"
-            value={universalCalamityAvg != null ? universalCalamityAvg.toFixed(1) : "—"}
+            value={universalCalamityAvg?.toFixed(1) ?? "—"}
             description="Derived risk probability score"
             color="red"
-            icon={<MdLocalFireDepartment  />}
+            icon={<MdLocalFireDepartment />}
+            trend={hasPreviousYear ? getTrend(universalCalamityAvg, prevCalamity, false) : null}
           />
         </div>
       </section>
@@ -160,9 +231,36 @@ const HomePage: React.FC = () => {
           <InfoBox
             title="Calamity Risk Likelihood"
             description="Computed from interaction between Hazard Exposure and Environmental Resilience."
-            formula="Calamity Risk ≈ α(Hazard Index) − β(Green Index)"
+            points={[
+              "Green Index",
+              "Hazard Index",
+              "Exposure",
+            ]}
+            formula="CRL = H_norm × E_norm × (1 − GI_norm)"
             variant="red"
           />
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="sdg-container">
+
+          <div className="sdg-box sdg-11">
+            <div className="sdg-icon">11</div>
+            <div className="sdg-content">
+              <h4>Sustainable Cities and Communities</h4>
+              <p>Target 11.5: Reduce the number of people affected by disasters.</p>
+            </div>
+          </div>
+
+          <div className="sdg-box sdg-13">
+            <div className="sdg-icon">13</div>
+            <div className="sdg-content">
+              <h4>Climate Action</h4>
+              <p>Target 13.1: Strengthen resilience and adaptive capacity to climate-related hazards and natural disasters.</p>
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -182,7 +280,7 @@ const HomePage: React.FC = () => {
 
           <div className="source">
             <img src="/datasource_logos/gee.png" alt="Google Earth Engine" />
-            <span>Google Earth Engine</span> 
+            <span>Google Earth Engine</span>
           </div>
 
           <div className="source">

@@ -36,9 +36,6 @@ interface AlertsPanelProps {
 export default function AlertsPanel({ onReport, onSelectReport, initialOpenIncidentId, isVerified, userBarangay, isVerificationLoading }: AlertsPanelProps) {
     const hasAutoOpenedRef = useRef(false);
 
-    console.log("initialOpenIncidentId:", initialOpenIncidentId);
-
-
     const [filtersOpen, setFiltersOpen] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -85,15 +82,21 @@ export default function AlertsPanel({ onReport, onSelectReport, initialOpenIncid
     const fetchReports = async () => {
         const token = localStorage.getItem("access_token");
         const API_URL = import.meta.env.VITE_API_URL;
-        if (!token) return;
+        // if (!token) return;
 
         setIsLoading(true);
         try {
+            const headers: HeadersInit = {
+                "Content-Type": "application/json",
+            };
+
+            // Only attach Authorization if token exists
+            if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
+            }
+
             const res = await fetch(`${API_URL}/api/incident-reports/verified/`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
+                headers,
             });
 
             if (!res.ok) {
@@ -102,8 +105,6 @@ export default function AlertsPanel({ onReport, onSelectReport, initialOpenIncid
             }
 
             const data = await res.json();
-
-
 
             const mappedReports: Report[] = (data.results || []).map((r: any) => {
                 let lat = r.lat ?? r.latitude;

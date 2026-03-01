@@ -440,28 +440,44 @@
 .feed-page .contact-actions {
     display: grid;
     gap: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
-
 
 .feed-page .contact-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 36px;
-    border-radius: 999px;
-    border: 1px solid var(--light-gray-border);
-    background: var(--white-bg);
-    font-weight: 700;
-    font-size: 14px;
-    color: #0f172a;
-    text-decoration: none;
-    transition: transform 120ms ease, background 120ms ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: 1px solid #e2e8f0;
 }
 
-.feed-page .contact-btn:hover {
-    background: #f1f5f9;
-    transform: translateY(-1px);
+.feed-page .contact-btn.facebook {
+  background-color: #f0f4ff;
+  color: #1877f2;
+}
+
+.feed-page .contact-btn.facebook:hover {
+  background-color: #1877f2;
+  color: white;
+}
+
+.feed-page .contact-btn.email {
+  background-color: #f8fafc;
+  color: #475569;
+}
+
+.feed-page .contact-btn.email:hover {
+  background-color: #334155;
+  color: white;
+}
+
+.feed-page .btn-icon {
+  font-size: 1.1rem;
 }
 
 .feed-page .contact-meta {

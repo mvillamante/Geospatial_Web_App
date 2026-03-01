@@ -41,6 +41,6 @@ export const roleToBasePath = (role: Role | string) => {
     case "Researcher":
       return "/main/researcher/home";
     default:
-      return "/main/guest/community-feed";
+      return "/main/citizen/community-feed";
   }
 };

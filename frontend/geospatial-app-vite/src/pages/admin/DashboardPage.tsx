@@ -21,7 +21,7 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/admin/stats`, {
+        const res = await fetch(`${API_URL}/api/admin/stats/`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },

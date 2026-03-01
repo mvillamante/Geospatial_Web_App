@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { FaFacebook, FaEnvelope } from "react-icons/fa";
 import {
     Pin,
     Search,
@@ -101,15 +102,29 @@ export default function CommunityFeedPage() {
     }, [location.state, posts])
 
     useEffect(() => {
-        fetch(`${API_URL}/api/cms/quick-contacts/`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-            },
-        })
-            .then(res => res.json())
-            .then(setContact);
-    }, []);
+        const fetchContact = async () => {
+            try {
+                const token = localStorage.getItem("access_token");
 
+                const headers: HeadersInit = token
+                    ? { Authorization: `Bearer ${token}` }
+                    : {};
+
+                const res = await fetch(`${API_URL}/api/cms/quick-contacts/`, {
+                    headers,
+                });
+
+                if (!res.ok) throw new Error("Failed to fetch contacts");
+
+                const data = await res.json();
+                setContact(data);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        fetchContact();
+    }, []);
 
     useEffect(() => {
         const fetchFeed = async () => {
@@ -217,13 +232,15 @@ export default function CommunityFeedPage() {
 
                                 <div className="contact-actions">
                                     {contact.facebook_url && (
-                                        <a className="contact-btn" href={contact.facebook_url} target="_blank" rel="noreferrer">
-                                            Facebook Page
+                                        <a className="contact-btn facebook" href={contact.facebook_url} target="_blank" rel="noreferrer">
+                                            <FaFacebook className="btn-icon" />
+                                            <span>Facebook Page</span>
                                         </a>
                                     )}
                                     {contact.email && (
-                                        <a className="contact-btn" href={`mailto:${contact.email}`}>
-                                            Email
+                                        <a className="contact-btn email" href={`mailto:${contact.email}`}>
+                                            <FaEnvelope className="btn-icon" />
+                                            <span>Email</span>
                                         </a>
                                     )}
                                 </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FaUser, FaChartBar, FaUniversity } from "react-icons/fa";
 import "./LandingPage.css";
 import { useAuth } from "../context/AuthContext";
@@ -22,6 +22,7 @@ type LandingStats = {
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { refreshUser } = useAuth(); // Get current user from context
 
   const [loading, setLoading] = useState(true);
@@ -61,6 +62,19 @@ const LandingPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const modal = params.get("modal");
+
+    if (modal === "login") {
+      setModalType("login");
+    }
+    if (modal === "signup") {
+      setModalType("signup");
+    }
+  }, [location.search]);
+
+
+  useEffect(() => {
     const fetchLandingStats = async () => {
       try {
         const res = await fetch(
@@ -87,6 +101,9 @@ const LandingPage: React.FC = () => {
       </div>
     );
   }
+
+
+
 
   // ===== Get user role and display name from localStorage =====
   // const { userRole, userRole2 } = getUserRoleAndDisplayName();
@@ -151,7 +168,7 @@ const LandingPage: React.FC = () => {
             A community-centered platform for understanding hazard risk, strengthening disaster preparedness, and supporting local sustainability initiatives.
           </p>
           <div className="cta-group">
-            <button className="btn btn-primary" onClick={() => setModalType("login")}>Get Started</button>
+            <button className="btn btn-primary" onClick={() => setModalType("signup")}>Get Started</button>
             <button className="btn btn-secondary" onClick={() => navigate("/main/guest/community-feed", { replace: true })}>Explore the Map</button>
           </div>
 

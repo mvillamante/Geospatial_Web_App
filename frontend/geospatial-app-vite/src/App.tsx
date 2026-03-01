@@ -148,6 +148,17 @@ const App: React.FC = () => {
           <Route path="guest" element={<Navigate to="guest/community-feed" replace />} />
           <Route path="guest/alerts-map" element={<AlertsMapPage />} />
           <Route path="guest/evac-center" element={<EvacCenterPage />} />
+          <Route path="guest/community-feed" element={<CommunityFeedPage />} />
+
+          <Route
+            path="guest/profile"
+            element={<Navigate to="/main/citizen-pwa/login" replace />}
+          />
+
+          <Route
+            path="guest/notifications"
+            element={<Navigate to="/main/citizen-pwa/login" replace />}
+          />
         </Route>
 
       </Routes>

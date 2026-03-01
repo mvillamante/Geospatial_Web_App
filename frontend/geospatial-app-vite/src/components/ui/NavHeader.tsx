@@ -24,11 +24,11 @@ const NavHeader: React.FC = () => {
     },
     "/main/officer/home": {
       title: "Home",
-      subtitle: "Welcome back, stay updated",
+      subtitle: "Overview of hazard conditions and environmental indicators",
     },
     "/main/officer/dashboard-map": {
       title: "Dashboard & Map",
-      subtitle: "Monitor incidents geographically",
+      subtitle: "Geospatial analytics integration of multi-factor hazard and environmental data",
     },
     "/main/officer/report-verify": {
       title: "Report Verification",
@@ -37,6 +37,14 @@ const NavHeader: React.FC = () => {
     "/main/officer/evac-center": {
       title: "Evacuation Centers",
       subtitle: "Manage evacuation center locations across Cabuyao",
+    },
+    "/main/researcher/home": {
+      title: "Home",
+      subtitle: "Overview of hazard conditions and environmental indicators",
+    },
+    "/main/researcher/dashboard-map": {
+      title: "Dashboard & Map",
+      subtitle: "Geospatial analytics integration of multi-factor hazard and environmental data.",
     },
     "/main/citizen/community-feed": {
       title: "Community Feed",
@@ -52,7 +60,31 @@ const NavHeader: React.FC = () => {
     },
     "/main/citizen/evac-center": {
       title: "Evacuation Centers",
-      subtitle: "Nearby evacuation centers",
+      subtitle: "Nearby evacuation centers and directions",
+    },
+    "/main/guest/community-feed": {
+      title: "Community Feed",
+      subtitle: "Latest advisories, announcements, and guides",
+    },
+    "/main/guest/alerts-map": {
+      title: "Reports & Map",
+      subtitle: "Verified incident reports and hazard map",
+    },
+    "/main/guest/evac-center": {
+      title: "Evacuation Centers",
+      subtitle: "Nearby evacuation centers and directions",
+    },
+    "/main/admin/profile": {
+      title: "Profile",
+      subtitle: "Manage your account information",
+    },
+    "/main/officer/profile": {
+      title: "Profile",
+      subtitle: "Manage your account information",
+    },
+    "/main/researcher/profile": {
+      title: "Profile",
+      subtitle: "Manage your account information",
     },
     "/main/citizen/profile": {
       title: "Profile",

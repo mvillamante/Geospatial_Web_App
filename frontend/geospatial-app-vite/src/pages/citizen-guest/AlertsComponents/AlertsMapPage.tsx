@@ -1,6 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-
 import "./AlertsMapPage.css";
 import LeafletMap from "../../../components/ui/LeafletMap";
 import AlertsPanel from "./AlertsPanel";
@@ -14,6 +13,7 @@ interface SelectedReportWithTimestamp {
 
 const AlertsMapPage: React.FC = () => {
   const API_URL = import.meta.env.VITE_API_URL;
+  const token = localStorage.getItem("access_token");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,6 +28,7 @@ const AlertsMapPage: React.FC = () => {
   const [searchedSeverity, setSearchedSeverity] = useState<string | null>(null);
   const [selectedReportData, setSelectedReportData] = useState<SelectedReportWithTimestamp | null>(null);
 
+  const [showRedirectPopup, setShowRedirectPopup] = useState(false);
   const [showVerifyPrompt, setShowVerifyPrompt] = useState(false);
 
   const activeLayers = useMemo(() => ["Verified Reports"], []);
@@ -48,7 +49,6 @@ const AlertsMapPage: React.FC = () => {
     setSearchedBarangay("");
     setSearchedSeverity(null);
   };
-
 
   useEffect(() => {
     async function checkVerification() {
@@ -136,13 +136,18 @@ const AlertsMapPage: React.FC = () => {
           {/* Alerts Panel */}
           <AlertsPanel
             onReport={() => {
-              if (isVerified === null) {
+              if (isVerified === null) return;
+
+              if (!token) {
+                setShowRedirectPopup(true);
                 return;
               }
+
               if (isVerified === false) {
                 setShowVerifyPrompt(true);
                 return;
               }
+
               setIsDrawerOpen(true);
             }}
             onBarangaySearch={(b, s) => {
@@ -198,9 +203,38 @@ const AlertsMapPage: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
-    </div >
 
+        {showRedirectPopup && (
+          <div className="modal-overlay" role="dialog" aria-modal="true">
+            <div className="modal-card">
+              <h3>Login Required</h3>
+              <p>
+                You must log in before you can report an incident.
+              </p>
+
+              <div className="modal-actions">
+                <button
+                  className="save-btn"
+                  onClick={() => {
+                    setShowRedirectPopup(false);
+                    navigate("/?modal=login");
+                  }}
+                >
+                  Login Now
+                </button>
+
+                <button
+                  className="cancel-btn"
+                  onClick={() => setShowRedirectPopup(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

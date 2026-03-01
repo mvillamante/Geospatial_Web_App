@@ -109,18 +109,6 @@
   transition: 0.2s ease;
 }
 
-.form-group input:focus,
-.form-group select:focus{
-  border-color: #0ea5a4;
-  box-shadow: 0 0 0 3px rgba(14,165,164,0.1);
-}
-
-.form-group input[readonly]{
-  background: #f1f5f9;
-  color: #6b7280;
-  cursor: default;
-}
-
 /* Layout rows */
 .form-row{
   display: grid;

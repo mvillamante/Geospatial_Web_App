@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { getUserRoleAndDisplayName, clearUserSession } from "../../libr/auth";
-
+import { MdArrowBack } from "react-icons/md";
 import type { IconType } from "react-icons";
 import { FaHome, FaCog, FaUser, FaMapMarkedAlt, FaBullhorn, FaMapMarked, FaBell } from "react-icons/fa";
 import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdKeyboardArrowUp } from "react-icons/md";
@@ -37,8 +37,8 @@ const NavigationMenu: React.FC = () => {
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/notifications/unread-count/)`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}`},
+        const res = await fetch(`${API_URL}/api/notifications/unread-count/`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
         });
         if (!res.ok) return;
         const data = await res.json();
@@ -157,6 +157,9 @@ const NavigationMenu: React.FC = () => {
 
   const effectiveRole = (userRole2.includes("Researcher") ? "Researcher" : "") || userRole;
 
+
+  const isGuest = effectiveRole === "Guest";
+
   const navItems: NavItem[] = navigationList[effectiveRole] || [];
 
   const handleLogout = () => {
@@ -176,7 +179,13 @@ const NavigationMenu: React.FC = () => {
         <img src="/test-hazspot.png" alt="HazSpot logo" className="nav-logo-img" /> 
         <span className="nav-logo-text">H<span>S</span></span>
       </div> */}
-
+      {isGuest && (
+        <div className="nav-item">
+          <div className="guest-back-btn" onClick={() => navigate('/')}>
+            <MdArrowBack size={22} />
+          </div>
+        </div>
+      )}
       <nav>
         {navItems.map(({ label, path, icon: Icon }, index) => (
           <div className={`nav-item ${effectiveRole === "Admin" ? "admin-layout" : ""}`} key={index}>
@@ -194,64 +203,67 @@ const NavigationMenu: React.FC = () => {
         ))}
       </nav>
 
-      <div
-        className={`user-profile-section ${effectiveRole === "Admin" ? "admin-profile" : "user-profile"}`}
-        ref={dropdownRef}
-      >
-        <div className="profile-dropdown-trigger" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
-          <div className="profile-circle">
-            {(user?.username || displayName)?.charAt(0).toUpperCase()}
-          </div>
-          <MdKeyboardArrowUp className={`dropdown-arrow ${isDropdownOpen ? "open" : ""}`} />
-        </div>
-
-        {isDropdownOpen && (
-          <div className="profile-dropdown-menu">
-            <div
-              className="dropdown-profile-info"
-            >
-              <div className="dropdown-avatar">
-                {(user?.username || displayName)?.charAt(0).toUpperCase()}
-              </div>
-              <div className="dropdown-user-details">
-                <span className="dropdown-username">{user?.username || displayName}</span>
-                <span className="dropdown-role">
-                  {userRole}
-                  {userRole2?.[0] ? ` & ${userRole2[0]}` : ""}
-                </span>
-              </div>
+      {!isGuest && (
+        <div
+          className={`user-profile-section ${effectiveRole === "Admin" ? "admin-profile" : "user-profile"}`}
+          ref={dropdownRef}
+        >
+          <div className="profile-dropdown-trigger" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+            <div className="profile-circle">
+              {(user?.username || displayName)?.charAt(0).toUpperCase()}
             </div>
-
-            <div className="dropdown-divider" />
-            <button
-              className="dropdown-menu-btn"
-              onClick={() => {
-                navigate(profilePath);
-                setIsDropdownOpen(false);
-              }}
-            >
-              <FaUser className="dropdown-menu-icon" />
-              <span>My Profile</span>
-            </button>
-
-            <button
-              className="dropdown-menu-btn"
-              onClick={() => {
-                navigate("");
-                setIsDropdownOpen(false);
-              }}
-            >
-              <FaCog className="dropdown-menu-icon" />
-              <span>Settings</span>
-            </button>
-
-            <button className="dropdown-logout-btn" onClick={handleLogout}>
-              <MdLogout className="dropdown-logout-icon" />
-              <span>Logout</span>
-            </button>
+            <MdKeyboardArrowUp className={`dropdown-arrow ${isDropdownOpen ? "open" : ""}`} />
           </div>
-        )}
-      </div>
+
+          {isDropdownOpen && (
+            <div className="profile-dropdown-menu">
+              <div
+                className="dropdown-profile-info"
+              >
+                <div className="dropdown-avatar">
+                  {(user?.username || displayName)?.charAt(0).toUpperCase()}
+                </div>
+                <div className="dropdown-user-details">
+                  <span className="dropdown-username">{user?.username || displayName}</span>
+                  <span className="dropdown-role">
+                    {userRole2?.length
+                      ? userRole2.join(" & ")
+                      : userRole}
+                  </span>
+                </div>
+              </div>
+
+              <div className="dropdown-divider" />
+              <button
+                className="dropdown-menu-btn"
+                onClick={() => {
+                  navigate(profilePath);
+                  setIsDropdownOpen(false);
+                }}
+              >
+                <FaUser className="dropdown-menu-icon" />
+                <span>My Profile</span>
+              </button>
+
+              <button
+                className="dropdown-menu-btn"
+                onClick={() => {
+                  navigate("");
+                  setIsDropdownOpen(false);
+                }}
+              >
+                <FaCog className="dropdown-menu-icon" />
+                <span>Settings</span>
+              </button>
+
+              <button className="dropdown-logout-btn" onClick={handleLogout}>
+                <MdLogout className="dropdown-logout-icon" />
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -456,6 +456,12 @@
   border: 1px solid #e0e0e0;
 }
 
+.dept-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .dept-item:hover {
   background: #f1f3f5;
 }
@@ -473,3 +479,22 @@
   background: #c62828;
 }
 
+
+.manage-dept-modal .save-btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    background-color: #007bff;
+    color: var(--text-white);
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+.manage-dept-modal .save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.manage-dept-modal .save-btn:hover:not(:disabled) {
+    background-color: #0056b3;
+}

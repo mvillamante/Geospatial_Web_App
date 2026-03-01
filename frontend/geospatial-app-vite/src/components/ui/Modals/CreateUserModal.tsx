@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import type { User } from "../../../usertype/User"; // <-- shared type
 import "./GlobalModal.css";
-// import { getDepartments, type Departments } from "../../../constants"
-
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -9,12 +8,9 @@ type StaffRole = "admin" | "officer" | "researcher";
 
 interface Props {
   onClose: () => void;
-  onCreated: () => Promise<void>;
+  onCreated: (newUser: User) => void; 
   departmentRefreshKey: number; 
 }
-
-// const departments: readonly Departments[] = getDepartments();
-
 
 const CreateUserModal: React.FC<Props> = ({ onClose, onCreated, departmentRefreshKey }) => {
   const today = new Date().toLocaleDateString();
@@ -26,17 +22,9 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated, departmentRefres
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState<StaffRole | "">("");
-  const [department, setDepartment] = useState<number | "">("");
+  const [departmentId, setDepartmentId] = useState<number | "">(""); // <-- store ID
   const [departments, setDepartments] = useState<{id:number,name:string}[]>([]);
 
-  // const [departmentsList, setDepartmentsList] = useState<string[]>([
-  //   ...getDepartments()
-  // ]);
-  // const [addingDept, setAddingDept] = useState(false);
-  // const [newDeptName, setNewDeptName] = useState("");
-
-
-  // Password & validation
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [phoneError, setPhoneError] = useState("");
@@ -47,94 +35,55 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated, departmentRefres
     firstName && lastName ? `${firstName.trim()}.${lastName.trim()}` : "";
   const finalUsername = username || generatedUsername;
 
-  // Close dropdown if clicked outside
-  // useEffect(() => {
-  //   const handleClickOutside = (e: MouseEvent) => {
-  //     if (deptRef.current && !deptRef.current.contains(e.target as Node)) {
-  //       setDeptOpen(false);
-  //     }
-  //   };
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => document.removeEventListener("mousedown", handleClickOutside);
-  // }, []);
-
-const fetchDepartments = async () => {
-  try {
-    const token = localStorage.getItem("access_token");
-    const res = await fetch(`${API_URL}/api/admin/departments/`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const data = await res.json();
-    console.log("Departments API response:", data);
-
-    if (Array.isArray(data.results)) {
-      setDepartments(data.results);
-    } else {
+  // Fetch departments
+  const fetchDepartments = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const res = await fetch(`${API_URL}/api/admin/departments/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setDepartments(Array.isArray(data.results) ? data.results : []);
+    } catch {
       setDepartments([]);
     }
-  } catch (err) {
-    console.error("Failed to fetch departments:", err);
-    setDepartments([]);
-  }
-};
+  };
 
-
-
-useEffect(() => {
-  fetchDepartments();
-}, [departmentRefreshKey]);
-
+  useEffect(() => { fetchDepartments(); }, [departmentRefreshKey]);
 
   // Validators
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePhone = (phone: string) => /^\d{11}$/.test(phone);
 
-  // =================== Generate temporary password ===================
-    const tempPasswordRef = useRef<string | null>(null);
-
-    const generateTempPassword = () => {
+  // Temporary password
+  const tempPasswordRef = useRef<string | null>(null);
+  const generateTempPassword = () => {
     if (!tempPasswordRef.current) {
-        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
-        let password = "";
-        for (let i = 0; i < 10; i++) {
-        password += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        tempPasswordRef.current = password; // store in ref
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+      let password = "";
+      for (let i = 0; i < 10; i++) password += chars.charAt(Math.floor(Math.random() * chars.length));
+      tempPasswordRef.current = password;
     }
-    };
+  };
 
-  // =================== Handle creation ===================
+  // Handle create
   const handleCreate = async () => {
     setError("");
 
-    // Final validation before sending
-    if (!firstName || !lastName || !email || !phone || !role || (role === "officer" && !department)) {
+    if (!firstName || !lastName || !email || !phone || !role || (role === "officer" && !departmentId)) {
       setError("Please fill in all required fields.");
       return;
     }
-    if (!validateEmail(email)) {
-      setError("Invalid email address.");
-      return;
-    }
-    if (!validatePhone(phone)) {
-      setError("Invalid phone number.");
-      return;
-    }
-    if (!tempPasswordRef.current) {
-      setError("Temporary password not generated.");
-      return;
-    }
+    if (!validateEmail(email)) { setError("Invalid email address."); return; }
+    if (!validatePhone(phone)) { setError("Invalid phone number."); return; }
+    if (!tempPasswordRef.current) { setError("Temporary password not generated."); return; }
 
     setLoading(true);
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`${API_URL}}/api/admin/users/create/`, {
+      const res = await fetch(`${API_URL}/api/admin/users/create/`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           first_name: firstName.trim(),
           last_name: lastName.trim(),
@@ -142,19 +91,34 @@ useEffect(() => {
           email: email.trim(),
           phone: phone.trim(),
           role: role.toLowerCase(),
-          ...(role === "officer" ? { department } : {}),
+          ...(role === "officer" ? { department: departmentId } : {}), // <-- send ID, not string
           password: tempPasswordRef.current,
         }),
       });
 
       const data = await res.json();
+      if (!res.ok) { setError(data.detail || data.error || "Failed to create user."); return; }
 
-      if (!res.ok) {
-        setError(data.detail || data.error || "Failed to create user.");
-        return;
-      }
+      // Map backend response to shared User type
+      const newUser: User = {
+        id: data.id,
+        staff_id: data.staff_id,
+        username: data.username,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        name: `${data.first_name} ${data.last_name}`,
+        email: data.email,
+        phone: data.phone,
+        role: data.role.charAt(0).toUpperCase() + data.role.slice(1),
+        extra_roles: data.extra_roles ?? [],
+        department: data.department_name ?? "---", // backend should return the string name for display
+        status: data.is_active ? "Active" : "Inactive",
+        dateJoined: data.date_joined_display,
+        lastLogin: data.last_login ?? "",
+        lastLoginDisplay: data.last_login_display ?? "Never",
+      };
 
-      await onCreated();
+      await onCreated(newUser);
       onClose();
     } catch {
       setError("Something went wrong.");
@@ -163,7 +127,6 @@ useEffect(() => {
     }
   };
 
-  // =================== Input handlers ===================
   const handleEmailChange = (value: string) => {
     setEmail(value);
     if (!value) setEmailError("Email is required.");
@@ -179,13 +142,12 @@ useEffect(() => {
     else setPhoneError("");
   };
 
-  // =================== Confirmation modal ===================
+  // =================== JSX ===================
   if (confirming) {
     return (
       <div className="modal-overlay">
         <div className="modal-content modal-signup create-user-modal confirm-step">
           <button className="modal-close" onClick={onClose}>✕</button>
-
           <div className="modal-header">
             <h2>Confirm Details</h2>
             <p>Please verify all details before creating the account</p>
@@ -196,7 +158,7 @@ useEffect(() => {
           <div className="form-group"><strong>Last Name:</strong> {lastName}</div>
           <div className="form-group"><strong>Username:</strong> {finalUsername}</div>
           <div className="form-group"><strong>Role:</strong> {role}</div>
-          {role === "officer" && <div className="form-group"><strong>Department:</strong> {department}</div>}
+          {role === "officer" && <div className="form-group"><strong>Department:</strong> {departments.find(d => d.id === departmentId)?.name}</div>}
 
           <h3 className="account-header">Account Credentials</h3>
           <div className="form-group"><strong>Email:</strong> {email}</div>
@@ -218,7 +180,6 @@ useEffect(() => {
     );
   }
 
-  // =================== Main Form ===================
   return (
     <div className="modal-overlay">
       <div className="modal-content modal-signup create-user-modal">
@@ -248,7 +209,7 @@ useEffect(() => {
 
           <div className="form-group">
             <label>Username</label>
-            <input value={finalUsername} onChange={e => setUsername(e.target.value)} />
+            <input value={finalUsername} disabled onChange={e => setUsername(e.target.value)} />
           </div>
 
           <div className="form-row">
@@ -258,29 +219,23 @@ useEffect(() => {
                 <option value="" disabled>Select role</option>
                 <option value="admin">Admin</option>
                 <option value="officer">Officer</option>
-                {/* <option value="researcher">Researcher</option> */}
               </select>
             </div>
 
             {role === "officer" && (
               <div className="form-group">
                 <label>Department <span className="required-star">*</span></label>
-                  <div className="department-select-wrapper">
-                    <select
-                      value={department || ""}
-                      onChange={(e) => setDepartment(Number(e.target.value))}
-                    >
-                      <option value="">Select Department</option>
-                      {departments.map((dep) => (
-                        <option key={dep.id} value={dep.id}>
-                          {dep.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                <select
+                  value={departmentId}
+                  onChange={(e) => setDepartmentId(Number(e.target.value))}
+                >
+                  <option value="">Select Department</option>
+                  {departments.map((dep) => (
+                    <option key={dep.id} value={dep.id}>{dep.name}</option>
+                  ))}
+                </select>
               </div>
             )}
-
           </div>
 
           <div className="form-row">
@@ -304,24 +259,11 @@ useEffect(() => {
               className="btn-submit review-btn"
               onClick={() => {
                 setError("");
-
-                if (
-                  !firstName.trim() ||
-                  !lastName.trim() ||
-                  !role ||
-                  (role === "officer" && !department) ||
-                  !email.trim() ||
-                  !phone.trim() ||
-                  emailError ||
-                  phoneError
-                ) {
+                if (!firstName.trim() || !lastName.trim() || !role || (role === "officer" && !departmentId) || !email.trim() || !phone.trim() || emailError || phoneError) {
                   setError("Please fill in all required fields.");
                   return;
                 }
-
-                // Only generate password if it hasn't been generated yet
                 if (!tempPasswordRef.current) generateTempPassword();
-
                 setConfirming(true);
               }}
             >

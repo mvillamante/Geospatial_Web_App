@@ -1,1 +1,0 @@
-export { createTrafficLayer } from "./trafficLayer";

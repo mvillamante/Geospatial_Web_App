@@ -22,4 +22,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["gunicorn", "djangobackend.wsgi:application", "--bind", "0.0.0.0:$PORT", "--workers", "3", "--threads", "2", "--timeout", "120"]
+CMD sh -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn djangobackend.wsgi:application --bind 0.0.0.0:${PORT} --workers 3 --threads 2 --timeout 120"

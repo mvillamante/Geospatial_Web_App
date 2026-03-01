@@ -221,7 +221,32 @@ class VerifiedIncidentReportsView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return self.base_queryset()
+        queryset = self.base_queryset()
+
+        time_filter = self.request.GET.get("time_filter")
+
+        now = timezone.localtime(timezone.now())
+
+        if time_filter == "today":
+            start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            queryset = queryset.filter(created_at__gte=start)
+
+        elif time_filter == "7days":
+            queryset = queryset.filter(
+                created_at__gte=now - timedelta(days=7)
+            )
+
+        elif time_filter == "last30days":
+            queryset = queryset.filter(
+                created_at__gte=now - timedelta(days=30)
+            )
+
+        elif time_filter == "last12months":
+            queryset = queryset.filter(
+                created_at__gte=now - timedelta(days=365)
+            )
+
+        return queryset
 
     def base_queryset(self):
         return (

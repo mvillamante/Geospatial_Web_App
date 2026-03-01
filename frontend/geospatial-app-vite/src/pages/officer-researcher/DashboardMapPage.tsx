@@ -219,7 +219,7 @@ const DashboardMapPage: React.FC = () => {
   } = useUniversalIndexData(year);
 
   /*---------- Right Panel ----------*/
-  const [rightNav, setRightNav] = useState<"analytics" | "export">("analytics");
+  const [rightNav, setRightNav] = useState<"analytics" | "export" | "import">("analytics");
 
   /*---------- Placeholder Export Section (Right Panel)----------*/
   const modelArtifactItems: ChartItem[] = [

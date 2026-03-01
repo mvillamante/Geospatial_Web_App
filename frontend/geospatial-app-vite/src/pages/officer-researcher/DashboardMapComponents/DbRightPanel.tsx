@@ -2,14 +2,15 @@ import React, { useState, useEffect, type JSX } from "react";
 import DbChartsSection from "./right/DbChartsSection";
 import DbAnalyticsSection from "./right/DbAnalyticsSection";
 import DbExportSection from "./right/DbExportSection";
+import DbImportSection from "./right/DbImportSection";
 import ChartExportPool from "./right/ChartExportPool";
 import "../DashboardMapPage.css";
 
 interface RightPanelProps {
   isOpen: boolean;
   toggle: () => void;
-  rightNav: "analytics" | "export";
-  setRightNav: (val: "analytics" | "export") => void;
+  rightNav: "analytics" | "export" | "import";
+  setRightNav: (val: "analytics" | "export" | "import") => void;
   exportSections: any[];
   recentDownloads: any[];
   handleDownload: (item: any, section: string) => void;
@@ -122,14 +123,14 @@ useEffect(() => {
           {isRightPanelOpen ? "→" : "←"}
         </button>
 
-        <div className="segmented-control small slide two">
+        <div className="segmented-control small slide three">
           <span className={`slider ${rightNav}`} />
 
-          {["analytics", "export"].map((tab) => (
+          {["analytics", "export", "import"].map((tab) => (
             <button
               key={tab}
               className={rightNav === tab ? "active" : ""}
-              onClick={() => setRightNav(tab as "analytics" | "export")}
+              onClick={() => setRightNav(tab as "analytics" | "export" | "import")}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
@@ -186,6 +187,14 @@ useEffect(() => {
               handleDownload={handleDownload}
             />
           </>
+        )}
+
+        {rightNav === "import" && (
+          <DbImportSection
+            getGreenIndexColor={props.getGreenIndexColor}
+            getHazardIndexColor={props.getHazardIndexColor}
+            getCalamityRiskColor={props.getCalamityRiskColor}
+          />
         )}
       </div>
     </aside>

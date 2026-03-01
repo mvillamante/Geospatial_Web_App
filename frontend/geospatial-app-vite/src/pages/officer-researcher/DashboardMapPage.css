@@ -1195,17 +1195,17 @@
   scrollbar-width: thin;
 }
 
-/*slide three*/
+/*slide three (Analytics / Export / Import) */
 .dbmright-panel .segmented-control.slide.three .slider {
     width: calc(33.3333% - 4px);
 }
-.dbmright-panel .segmented-control.slide.three .slider.charts {
+.dbmright-panel .segmented-control.slide.three .slider.analytics {
     transform: translateX(0%);
 }
-.dbmright-panel .segmented-control.slide.three .slider.analytics {
+.dbmright-panel .segmented-control.slide.three .slider.export {
     transform: translateX(100%);
 }
-.dbmright-panel .segmented-control.slide.three .slider.export {
+.dbmright-panel .segmented-control.slide.three .slider.import {
     transform: translateX(200%);
 }
 
@@ -2588,4 +2588,349 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ----- Import Section ----- */
+.import-section {
+  padding-top: 8px;
+}
+.import-section h4 {
+  margin-bottom: 4px;
+}
+.import-subtitle {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.import-index-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.import-index-tabs button {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.import-index-tabs button:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+.import-index-tabs button.active {
+  background: #ecfdf5;
+  border-color: #2e7d32;
+  color: #065f46;
+}
+.import-index-tabs button.active.hazard {
+  background: #fffbeb;
+  border-color: #b45309;
+  color: #78350f;
+}
+.import-index-tabs button.hazard .import-index-tabs-icon-hazard {
+  color: #e65100;
+  display: inline-flex;
+}
+.import-index-tabs button.active.calamity {
+  background: #fef2f2;
+  border-color: #b91c1c;
+  color: #7f1d1d;
+}
+.import-index-tabs button.calamity .import-index-tabs-icon-calamity {
+  color: #dc2626;
+  display: inline-flex;
+}
+.import-index-tabs button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.import-green-card {
+  margin-top: 0;
+}
+.import-hazard-card {
+  margin-top: 0;
+}
+.import-calamity-card {
+  margin-top: 0;
+}
+.import-download-link.hazard {
+  color: #b45309;
+}
+.import-download-link.hazard:hover {
+  color: #92400e;
+}
+.import-download-link.calamity {
+  color: #b91c1c;
+}
+.import-download-link.calamity:hover {
+  color: #991b1b;
+}
+.import-projection-hazard .import-projection-label,
+.import-projection-hazard .import-projection-value {
+  color: #78350f;
+}
+.import-projection-calamity .import-projection-label,
+.import-projection-calamity .import-projection-value {
+  color: #7f1d1d;
+}
+.import-chart-hazard .panel-card-title {
+  color: #78350f;
+}
+.import-chart-calamity .panel-card-title {
+  color: #b91c1c;
+}
+/* Hazard Index: orange key insight cards */
+.import-key-insight.import-insight-hazard {
+  border-left-color: #b45309;
+  background: #fff7ed;
+}
+.import-key-insight.import-insight-2026.import-insight-hazard {
+  border-left-color: #92400e;
+  background: #ffedd5;
+}
+.import-hazard-card .import-key-insight.import-insight-2026.import-insight-hazard .import-insight-label {
+  color: #78350f;
+}
+.import-insight-hazard .import-insight-label {
+  color: #b45309;
+}
+/* Calamity Risk: red key insight cards */
+.import-key-insight.import-insight-calamity {
+  border-left-color: #b91c1c;
+  background: #fef2f2;
+}
+.import-key-insight.import-insight-2026.import-insight-calamity {
+  border-left-color: #991b1b;
+  background: #fee2e2;
+}
+.import-calamity-card .import-key-insight.import-insight-2026.import-insight-calamity .import-insight-label {
+  color: #7f1d1d;
+}
+.import-insight-calamity .import-insight-label {
+  color: #b91c1c;
+}
+.import-file-name-calamity {
+  color: #b91c1c;
+  font-weight: 500;
+}
+.import-dataset-dropdown {
+  margin-bottom: 12px;
+}
+.import-dataset-dropdown label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.import-dataset-dropdown select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+.import-format-hint {
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+.import-format-hint code {
+  font-size: 10px;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.import-download-link {
+  color: #2e7d32;
+  text-decoration: none;
+  font-weight: 500;
+}
+.import-download-link:hover {
+  text-decoration: underline;
+}
+.import-upload-group {
+  margin-bottom: 14px;
+}
+.import-upload-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.import-file-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.import-file-name {
+  font-size: 12px;
+  color: #059669;
+  word-break: break-all;
+}
+.import-file-name-hazard {
+  color: #e65100;
+}
+.import-file-name.import-file-name-calamity {
+  color: #b91c1c;
+  font-weight: 500;
+}
+.import-upload-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.import-file-input {
+  font-size: 11px;
+  max-width: 140px;
+  color: transparent;
+}
+.import-file-input::file-selector-button {
+  color: #111827;
+}
+.import-file-input::-webkit-file-upload-button {
+  color: #111827;
+}
+.import-sample-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #2e7d32;
+  border-radius: 6px;
+  background: #ecfdf5;
+  color: #065f46;
+  cursor: pointer;
+}
+.import-sample-btn:hover {
+  background: #d1fae5;
+}
+.import-error {
+  font-size: 12px;
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.import-key-insights {
+  margin-bottom: 12px;
+}
+.import-key-insights .panel-card-title {
+  display: block;
+  margin-bottom: 10px;
+}
+.import-key-insight {
+  border-left: 4px solid #2e7d32;
+  background: #f0fdf4;
+  margin-bottom: 8px;
+}
+.import-key-insight:last-child {
+  margin-bottom: 0;
+}
+.import-key-insight.import-insight-2026 {
+  border-left-color: #0ea5e9;
+  background: #f0f9ff;
+}
+/* Green Index: 2026 projection uses green theme */
+.import-green-card .import-key-insight.import-insight-2026 {
+  border-left-color: #15803d;
+  background: #dcfce7;
+}
+.import-green-card .import-key-insight.import-insight-2026 .import-insight-label {
+  color: #166534;
+}
+.import-insight-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+.import-insight-loading {
+  font-weight: 400;
+  color: #64748b;
+}
+.import-insight-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #334155;
+  margin: 0;
+}
+.import-insight-text.import-insight-error {
+  color: #dc2626;
+}
+.import-year-select {
+  margin-bottom: 12px;
+}
+.import-year-select label {
+  font-size: 12px;
+  margin-right: 8px;
+}
+.import-year-select select {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+.import-projection-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-left: 4px solid #2e7d32;
+  margin-bottom: 12px;
+}
+.import-projection-summary.import-2026 {
+  border-left-color: #0ea5e9;
+}
+.import-green-card .import-projection-summary.import-2026 {
+  border-left-color: #15803d;
+}
+.import-hazard-card .import-projection-summary.import-2026 {
+  border-left-color: #92400e;
+}
+.import-calamity-card .import-projection-summary.import-2026 {
+  border-left-color: #991b1b;
+}
+.import-projection-label {
+  font-size: 12px;
+  color: #64748b;
+}
+.import-projection-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #065f46;
+}
+.import-2026 .import-projection-value {
+  color: #0369a1;
+}
+.import-green-card .import-2026 .import-projection-value {
+  color: #166534;
+}
+.import-hazard-card .import-2026 .import-projection-value {
+  color: #78350f;
+}
+.import-calamity-card .import-2026 .import-projection-value {
+  color: #7f1d1d;
+}
+.import-chart-card {
+  margin-top: 12px;
+}
+.import-coming-soon {
+  text-align: center;
+  padding: 24px;
+  color: #64748b;
 }

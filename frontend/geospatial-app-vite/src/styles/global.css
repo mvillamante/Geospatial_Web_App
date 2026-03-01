@@ -640,6 +640,11 @@ body {
   border-color: transparent transparent #ffffff transparent;
 }
 
+.help-tooltip.help-tooltip-right-edge::after {
+  left: auto;
+  right: 12px;
+}
+
 .header-with-help {
   display: flex;
   align-items: center;

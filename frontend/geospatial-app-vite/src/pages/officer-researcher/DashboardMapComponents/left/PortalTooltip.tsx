@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface PortalTooltipProps {
@@ -6,6 +6,8 @@ interface PortalTooltipProps {
   content: React.ReactNode;
   triggerRef: React.RefObject<HTMLElement | null>;
   className?: string;
+  /** "bottom" = below trigger, left-aligned (extends right). "bottom-left" = below trigger, right-aligned (extends left, for right-edge panels) */
+  placement?: "bottom" | "bottom-left";
 }
 
 /**
@@ -17,6 +19,7 @@ export const PortalTooltip: React.FC<PortalTooltipProps> = ({
   content,
   triggerRef,
   className = "help-tooltip left-panel-tooltip-portal",
+  placement = "bottom",
 }) => {
   const [rect, setRect] = useState<DOMRect | null>(null);
 
@@ -48,17 +51,26 @@ export const PortalTooltip: React.FC<PortalTooltipProps> = ({
 
   if (!show || !rect) return null;
 
+  const style: React.CSSProperties = {
+    position: "fixed",
+    top: rect.bottom + 8,
+    zIndex: 2147483647,
+    pointerEvents: "none",
+  };
+
+  if (placement === "bottom-left") {
+    style.right = window.innerWidth - rect.left;
+    style.left = "auto";
+  } else {
+    style.left = rect.left;
+  }
+
+  const resolvedClass = placement === "bottom-left"
+    ? `${className} help-tooltip-right-edge`
+    : className;
+
   return createPortal(
-    <div
-      className={className}
-      style={{
-        position: "fixed",
-        top: rect.bottom + 8,
-        left: rect.left,
-        zIndex: 2147483647,
-        pointerEvents: "none",
-      }}
-    >
+    <div className={resolvedClass} style={style}>
       {content}
     </div>,
     document.body

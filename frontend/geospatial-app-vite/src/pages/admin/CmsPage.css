@@ -399,3 +399,28 @@
   z-index: 10;
 }
 
+/* View Full Details modal */
+.cms-page .modal input[readonly],
+.cms-page .modal textarea[readonly] {
+    background: #f3f4f6;
+    color: #374151;
+    cursor: default;
+}
+
+.cms-page .modal .editor-input {
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    padding: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+    border-radius: 10px;
+}
+
+.cms-page .modal .attachment-preview img {
+    width: 140px;
+    height: auto;
+    border-radius: 8px;
+    margin-right: 8px;
+    margin-top: 8px;
+    border: 1px solid #e5e7eb;
+}

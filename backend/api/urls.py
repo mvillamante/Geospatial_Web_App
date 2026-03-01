@@ -55,6 +55,7 @@ urlpatterns = [
     path("admin/stats/", dashboard_stats,name="dashboard-stats"),
     path("admin/users/<int:user_id>/change-password/", change_user_password),
     path("admin/departments/", DepartmentListCreateView.as_view()),
+    path("admin/departments/<int:pk>/", DepartmentDetailView.as_view(), name="departments-detail"),
 
     # Researcher_Views
     path("researcher/request/", CreateResearcherRequestView.as_view(), name="researcher_request_create"),

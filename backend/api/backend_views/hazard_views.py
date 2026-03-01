@@ -257,12 +257,6 @@ def calamity_risk_ai_insight(request):
             {"error": "Missing required query parameter: year"},
             status=400,
         )
-    api_key = os.getenv("GROQ_API_KEY")
-    if not api_key:
-        return JsonResponse(
-            {"error": "AI not configured. Set GROQ_API_KEY in your environment.", "summary": None},
-            status=503,
-        )
     # Use same data source order as frontend: forecast first, then historical (so Key Insights match map/left panel).
     full: Dict[str, Any] = {}
     for path in (
@@ -284,6 +278,17 @@ def calamity_risk_ai_insight(request):
             status=404,
         )
     payload = _calamity_risk_ai_insight_payload(year, full[year])
+
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        fallback = _calamity_risk_fallback_insights(payload)
+        return JsonResponse({
+            "summary": fallback["summary"],
+            "risk_peak_insight": fallback["risk_peak"],
+            "adaptation_insight": fallback["adaptation"],
+            "year": year,
+            "payload": payload,
+        })
 
     now = time.time()
     if year in _CALAMITY_AI_INSIGHT_CACHE:
@@ -496,15 +501,6 @@ def green_index_ai_insight(request):
             {"error": "Missing required query parameter: year"},
             status=400,
         )
-    api_key = os.getenv("GROQ_API_KEY")
-    if not api_key:
-        return JsonResponse(
-            {
-                "error": "AI not configured. Set GROQ_API_KEY in your environment. Get a free key at https://console.groq.com/keys",
-                "summary": None,
-            },
-            status=503,
-        )
     try:
         full = _load_json(GREEN_INDEX_OUTPUTS / "green_index_data.json")
     except FileNotFoundError as exc:
@@ -519,6 +515,17 @@ def green_index_ai_insight(request):
             status=404,
         )
     payload = _green_index_ai_insight_payload(year, full[year])
+
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        fallback = _green_index_fallback_insights(payload)
+        return JsonResponse({
+            "summary": fallback["summary"],
+            "hotspots_insight": fallback["hotspots"],
+            "areas_for_greening_insight": fallback["areas_for_greening"],
+            "year": year,
+            "payload": payload,
+        })
 
     # Return cached insights if still valid (reduces API calls and avoids 429)
     now = time.time()
@@ -1473,12 +1480,6 @@ def hazard_index_ai_insight(request):
             {"error": "Missing required query parameter: year"},
             status=400,
         )
-    api_key = os.getenv("GROQ_API_KEY")
-    if not api_key:
-        return JsonResponse(
-            {"error": "AI not configured. Set GROQ_API_KEY in your environment.", "summary": None},
-            status=503,
-        )
     try:
         full = _load_json(HAZARD_INDEX_OUTPUTS / "hazard_index_data.json")
     except FileNotFoundError as exc:
@@ -1493,6 +1494,18 @@ def hazard_index_ai_insight(request):
             status=404,
         )
     payload = _hazard_index_ai_insight_payload(year, full[year])
+
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        fallback = _hazard_index_fallback_insights(payload)
+        return JsonResponse({
+            "summary": fallback["summary"],
+            "hotspots_insight": fallback["hotspots"],
+            "lower_risk_insight": fallback["lower_risk"],
+            "earthquake_typhoon_insight": fallback["earthquake_typhoon"],
+            "year": year,
+            "payload": payload,
+        })
 
     now = time.time()
     if year in _HAZARD_AI_INSIGHT_CACHE:

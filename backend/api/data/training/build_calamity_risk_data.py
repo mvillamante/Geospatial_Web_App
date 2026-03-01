@@ -9,7 +9,7 @@ Inputs (must exist in the project root):
 Output:
 - calamity_risk_data.json   : yearly calamity risk likelihood per barangay
 
-Methodology (aligned with the thesis reference):
+Methodology (multiplicative approach):
 - Each component is expressed on a 0–1 scale:
   - Hazard component  (H):   hazard_index_raw  (already 0–1 from hazard_index_data.json)
   - Exposure component (E):  exposure index    (derived from training data, 0–1)
@@ -17,7 +17,7 @@ Methodology (aligned with the thesis reference):
 
 - Calamity Risk Likelihood (CRL) is computed as:
 
-      CRL = 0.5 * H + 0.3 * E + 0.2 * (1 - G)
+      CRL = H × E × (1 - G)
 
   where:
     - H   = hazard severity
@@ -163,8 +163,8 @@ def main() -> None:
             g_idx = float(g_entry.get("green_index", 0.0))
             g_raw = max(0.0, min(1.0, g_idx / 100.0))
 
-            # Calamity Risk Likelihood (0–1)
-            crl_raw = 0.5 * h_raw + 0.3 * e_raw + 0.2 * (1.0 - g_raw)
+            # Calamity Risk Likelihood (0–1) — multiplicative: CRL = H × E × (1−G)
+            crl_raw = h_raw * e_raw * (1.0 - g_raw)
             crl_raw = max(0.0, min(1.0, crl_raw))
             crl_100 = crl_raw * 100.0
 
@@ -184,7 +184,7 @@ def main() -> None:
     with OUTPUT_PATH.open("w", encoding="utf-8") as f:
         json.dump(out, f, indent=2)
 
-    print(f"✓ Saved calamity risk data to: {OUTPUT_PATH}")
+    print(f"[OK] Saved calamity risk data to: {OUTPUT_PATH}")
     print(f"  Years: {years[0]}–{years[-1]}  | Barangays: {len(all_barangays)}")
 
 

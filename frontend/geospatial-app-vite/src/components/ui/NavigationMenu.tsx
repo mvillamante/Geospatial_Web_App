@@ -11,6 +11,9 @@ import { PiUsersBold } from "react-icons/pi";
 import { TbFileReport } from "react-icons/tb";
 import { FiEdit } from "react-icons/fi";
 
+
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface NavItem {
   label: string;
   path: string;
@@ -18,8 +21,6 @@ interface NavItem {
 }
 
 const NavigationMenu: React.FC = () => {
-  const API_URL = import.meta.env.VITE_API_URL;
-
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
@@ -36,7 +37,7 @@ const NavigationMenu: React.FC = () => {
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/notifications/unread-count/`, {
+        const res = await fetch(`${API_URL}/api/notifications/unread-count/)`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}`},
         });
         if (!res.ok) return;

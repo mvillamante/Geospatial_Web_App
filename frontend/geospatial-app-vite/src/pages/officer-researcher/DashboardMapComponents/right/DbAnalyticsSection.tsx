@@ -87,7 +87,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
     setEdaError(null);
     setLoadingEda(true);
     try {
-      const res = await fetch("/api/hazard/eda/summary/");
+      const res = await fetch(`${API_URL}/api/hazard/eda/summary/`);
       if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
       const payload = await res.json();
 
@@ -133,7 +133,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
     setGreenAiInsight(null);
     setGreenHotspotsInsight(null);
     setGreenAreasForGreeningInsight(null);
-    fetch(`/api/hazard/green-index/ai-insight/?year=${year}`)
+    fetch(`${API_URL}/api/hazard/green-index/ai-insight/?year=${year}`)
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return;
@@ -231,7 +231,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
     setCalamityAiSummary(null);
     setCalamityRiskPeakInsight(null);
     setCalamityAdaptationInsight(null);
-    fetch(`/api/hazard/calamity-risk/ai-insight/?year=${year}`)
+    fetch(`${API_URL}/api/hazard/calamity-risk/ai-insight/?year=${year}`)
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return;

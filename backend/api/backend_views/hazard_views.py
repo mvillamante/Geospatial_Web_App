@@ -645,6 +645,745 @@ def green_index_ai_insight(request):
         })
 
 
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def green_index_import_ai_insight(request):
+    """
+    Returns an AI-generated key insight for user-imported Green Index data.
+    Used by the Import section to help users understand trends, projections,
+    and data quality in plain language.
+
+    POST body (JSON): {
+        "chartData": [{"year": "2020", "value": 52.3}, ...],
+        "rowCount": 96,
+        "hasError": false,
+        "parseError": null
+    }
+
+    Uses Groq (Llama). Set GROQ_API_KEY in environment.
+    """
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        return JsonResponse(
+            {
+                "error": "AI not configured. Set GROQ_API_KEY in your environment.",
+                "insight": None,
+            },
+            status=503,
+        )
+    try:
+        body = json.loads(request.body.decode("utf-8")) if request.body else {}
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"error": "Invalid JSON body", "insight": None},
+            status=400,
+        )
+    chart_data = body.get("chartData") or []
+    row_count = body.get("rowCount") or 0
+    has_error = body.get("hasError", False)
+    parse_error = body.get("parseError") or ""
+    selected_year = body.get("selectedYear")
+    year_avg = body.get("yearAvg")
+    val_2026 = body.get("val2026")
+    data_quality = body.get("dataQuality") or {}
+    has_negative = data_quality.get("hasNegative", False)
+    has_over_100 = data_quality.get("hasOver100", False)
+    min_gi = data_quality.get("minGreenIndex")
+    max_gi = data_quality.get("maxGreenIndex")
+    bad_data = has_negative or has_over_100
+    has_2026 = any(d.get("year") == "2026" for d in chart_data) if chart_data else False
+    prev_2026_val: Optional[float] = None
+    prev_year_num: Optional[int] = None
+    prev_year_val: Optional[float] = None
+    bad_projection = False
+
+    if has_error and parse_error:
+        prompt = (
+            "Analyst for Green Index import. The user imported wrong data (invalid or missing columns). "
+            "Write ONE short paragraph (2 sentences): state that wrong data was imported, what is missing or invalid, and how to fix it. "
+            f"Technical detail: {parse_error}. Use 'you/your'. Do NOT say 'you're getting a validation error'. Under 60 words."
+        )
+    elif not chart_data:
+        prompt = (
+            "Analyst for Green Index import. User has no data yet. "
+            "One sentence encouraging upload. CSV needs year, barangay, green_index. Under 25 words."
+        )
+    else:
+        years = [d.get("year") for d in chart_data if d.get("year")]
+        values = [d.get("value") for d in chart_data if isinstance(d.get("value"), (int, float))]
+        min_year = min(years, key=lambda x: int(x)) if years else None
+        max_year = max(years, key=lambda x: int(x)) if years else None
+        trend = "upward" if len(values) >= 2 and values[-1] > values[0] else "downward" if len(values) >= 2 and values[-1] < values[0] else "flat"
+
+        numeric_points: List[Tuple[int, float]] = []
+        for d in chart_data:
+            y = d.get("year")
+            v = d.get("value")
+            if not y or not isinstance(v, (int, float)):
+                continue
+            try:
+                yi = int(y)
+            except (TypeError, ValueError):
+                continue
+            numeric_points.append((yi, v))
+        numeric_points.sort(key=lambda x: x[0])
+        if has_2026:
+            for yi, v in numeric_points:
+                if yi == 2026:
+                    break
+                prev_2026_val = v
+
+        if has_2026 and isinstance(val_2026, (int, float)):
+            bad_projection = (
+                val_2026 < 0
+                or val_2026 > 100
+                or (
+                    prev_2026_val is not None
+                    and val_2026 >= prev_2026_val + 20
+                    and val_2026 >= prev_2026_val * 1.3
+                )
+            )
+        bad_warning = ""
+        if bad_data:
+            bad_warning = (
+                "CRITICAL: Data quality issue detected. Green Index should be 0-100. "
+                + (f"Your data has values outside range: min={min_gi}, max={max_gi}. " if min_gi is not None and max_gi is not None else "")
+                + "You MUST warn the user their dataset appears invalid. "
+                "Say: check your CSV for negative values or values over 100. Suggest re-uploading valid data."
+            )
+        prev_year_num = int(numeric_points[-2][0]) if len(numeric_points) >= 2 and numeric_points[-1][0] == 2026 else None
+        prev_year_val = numeric_points[-2][1] if prev_year_num is not None else prev_2026_val
+        prompt = (
+            "Analyst for Cabuyao Green Index. Reply with EXACTLY 2 short paragraphs separated by a line with only: ---\n\n"
+            + bad_warning
+            + ("\n\n" if bad_warning else "")
+            + "Paragraph 1 (City average): 1–2 sentences on the historical city average. "
+            + ("If bad data: warn user first, then brief trend. " if bad_data else "")
+            + f"Selected year: {selected_year}, value: {year_avg}%. Years {min_year}–{max_year}. Trend: {trend}. Under 50 words.\n\n"
+            + "Paragraph 2 (2026 projection): ONE sentence. Compare 2026 to the last year before it. "
+            + (f"2026: {val_2026}%, last year ({prev_year_num}): {prev_year_val}%. " if has_2026 and val_2026 is not None and prev_year_val is not None and prev_year_num is not None else f"2026: {val_2026}%. " if has_2026 and val_2026 is not None else "No 2026 data. ")
+            + "Say clearly if the projection is good (up/improving) or bad (down/declining) compared to last year. "
+            + ("If 2026 is outside 0–100 or unrealistic, warn the user to check their CSV. " if bad_projection else "")
+            + "Under 35 words. No filler.\n\n"
+            "No intro. No bullets. Output only the 2 paragraphs."
+        )
+
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    req_body = {
+        "model": "llama-3.1-8b-instant",
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 180,
+        "temperature": 0.3,
+    }
+    try:
+        r = requests.post(url, json=req_body, headers=headers, timeout=15)
+        if r.status_code == 429:
+            logger.warning("Groq rate limit (429) on import insight")
+            if has_error:
+                fallback_avg = f"Fix your data: {parse_error}. CSV needs year, barangay, green_index."
+                fallback_2026 = ""
+            elif bad_data:
+                fallback_avg = (
+                    "Data quality issue: Green Index should be 0–100. "
+                    f"Your data has values outside range (min={min_gi}, max={max_gi}). "
+                    "Check your CSV for negatives or values over 100 and re-upload."
+                )
+                fallback_2026 = (
+                    f"2026 projection ({val_2026}%) appears invalid. "
+                    "Check your CSV and re-upload valid data."
+                    if bad_projection
+                    else (
+                        f"2026 projection ({val_2026}%) is good — up from {prev_year_val}% in {prev_year_num}."
+                        if prev_year_val is not None and prev_year_num is not None and val_2026 is not None and val_2026 > prev_year_val
+                        else f"2026 projection ({val_2026}%) is concerning — down from {prev_year_val}% in {prev_year_num}."
+                        if prev_year_val is not None and prev_year_num is not None and val_2026 is not None and val_2026 < prev_year_val
+                        else f"2026 projection: {val_2026}%." if has_2026 and val_2026 is not None else "No 2026 projection."
+                    )
+                )
+            else:
+                fallback_avg = "City average reflects your historical Green Index scores."
+                if has_2026 and val_2026 is not None and prev_year_val is not None and prev_year_num is not None:
+                    fallback_2026 = (
+                        f"2026 projection ({val_2026}%) is good — up from {prev_year_val}% in {prev_year_num}."
+                        if val_2026 > prev_year_val
+                        else f"2026 projection ({val_2026}%) is concerning — down from {prev_year_val}% in {prev_year_num}."
+                        if val_2026 < prev_year_val
+                        else f"2026 projection: {val_2026}% (flat vs {prev_year_num})."
+                    )
+                else:
+                    fallback_2026 = f"2026 projection: {val_2026}%." if has_2026 and val_2026 is not None else "No 2026 projection."
+            return JsonResponse({"insight_avg": fallback_avg, "insight_2026": fallback_2026, "error": None})
+        r.raise_for_status()
+        out = r.json()
+        text = None
+        for choice in out.get("choices") or []:
+            msg = choice.get("message") or {}
+            if "content" in msg and msg["content"]:
+                text = msg["content"].strip()
+                break
+        if not text:
+            if bad_data:
+                fallback_avg = (
+                    "Data quality issue: Green Index should be 0–100. "
+                    f"Your data has values outside range (min={min_gi}, max={max_gi}). "
+                    "Check your CSV for negatives or values over 100 and re-upload."
+                )
+                if has_2026 and val_2026 is not None:
+                    if bad_projection:
+                        fallback_2026 = (
+                            f"Warning: the 2026 Green Index projection ({val_2026}%) looks unrealistic. "
+                            "Green Index should normally stay between 0–100 and follow past trends. "
+                            "Check your CSV for errors before using this projection."
+                        )
+                    else:
+                        fallback_2026 = (
+                            f"2026 projection ({val_2026}%) is good — up from {prev_year_val}% in {prev_year_num}."
+                            if prev_year_val is not None and prev_year_num is not None and val_2026 and val_2026 > prev_year_val
+                            else f"2026 projection ({val_2026}%) is concerning — down from {prev_year_val}% in {prev_year_num}."
+                            if prev_year_val is not None and prev_year_num is not None and val_2026 and val_2026 < prev_year_val
+                            else f"2026 projection: {val_2026}%."
+                        )
+                else:
+                    fallback_2026 = ""
+            else:
+                fallback_avg = "City average reflects your imported Green Index data."
+                if has_2026 and val_2026 is not None and prev_year_val is not None and prev_year_num is not None:
+                    fallback_2026 = (
+                        f"2026 projection ({val_2026}%) is good — up from {prev_year_val}% in {prev_year_num}."
+                        if val_2026 > prev_year_val
+                        else f"2026 projection ({val_2026}%) is concerning — down from {prev_year_val}% in {prev_year_num}."
+                        if val_2026 < prev_year_val
+                        else f"2026 projection: {val_2026}% (flat vs {prev_year_num})."
+                    )
+                else:
+                    fallback_2026 = f"2026 projection: {val_2026}%." if has_2026 and val_2026 is not None else ""
+            return JsonResponse({"insight_avg": fallback_avg, "insight_2026": fallback_2026, "error": None})
+        parts = [p.strip() for p in text.split("---") if p.strip()]
+        insight_avg = parts[0] if parts else "City average reflects your imported data."
+        if len(parts) >= 2:
+            insight_2026 = parts[1]
+        elif not has_2026 or val_2026 is None:
+            insight_2026 = ""
+        elif bad_projection:
+            insight_2026 = (
+                f"Warning: the 2026 Green Index projection ({val_2026}%) spiked unusually high. "
+                "This projection may be invalid; Green Index should stay within 0–100 and align with previous years. "
+                "Double-check your CSV before relying on this value."
+            )
+        elif bad_data:
+            insight_2026 = (
+                f"2026 projection ({val_2026}%) may be unreliable because your dataset has values outside 0–100. "
+                "Review and clean your CSV before trusting this forecast."
+            )
+        else:
+            insight_2026 = f"2026 projection: {val_2026}%."
+        return JsonResponse({"insight_avg": insight_avg, "insight_2026": insight_2026, "error": None})
+    except requests.RequestException as e:
+        logger.exception("Groq API failed for import insight: %s", e)
+        if bad_data and chart_data:
+            fallback_avg = (
+                "Data quality issue: Green Index should be 0–100. "
+                f"Your data has min={min_gi}, max={max_gi}. Check CSV and re-upload."
+            )
+            if has_2026 and val_2026 is not None:
+                if bad_projection:
+                    fallback_2026 = (
+                        f"Warning: the 2026 Green Index projection ({val_2026}%) looks unrealistic. "
+                        "Check your CSV for errors before using this projection."
+                    )
+                else:
+                    fallback_2026 = f"2026: {val_2026}%."
+            else:
+                fallback_2026 = ""
+        else:
+            fallback_avg = "Chart is valid; AI insight unavailable. Review the trends above."
+            fallback_2026 = f"2026: {val_2026}%." if has_2026 and val_2026 is not None else ""
+        return JsonResponse({"insight_avg": fallback_avg, "insight_2026": fallback_2026, "error": str(e)})
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def hazard_index_import_ai_insight(request):
+    """
+    Returns an AI-generated key insight for user-imported Hazard Index data.
+    Used by the Import section. Higher hazard index = higher risk (0–100).
+    """
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        return JsonResponse(
+            {
+                "error": "AI not configured. Set GROQ_API_KEY in your environment.",
+                "insight_avg": None,
+                "insight_2026": None,
+            },
+            status=503,
+        )
+    try:
+        body = json.loads(request.body.decode("utf-8")) if request.body else {}
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"error": "Invalid JSON body", "insight_avg": None, "insight_2026": None},
+            status=400,
+        )
+    chart_data = body.get("chartData") or []
+    row_count = body.get("rowCount") or 0
+    has_error = body.get("hasError", False)
+    parse_error = body.get("parseError") or ""
+    selected_year = body.get("selectedYear")
+    year_avg = body.get("yearAvg")
+    val_2026 = body.get("val2026")
+    data_quality = body.get("dataQuality") or {}
+    has_negative = data_quality.get("hasNegative", False)
+    has_over_100 = data_quality.get("hasOver100", False)
+    min_hi = data_quality.get("minHazardIndex")
+    max_hi = data_quality.get("maxHazardIndex")
+    bad_data = has_negative or has_over_100
+    has_2026 = any(d.get("year") == "2026" for d in chart_data) if chart_data else False
+    prev_2026_val: Optional[float] = None
+    prev_year_num: Optional[int] = None
+    prev_year_val: Optional[float] = None
+    bad_projection = False
+
+    if has_error and parse_error:
+        prompt = (
+            "Analyst for Hazard Index import. The user imported wrong data (invalid or missing columns). "
+            "Write ONE short paragraph (2 sentences): state that wrong data was imported, what is missing or invalid, and how to fix it. "
+            f"Technical detail: {parse_error}. Use 'you/your'. Do NOT say 'you're getting a validation error'. Under 60 words."
+        )
+    elif not chart_data:
+        prompt = (
+            "Analyst for Hazard Index import. User has no data yet. "
+            "One sentence encouraging upload. CSV needs year, barangay, hazard_index. Under 25 words."
+        )
+    else:
+        years = [d.get("year") for d in chart_data if d.get("year")]
+        values = [d.get("value") for d in chart_data if isinstance(d.get("value"), (int, float))]
+        min_year = min(years, key=lambda x: int(x)) if years else None
+        max_year = max(years, key=lambda x: int(x)) if years else None
+        trend = "upward" if len(values) >= 2 and values[-1] > values[0] else "downward" if len(values) >= 2 and values[-1] < values[0] else "flat"
+
+        numeric_points: List[Tuple[int, float]] = []
+        for d in chart_data:
+            y = d.get("year")
+            v = d.get("value")
+            if not y or not isinstance(v, (int, float)):
+                continue
+            try:
+                yi = int(y)
+            except (TypeError, ValueError):
+                continue
+            numeric_points.append((yi, v))
+        numeric_points.sort(key=lambda x: x[0])
+        if has_2026:
+            for yi, v in numeric_points:
+                if yi == 2026:
+                    break
+                prev_2026_val = v
+
+        if has_2026 and isinstance(val_2026, (int, float)):
+            bad_projection = (
+                val_2026 < 0
+                or val_2026 > 100
+                or (
+                    prev_2026_val is not None
+                    and val_2026 >= prev_2026_val + 25
+                    and val_2026 >= prev_2026_val * 1.4
+                )
+            )
+        bad_warning = ""
+        if bad_data:
+            bad_warning = (
+                "CRITICAL: Data quality issue detected. Hazard Index should be 0-100. "
+                + (f"Your data has values outside range: min={min_hi}, max={max_hi}. " if min_hi is not None and max_hi is not None else "")
+                + "You MUST warn the user their dataset appears invalid. "
+                "Say: check your CSV for negative values or values over 100. Suggest re-uploading valid data."
+            )
+        prev_year_num = int(numeric_points[-2][0]) if len(numeric_points) >= 2 and numeric_points[-1][0] == 2026 else None
+        prev_year_val = numeric_points[-2][1] if prev_year_num is not None else prev_2026_val
+        prompt = (
+            "Analyst for Cabuyao Hazard Index (higher = more risk, 0–100). Reply with EXACTLY 2 short paragraphs separated by a line with only: ---\n\n"
+            + bad_warning
+            + ("\n\n" if bad_warning else "")
+            + "Paragraph 1 (Hazard average): 1–2 sentences on the historical city average hazard. "
+            + ("If bad data: warn user first, then brief trend. " if bad_data else "")
+            + f"Selected year: {selected_year}, value: {year_avg}%. Years {min_year}–{max_year}. Trend: {trend}. Note: higher hazard = more risk. Under 50 words.\n\n"
+            + "Paragraph 2 (2026 projection): ONE sentence. Compare 2026 to the last year before it. "
+            + (f"2026: {val_2026}%, last year ({prev_year_num}): {prev_year_val}%. " if has_2026 and val_2026 is not None and prev_year_val is not None and prev_year_num is not None else f"2026: {val_2026}%. " if has_2026 and val_2026 is not None else "No 2026 data. ")
+            + "Say clearly if rising hazard (concerning) or falling hazard (improving) compared to last year. "
+            + ("If 2026 is outside 0–100 or unrealistic, warn the user to check their CSV. " if bad_projection else "")
+            + "Under 35 words. No filler.\n\n"
+            "No intro. No bullets. Output only the 2 paragraphs."
+        )
+
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    req_body = {
+        "model": "llama-3.1-8b-instant",
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 180,
+        "temperature": 0.3,
+    }
+    try:
+        r = requests.post(url, json=req_body, headers=headers, timeout=15)
+        if r.status_code == 429:
+            if has_error:
+                fallback_avg = f"Fix your data: {parse_error}. CSV needs year, barangay, hazard_index."
+                fallback_2026 = ""
+            elif bad_data:
+                fallback_avg = (
+                    "Data quality issue: Hazard Index should be 0–100. "
+                    f"Your data has values outside range (min={min_hi}, max={max_hi}). "
+                    "Check your CSV for negatives or values over 100 and re-upload."
+                )
+                fallback_2026 = (
+                    f"2026 projection ({val_2026}%) appears invalid. "
+                    "Check your CSV and re-upload valid data."
+                    if bad_projection
+                    else (
+                        f"2026 hazard projection ({val_2026}%) — {'concerning (risk up)' if val_2026 and prev_year_val is not None and val_2026 > prev_year_val else 'improving (risk down)' if val_2026 and prev_year_val is not None and val_2026 < prev_year_val else 'unchanged'} from {prev_year_val}% in {prev_year_num}."
+                        if prev_year_val is not None and prev_year_num is not None and val_2026 is not None
+                        else f"2026 hazard projection: {val_2026}%."
+                    )
+                )
+            else:
+                fallback_avg = "City average reflects your historical Hazard Index scores."
+                if has_2026 and val_2026 is not None and prev_year_val is not None and prev_year_num is not None:
+                    fallback_2026 = (
+                        f"2026 hazard projection ({val_2026}%) — risk up from {prev_year_val}% in {prev_year_num}."
+                        if val_2026 > prev_year_val
+                        else f"2026 hazard projection ({val_2026}%) — risk down from {prev_year_val}% in {prev_year_num}."
+                        if val_2026 < prev_year_val
+                        else f"2026 hazard projection: {val_2026}% (flat vs {prev_year_num})."
+                    )
+                else:
+                    fallback_2026 = f"2026 hazard projection: {val_2026}%." if has_2026 and val_2026 is not None else "No 2026 projection."
+            return JsonResponse({"insight_avg": fallback_avg, "insight_2026": fallback_2026, "error": None})
+        r.raise_for_status()
+        out = r.json()
+        text = None
+        for choice in out.get("choices") or []:
+            msg = choice.get("message") or {}
+            if "content" in msg and msg["content"]:
+                text = msg["content"].strip()
+                break
+        if not text:
+            if bad_data:
+                fallback_avg = (
+                    "Data quality issue: Hazard Index should be 0–100. "
+                    f"Your data has min={min_hi}, max={max_hi}. Check CSV and re-upload."
+                )
+                if has_2026 and val_2026 is not None:
+                    if bad_projection:
+                        fallback_2026 = (
+                            f"Warning: the 2026 Hazard Index projection ({val_2026}%) looks unrealistic. "
+                            "Hazard Index should stay between 0–100. Check your CSV for errors."
+                        )
+                    else:
+                        fallback_2026 = (
+                            f"2026 hazard projection ({val_2026}%) — risk up from {prev_year_val}% in {prev_year_num}."
+                            if prev_year_val is not None and prev_year_num is not None and val_2026 and val_2026 > prev_year_val
+                            else f"2026 hazard projection ({val_2026}%) — risk down from {prev_year_val}% in {prev_year_num}."
+                            if prev_year_val is not None and prev_year_num is not None and val_2026 and val_2026 < prev_year_val
+                            else f"2026 hazard projection: {val_2026}%."
+                        )
+                else:
+                    fallback_2026 = ""
+            else:
+                fallback_avg = "City average reflects your imported Hazard Index data."
+                if has_2026 and val_2026 is not None and prev_year_val is not None and prev_year_num is not None:
+                    fallback_2026 = (
+                        f"2026 hazard projection ({val_2026}%) — risk up from {prev_year_val}% in {prev_year_num}."
+                        if val_2026 > prev_year_val
+                        else f"2026 hazard projection ({val_2026}%) — risk down from {prev_year_val}% in {prev_year_num}."
+                        if val_2026 < prev_year_val
+                        else f"2026 hazard projection ({val_2026}%) (flat vs {prev_year_num})."
+                    )
+                else:
+                    fallback_2026 = f"2026 hazard projection: {val_2026}%." if has_2026 and val_2026 is not None else ""
+            return JsonResponse({"insight_avg": fallback_avg, "insight_2026": fallback_2026, "error": None})
+        parts = [p.strip() for p in text.split("---") if p.strip()]
+        insight_avg = parts[0] if parts else "City average reflects your imported hazard data."
+        if len(parts) >= 2:
+            insight_2026 = parts[1]
+        elif not has_2026 or val_2026 is None:
+            insight_2026 = ""
+        elif bad_projection:
+            insight_2026 = (
+                f"Warning: the 2026 Hazard Index projection ({val_2026}%) looks unrealistic. "
+                "Hazard Index should stay within 0–100. Check your CSV before using this value."
+            )
+        elif bad_data:
+            insight_2026 = (
+                f"2026 projection ({val_2026}%) may be unreliable because your dataset has values outside 0–100. "
+                "Review and clean your CSV before trusting this forecast."
+            )
+        else:
+            insight_2026 = f"2026 hazard projection: {val_2026}%."
+        return JsonResponse({"insight_avg": insight_avg, "insight_2026": insight_2026, "error": None})
+    except requests.RequestException as e:
+        logger.exception("Groq API failed for hazard import insight: %s", e)
+        if bad_data and chart_data:
+            fallback_avg = (
+                "Data quality issue: Hazard Index should be 0–100. "
+                f"Your data has min={min_hi}, max={max_hi}. Check CSV and re-upload."
+            )
+            if has_2026 and val_2026 is not None:
+                if bad_projection:
+                    fallback_2026 = (
+                        f"Warning: the 2026 Hazard Index projection ({val_2026}%) looks unrealistic. "
+                        "Check your CSV for errors before using this projection."
+                    )
+                else:
+                    fallback_2026 = f"2026: {val_2026}%."
+            else:
+                fallback_2026 = ""
+        else:
+            fallback_avg = "Chart is valid; AI insight unavailable. Review the trends above."
+            fallback_2026 = f"2026: {val_2026}%." if has_2026 and val_2026 is not None else ""
+        return JsonResponse({"insight_avg": fallback_avg, "insight_2026": fallback_2026, "error": str(e)})
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def calamity_risk_import_ai_insight(request):
+    """
+    Returns an AI-generated key insight for user-imported Calamity Risk data.
+    Used by the Import section. Higher calamity risk = higher risk (0–100).
+    """
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        return JsonResponse(
+            {
+                "error": "AI not configured. Set GROQ_API_KEY in your environment.",
+                "insight_avg": None,
+                "insight_2026": None,
+            },
+            status=503,
+        )
+    try:
+        body = json.loads(request.body.decode("utf-8")) if request.body else {}
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"error": "Invalid JSON body", "insight_avg": None, "insight_2026": None},
+            status=400,
+        )
+    chart_data = body.get("chartData") or []
+    row_count = body.get("rowCount") or 0
+    has_error = body.get("hasError", False)
+    parse_error = body.get("parseError") or ""
+    selected_year = body.get("selectedYear")
+    year_avg = body.get("yearAvg")
+    val_2026 = body.get("val2026")
+    data_quality = body.get("dataQuality") or {}
+    has_negative = data_quality.get("hasNegative", False)
+    has_over_100 = data_quality.get("hasOver100", False)
+    min_cr = data_quality.get("minCalamityRisk")
+    max_cr = data_quality.get("maxCalamityRisk")
+    bad_data = has_negative or has_over_100
+    has_2026 = any(d.get("year") == "2026" for d in chart_data) if chart_data else False
+    prev_2026_val: Optional[float] = None
+    prev_year_num: Optional[int] = None
+    prev_year_val: Optional[float] = None
+    bad_projection = False
+
+    if has_error and parse_error:
+        prompt = (
+            "Analyst for Calamity Risk import. The user imported wrong data (invalid or missing columns). "
+            "Write ONE short paragraph (2 sentences): state that wrong data was imported, what is missing or invalid, and how to fix it. "
+            f"Technical detail: {parse_error}. Use 'you/your'. Do NOT say 'you're getting a validation error'. Under 60 words."
+        )
+    elif not chart_data:
+        prompt = (
+            "Analyst for Calamity Risk import. User has no data yet. "
+            "One sentence encouraging upload. CSV needs year, barangay, calamity_risk. Under 25 words."
+        )
+    else:
+        years = [d.get("year") for d in chart_data if d.get("year")]
+        values = [d.get("value") for d in chart_data if isinstance(d.get("value"), (int, float))]
+        min_year = min(years, key=lambda x: int(x)) if years else None
+        max_year = max(years, key=lambda x: int(x)) if years else None
+        trend = "upward" if len(values) >= 2 and values[-1] > values[0] else "downward" if len(values) >= 2 and values[-1] < values[0] else "flat"
+
+        numeric_points: List[Tuple[int, float]] = []
+        for d in chart_data:
+            y = d.get("year")
+            v = d.get("value")
+            if not y or not isinstance(v, (int, float)):
+                continue
+            try:
+                yi = int(y)
+            except (TypeError, ValueError):
+                continue
+            numeric_points.append((yi, v))
+        numeric_points.sort(key=lambda x: x[0])
+        if has_2026:
+            for yi, v in numeric_points:
+                if yi == 2026:
+                    break
+                prev_2026_val = v
+
+        if has_2026 and isinstance(val_2026, (int, float)):
+            bad_projection = (
+                val_2026 < 0
+                or val_2026 > 100
+                or (
+                    prev_2026_val is not None
+                    and val_2026 >= prev_2026_val + 25
+                    and val_2026 >= prev_2026_val * 1.4
+                )
+            )
+        bad_warning = ""
+        if bad_data:
+            bad_warning = (
+                "CRITICAL: Data quality issue detected. Calamity Risk should be 0-100. "
+                + (f"Your data has values outside range: min={min_cr}, max={max_cr}. " if min_cr is not None and max_cr is not None else "")
+                + "You MUST warn the user their dataset appears invalid. "
+                "Say: check your CSV for negative values or values over 100. Suggest re-uploading valid data."
+            )
+        prev_year_num = int(numeric_points[-2][0]) if len(numeric_points) >= 2 and numeric_points[-1][0] == 2026 else None
+        prev_year_val = numeric_points[-2][1] if prev_year_num is not None else prev_2026_val
+        prompt = (
+            "Analyst for Cabuyao Calamity Risk Likelihood (higher = more risk, 0–100). Reply with EXACTLY 2 short paragraphs separated by a line with only: ---\n\n"
+            + bad_warning
+            + ("\n\n" if bad_warning else "")
+            + "Paragraph 1 (Calamity risk average): 1–2 sentences on the historical city average calamity risk. "
+            + ("If bad data: warn user first, then brief trend. " if bad_data else "")
+            + f"Selected year: {selected_year}, value: {year_avg}%. Years {min_year}–{max_year}. Trend: {trend}. Note: higher calamity risk = more risk. Under 50 words.\n\n"
+            + "Paragraph 2 (2026 projection): ONE sentence. Compare 2026 to the last year before it. "
+            + (f"2026: {val_2026}%, last year ({prev_year_num}): {prev_year_val}%. " if has_2026 and val_2026 is not None and prev_year_val is not None and prev_year_num is not None else f"2026: {val_2026}%. " if has_2026 and val_2026 is not None else "No 2026 data. ")
+            + "Say clearly if rising calamity risk (concerning) or falling risk (improving) compared to last year. "
+            + ("If 2026 is outside 0–100 or unrealistic, warn the user to check their CSV. " if bad_projection else "")
+            + "Under 35 words. No filler.\n\n"
+            "No intro. No bullets. Output only the 2 paragraphs."
+        )
+
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    req_body = {
+        "model": "llama-3.1-8b-instant",
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 180,
+        "temperature": 0.3,
+    }
+    try:
+        r = requests.post(url, json=req_body, headers=headers, timeout=15)
+        if r.status_code == 429:
+            if has_error:
+                fallback_avg = f"Fix your data: {parse_error}. CSV needs year, barangay, calamity_risk."
+                fallback_2026 = ""
+            elif bad_data:
+                fallback_avg = (
+                    "Data quality issue: Calamity Risk should be 0–100. "
+                    f"Your data has values outside range (min={min_cr}, max={max_cr}). "
+                    "Check your CSV for negatives or values over 100 and re-upload."
+                )
+                fallback_2026 = (
+                    f"2026 projection ({val_2026}%) appears invalid. "
+                    "Check your CSV and re-upload valid data."
+                    if bad_projection
+                    else (
+                        f"2026 calamity risk projection ({val_2026}%) — {'concerning (risk up)' if val_2026 and prev_year_val is not None and val_2026 > prev_year_val else 'improving (risk down)' if val_2026 and prev_year_val is not None and val_2026 < prev_year_val else 'unchanged'} from {prev_year_val}% in {prev_year_num}."
+                        if prev_year_val is not None and prev_year_num is not None and val_2026 is not None
+                        else f"2026 calamity risk projection: {val_2026}%."
+                    )
+                )
+            else:
+                fallback_avg = "City average reflects your historical Calamity Risk scores."
+                if has_2026 and val_2026 is not None and prev_year_val is not None and prev_year_num is not None:
+                    fallback_2026 = (
+                        f"2026 calamity risk projection ({val_2026}%) — risk up from {prev_year_val}% in {prev_year_num}."
+                        if val_2026 > prev_year_val
+                        else f"2026 calamity risk projection ({val_2026}%) — risk down from {prev_year_val}% in {prev_year_num}."
+                        if val_2026 < prev_year_val
+                        else f"2026 calamity risk projection: {val_2026}% (flat vs {prev_year_num})."
+                    )
+                else:
+                    fallback_2026 = f"2026 calamity risk projection: {val_2026}%." if has_2026 and val_2026 is not None else "No 2026 projection."
+            return JsonResponse({"insight_avg": fallback_avg, "insight_2026": fallback_2026, "error": None})
+        r.raise_for_status()
+        out = r.json()
+        text = None
+        for choice in out.get("choices") or []:
+            msg = choice.get("message") or {}
+            if "content" in msg and msg["content"]:
+                text = msg["content"].strip()
+                break
+        if not text:
+            if bad_data:
+                fallback_avg = (
+                    "Data quality issue: Calamity Risk should be 0–100. "
+                    f"Your data has min={min_cr}, max={max_cr}. Check CSV and re-upload."
+                )
+            if has_2026 and val_2026 is not None:
+                if bad_projection:
+                    fallback_2026 = (
+                        f"Warning: the 2026 Calamity Risk projection ({val_2026}%) looks unrealistic. "
+                        "Calamity Risk should stay within 0–100. Check your CSV before using this value."
+                    )
+                else:
+                    fallback_2026 = (
+                        f"2026 calamity risk projection ({val_2026}%) — risk up from {prev_year_val}% in {prev_year_num}."
+                        if prev_year_val is not None and prev_year_num is not None and val_2026 and val_2026 > prev_year_val
+                        else f"2026 calamity risk projection ({val_2026}%) — risk down from {prev_year_val}% in {prev_year_num}."
+                        if prev_year_val is not None and prev_year_num is not None and val_2026 and val_2026 < prev_year_val
+                        else f"2026 calamity risk projection: {val_2026}%."
+                    )
+            else:
+                fallback_avg = "City average reflects your imported Calamity Risk data."
+                if has_2026 and val_2026 is not None and prev_year_val is not None and prev_year_num is not None:
+                    fallback_2026 = (
+                        f"2026 calamity risk projection ({val_2026}%) — risk up from {prev_year_val}% in {prev_year_num}."
+                        if val_2026 > prev_year_val
+                        else f"2026 calamity risk projection ({val_2026}%) — risk down from {prev_year_val}% in {prev_year_num}."
+                        if val_2026 < prev_year_val
+                        else f"2026 calamity risk projection ({val_2026}%) (flat vs {prev_year_num})."
+                    )
+                else:
+                    fallback_2026 = f"2026 calamity risk projection: {val_2026}%." if has_2026 and val_2026 is not None else ""
+            return JsonResponse({"insight_avg": fallback_avg, "insight_2026": fallback_2026, "error": None})
+        parts = [p.strip() for p in text.split("---") if p.strip()]
+        insight_avg = parts[0] if parts else "City average reflects your imported calamity risk data."
+        if len(parts) >= 2:
+            insight_2026 = parts[1]
+        elif not has_2026 or val_2026 is None:
+            insight_2026 = ""
+        elif bad_projection:
+            insight_2026 = (
+                f"Warning: the 2026 Calamity Risk projection ({val_2026}%) looks unrealistic. "
+                "Calamity Risk should stay within 0–100. Check your CSV before using this value."
+            )
+        elif bad_data:
+            insight_2026 = (
+                f"2026 projection ({val_2026}%) may be unreliable because your dataset has values outside 0–100. "
+                "Review and clean your CSV before trusting this forecast."
+            )
+        else:
+            insight_2026 = f"2026 calamity risk projection: {val_2026}%."
+        return JsonResponse({"insight_avg": insight_avg, "insight_2026": insight_2026, "error": None})
+    except requests.RequestException as e:
+        logger.exception("Groq API failed for calamity import insight: %s", e)
+        if bad_data and chart_data:
+            fallback_avg = (
+                "Data quality issue: Calamity Risk should be 0–100. "
+                f"Your data has min={min_cr}, max={max_cr}. Check CSV and re-upload."
+            )
+            if has_2026 and val_2026 is not None:
+                if bad_projection:
+                    fallback_2026 = (
+                        f"Warning: the 2026 Calamity Risk projection ({val_2026}%) looks unrealistic. "
+                        "Check your CSV for errors before using this projection."
+                    )
+                else:
+                    fallback_2026 = f"2026: {val_2026}%."
+            else:
+                fallback_2026 = ""
+        else:
+            fallback_avg = "Chart is valid; AI insight unavailable. Review the trends above."
+            fallback_2026 = f"2026: {val_2026}%." if has_2026 and val_2026 is not None else ""
+        return JsonResponse({"insight_avg": fallback_avg, "insight_2026": fallback_2026, "error": str(e)})
+
+
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def hazard_index(request):

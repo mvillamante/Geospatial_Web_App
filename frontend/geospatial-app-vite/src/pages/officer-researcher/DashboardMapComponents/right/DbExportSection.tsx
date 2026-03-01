@@ -6,7 +6,7 @@ import { HiOutlineDocumentReport, HiOutlineChartBar } from "react-icons/hi";
 import type {
   DownloadItem,
   ReportItem,
-  ChartItem,
+  // ChartItem,
   ExportItem,
 } from "../../../../types/dashboard.types";
 
@@ -46,13 +46,13 @@ const DbExportSection: React.FC<ExportSectionProps> = ({
               {itemsToRender.map((item, i) => {
                 const isRecent = section.title === "Recent Downloads";
 
-                const name = isRecent
-                  ? (item as DownloadItem).name
-                  : Array.isArray(item)
-                  ? (item as ReportItem)[0]
-                  : typeof item === "string"
-                  ? item
-                  : (item as DownloadItem).name;
+                // const name = isRecent
+                //   ? (item as DownloadItem).name
+                //   : Array.isArray(item)
+                //   ? (item as ReportItem)[0]
+                //   : typeof item === "string"
+                //   ? item
+                //   : (item as DownloadItem).name;
 
                 return (
                   <li className="export-content" key={i}>

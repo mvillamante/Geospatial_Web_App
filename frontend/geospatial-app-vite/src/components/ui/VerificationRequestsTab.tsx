@@ -1,14 +1,16 @@
 import '../../pages/admin/UserMgmtPage.css';
 import React, { useState, useEffect } from "react";
 import { CheckCircle, XCircle } from "lucide-react";
-import { LuEllipsis } from "react-icons/lu";
+// import { LuEllipsis } from "react-icons/lu";
 import { FiEye, FiX } from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
 import placeholderImg from '../../assets/placeholder_img/SampleID.png';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export type VerificationStatus = "Pending" | "Approved" | "Rejected";
 
-export interface Verification {
+export interface VerificationRequest {
   id: number;
   citizen_id: number;
   citizen_name: string;
@@ -28,29 +30,29 @@ interface Props {
 }
 
 const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCountChange }) => {
-  const [verifications, setVerifications] = useState<Verification[]>([]);
+  const [verifications, setVerifications] = useState<VerificationRequest[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
-  const [modalVerification, setModalVerification] = useState<Verification | null>(null);
+  // const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [modalVerification, setModalVerification] = useState<VerificationRequest | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
 
-  /* =========================
-     FETCH FROM BACKEND
-  ========================= */
   const fetchVerifications = async (page = 1) => {
     try {
+      setLoading(true);
+
       const token = localStorage.getItem("access_token");
       const res = await fetch(
-        `http://127.0.0.1:8000/api/admin/resident-verifications/?page=${page}&page_size=${pageSize}`,
+        `${API_URL}/api/admin/resident-verifications/?page=${page}&page_size=${pageSize}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) throw new Error("Failed to fetch");
 
       const data = await res.json();
-      const mapped: Verification[] = data.results.map((v: any) => ({
+      const mapped: VerificationRequest[] = data.results.map((v: any) => ({
         id: v.id,
         citizen_id: v.citizen_id,
         citizen_name: v.citizen_name,
@@ -73,6 +75,8 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
       }
     } catch (err) {
       console.error("Error fetching verifications:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -87,14 +91,12 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
       const token = localStorage.getItem("access_token");
 
       // Get relative path
-      const relativePath = modalVerification.id_image.replace(
-        /^http:\/\/127\.0\.0\.1:8000\//,
-        ""
-      );
+      const url = new URL(modalVerification.id_image);
+      const relativePath = url.pathname;
 
       try {
         const res = await fetch(
-          `http://127.0.0.1:8000/api/get-signed-url/?path=${encodeURIComponent(relativePath)}`,
+          `${API_URL}/api/get-signed-url/?path=${encodeURIComponent(relativePath)}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) throw new Error("Failed to fetch signed URL");
@@ -115,7 +117,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
   const updateStatus = async (id: number, action: "approve" | "reject", reason?: string) => {
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`http://127.0.0.1:8000/api/admin/resident-verifications/${id}/`, {
+      const res = await fetch(`${API_URL}/api/admin/resident-verifications/${id}/`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ action, reason }),
@@ -125,7 +127,10 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
       // Update local state
       const updated = verifications.map(v =>
         v.id === id
-          ? { ...v, status: action === "approve" ? "Approved" : "Rejected" }
+          ? {
+            ...v,
+            status: (action === "approve" ? "Approved" : "Rejected") as VerificationStatus
+          }
           : v
       );
       setVerifications(updated);
@@ -176,7 +181,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
       </div>
     </div>
   );
-  
+
 
   return (
     <>
@@ -197,12 +202,18 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
           </thead>
 
           <tbody>
-            {verifications.length === 0 ? (
+            {loading ? (
               <tr>
-                <td colSpan={9} className="empty">No citizen request found.</td>
+                <td colSpan={7} className='empty'>
+                  Loading verification requests...
+                </td>
+              </tr>
+            ) : verifications.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="empty">No citizen request found.</td>
               </tr>
             ) : (
-              verifications.map((v, index) => (
+              verifications.map((v) => (
                 <tr key={v.id}>
                   {/* <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td> */}
                   <td className="center muted">{v.citizen_id}</td>
@@ -286,7 +297,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
 
             {modalVerification.status === "Pending" && (
               <div className="verification-modal-actions" style={{ display: "flex", gap: "10px", alignItems: "flex-start", marginTop: "10px" }}>
-                
+
                 {/* Approve Button */}
                 <button
                   className="approve-btn"

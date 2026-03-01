@@ -5,7 +5,7 @@ import {
   EvacCenterPage, CommunityFeedPage,
   CmsPage, DashboardPage, ReportsMgmtPage, SysMonitoringPage, UserMgmtPage,
   AlertsMapPage, ProfilePage, NotificationPage,
-  DashboardMapPage, OldDashboardMapPage, ReportVerifyPage,
+  DashboardMapPage, ReportVerifyPage,
   PwaAuthPage,
   HomePage
 } from "./pages";

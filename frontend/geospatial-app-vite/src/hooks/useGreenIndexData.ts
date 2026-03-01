@@ -1,6 +1,8 @@
 import { useEffect, useState, useMemo } from "react";
 import type { GreenIndexBarangayData } from "../components/ui/LeafletMap";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export const useGreenIndexData = (year: number, fetchData: boolean) => {
   const [data, setData] = useState<Record<string, GreenIndexBarangayData> | null>(null);
 
@@ -11,7 +13,7 @@ export const useGreenIndexData = (year: number, fetchData: boolean) => {
     }
 
     let cancelled = false;
-    fetch(`/api/hazard/green-index/?year=${year}`)
+    fetch(`${API_URL}/api/hazard/green-index/?year=${year}`)
       .then(res => (res.ok ? res.json() : null))
       .then((json: { data?: Record<string, GreenIndexBarangayData> } | null) => {
         if (cancelled) return;

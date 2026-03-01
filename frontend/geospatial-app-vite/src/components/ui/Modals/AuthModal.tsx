@@ -7,10 +7,24 @@ import { normalizePrimaryRole, normalizeSecondaryRole, roleToBasePath } from "..
 import "./GlobalModal.css";
 import type { User } from "../../../libr/fetchCurrentUser";
 
-const AuthModal = ({ type = "login", onClose, switchModal }) => {
+type AuthModalType = "login" | "signup" | "forgotPassword" | "verifyOtp";
+
+interface AuthModalProps {
+    type?: AuthModalType;
+    onClose: () => void;
+    switchModal: (type: AuthModalType) => void;
+}
+
+const AuthModal: React.FC<AuthModalProps> = ({
+    type = "login",
+    onClose,
+    switchModal,
+}) => {
+    const API_URL = import.meta.env.VITE_API_URL;
     const navigate = useNavigate();
     const { refreshUser } = useAuth();
 
+    // const [otpValues, setOtpValues] = useState(["", "", "", ""]);
     const [resetTarget, setResetTarget] = useState("");
     const [resetOtp, setResetOtp] = useState("");
     const [resetNewPass, setResetNewPass] = useState("");
@@ -26,13 +40,12 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
     const [signupEmail, setSignupEmail] = useState("");
     const [signupPassword, setSignupPassword] = useState("");
     const [signupConfirm, setSignupConfirm] = useState("");
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 768);
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
+    // useEffect(() => {
+    //     const handleResize = () => setIsMobile(window.innerWidth < 768);
+    //     window.addEventListener("resize", handleResize);
+    //     return () => window.removeEventListener("resize", handleResize);
+    // }, []);
 
     useEffect(() => {
         document.body.style.overflow = "hidden";
@@ -55,7 +68,7 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
         if (!loginInput || !loginPassword) return alert("Please fill in all fields");
 
         try {
-            const response = await fetch("http://localhost:8000/api/login_user/", {
+            const response = await fetch(`${API_URL}/api/login_user/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -77,13 +90,30 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
             handleNavigation(result.user);
 
         } catch (error) {
-            alert("Login failed: " + error.message);
+            if (error instanceof Error) {
+                alert("Login failed: " + error.message);
+            } else {
+                alert("Login failed.");
+            }
         }
     };
 
-    const formatName = (firstName, lastName) =>
-        `${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}.${lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase()
-        }`;
+    // const handleOtpChange = (value: string, index: number) => {
+    //     if (!/^\d?$/.test(value)) return;
+
+    //     const newOtp = [...otpValues];
+    //     newOtp[index] = value;
+    //     setOtpValues(newOtp);
+
+    //     if (value && index < 3) {
+    //         const nextInput = document.getElementById(`otp-${index-1}`);
+    //         nextInput?.focus();
+    //     }
+    // }
+
+    const formatName = (firstName: string, lastName: string): string =>
+        `${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}.` +
+        `${lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase()}`;
 
     const handleSignup = async () => {
         if (!signupFirstName || !signupLastName || !signupPhone || !signupEmail || !signupPassword || !signupConfirm) {
@@ -104,7 +134,7 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                 role: "citizen",
             };
 
-            const response = await fetch('http://localhost:8000/api/sign_up/', {
+            const response = await fetch(`${API_URL}/api/sign_up/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData),
@@ -121,7 +151,9 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
                 alert(data.error || "Signup failed.");
             }
         } catch (error) {
-            alert("Signup failed: " + error.message);
+            const message =
+                error instanceof Error ? error.message : "Something went wrong";
+            alert("Signup failed: " + message);
         }
     };
 
@@ -130,21 +162,19 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
 
         setResetLoading(true);
         try {
-            const res = await fetch("http://localhost:8000/api/password-reset/request/", {
+            const res = await fetch(`${API_URL}/api/password-reset/request/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email_or_phone: resetTarget.trim() }),
             });
 
-            const text = await res.text();
-            console.log("RESET OTP status:", res.status);
-            console.log("RESET OTP raw response:", text);
+            const data = await res.json().catch(() => ({}));
 
-            let data: any = {};
-            try { data = JSON.parse(text); } catch { }
-            if (!res.ok) throw new Error(data.detail || text || "Failed to send OTP");
+            if (!res.ok)
+                throw new Error(data.detail || "Failed to send OTP");
 
-
+            alert("OTP sent successfully");
+            switchModal("verifyOtp");
         } catch (e: any) {
             alert(e?.message || "Failed to send OTP");
         } finally {
@@ -161,7 +191,7 @@ const AuthModal = ({ type = "login", onClose, switchModal }) => {
 
         setResetLoading(true);
         try {
-            const res = await fetch("http://localhost:8000/api/password-reset/confirm/", {
+            const res = await fetch(`${API_URL}/api/password-reset/confirm/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

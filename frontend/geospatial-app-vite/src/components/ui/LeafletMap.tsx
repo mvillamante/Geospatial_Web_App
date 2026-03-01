@@ -123,6 +123,9 @@ interface LeafletMapProps {
   onCalamityRiskBarangaySelect?: (barangay: string, year: string, data: CalamityRiskBarangayData) => void;
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
+
+
 export default function LeafletMap(props: LeafletMapProps) {
   const {
     height = "100%",
@@ -416,7 +419,7 @@ export default function LeafletMap(props: LeafletMapProps) {
       try {
         // Fetch hazard index data (all years) once
         if (!hazardDataRef.current) {
-          const res = await fetch("/api/hazard/hazard-index/");
+          const res = await fetch(`${API_URL}/api/hazard/hazard-index/`);
           if (!res.ok) throw new Error(`Failed to load hazard index data: ${res.status}`);
           const json = await res.json();
           hazardDataRef.current = json;
@@ -452,7 +455,7 @@ export default function LeafletMap(props: LeafletMapProps) {
         }
 
         // Fetch barangay boundaries GeoJSON
-        const geoRes = await fetch("/api/hazard/barangays/");
+        const geoRes = await fetch(`${API_URL}/api/hazard/barangays/`);
         if (!geoRes.ok) throw new Error(`Failed to load barangay GeoJSON: ${geoRes.status}`);
         const geoJson = await geoRes.json();
 
@@ -663,7 +666,7 @@ export default function LeafletMap(props: LeafletMapProps) {
       try {
         // Fetch green index data (all years) once
         if (!greenDataRef.current) {
-          const res = await fetch("/api/hazard/green-index/");
+          const res = await fetch(`${API_URL}/api/hazard/green-index/`);
           if (!res.ok) throw new Error(`Failed to load green index data: ${res.status}`);
           const json = await res.json();
           greenDataRef.current = json;
@@ -699,7 +702,7 @@ export default function LeafletMap(props: LeafletMapProps) {
         }
 
         // Fetch barangay boundaries GeoJSON
-        const geoRes = await fetch("/api/hazard/barangays/");
+        const geoRes = await fetch(`${API_URL}/api/hazard/barangays/`);
         if (!geoRes.ok) throw new Error(`Failed to load barangay GeoJSON: ${geoRes.status}`);
         const geoJson = await geoRes.json();
 
@@ -877,9 +880,9 @@ export default function LeafletMap(props: LeafletMapProps) {
     const loadCalamityLayer = async () => {
       try {
         if (!calamityDataRef.current) {
-          const res = await fetch("/api/hazard/calamity-risk/forecast/");
+          const res = await fetch(`${API_URL}/api/hazard/calamity-risk/forecast/`);
           if (!res.ok) {
-            const fallbackRes = await fetch("/api/hazard/calamity-risk/");
+            const fallbackRes = await fetch(`${API_URL}api/hazard/calamity-risk/`);
             if (!fallbackRes.ok) throw new Error(`Failed to load calamity risk data`);
             const json = await fallbackRes.json();
             calamityDataRef.current = json;
@@ -917,7 +920,7 @@ export default function LeafletMap(props: LeafletMapProps) {
           return;
         }
 
-        const geoRes = await fetch("/api/hazard/barangays/");
+        const geoRes = await fetch(`${API_URL}/api/hazard/barangays/`);
         if (!geoRes.ok) throw new Error(`Failed to load barangay GeoJSON: ${geoRes.status}`);
         const geoJson = await geoRes.json();
 
@@ -1382,7 +1385,7 @@ export default function LeafletMap(props: LeafletMapProps) {
 
     const layerGroup = verifiedReportsLayerRef.current;
 
-    fetch("/api/incident-reports/verified/", {
+    fetch(`${API_URL}/api/incident-reports/verified/`, {
       headers: {
         "Content-Type": "application/json",
         ...(token && { Authorization: `Bearer ${token}` }),

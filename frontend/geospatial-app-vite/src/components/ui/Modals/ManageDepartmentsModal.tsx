@@ -12,6 +12,8 @@ interface Props {
 }
 
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const ManageDepartmentsModal: React.FC<Props> = ({ onClose, onDepartmentChanged }) => {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [newDept, setNewDept] = useState("");
@@ -20,7 +22,7 @@ const ManageDepartmentsModal: React.FC<Props> = ({ onClose, onDepartmentChanged 
   const fetchDepartments = async () => {
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch("http://127.0.0.1:8000/api/admin/departments/", {
+      const res = await fetch(`${API_URL}admin/departments/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -41,7 +43,7 @@ const ManageDepartmentsModal: React.FC<Props> = ({ onClose, onDepartmentChanged 
     setLoading(true);
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch("http://127.0.0.1:8000/api/admin/departments/", {
+      const res = await fetch(`${API_URL}/api/admin/departments/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -65,22 +67,22 @@ const ManageDepartmentsModal: React.FC<Props> = ({ onClose, onDepartmentChanged 
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm("Delete this department?")) return;
+  // const handleDelete = async (id: number) => {
+  //   if (!window.confirm("Delete this department?")) return;
 
-    try {
-      const token = localStorage.getItem("access_token");
-      await fetch(`http://127.0.0.1:8000/api/admin/departments/${id}/`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  //   try {
+  //     const token = localStorage.getItem("access_token");
+  //     await fetch(`http://127.0.0.1:8000admin/departments/${id}/`, {
+  //       method: "DELETE",
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
 
-      fetchDepartments();
-      onDepartmentChanged();
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  //     fetchDepartments();
+  //     onDepartmentChanged();
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
 
   return (
     <div className="modal-overlay">

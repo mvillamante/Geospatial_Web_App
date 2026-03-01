@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import LeafletMap from "../../components/ui/LeafletMap";
@@ -8,14 +8,14 @@ import { Search, MapPin, Phone, Navigation, Users } from 'lucide-react';
 import { GrLocationPin } from "react-icons/gr";
 import { MdOutlineModeEdit, MdAdd } from "react-icons/md";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
-import { RiDeleteBinFill, RiBuilding4Fill } from "react-icons/ri";
+import { RiDeleteBinFill } from "react-icons/ri";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
 import type { EvacuationCenterData } from "../../components/ui/mapLayers/evacuationCenters";
 import './EvacCenterPage.css';
 
 import AddEvacCenterModal from "../../components/ui/Modals/AddEvacCenterModal";
 import MapPickerModal from '../../components/ui/Modals/MapPickerModal';
-import { getEvacuationPopupHTML } from "../../components/ui/mapLayers/evacuationCenters";
+// import { getEvacuationPopupHTML } from "../../components/ui/mapLayers/evacuationCenters";
 import EvacCenterEditor from '../../components/ui/Modals/EvacCenterEditor';
 
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -58,15 +58,15 @@ const mapApiToCenter = (api: any): EvacuationCenter => ({
 });
 
 
-interface EvacCenterEditorProps {
-  center: EvacuationCenter;
-  onChange: (center: EvacuationCenter) => void;
-  onSave: () => void;
-  onCancel: () => void;
-  readOnly?: boolean;
-  showCoordinatesPicker?: boolean;
-  onPickCoordinates?: () => void;
-}
+// interface EvacCenterEditorProps {
+//   center: EvacuationCenter;
+//   onChange: (center: EvacuationCenter) => void;
+//   onSave: () => void;
+//   onCancel: () => void;
+//   readOnly?: boolean;
+//   showCoordinatesPicker?: boolean;
+//   onPickCoordinates?: () => void;
+// }
 
 /* EVAC CENTER PAGE ----------------------------------------------------- */
 function EvacCenterPage() {
@@ -79,7 +79,7 @@ function EvacCenterPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   //get user role
-  const { userRole, displayName, profilePath } = getUserRoleAndDisplayName();
+  const { userRole } = getUserRoleAndDisplayName();
 
   const handleGetDirections = (coordinates: string) => {
     const [lat, lng] = coordinates.split(', ');
@@ -202,15 +202,15 @@ function EvacCenterPage() {
 
   /* Evacuation Center Map */
   const activeLayers = useMemo(() => ["Evacuation Centers",], []); /* "Barangay Boundaries" */
-  const [isClosing, setIsClosing] = useState(false);
+  // const [isClosing, setIsClosing] = useState(false);
   const [closingId, setClosingId] = useState<number | null>(null);
 
   const handleCloseEditor = () => {
-    setIsClosing(true);
+    // setIsClosing(true);
     setTimeout(() => {
       setEditingCenter(null);
       setSelectedEvacuationCenter(null);
-      setIsClosing(false);
+      // setIsClosing(false);
     }, 250);
   };
 
@@ -242,7 +242,7 @@ function EvacCenterPage() {
 
   return (
     <div className="evac-page">
-      <div className="evac-header">
+      {/* <div className="evac-header">
         <div className="evac-header-title">
           <h1>Evacuation Centers</h1>
         </div>
@@ -254,7 +254,7 @@ function EvacCenterPage() {
               ? "Find the nearest evacuation center in your barangay"
               : null}
         </p>
-      </div>
+      </div> */}
 
       <div className="evac-map-wrapper">
         <div className="evac-side-content">
@@ -262,7 +262,7 @@ function EvacCenterPage() {
           <LeafletMap
             key={mapRefreshKey}
             height="43vh"
-            width="{mapWidth}"
+            width={mapWidth}
             mapView="interactive"
             mapType="basic"
             activeLayers={activeLayers}
@@ -325,10 +325,14 @@ function EvacCenterPage() {
                 <span>⚠️</span> Important Reminders
               </h3>
               <ul className="evac-reminders-list">
-                <li>Bring essential items: water, food, medicines, and important documents</li>
-                <li>Follow instructions from local authorities and evacuation center staff</li>
-                <li>Register upon arrival at the evacuation center</li>
-                <li>Keep your mobile phone charged for emergency communications</li>
+                <li>Bring essential items such as water, ready-to-eat food, medicines, and important documents (ID, birth certificate, medical records).</li>
+  <li>Pack hygiene supplies including face masks, alcohol, toiletries, and sanitary items.</li>
+  <li>Register immediately upon arrival at the evacuation center.</li>
+  <li>Follow instructions from local authorities and evacuation center personnel at all times.</li>
+  <li>Inform staff of any medical conditions, disabilities, or special needs.</li>
+  <li>Keep your mobile phone charged for emergency updates and communication.</li>
+  <li>Maintain cleanliness and respect shared spaces within the evacuation center.</li>
+  <li>Keep personal belongings secure and do not leave valuables unattended.</li>
               </ul>
             </div>
         ) : null }

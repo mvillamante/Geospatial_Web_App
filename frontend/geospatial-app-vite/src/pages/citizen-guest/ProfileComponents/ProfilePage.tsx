@@ -3,33 +3,36 @@ import { useNavigate, useLocation } from "react-router-dom";
 import ReportCard from './ReportCard';
 import "./ProfilePage.css";
 import { getUserRoleAndDisplayName } from "../../../libr/auth";
+import type { Report, ReportStatus } from "../../../types/report";
 
-type ReportCardModel = {
-  id: number | string;
-  title: string;
-  description: string;
-  category: string;
-  other_category?: string | null;
-  location_display: string;
-  date: string;
-  progressStatus: "Pending" | "In Progress" | "Resolved";
-  status: string;
-  progress: number;
-  lgu_post?: {
-    incident: string;
-    status: string;
-    what_happened?: string | null;
-    action_taken?: string | null;
-    advisory?: string | null;
-    updated_at?: string;
-  } | null;
-  photo?: string | null;
-  officer_note: string | null;
-  needs_info_note?: string;
-  reply_message?: string | null;
-  reply_image_url?: string | null;
-  rejection_reason?: string | null;
-};
+// export type ReportCardModel = {
+//   id: number;
+//   title: string;
+//   description: string;
+//   category: string;
+//   other_category?: string | null;
+//   location_display: string;
+//   date: string;
+//   progressStatus: "Pending" | "In Progress" | "Resolved";
+//   status: string;
+//   progress: number;
+//   lgu_post?: {
+//     incident: string;
+//     status: string;
+//     what_happened?: string | null;
+//     action_taken?: string | null;
+//     advisory?: string | null;
+//     updated_at?: string;
+//   } | null;
+//   photo?: string | null;
+//   officer_note: string | null;
+//   needs_info_note?: string | null;
+//   reply_message?: string | null;
+//   reply_image_url?: string | null;
+//   rejection_reason?: string | null;
+// };
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 type IncidentReportAPI = {
   id: number;
@@ -50,14 +53,14 @@ type IncidentReportAPI = {
     updated_at?: string;
   } | null;
   officer_note: string | null;
-  needs_info_note?: string;
+  needs_info_note?: string | null;
   reply_message?: string | null;
   reply_image_url?: string | null;
   rejection_reason: string | null;
 };
 
 type VerificationStatus = "unverified" | "pending" | "verified" | "rejected";
-type ProgressStatus = "Pending" | "In Progress" | "Resolved";
+type ProgressStatus = "Pending" | "In Progress" | "Resolved" | "Needs Info" | "Archived" | "Rejected";
 
 function toProgressStatus(raw: string | undefined | null): ProgressStatus {
   const s = (raw || "").toLowerCase();
@@ -74,11 +77,11 @@ const ProfilePage: React.FC = () => {
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>("unverified");
   const [verificationReason, setVerificationReason] = useState<string>("");
 
-  const [showResearcherModal, setShowResearcherModal] = useState(false);
-  const [researchPurpose, setResearchPurpose] = useState("");
-  const [researchOrgSchool, setResearchOrgSchool] = useState("");
-  const [researchAttachment, setResearchAttachment] = useState<File | null>(null);
-  const [researchLoading, setResearchLoading] = useState(false);
+  // const [showResearcherModal, setShowResearcherModal] = useState(false);
+  // const [researchPurpose, setResearchPurpose] = useState("");
+  // const [researchOrgSchool, setResearchOrgSchool] = useState("");
+  // const [researchAttachment, setResearchAttachment] = useState<File | null>(null);
+  // const [researchLoading, setResearchLoading] = useState(false);
 
 
   const [showVerifyModal, setShowVerifyModal] = useState(false);
@@ -120,9 +123,9 @@ const ProfilePage: React.FC = () => {
     normalizedRole2 === "admin" ||
     normalizedRole2 === "officer";
 
-  const [isRequested, setIsRequested] = useState(false);
+  // const [isRequested, setIsRequested] = useState(false);
 
-  const [reports, setReports] = useState<ReportCardModel[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
 
   const activeReports = reports.filter(
     (r) => r.status?.toLowerCase() !== "archived"
@@ -171,6 +174,18 @@ const ProfilePage: React.FC = () => {
     others: "Reported Incident",
   };
 
+  function toReportStatus(raw: string | undefined | null): ReportStatus {
+    const s = (raw || "").toLowerCase();
+
+    if (s === "resolved") return "Resolved";
+    if (s === "in_progress" || s === "in progress") return "In Progress";
+    if (s === "needs_info" || s === "needs info") return "Needs Info";
+    if (s === "rejected") return "Rejected";
+    if (s === "archived") return "Archived";
+
+    return "Pending";
+  }
+
   useEffect(() => {
     const openReportId = location.state?.openReportId;
 
@@ -188,7 +203,9 @@ const ProfilePage: React.FC = () => {
       setProfileError(null);
       try {
         const token = localStorage.getItem("access_token");
-        const res = await fetch("http://localhost:8000/api/users/me/", {
+        const API_URL = import.meta.env.VITE_API_URL;
+
+        const res = await fetch(`${API_URL}/api/users/me/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -205,10 +222,11 @@ const ProfilePage: React.FC = () => {
         const normalizedStatus =
           rawStatus === "approved"
             ? "verified"
-            : rawStatus === "pending" || rawStatus === "verified" || rawStatus === "rejected"
+            : rawStatus === "pending" ||
+              rawStatus === "verified" ||
+              rawStatus === "rejected"
               ? rawStatus
               : "unverified";
-
         setVerificationStatus(normalizedStatus);
 
         setVerificationReason(data.verification_rejection_reason || "");
@@ -237,9 +255,9 @@ const ProfilePage: React.FC = () => {
 
       try {
         const token = localStorage.getItem("access_token");
+        const API_URL = import.meta.env.VITE_API_URL;
 
-
-        const res = await fetch("http://localhost:8000/api/reports/my/", {
+        const res = await fetch(`${API_URL}/api/reports/my/`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -255,7 +273,7 @@ const ProfilePage: React.FC = () => {
 
         const list: IncidentReportAPI[] = Array.isArray(data) ? data : (data.results ?? []);
 
-        const mapped: ReportCardModel[] = list.map((r) => {
+        const mapped: Report[] = list.map((r) => {
           const dateStr = r.created_at
             ? new Date(r.created_at).toLocaleDateString(undefined, {
               year: "numeric",
@@ -264,14 +282,13 @@ const ProfilePage: React.FC = () => {
             })
             : "";
 
-          const rawStatus = r.status || (r as any).verification_status || "Pending";
-          const progressStatus = toProgressStatus(rawStatus);
+          const status = toReportStatus(r.status);
+          const progressStatus = toProgressStatus(status);
 
           const progress =
-            rawStatus.toLowerCase().includes("resolved") ? 1 :
-              rawStatus.toLowerCase().includes("in_progress") ? 0.6 :
+            status.toLowerCase().includes("resolved") ? 1 :
+              status.toLowerCase().includes("in_progress") ? 0.6 :
                 0.25;
-
 
           const customTitle =
             r.category === "others" && r.other_category?.trim()
@@ -280,22 +297,23 @@ const ProfilePage: React.FC = () => {
 
           return {
             id: r.id,
-            title: customTitle ? customTitle : (categoryTitleMap[r.category] || "Incident Report"),
+            title: customTitle ?? (categoryTitleMap[r.category] || "Incident Report"),
             description: r.description || "No description provided.",
-            location: r.location_display || "Unknown location",
+            category: r.category,                         // ✅ added
+            other_category: r.other_category ?? null,
+            location_display: r.location_display || "Unknown location",  // ✅ fixed key
             date: dateStr,
-            status: rawStatus,
+            status,
             progressStatus,
             progress,
             lgu_post: r.lgu_post || null,
-            photo: r.photo_url || null,
+            photo: r.photo_url ?? undefined,
             officer_note: r.officer_note || null,
             needs_info_note: r.needs_info_note || null,
             reply_message: r.reply_message || null,
             reply_image_url: r.reply_image_url || null,
             rejection_reason: r.rejection_reason || null,
           };
-
         });
         setReports(mapped);
       } catch (e: any) {
@@ -319,8 +337,8 @@ const ProfilePage: React.FC = () => {
   const saveProfile = async () => {
     try {
       const token = localStorage.getItem("access_token");
-
-      const res = await fetch("http://localhost:8000/api/users/me/", {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_URL}/api/users/me/`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -365,7 +383,9 @@ const ProfilePage: React.FC = () => {
     setPasswordLoading(true);
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch("http://localhost:8000/api/users/change-password/", {
+      const API_URL = import.meta.env.VITE_API_URL;
+
+      const res = await fetch(`${API_URL}/api/users/change-password/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -393,7 +413,7 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const isVerifiedResident = verificationStatus === "verified";
+  // const isVerifiedResident = verificationStatus === "verified";
 
 
   const submitVerificationRequest = async () => {
@@ -419,7 +439,7 @@ const ProfilePage: React.FC = () => {
         formData.append("address", address.trim()),
         formData.append("id_image", barangayIdFile);
 
-      const res = await fetch("http://127.0.0.1:8000/api/resident-verification/request/", {
+      const res = await fetch(`${API_URL}/api/resident-verification/request/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -449,26 +469,31 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const updateReport = (updatedReport: ReportCardModel) => {
+  const updateReport = (updatedReport: Report) => {
     setReports((prev) =>
       prev.map((r) => (r.id === updatedReport.id ? { ...r, ...updatedReport } : r))
     );
   };
 
-  const mockAvatarUrl =
-    "https://i.pinimg.com/736x/53/ce/e1/53cee1111732dcf17bb5518213ff215a.jpg";
+  // const mockAvatarUrl =
+  //   "https://i.pinimg.com/736x/53/ce/e1/53cee1111732dcf17bb5518213ff215a.jpg";
 
   return (
     <div className="profile-page">
+      {profileError && (
+        <div className="profile-error">
+          {profileError}
+        </div>
+      )}
       {/* Profile Header */}
       <div className="profile-card">
         <div className="profile-left">
           <div className="avatar-wrapper">
             <div className="avatar-wrapper">
               <div className="avatar-initials">
-                {displayName
-                  ?.split(" ")
-                  .map((n) => n[0])
+                {(displayName ?? "")
+                  .split(" ")
+                  .map((n: string) => n[0])
                   .join("")
                   .slice(0, 2)
                   .toUpperCase()}
@@ -801,7 +826,7 @@ const ProfilePage: React.FC = () => {
         </div>
       )}
 
-      {showResearcherModal && (
+      {/* {showResearcherModal && (
         <div className="modal-overlay" role="dialog" aria-modal="true">
           <div className="modal-card">
             <h3>Request Researcher Access</h3>
@@ -858,7 +883,7 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
 
       {/* Logout */}

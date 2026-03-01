@@ -148,11 +148,11 @@ const ReportVerifyPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<ReportCategory | "all">("all");
 
   // sorting: newest, citizenRisk, effectiveRisk
-  const [sortMode, setSortMode] = useState<"newest" | "citizenRisk" | "effectiveRisk">("effectiveRisk");
+  const [sortMode] = useState<"newest" | "citizenRisk" | "effectiveRisk">("effectiveRisk");
 
   // modals
   const [modal, setModal] = useState<ModalType>("none");
-  const [resolveTitle, setResolveTitle] = useState("");
+  // const [resolveTitle, setResolveTitle] = useState("");
   const [rejectReason, setRejectReason] = useState("");
 
   const selected = useMemo(
@@ -184,7 +184,7 @@ const ReportVerifyPage: React.FC = () => {
     myOfficerId != null &&
     selected.assignedOfficerId != null &&
     Number(selected.assignedOfficerId) === myOfficerId;
-  const isAssignedToSomeone = !!selected && !!selected.assignedTo;
+  // const isAssignedToSomeone = !!selected && !!selected.assignedTo;
 
   const effectiveRisk = (r: CitizenReport) => r.verifiedRisk ?? r.citizenRisk;
 
@@ -257,7 +257,9 @@ const ReportVerifyPage: React.FC = () => {
   // Patching of report
   async function patchReport(id: number, body: any) {
     const token = localStorage.getItem("access_token");
-    const res = await fetch(`http://localhost:8000/api/reports/${id}/`, {
+    const API_URL = import.meta.env.VITE_API_URL;
+
+    const res = await fetch(`${API_URL}/api/reports/${id}/`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -285,8 +287,8 @@ const ReportVerifyPage: React.FC = () => {
 
         const token = localStorage.getItem("access_token");
         if (!token) throw new Error("No access token found. Please login again.");
-
-        const res = await fetch("http://localhost:8000/api/reports/queue/", {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/reports/queue/`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -426,21 +428,21 @@ const ReportVerifyPage: React.FC = () => {
   };
 
 
-  // Needs info: just set status + store note 
-  const markNeedsInfo = () => {
-    if (!selected) return;
-    if (!selected.officerNote || selected.officerNote.trim().length < 3) {
-      alert("Please type an update/request first (Needs Info message).");
-      return;
-    }
-    setStatus("needs_info");
-  };
+  // // Needs info: just set status + store note 
+  // const markNeedsInfo = () => {
+  //   if (!selected) return;
+  //   if (!selected.officerNote || selected.officerNote.trim().length < 3) {
+  //     alert("Please type an update/request first (Needs Info message).");
+  //     return;
+  //   }
+  //   setStatus("needs_info");
+  // };
 
   const openResolveModal = () => {
     if (!selected) return;
 
     // prefill a structured post template
-    setResolveTitle(`Update: ${selected.title}`);
+    // setResolveTitle(`Update: ${selected.title}`);
     setModal("resolve");
   };
 
@@ -543,12 +545,12 @@ const ReportVerifyPage: React.FC = () => {
   return (
     <div className="reportverify-page">
       {/* Header */}
-      <div className="reportverify-header">
+      {/* <div className="reportverify-header">
         <div className="reportverify-header-title">
           <h1>Report Verification</h1>
         </div>
         <p className="reportverify-header-desc">Review, validate, and update citizen hazard reports</p>
-      </div>
+      </div> */}
 
       {/* Stats */}
       <div className="reportverify-stat-container">
@@ -594,7 +596,7 @@ const ReportVerifyPage: React.FC = () => {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search title, barangay, location..."
+                placeholder="Search barangay..."
               />
               <Search className="queue-search-icon" />
             </div>

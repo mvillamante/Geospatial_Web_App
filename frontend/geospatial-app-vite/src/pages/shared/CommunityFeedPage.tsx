@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
     Pin,
     Search,
@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import "./CommunityFeedPage.css";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 type PostType = "advisory" | "announcement" | "guide";
 
@@ -70,12 +72,12 @@ const timeAgo = (iso: string) => {
     return `${days}d`;
 };
 
-function initials(name: string) {
-    const parts = name.trim().split(/\s+/);
-    const first = parts[0]?.[0] ?? "?";
-    const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
-    return (first + last).toUpperCase();
-}
+// function initials(name: string) {
+//     const parts = name.trim().split(/\s+/);
+//     const first = parts[0]?.[0] ?? "?";
+//     const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+//     return (first + last).toUpperCase();
+// }
 
 
 export default function CommunityFeedPage() {
@@ -99,7 +101,7 @@ export default function CommunityFeedPage() {
     }, [location.state, posts])
 
     useEffect(() => {
-        fetch("/api/cms/quick-contacts/", {
+        fetch(`${API_URL}/api/cms/quick-contacts/`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
@@ -113,7 +115,8 @@ export default function CommunityFeedPage() {
         const fetchFeed = async () => {
             try {
                 setLoading(true);
-                const res = await fetch("http://localhost:8000/api/community-feed/");
+                const API_URL = import.meta.env.VITE_API_URL;
+                const res = await fetch(`${API_URL}/api/community-feed/`);
                 if (!res.ok) throw new Error("Failed to fetch feed");
 
                 const data = await res.json();
@@ -147,10 +150,10 @@ export default function CommunityFeedPage() {
                 {/* Main */}
                 <main className="feed-main">
                     <header className="feed-topbar">
-                        <div className="feed-title">
+                        {/* <div className="feed-title">
                             <h1>Community Feed</h1>
                             <p className="feed-header-desc">Latest advisories, announcements, and guides</p>
-                        </div>
+                        </div> */}
 
                         <div className="feed-controls">
                             <label className="search">

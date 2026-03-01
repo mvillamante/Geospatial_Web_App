@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import PinLocationPicker from "./PinLocationPicker";
 import { isWithinCabuyao } from '../../../../src/utils/validateCabuyao';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface ReportDrawerProps {
   open: boolean;
   onClose: () => void;
@@ -76,7 +78,7 @@ function formatStreetBarangayCity(data: ReverseGeocodeResponse): string {
 export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
   const token = localStorage.getItem("access_token");
   const profanityRegex = filipinoBadWords.regex;
-  const [badWords, setBadWords] = useState<string[]>([]);
+  // const [badWords, setBadWords] = useState<string[]>([]);
   const [showProfanityWarning, setShowProfanityWarning] = useState(false);
 
   // Location mode
@@ -114,7 +116,7 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
 
     setPinLoadingAddress(true);
     try {
-      const response = await fetch(`/api/geocoding/reverse/?lat=${lat}&lon=${lon}`, {
+      const response = await fetch(`${API_URL}/api/geocoding/reverse/?lat=${lat}&lon=${lon}`, {
         signal: controller.signal,
       });
       const data: ReverseGeocodeResponse = await response.json();
@@ -177,7 +179,7 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
         try {
           setLocation("Getting location...");
           const response = await fetch(
-            `/api/geocoding/reverse/?lat=${latitude}&lon=${longitude}`,
+            `${API_URL}/api/geocoding/reverse/?lat=${latitude}&lon=${longitude}`,
             { signal: controller.signal }
           );
           const data: ReverseGeocodeResponse = await response.json();
@@ -294,8 +296,9 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
 
       // Photo
       if (photoFile) form.append("photo", photoFile);
-
-      const res = await fetch("http://localhost:8000/api/reports/", {
+      
+      const API_URL = import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_URL}0/api/reports/`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: form,

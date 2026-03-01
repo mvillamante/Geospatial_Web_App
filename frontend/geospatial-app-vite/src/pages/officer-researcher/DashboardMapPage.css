@@ -2,14 +2,14 @@
 /*---------------------LEFT PANEL----------------------*/
 .dbmleft-panel {
   position: relative;
-  z-index: 1100;
+  z-index: 20;
   width: 350px;
   padding: 12px;
   background: #f9fafb;
-  border-right: 1px solid var(--light-gray-border);
-  height: 95vh;
   overflow-y: auto;
+  border-right: 1px solid var(--light-gray-border);
   overflow-x: hidden;
+  height: 100%;
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
@@ -748,14 +748,18 @@
 /*---------------------MAP COMPONENT----------------------*/
 /*interactive map view*/
 .main-layout-dbmap {
-  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   background-color: var(--light-gray-bg);
 }
 
 .dashboardmap-container {
     display: flex;
+    min-height: 0;
     height: 100%;
 }
+
 .dashboardmap-container .dashboardview-map,
 .dashboardmap-container .choroplethview-map {
     position: relative;

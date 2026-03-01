@@ -82,7 +82,7 @@ const HomePage: React.FC = () => {
   const minYear = 2020;
   const maxYear = 2030;
   const initialYear = Math.min(maxYear, Math.max(minYear, currentYear));
-  const [year, setYear] = useState(initialYear);
+  const [year] = useState(initialYear);
 
   const {
     universalGreenAvg,
@@ -176,23 +176,27 @@ const HomePage: React.FC = () => {
 
         <div className="sources-grid">
           <div className="source">
-            <img src="/datasource_logos/PAGASA_logo.png" alt="PAGASA" />
-            <span>PAGASA</span>
+            <img src="/datasource_logos/copernicus.png" alt="COPERNICUS" />
+            <span>Copernicus</span>
           </div>
 
           <div className="source">
-            <img src="/datasource_logos/PHIVOLCS_logo.png" alt="PHIVOLCS" />
-            <span>PHIVOLCS</span> 
+            <img src="/datasource_logos/gee.png" alt="Google Earth Engine" />
+            <span>Google Earth Engine</span> 
           </div>
 
           <div className="source">
-            <img src="/datasource_logos/NAMRIA_logo.png" alt="NAMRIA" />
-            <span>NAMRIA</span>
+            <img src="/datasource_logos/openstreetmap.png" alt="OpenStreetMap" />
+            <span>OpenStreetMap</span>
           </div>
 
           <div className="source">
-            <img src="/datasource_logos/OPENMETEO_logo.png" alt="Open Meteo" />
+            <img src="/datasource_logos/openmeteo.png" alt="Open Meteo" />
             <span>Open Meteo</span>
+          </div>
+          <div className="source">
+            <img src="/datasource_logos/psa.jpeg" alt="PSA" />
+            <span>PSA</span>
           </div>
         </div>
       </section>

@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { Users, FileText, Clock, AlertTriangle, Shield, Newspaper } from "lucide-react";
+import { Users, FileText, Clock, AlertTriangle } from "lucide-react";
 import { StatsCard } from "./DashboardComponents/StatsCard";
 import { ReportsTable } from "./DashboardComponents/ReportsTable";
 import { UserDistributionChart } from "./DashboardComponents/UserDistributionChart";
 import { ReportsStatusChart } from "./DashboardComponents/ReportsStatusChart";
 import { ActionCenter } from "./DashboardComponents/ActionCenter";
 import "./DashboardPage.css";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState<{
@@ -19,7 +21,7 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
-        const res = await fetch("/api/admin/stats/", {
+        const res = await fetch(`${API_URL}/api/admin/stats`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
@@ -36,12 +38,12 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="dashboard-page">
       {/* Header */}
-      <div className="dashboard-header">
+      {/* <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Admin Dashboard</h1>
           <div className="dashboard-subtitle">Overview of users, reports, and community content</div>
         </div>
-      </div>
+      </div> */}
 
       {/* KPI Cards */}
       <section className="stats-grid">

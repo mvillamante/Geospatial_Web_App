@@ -5,6 +5,8 @@ interface Props {
   onClose: () => void;
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -33,7 +35,7 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
       formData.append("purpose", purpose);
       if (proofFile) formData.append("attachment", proofFile);
 
-      const response = await fetch("http://127.0.0.1:8000/api/researcher/request/", {
+      const response = await fetch(`${API_URL}/api/researcher/request/`, {
         method: "POST",
         body: formData,
       });
@@ -63,7 +65,7 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
           <h2>Researcher Access Request</h2>
 
           <p className="modal-description">
-            Please fill out the form below to request Researcher/Analyst access.
+            Please fill out the form below to request Researcher access.
           </p>
 
           <form className="researcher-form" onSubmit={handleSubmit}>

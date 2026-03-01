@@ -26,6 +26,7 @@
 
 
 .navigation {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -36,13 +37,13 @@
   padding: 16px 0;
   border-right: 1px solid var(--light-gray-border);
   overflow: visible;
-  z-index: 2500;
+  z-index: 100;
 }
 
 .navigation nav {
   display: flex;
   flex-direction: column;
-  margin-top: 50px;
+  margin-top: 20px;
 } 
 
 .navigation .nav-item {

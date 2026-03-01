@@ -3,6 +3,8 @@ import "./GlobalModal.css";
 // import { getDepartments, type Departments } from "../../../constants"
 
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 type StaffRole = "admin" | "officer" | "researcher";
 
 interface Props {
@@ -59,7 +61,7 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated, departmentRefres
 const fetchDepartments = async () => {
   try {
     const token = localStorage.getItem("access_token");
-    const res = await fetch("http://127.0.0.1:8000/api/admin/departments/", {
+    const res = await fetch(`${API_URL}/api/admin/departments/`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -127,7 +129,7 @@ useEffect(() => {
     setLoading(true);
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch("http://127.0.0.1:8000/api/admin/users/create/", {
+      const res = await fetch(`${API_URL}}/api/admin/users/create/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

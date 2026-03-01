@@ -1,6 +1,7 @@
 import L from "leaflet";
+// const API_URL = import.meta.env.VITE_API_URL;
 
-const TRAFFIC_TILE_URL = "/api/tomtom/traffic/{z}/{x}/{y}.png";
+const TRAFFIC_TILE_URL = `/api/tomtom/traffic/{z}/{x}/{y}.png`;
 
 /**
  * Creates and adds TomTom traffic flow tile layer to the map.

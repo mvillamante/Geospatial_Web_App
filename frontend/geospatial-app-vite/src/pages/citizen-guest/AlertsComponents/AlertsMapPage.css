@@ -704,11 +704,6 @@
   margin-bottom: 0;
 }
 
-.map-legend-box ul li:hover {
-  color: var(--text-primary);
-  transform: translateX(4px);
-}
-
 .map-legend-box ul li::before {
   content: '';
   width: 12px;
@@ -801,7 +796,7 @@ li.critical::before {
 }
 
 .drawer {
-  position: absolute;
+  position: fixed;
   right: 0;
   top: 0;
   height: 100%;
@@ -811,6 +806,7 @@ li.critical::before {
   flex-direction: column;
   animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: -10px 0 40px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
 }
 
 @keyframes slideIn {
@@ -867,12 +863,14 @@ li.critical::before {
 }
 
 .drawer-header {
+  position: relative; 
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
   border-bottom: 2px solid var(--border-light);
   background: var(--white-bg);
+  z-index: 1000;
 }
 
 .drawer-header h3 {

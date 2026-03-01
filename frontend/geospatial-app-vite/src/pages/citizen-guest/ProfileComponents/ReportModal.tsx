@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Report } from "../../../../types/report";
+import type { Report } from "../../../types/report";
 
 interface ReportModalProps {
   report: Report;
@@ -37,9 +37,10 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
       }
 
       console.log("Form Data: ", formData)
+      const API_URL = import.meta.env.VITE_API_URL;
 
       const res = await fetch(
-        `http://localhost:8000/api/reports/${report.id}/reply/`,
+        `${API_URL}/api/reports/${report.id}/reply/`,
         {
           method: "PATCH",
           headers: {
@@ -112,7 +113,7 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
             <strong>Status:</strong> <span>{formatStatus(report.status)}</span>
           </div>
           <div className="modal-row">
-            <strong>Location:</strong> <span>{report.location}</span>
+            <strong>Location:</strong> <span>{report.location_display}</span>
           </div>
           <div className="modal-row">
             <strong>Date:</strong> <span>{report.date}</span>
@@ -122,7 +123,7 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
         <p className="modal-desc">{report.description}</p>
 
         {report.photo && <img src={report.photo} alt="report" className="report-photo" />}
-       
+
         {/* Officer Note for Rejected */}
         {localReport.status?.toLowerCase() === "rejected" && (
           <div className="note-card rejected-card">
@@ -178,7 +179,7 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
 
 
         {/* Reply Section */}
-        {localReport.status === "needs_info" && report.needs_info_note && (
+        {localReport.status === "Needs Info" && report.needs_info_note && (
           <div className="note-card needs-info-card">
             <div className="note-header">Officer Note</div>
             <div className="note-content">{report.needs_info_note}</div>

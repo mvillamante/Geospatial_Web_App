@@ -8,6 +8,8 @@ import "../../DashboardMapPage.css";
 
 import DbEdaModal from "../right/DbEdaModal";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface Props {
   keyInsights?: any[];
   colors?: string[];
@@ -85,7 +87,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
     setEdaError(null);
     setLoadingEda(true);
     try {
-      const res = await fetch("/api/hazard/eda/summary/");
+      const res = await fetch(`${API_URL}/api/hazard/eda/summary/`);
       if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
       const payload = await res.json();
 
@@ -131,7 +133,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
     setGreenAiInsight(null);
     setGreenHotspotsInsight(null);
     setGreenAreasForGreeningInsight(null);
-    fetch(`/api/hazard/green-index/ai-insight/?year=${year}`)
+    fetch(`${API_URL}/api/hazard/green-index/ai-insight/?year=${year}`)
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return;
@@ -181,7 +183,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
     setHazardHotspotsInsight(null);
     setHazardLowerRiskInsight(null);
     setHazardEarthquakeTyphoonInsight(null);
-    fetch(`/api/hazard/hazard-index/ai-insight/?year=${year}`)
+    fetch(`${API_URL}/api/hazard/hazard-index/ai-insight/?year=${year}`)
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return;
@@ -229,7 +231,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
     setCalamityAiSummary(null);
     setCalamityRiskPeakInsight(null);
     setCalamityAdaptationInsight(null);
-    fetch(`/api/hazard/calamity-risk/ai-insight/?year=${year}`)
+    fetch(`${API_URL}/api/hazard/calamity-risk/ai-insight/?year=${year}`)
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return;
@@ -327,7 +329,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
       ? {
           label: `Green Index — ${year}`,
           description: greenAiInsightLoading
-            ? "Loading AI summary…"
+            ? "Loading..."
             : greenAiInsightError
               ? greenAiInsightError
               : greenAiInsight ?? "No summary available.",
@@ -341,7 +343,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
       ? {
           label: `Hazard Index — ${year}`,
           description: hazardAiInsightLoading
-            ? "Loading AI summary…"
+            ? "Loading..."
             : hazardAiInsightError
               ? hazardAiInsightError
               : hazardAiSummary ?? "No summary available.",
@@ -384,7 +386,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
       ? {
           label: `Calamity Risk — ${year}`,
           description: calamityAiInsightLoading
-            ? "Loading AI summary…"
+            ? "Loading…"
             : calamityAiInsightError
               ? calamityAiInsightError
               : calamityAiSummary ?? "No summary available.",
@@ -424,8 +426,8 @@ const DbAnalyticsSection: React.FC<Props> = ({
   return (
     <>
         <div>
-        <h4>Analytics Section</h4>
-        <h5>Forecasting and Trends</h5>
+        {/* <h4>Analytics Section</h4>
+        <h5>Forecasting and Trends</h5> */}
 
         {/* Layer-aware forecasting cards */}
         {/* Default / non-choropleth / no selection: show all three */}

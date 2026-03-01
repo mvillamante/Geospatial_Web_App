@@ -1,4 +1,4 @@
-type ProgressStatus = "Pending" | "In Progress" | "Resolved";
+export type ProgressStatus = "Pending" | "In Progress" | "Resolved";
 
 interface ProgressBarProps {
   status: ProgressStatus; 

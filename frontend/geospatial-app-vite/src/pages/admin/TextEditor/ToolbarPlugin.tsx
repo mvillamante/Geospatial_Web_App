@@ -110,7 +110,7 @@ export default function ToolbarPlugin() {
         <span className="icon-italic">I</span>
       </button>
 
-      {/* <button
+      <button
         className={`toolbar-btn ${isUnderline ? 'active' : ''}`}
         onMouseDown={e => {
           e.preventDefault();
@@ -118,7 +118,7 @@ export default function ToolbarPlugin() {
         }}
       >
         <span className="icon-underline">U</span>
-      </button> */}
+      </button>
 
       <div className="toolbar-divider" />
 

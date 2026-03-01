@@ -4,6 +4,8 @@ import type { CalamityRiskBarangayData } from "../components/ui/LeafletMap";
 export const useCalamityRiskData = (year: number, fetchData: boolean) => {
   const [data, setData] = useState<Record<string, CalamityRiskBarangayData> | null>(null);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     if (!fetchData) {
       setData(null);
@@ -13,8 +15,8 @@ export const useCalamityRiskData = (year: number, fetchData: boolean) => {
     let cancelled = false;
     const fetchDataAsync = async () => {
       try {
-        let res = await fetch(`/api/hazard/calamity-risk/forecast/?year=${year}`);
-        if (!res.ok) res = await fetch(`/api/hazard/calamity-risk/?year=${year}`);
+        let res = await fetch(`${API_URL}/api/hazard/calamity-risk/forecast/?year=${year}`);
+        if (!res.ok) res = await fetch(`${API_URL}/api/hazard/calamity-risk/?year=${year}`);
         if (!res.ok) { setData(null); return; }
 
         const json: { data?: Record<string, CalamityRiskBarangayData> } | null = await res.json();

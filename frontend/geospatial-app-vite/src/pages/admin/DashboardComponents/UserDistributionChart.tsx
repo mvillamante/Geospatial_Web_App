@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import "./UserDistributionChart.css";
+// import { PieLabelRenderProps } from "recharts";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface User {
   role: string | null;
@@ -21,7 +24,7 @@ export const UserDistributionChart: React.FC<Props> = ({ small }) => {
       try {
         const token = localStorage.getItem("access_token");
         const res = await fetch(
-          `http://127.0.0.1:8000/api/admin/users/distribution/`,
+          `${API_URL}/api/admin/users/distribution/`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -57,7 +60,7 @@ export const UserDistributionChart: React.FC<Props> = ({ small }) => {
   ).length;
 
   const citizensCount = users.filter(u =>
-      u.role?.toLowerCase() === "citizen"
+    u.role?.toLowerCase() === "citizen"
   ).length;
 
   const data = [
@@ -94,7 +97,8 @@ export const UserDistributionChart: React.FC<Props> = ({ small }) => {
               label={
                 small
                   ? false
-                  : ({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`
+                  : ({ name, percent }: { name?: string; percent?: number }) =>
+                    `${name ?? ""}: ${((percent ?? 0) * 100).toFixed(0)}%`
               }
               labelLine={!small}
             >

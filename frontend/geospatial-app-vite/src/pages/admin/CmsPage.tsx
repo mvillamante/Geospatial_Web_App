@@ -1,10 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
-import { Plus, Edit, Eye, Trash2, Send, ArchiveRestore, Phone, Archive } from 'lucide-react';
+import { Plus, Edit, Eye, Trash2, Send, ArchiveRestore, Archive } from 'lucide-react';
 import { FiCheckCircle, FiSearch } from "react-icons/fi";
 import { LuEllipsis } from "react-icons/lu";
 import './CmsPage.css';
 import RichTextEditor from './TextEditor/RichTextEditor';
 import Pagination from "../../components/ui/Pagination";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface Attachment {
   id: number;
@@ -47,7 +49,7 @@ interface QuickContact {
   phones: ContactPhone[];
 }
 
-type cmsStatuses = 'All' | 'Published' | 'Draft' | 'Archived';
+type cmsStatuses = 'All' | 'Published' | 'Draft';
 type cmsTypes = 'All' | 'advisory' | 'announcement' | 'guide';
 
 const CmsPage: React.FC = () => {
@@ -106,7 +108,7 @@ const CmsPage: React.FC = () => {
   const [originalAttachments, setOriginalAttachments] = useState<Attachment[]>([]);
   const [tempEditImages, setTempEditImages] = useState<Attachment[]>([]);
 
-  const cmsStatuses: Array<'Published' | 'Draft' | 'Archived'> = ['Published', 'Draft', 'Archived'];
+  const cmsStatuses: Array<'Published' | 'Draft'> = ['Published', 'Draft'];
   const cmsTypes: Array<'advisory' | 'announcement' | 'guide'> = ['advisory', 'announcement', 'guide'];
   const [statusFilter, setStatusFilter] = useState<cmsStatuses | 'All'>('All');
   const [typeFilter, setTypeFilter] = useState<cmsTypes | 'All'>('All');
@@ -122,7 +124,7 @@ const CmsPage: React.FC = () => {
   const fetchGuides = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/cms/guides/", {
+      const res = await fetch(`${API_URL}/api/cms/guides/`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -162,7 +164,7 @@ const CmsPage: React.FC = () => {
 
 
   useEffect(() => {
-    fetch("/api/cms/quick-contacts/", {
+    fetch( `${API_URL}/api/cms/quick-contacts/`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       },
@@ -180,7 +182,7 @@ const CmsPage: React.FC = () => {
   }, [viewArchived]);
 
   const togglePublish = async (postId: number) => {
-    await fetch(`/api/cms/guides/${postId}/publish/`, {
+    await fetch(`${API_URL}/api/cms/guides/${postId}/publish/`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -197,7 +199,7 @@ const CmsPage: React.FC = () => {
   };
 
   const archiveGuide = async (postId: number) => {
-    await fetch(`/api/cms/guides/${postId}/archive/`, {
+    await fetch(`${API_URL}/cms/guides/${postId}/archive/`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -208,7 +210,7 @@ const CmsPage: React.FC = () => {
   };
 
   const restoreGuide = async (postId: number) => {
-    await fetch(`/api/cms/guides/${postId}/restore/`, {
+    await fetch(`${API_URL}/api/cms/guides/${postId}/restore/`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -224,7 +226,7 @@ const CmsPage: React.FC = () => {
   };
 
   const permanentDeleteGuide = async (postId: number) => {
-    await fetch(`/api/cms/guides/${postId}/permanent-delete/`, {
+    await fetch(`${API_URL}/api/cms/guides/${postId}/permanent-delete/`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -262,7 +264,7 @@ const CmsPage: React.FC = () => {
       }
 
       if (publishImmediately) {
-        await fetch(`/api/cms/guides/${created.id}/publish/`, {
+        await fetch(`${API_URL}/api/cms/guides/${created.id}/publish/`, {
           method: "PATCH",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -301,7 +303,7 @@ const CmsPage: React.FC = () => {
   const updateGuide = async () => {
     if (!editingGuide) return;
 
-    const res = await fetch(`/api/cms/guides/${editingGuide.postId}/`, {
+    const res = await fetch(`${API_URL}/api/cms/guides/${editingGuide.postId}/`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -322,7 +324,7 @@ const CmsPage: React.FC = () => {
     const updated = await res.json();
 
     for (const attachmentId of deletedAttachments) {
-      await fetch(`/api/cms/attachments/${attachmentId}/`, {
+      await fetch(`${API_URL}/api/cms/attachments/${attachmentId}/`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -354,7 +356,7 @@ const CmsPage: React.FC = () => {
     formData.append("image", file);
 
     const res = await fetch(
-      `/api/cms/guides/${guideId}/attachments/`,
+      `${API_URL}/api/cms/guides/${guideId}/attachments/`,
       {
         method: "POST",
         headers: {
@@ -432,7 +434,7 @@ const CmsPage: React.FC = () => {
     <div className="cms-page">
       {/* Page Head */}
       <div className="page-head">
-        <h1>Content Management System</h1>
+
 
         {/* Tab Actions */}
         <div className="page-actions">
@@ -470,7 +472,9 @@ const CmsPage: React.FC = () => {
           {/* Filter Status */}
           <div className="select-wrapper">
             <FiCheckCircle className="select-icon" />
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as ReportStatus | 'All')} className="status-select">
+            <select value={statusFilter} onChange={(e) =>
+              setStatusFilter(e.target.value as (typeof cmsStatuses)[number] | 'All')
+            } className="status-select">
               <option value="All">All Status</option>
               {cmsStatuses.map((s) => (
                 <option key={s} value={s}>
@@ -548,7 +552,7 @@ const CmsPage: React.FC = () => {
           <thead>
             <tr>
               <th className="center">Content ID</th>
-              <th className="">Title</th>
+              <th className="center">Title</th>
               <th className="center">Type</th>
               <th className="center">Status</th>
               <th className="center">Created At</th>
@@ -618,7 +622,7 @@ const CmsPage: React.FC = () => {
 
                         {/* Dropdown */}
                         {openMenuId === guide.postId && (
-                          <div className="dropdown-menu">
+                          <div className="kebab-dropdown">
                             {!viewArchived ? (
                               <>
                                 <button
@@ -1149,7 +1153,7 @@ const CmsPage: React.FC = () => {
               <button
                 className="btn-primary"
                 onClick={async () => {
-                  const res = await fetch(`/api/cms/quick-contacts/${contact.id}/`, {
+                  const res = await fetch(`${API_URL}/api/cms/quick-contacts/${contact.id}/`, {
                     method: "PUT",
                     headers: {
                       "Content-Type": "application/json",

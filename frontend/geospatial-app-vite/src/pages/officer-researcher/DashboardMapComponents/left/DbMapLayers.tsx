@@ -61,9 +61,9 @@ const DbMapLayers: React.FC<DbMapLayersProps> = ({
           <p className="layer-group">{section.group}</p>
           {section.items.map((item) => {
             const tooltip = layerTooltips[item.key];
-            const isDisabledByOther =
-              (item.key === "Flood Zones" && activeLayers.includes("Landslide Risk")) ||
-              (item.key === "Landslide Risk" && activeLayers.includes("Flood Zones"));
+            // const isDisabledByOther =
+            //   (item.key === "Flood Zones" && activeLayers.includes("Landslide Risk")) ||
+            //   (item.key === "Landslide Risk" && activeLayers.includes("Flood Zones"));
             return (
               <div className="layer-item" key={item.key}>
                 <span className="layer-item-label">

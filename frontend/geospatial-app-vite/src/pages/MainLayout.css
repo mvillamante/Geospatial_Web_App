@@ -2,7 +2,7 @@
   display: flex;
   height: 100vh;
   overflow: hidden;
-  background: var(--white-bg);
+  background: #f8fafc;
 }
 
 .main-layout-app {
@@ -12,13 +12,21 @@
   min-width: 0;
 }
 
+.nav-header {
+  flex-shrink: 0; 
+  height: 80px;   
+  border-bottom: 1px solid #e6e6e6;
+  background: #fff;
+  z-index: 10;
+}
+
 
 .main-content {
   flex: 1;
-  min-height: 0;
-  margin-top: 50px;
-  /*overflow: auto;*/
+  overflow: auto; 
+  min-height: 0; 
 }
+
 
 /* Navigation / Header column */
 .main-layout-sidebar {

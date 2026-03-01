@@ -5,11 +5,14 @@ import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { getUserRoleAndDisplayName, clearUserSession } from "../../libr/auth";
 
 import type { IconType } from "react-icons";
-import { FaHome, FaCog, FaUser, FaMapMarkedAlt, FaBullhorn, FaShieldAlt, FaMapMarked, FaBell } from "react-icons/fa";
-import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdOutlineMonitorHeart, MdKeyboardArrowUp } from "react-icons/md";
+import { FaHome, FaCog, FaUser, FaMapMarkedAlt, FaBullhorn, FaMapMarked, FaBell } from "react-icons/fa";
+import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdKeyboardArrowUp } from "react-icons/md";
 import { PiUsersBold } from "react-icons/pi";
 import { TbFileReport } from "react-icons/tb";
 import { FiEdit } from "react-icons/fi";
+
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface NavItem {
   label: string;
@@ -34,7 +37,7 @@ const NavigationMenu: React.FC = () => {
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/notifications/unread-count/", {
+        const res = await fetch(`${API_URL}/api/notifications/unread-count/)`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}`},
         });
         if (!res.ok) return;

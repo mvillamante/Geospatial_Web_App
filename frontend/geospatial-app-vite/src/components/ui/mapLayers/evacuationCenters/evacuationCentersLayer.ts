@@ -4,6 +4,8 @@ import { evacuationTypeConfig } from "./evacuationCentersTypes";
 import type { EvacuationCenterData, EvacuationCenterType } from "./evacuationCentersTypes";
 import { getEvacuationPopupHTML } from "./evacCenterMapPopup";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 // API response types
 interface EvacuationCenterAPI {
   id: number;
@@ -27,7 +29,7 @@ interface PaginatedResponse<T> {
 
 // Fetch all evacuation centers (ignoring pagination)
 async function fetchEvacuationCenters(): Promise<EvacuationCenterData[]> {
-  const response = await fetch("/api/evacuation-centers/?page_size=1000", {
+  const response = await fetch(`${API_URL}/api/evacuation-centers/?page_size=1000`, {
     credentials: "include",
     headers: { "Accept": "application/json" },
   });
@@ -56,12 +58,12 @@ async function fetchEvacuationCenters(): Promise<EvacuationCenterData[]> {
 // Create Leaflet layer
 export async function createEvacuationCentersLayer(
   map: L.Map,
-  options?: { 
-    showOnMap?: boolean; 
-    showPopupOnMap?: boolean; 
+  options?: {
+    showOnMap?: boolean;
+    showPopupOnMap?: boolean;
     onSelectCenter?: (center: EvacuationCenterData) => void;
   }
-): Promise<L.LayerGroup> {
+): Promise<L.LayerGroup | null> {
   const { showOnMap = true, showPopupOnMap = true, onSelectCenter } = options || {};
 
   const oldLayer = (map as any)._evacuationLayer as L.LayerGroup | undefined;
@@ -105,8 +107,8 @@ export async function createEvacuationCentersLayer(
       const marker = L.marker(center.coordinates, { icon: markerIcon }).addTo(evacuationCentersGroup);
       marker.bindPopup(getEvacuationPopupHTML(center, showPopupOnMap));
       marker.on("click", () => {
-        if (options?.onSelectCenter) {
-          options.onSelectCenter(center); 
+        if (onSelectCenter) {
+          onSelectCenter(center);
         }
       });
 

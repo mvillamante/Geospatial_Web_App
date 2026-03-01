@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Eye, UserPlus, RefreshCcw, X } from "lucide-react";
+import { X } from "lucide-react";
 import { FiUser, FiCheckCircle, FiSearch } from "react-icons/fi";
 import { HiChevronUpDown, HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { toast } from "sonner";
@@ -43,10 +43,11 @@ interface Report {
   status?: ReportStatus;
   assigned_officer_label?: string | null;
   assigned_officer_id?: number | null;
+  department_id?: number | null;
   photo_url?: string | null;
 }
 
-const API_BASE = "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const reportCategory = (c: string) =>
   c ? c.charAt(0).toUpperCase() + c.slice(1) : "";
@@ -103,14 +104,14 @@ const criticalBadgeClass = (level?: string | null) => {
   }
 };
 
-type ApiStatus =
-  | "pending"
-  | "in_progress"
-  | "needs_info"
-  | "rejected"
-  | "resolved"
-  | "archived"
-  | "verified";
+// type ApiStatus =
+//   | "pending"
+//   | "in_progress"
+//   | "needs_info"
+//   | "rejected"
+//   | "resolved"
+//   | "archived"
+//   | "verified";
 
 const normalizeStatus = (raw: any): ReportStatus => {
   const s = String(raw ?? "").toLowerCase();
@@ -167,7 +168,7 @@ const ReportsMgmtPage: React.FC = () => {
     if (status && ["Pending", "In Progress", "Rejected", "Resolved", "Archived"].includes(status)) {
       setStatusFilter(status as any);
     }
-}, [searchParams]);
+  }, [searchParams]);
 
 
   useEffect(() => {
@@ -177,7 +178,7 @@ const ReportsMgmtPage: React.FC = () => {
 
       try {
         setLoadingOfficers(true);
-        const res = await fetch(`${API_BASE}/api/reports/list/officers/`, {
+        const res = await fetch(`${API_URL}/api/reports/list/officers/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -204,10 +205,10 @@ const ReportsMgmtPage: React.FC = () => {
   const includes = (value: any, q: string) =>
     String(value ?? "").toLowerCase().includes(q);
 
-  const openDetails = (report: Report) => {
-    const latest = reports.find((r) => r.id === report.id) ?? report;
-    setSelectedReport(latest);
-  };
+  // const openDetails = (report: Report) => {
+  //   const latest = reports.find((r) => r.id === report.id) ?? report;
+  //   setSelectedReport(latest);
+  // };
 
   const archiveReport = async (reportId: number) => {
     try {
@@ -250,7 +251,7 @@ const ReportsMgmtPage: React.FC = () => {
 
       try {
         setLoadingReports(true);
-        const res = await fetch(`${API_BASE}/api/reports/list/`, {
+        const res = await fetch(`${API_URL}/api/reports/list/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -276,7 +277,7 @@ const ReportsMgmtPage: React.FC = () => {
 
   async function patchReport(reportId: number, body: any) {
     const token = localStorage.getItem("access_token");
-    const res = await fetch(`${API_BASE}/api/reports/${reportId}/`, {
+    const res = await fetch(`${API_URL}/api/reports/${reportId}/`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -371,7 +372,7 @@ const ReportsMgmtPage: React.FC = () => {
 
   /* Tabs */
   const indicatorRef = useRef<HTMLDivElement>(null);
-  const tabRefs = useRef<{[key: string]: HTMLButtonElement | null}>({});
+  const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   const activeTabRef = (isArchived: boolean) => (el: HTMLButtonElement | null) => {
     tabRefs.current[isArchived ? "archived" : "active"] = el;
@@ -398,9 +399,6 @@ const ReportsMgmtPage: React.FC = () => {
   return (
     <div className="reportsmgmt-page">
       <div className="page-head">
-        <div>
-          <h1>Reports Management</h1>
-        </div>
 
         <div className="page-actions">
           <div
@@ -488,7 +486,7 @@ const ReportsMgmtPage: React.FC = () => {
               <th className="center">Location</th>
               <th onClick={toggleSort} className="sort-header center">
                 Submitted{" "}
-               {sortOrder === "asc" ? (
+                {sortOrder === "asc" ? (
                   <HiChevronUp />
                 ) : sortOrder === "desc" ? (
                   <HiChevronDown />
@@ -727,16 +725,19 @@ const ReportsMgmtPage: React.FC = () => {
                     className="select"
                     value={selectedOfficer}
                     onChange={(e) => setSelectedOfficer(e.target.value)}
+                    disabled={loadingOfficers}
                   >
-                    <option value="" disabled>Select Officer..</option>
+                    <option value="" disabled>
+                      {loadingOfficers ? "Loading officers..." : "Select Officer.."}
+                    </option>
 
-                  {officers
-                    .filter(o => o.department_id === selectedReport.department_id)
-                    .map((o) => (
-                      <option key={o.id} value={String(o.id)}>
-                        {o.label}
-                      </option>
-                    ))}
+                    {officers
+                      .filter(o => o.department_id === selectedReport.department_id)
+                      .map((o) => (
+                        <option key={o.id} value={String(o.id)}>
+                          {o.label}
+                        </option>
+                      ))}
                   </select>
 
 

@@ -236,8 +236,23 @@ const DbAnalyticsSection: React.FC<Props> = ({
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return;
-        if (data.summary != null) {
-          setCalamityAiSummary(data.summary);
+        if (data.summary != null || data.payload != null) {
+          // Prefer building summary from payload so numbers always match left panel (42.1% vs wrong AI 6.2%)
+          let summaryToUse = data.summary;
+          const p = data.payload;
+          if (
+            p &&
+            p.year != null &&
+            p.city_average != null &&
+            Array.isArray(p.top) &&
+            Array.isArray(p.bottom)
+          ) {
+            const avgDisplay = Math.round(Number(p.city_average) * 10) / 10;
+            const topS = p.top.slice(0, 3).map((t: { barangay: string; calamity_risk: number }) => `${t.barangay} (${t.calamity_risk}%)`).join(", ");
+            const botS = p.bottom.slice(0, 3).map((b: { barangay: string; calamity_risk: number }) => `${b.barangay} (${b.calamity_risk}%)`).join(", ");
+            summaryToUse = `As of ${p.year}, Cabuyao's city average calamity risk stands at ${avgDisplay}%. The highest risk barangays are ${topS}; lowest are ${botS}.`;
+          }
+          setCalamityAiSummary(summaryToUse ?? data.summary);
           setCalamityRiskPeakInsight(data.risk_peak_insight ?? null);
           setCalamityAdaptationInsight(data.adaptation_insight ?? null);
           setCalamityAiInsightError(null);

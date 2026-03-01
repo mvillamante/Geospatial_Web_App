@@ -532,8 +532,8 @@ const UserMgmtPage: React.FC = () => {
           departmentRefreshKey={departmentRefreshKey}
           onClose={() => setShowCreateModal(false)}
           onCreated={async () => {
-            await fetchUsers(currentPage);
-            setShowCreateModal(false);
+            setShowCreateModal(false);         
+            await fetchUsers(1);               
           }}
         />
       )}

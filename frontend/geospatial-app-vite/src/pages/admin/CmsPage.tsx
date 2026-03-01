@@ -199,7 +199,7 @@ const CmsPage: React.FC = () => {
   };
 
   const archiveGuide = async (postId: number) => {
-    await fetch(`${API_URL}/cms/guides/${postId}/archive/`, {
+    await fetch(`${API_URL}/api/cms/guides/${postId}/archive/`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,

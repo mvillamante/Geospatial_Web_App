@@ -58,7 +58,7 @@ def incidentreport_create_notifications(sender, instance: IncidentReport, create
             severity_from=severity_from,
             severity_to=severity_to,
             target_user = None,
-            barangay=instance.barangay
+            barangay=instance.location_display
         )
 
     def do_create():

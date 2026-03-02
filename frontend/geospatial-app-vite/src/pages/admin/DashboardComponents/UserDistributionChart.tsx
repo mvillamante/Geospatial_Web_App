@@ -39,7 +39,7 @@ export const UserDistributionChart: React.FC<Props> = ({ small }) => {
         }));
 
         setUsers(mappedUsers);
-        console.log("eto eon", mappedUsers)
+        console.log("")
       } catch (err) {
         console.error(err);
       } finally {

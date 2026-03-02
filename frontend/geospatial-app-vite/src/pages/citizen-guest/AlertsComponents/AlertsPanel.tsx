@@ -350,7 +350,6 @@ export default function AlertsPanel({
 
     return (
         <aside className="dashboard-alerts">
-            <div className="sheet-handle" />
             <div className="alerts-controls">
                 <div className="alerts-header">
                     <div className="alerts-header-left">

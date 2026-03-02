@@ -45,8 +45,8 @@ export function getIncidentIcon(category: string): string {
   );
 }
 
-export function getIncidentCategories(): readonly IncidentCategories[] {
-  return INCIDENT_CATEGORY_METADATA.map(meta => meta.value) as readonly IncidentCategories[];
+export function getIncidentCategories() {
+  return INCIDENT_CATEGORY_METADATA;
 }
 
 export function getIncidentLabel(value: IncidentCategories): string {

@@ -2,7 +2,6 @@
 .editor-card{
   width: 100%;
   max-width: 880px;
-  margin: 14px auto;
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(2,6,23,0.08);
@@ -69,7 +68,8 @@
 .view-card.small{
   padding: 10px;
   min-height: 48px;
-  flex-direction: column;
+  gap: 5px;
+  flex-direction: column; 
   align-items: flex-start;
 }
 
@@ -81,6 +81,20 @@
 .view-card .value{
   font-weight: 600;
   font-size: 14px;
+}
+
+.view-card.small .card-header{
+  display: flex;
+  gap: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.view-card.small .value{
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 2px;
 }
 
 /* Form */
@@ -114,23 +128,6 @@
   display: grid;
   gap: 12px;
   margin-bottom: 12px;
-}
-
-.form-row.two{
-  grid-template-columns: 1fr 280px;
-}
-
-.form-row.three{
-  grid-template-columns: 1fr 1fr 200px;
-}
-
-
-
-@media (max-width: 720px){
-  .form-row.two,
-  .form-row.three{
-    grid-template-columns: 1fr;
-  }
 }
 
 /* Coordinates */
@@ -187,10 +184,13 @@
 .facility-item{
   display: inline-block;
   background: #e5e7eb;
+  color: rgb(61, 57, 57);
   padding: 6px 8px;
   border-radius: 999px;
   margin: 4px 6px 0 0;
   font-size: 13px;
+  font-weight: 600;
+  text-align: center;
 }
 
 .facility-row{
@@ -388,4 +388,87 @@
     font-size: 13px;
     padding: 8px 12px;
   }
+}
+
+@media (max-width: 500px){
+
+  .editor-card{
+    padding: 12px;
+    border-radius: 10px;
+    margin: 8px auto;
+  }
+
+  .editor-header{
+    gap: 6px;
+  }
+
+  .editor-header .label{
+    font-size: 12px;
+  }
+
+  .role-badge{
+    font-size: 10.5px;
+    padding: 4px 7px;
+  }
+
+  .view-card{
+    padding: 5px;
+    min-height: 25px;
+  }
+
+  .view-card .label{
+    font-size: 11px;
+  }
+
+  .view-card .value{
+    font-size: 10.5px;
+  }
+
+  .form-group label{
+    font-size: 12px;
+  }
+
+  .form-group input,
+  .form-group select{
+    height: 36px;
+    font-size: 12.5px;
+  }
+
+  .form-row{
+    gap: 8px;
+  }
+
+  .coord-row{
+    gap: 6px;
+  }
+
+  .pick-map-btn{
+    height: 38px;
+    font-size: 12.5px;
+  }
+
+  .facilities-card{
+    padding: 8px;
+  }
+
+  .facilities-scroll{
+    height: 110px;
+  }
+
+  .facility-item{
+    font-size: 11.5px;
+    padding: 4px 6px;
+  }
+
+  .evac-banner{
+    font-size: 12.5px;
+    padding: 8px;
+    justify-content: center;
+  }
+
+  .evac-card-wrapper .modal-actions button{
+    height: 40px;
+    font-size: 13px;
+  }
+
 }

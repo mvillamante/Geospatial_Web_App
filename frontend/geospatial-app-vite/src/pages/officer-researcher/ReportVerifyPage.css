@@ -833,7 +833,7 @@
   background: var(--surface-2);
   font-weight: 700;
   color: var(--subtext);
-  font-size: 15px;
+  font-size: 12px;
 }
 
 .reportverify-page .step-dot {

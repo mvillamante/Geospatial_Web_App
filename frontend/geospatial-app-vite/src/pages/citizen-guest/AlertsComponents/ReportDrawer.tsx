@@ -1,10 +1,10 @@
 
 import filipinoBadWords from "filipino-badwords-list";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import PinLocationPicker from "./PinLocationPicker";
 import { isWithinCabuyao } from '../../../../src/utils/validateCabuyao';
-import { INCIDENT_CATEGORY_METADATA } from "../../../constants"
+import { getIncidentCategories } from "../../../constants"
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -108,6 +108,8 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
   // Abort controller refs (avoid stale requests)
   const geoAbortRef = useRef<AbortController | null>(null);
   const pinAbortRef = useRef<AbortController | null>(null);
+
+  const categories = useMemo(() => getIncidentCategories(), []);
 
   // Manual pin reverse-geocode
   async function reverseGeocodeAndSetDisplay(lat: number, lon: number) {
@@ -299,7 +301,7 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
       if (photoFile) form.append("photo", photoFile);
       
       const API_URL = import.meta.env.VITE_API_URL;
-      const res = await fetch(`${API_URL}0/api/reports/`, {
+      const res = await fetch(`${API_URL}/api/reports/`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: form,
@@ -336,7 +338,7 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
-            {INCIDENT_CATEGORY_METADATA.map((cat) => (
+            {categories.map((cat) => (
               <option key={cat.value} value={cat.value}>
                 {cat.label}
               </option>

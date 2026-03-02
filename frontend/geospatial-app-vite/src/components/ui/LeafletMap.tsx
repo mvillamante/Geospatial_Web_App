@@ -1520,7 +1520,7 @@ export default function LeafletMap(props: LeafletMapProps) {
 
 
 
-  return (
+  return (  
     <div
       className="leaflet-map-wrapper"
       style={{ height, width }}

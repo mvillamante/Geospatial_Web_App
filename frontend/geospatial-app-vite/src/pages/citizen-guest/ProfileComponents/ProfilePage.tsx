@@ -5,6 +5,8 @@ import "./ProfilePage.css";
 import { getUserRoleAndDisplayName } from "../../../libr/auth";
 import type { Report, ReportStatus } from "../../../types/report";
 
+import { getCabuyaoBarangays, getIncidentCategories } from "../../../constants"
+
 // export type ReportCardModel = {
 //   id: number;
 //   title: string;
@@ -91,26 +93,6 @@ const ProfilePage: React.FC = () => {
 
   const [verifyLoading, setVerifyLoading] = useState(false);
 
-  const CABUYAO_BARANGAYS = [
-    "Banaybanay",
-    "Bigaa",
-    "Butong",
-    "Casile",
-    "Diezmo",
-    "Gulod",
-    "Mamatid",
-    "Marinig",
-    "Niugan",
-    "Pittland",
-    "Pulo",
-    "Sala",
-    "San Isidro",
-    "Baclaran",
-    "Barangay Dos",
-    "Barangay Tres",
-    "Barangay Uno"
-  ]
-
   const navigate = useNavigate();
   const { displayName, userRole, userRole2 } = getUserRoleAndDisplayName();
 
@@ -161,18 +143,9 @@ const ProfilePage: React.FC = () => {
     navigate("/");
   }
 
-  const categoryTitleMap: Record<string, string> = {
-    fire: "Fire Incident",
-    flood: "Flood Incident",
-    landslide: "Landslide Alert",
-    typhoon: "Severe Weather Alert",
-    earthquake: "Earthquake Alert",
-    vehicular_accident: "Vehicular Accident",
-    chemical_gas_leak: "Chemical / Gas Leak",
-    fallen_tree: "Fallen Tree Hazard",
-    infrastructure_damage: "Infrastructure Damage",
-    others: "Reported Incident",
-  };
+  const categoryTitleMap = Object.fromEntries(
+    getIncidentCategories().map(cat => [cat.value, cat.label])
+  );
 
   function toReportStatus(raw: string | undefined | null): ReportStatus {
     const s = (raw || "").toLowerCase();
@@ -297,11 +270,11 @@ const ProfilePage: React.FC = () => {
 
           return {
             id: r.id,
-            title: customTitle ?? (categoryTitleMap[r.category] || "Incident Report"),
+            title: customTitle || categoryTitleMap[r.category] || "Incident Report",
             description: r.description || "No description provided.",
-            category: r.category,                         // ✅ added
+            category: r.category,
             other_category: r.other_category ?? null,
-            location_display: r.location_display || "Unknown location",  // ✅ fixed key
+            location_display: r.location_display || "Unknown location",
             date: dateStr,
             status,
             progressStatus,
@@ -316,6 +289,7 @@ const ProfilePage: React.FC = () => {
           };
         });
         setReports(mapped);
+        console.log("bbd", mapped)
       } catch (e: any) {
         setReportsError(e?.message || "Something went wrong");
         setReports([]);
@@ -776,7 +750,7 @@ const ProfilePage: React.FC = () => {
               <label>Barangay</label>
               <select value={barangay} onChange={(e) => setBarangay(e.target.value)}>
                 <option value="">Select barangay</option>
-                {CABUYAO_BARANGAYS.map((b) => (
+                {getCabuyaoBarangays().map((b) => (
                   <option key={b} value={b}>
                     {b}
                   </option>

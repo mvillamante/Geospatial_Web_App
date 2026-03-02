@@ -5,7 +5,7 @@ import { MapPin, Users, Search, CheckCircle2, XCircle, Tag,
   Clock3, ArrowRight, MessageSquareText, Filter, UserPlus, ShieldCheck,
 } from "lucide-react";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
-import { INCIDENT_CATEGORY_METADATA, getIncidentCategories, type IncidentCategories } from "../../constants"
+import { getIncidentCategories, type IncidentCategories } from "../../constants"
 
 type ReportStatus = "pending" | "in_progress" | "resolved" | "needs_info" | "rejected";
 type RiskLevel = "low" | "moderate" | "high" | "critical";
@@ -116,6 +116,8 @@ const ReportVerifyPage: React.FC = () => {
   const [modal, setModal] = useState<ModalType>("none");
   // const [resolveTitle, setResolveTitle] = useState("");
   const [rejectReason, setRejectReason] = useState("");
+
+  const categories = useMemo(() => getIncidentCategories(), []);
 
   const selected = useMemo(
     () => reports.find((r) => r.id === selectedId) ?? reports[0],
@@ -528,7 +530,7 @@ const ReportVerifyPage: React.FC = () => {
   };
 
   const categoryMeta = selected
-  ? INCIDENT_CATEGORY_METADATA.find(
+  ? categories.find(
       c => c.value === selected.category
     )
   : null;
@@ -629,7 +631,7 @@ const ReportVerifyPage: React.FC = () => {
                   }
                 >
                   <option value="all">All Categories</option>
-                  {INCIDENT_CATEGORY_METADATA.map((cat) => (
+                  {categories.map((cat) => (
                     <option key={cat.value} value={cat.value}>
                       {cat.label}
                     </option>
@@ -862,7 +864,7 @@ const ReportVerifyPage: React.FC = () => {
                   </div>
 
                   <button
-                    className="btn ghost"
+                    className="btn ghostt"
                     onClick={assignToMe}
                     disabled={!!selected.assignedTo}
                     title={selected.assignedTo ? "Already assigned" : "Assign to yourself"}

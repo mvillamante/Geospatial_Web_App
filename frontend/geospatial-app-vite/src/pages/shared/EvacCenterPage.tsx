@@ -240,7 +240,8 @@ function EvacCenterPage() {
       else setMapWidth("50%");
 
       // Height rules
-      if (h < 800) setMapHeight("66vh");
+      if (w < 500) setMapHeight("40vh")
+      else if (h < 800) setMapHeight("66vh");
       else if (h < 1024) setMapHeight("62vh");
       else setMapHeight("61vh");
     };

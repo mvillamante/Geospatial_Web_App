@@ -74,12 +74,6 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
     }
   };
 
-
-  const displayCategory =
-    report.category === "others" && report.other_category?.trim()
-      ? report.other_category.trim()
-      : report.category;
-
   function formatStatus(status: string | undefined | null) {
     if (!status) return "";
 
@@ -106,7 +100,7 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-handle" />
-        <h2>{displayCategory}</h2>
+        <h2>{report.title}</h2>
 
         <div className="modal-meta">
           <div className="modal-row">

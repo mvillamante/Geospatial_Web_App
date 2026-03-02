@@ -380,14 +380,62 @@
 .evac-side-content {
   display: flex;
   flex-direction: row;
-  justify-content: right;
-  align-items: center;
+  align-items: stretch;
   gap: 1rem;
   width: 80%;
   background-color: var(--white-bg);
   border-radius: 15px;
   box-shadow: 0 6px 16px rgba(163, 169, 182, 0.18);
   padding: 15px;
+}
+
+.evac-side-content-filtermap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.evac-side-content-filtermap .role-select {
+  padding: 0.35rem 1.8rem 0.35rem 1.85rem;
+}
+
+.filter-hint {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 6px;
+  margin-left: 6px;
+}
+
+.evac-side-content-map {
+  width: 100%;
+  height: 61vh;
+}
+
+@media (max-width: 1024px) {
+  .evac-side-content-map {
+    width: 70%;
+    height: 62vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .evac-side-content-map {
+    width: 100%;
+    height: 66vh;
+  }
+}
+
+@media (max-height: 800px) {
+  .evac-side-content-map {
+    height: 66vh;
+  }
+}
+
+@media (max-width: 500px) {
+  .evac-side-content-map {
+    height: 40vh;
+  }
 }
 
 /* =========================

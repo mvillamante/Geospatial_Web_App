@@ -306,7 +306,7 @@
   align-items: flex-start;
 }
 
-.filters {
+.reportsmgmt-page .filters {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -314,13 +314,13 @@
   margin: 14px 0;
 }
 
-.filters-left {
+.reportsmgmt-page .filters-left {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
 }
 
-.filters-right {
+.reportsmgmt-page .filters-right {
   display: flex;
   justify-content: flex-end;
   flex: 1;
@@ -477,7 +477,6 @@
   display:flex;
   justify-content:center;
   border-radius: 15px;
-  overflow-y: auto;
 }
 
 .mini-table{

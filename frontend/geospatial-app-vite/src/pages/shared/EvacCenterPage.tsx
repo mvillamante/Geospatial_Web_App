@@ -6,7 +6,7 @@ import { fetchEvacCenters, createEvacCenter, updateEvacCenter, deleteEvacCenter 
 
 import { Search, MapPin, Phone, Navigation, Users } from 'lucide-react';
 import { GrLocationPin } from "react-icons/gr";
-import { MdOutlineModeEdit, MdAdd } from "react-icons/md";
+import { MdOutlineModeEdit, MdAdd, MdPlace } from "react-icons/md";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { RiDeleteBinFill } from "react-icons/ri";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
@@ -22,7 +22,7 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
-import { getCabuyaoBarangays } from "../../constants";
+import { getCabuyaoBarangays, type IncidentCategories  } from "../../constants";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -77,6 +77,15 @@ function EvacCenterPage() {
   const [mapOpen, setMapOpen] = useState(false);
   const [selectedEvacuationCenter, setSelectedEvacuationCenter] = useState<EvacuationCenter | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [locationFilter, setLocationFilter] = useState<"all" | "near_me">("all");
+
+  const userBarangay = localStorage.getItem("user_barangay") || "";
+  const normalizeBarangay = (text: string) =>
+    text
+      .toLowerCase()
+      .replace(/barangay/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
 
   //get user role
   const { userRole } = getUserRoleAndDisplayName();
@@ -115,11 +124,24 @@ function EvacCenterPage() {
 
   // Filter evacuation centers based on search query
   const filteredCenters = centers.filter(center => {
-    const query = searchQuery.toLowerCase();
-    return (
-      center.name.toLowerCase().includes(query) ||
-      center.barangay.toLowerCase().includes(query)
-    );  
+    const query = searchQuery.trim().toLowerCase();
+
+    const nameMatch =
+      center.name?.toLowerCase().includes(query) ?? false;
+
+    const barangayMatch =
+      center.barangay?.toLowerCase().includes(query) ?? false;
+
+    const matchesSearch = nameMatch || barangayMatch;
+
+    const matchesBarangayFilter =
+      locationFilter === "all" ||
+      (locationFilter === "near_me" &&
+        userBarangay &&
+        center.barangay &&
+        normalizeBarangay(center.barangay) === normalizeBarangay(userBarangay));
+
+    return matchesSearch && matchesBarangayFilter;
   });
 
   // Manage Evacuation Center Cards ----------------------------------------
@@ -155,7 +177,7 @@ function EvacCenterPage() {
     try {
       const [lat, lng] = updatedCenter.coordinates
         .split(",")
-        .map((s) => Number(s.trim()));
+        .map((v) => Number(v.trim()));
 
       const payload = {
         id: updatedCenter.id,
@@ -226,61 +248,44 @@ function EvacCenterPage() {
     }
   };
 
-  /* Leaflet Width Responsiveness */
-  const [mapWidth, setMapWidth] = useState("50%")
-  const [mapHeight, setMapHeight] = useState("59vh");
-  useEffect(() => {
-    const updateSize = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-
-      // Width rules
-      if (w < 768) setMapWidth("100%");
-      else if (w < 1024) setMapWidth("70%");
-      else setMapWidth("50%");
-
-      // Height rules
-      if (w < 500) setMapHeight("40vh")
-      else if (h < 800) setMapHeight("66vh");
-      else if (h < 1024) setMapHeight("62vh");
-      else setMapHeight("61vh");
-    };
-
-    window.addEventListener("resize", updateSize);
-    updateSize();
-
-    return () => window.removeEventListener("resize", updateSize);
-  }, []);
-
   return (
     <div className="evac-page">
-      {/* <div className="evac-header">
-        <div className="evac-header-title">
-          <h1>Evacuation Centers</h1>
-        </div>
-
-        <p className="evac-header-desc">
-          {userRole === "Officer"
-            ? "Manage evacuation center locations across Cabuyao"
-            : userRole === "Citizen"
-              ? "Find the nearest evacuation center in your barangay"
-              : null}
-        </p>
-      </div> */}
-
       <div className="evac-map-wrapper">
         <div className="evac-side-content">
-          {/* Interactive Map Component */}
-          <LeafletMap
-            key={mapRefreshKey}
-            height={mapHeight}
-            width={mapWidth}
-            mapView="interactive"
-            mapType="basic"
-            activeLayers={activeLayers}
-            showPopupOnMap={false}
-            onSelectEvacuationCenter={handleSelectCenter}
-          />
+          <div className="evac-side-content-filtermap">
+            {/* Filter-Row */}
+            <div className="filters">
+              <div className="select-wrapper">
+                <MdPlace className="select-icon" />
+                <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)} className="role-select">
+                  <option value="all">All Centers</option>
+                  <option value="near_me">
+                    Near My Barangay
+                  </option>
+                </select>
+              </div>
+
+              {locationFilter === "near_me" && userBarangay && (
+                <div className="filter-hint">
+                  Showing centers near {" "}
+                  <strong>{userBarangay}</strong>
+                </div>
+              )}
+            </div>
+
+            {/* Interactive Map Component */}
+            <div className="evac-side-content-map">
+              <LeafletMap
+                key={mapRefreshKey}
+                mapView="interactive"
+                mapType="basic"
+                activeLayers={activeLayers}
+                showPopupOnMap={false}
+                locationFilter={locationFilter}
+                onSelectEvacuationCenter={handleSelectCenter}
+              />
+            </div>
+          </div>
 
           {/* Selected Evacuation Center */}
           <div className="selected-evac-card">
@@ -516,7 +521,7 @@ function EvacCenterPage() {
           try {
             const [lat, lng] = newCenter.coordinates
               .split(",")
-              .map((s: string) => Number(s.trim()));
+              .map(v => Number(v.trim()))
 
             const payload = {
               name: newCenter.name,
@@ -548,7 +553,7 @@ function EvacCenterPage() {
         initial={
           editingCenter?.coordinates
             ? (() => {
-                const [lat, lng] = editingCenter.coordinates.split(",").map(s => Number(s.trim()));
+                const [lat, lng] = editingCenter.coordinates.split(",").map(v => Number(v.trim()));
                 return { lat, lng };
               })()
             : null

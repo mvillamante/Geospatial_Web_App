@@ -144,6 +144,7 @@ const ReportsMgmtPage: React.FC = () => {
   const [loadingOfficers, setLoadingOfficers] = useState(false);
   const [selectedOfficer, setSelectedOfficer] = useState<string>("");
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [openMapMenuId, setOpenMapMenuId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
@@ -248,6 +249,12 @@ const ReportsMgmtPage: React.FC = () => {
 
   useEffect(() => {
     const onDocClick = () => setOpenMenuId(null);
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, []);
+
+  useEffect(() => {
+    const onDocClick = () => setOpenMapMenuId(null);
     document.addEventListener("click", onDocClick);
     return () => document.removeEventListener("click", onDocClick);
   }, []);
@@ -599,12 +606,14 @@ const ReportsMgmtPage: React.FC = () => {
                   <th>Reporter</th>
                   <th>Category</th>
                   <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
 
               <tbody>
                 {filteredReports.map((report) => {
                   const status = normalizeStatus(report.status);
+                  const isArchived = normalizeStatus(report.status) === "Archived";
 
                   return (
                     <tr key={report.id} onClick={() => setSelectedReportMap(report)} title="Click to navigate to pin">
@@ -614,6 +623,80 @@ const ReportsMgmtPage: React.FC = () => {
 
                       <td className="center">
                         <span className={badgeClass(status)}>{status}</span>
+                      </td>
+
+                      <td className="center">
+                        <div className="row-menu" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            className="kebab-btn"
+                            aria-label="Actions"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMapMenuId((prev) => (prev === report.id ? null : report.id));
+                            }}
+                          >...</button>
+
+                          {openMapMenuId === report.id && (
+                            <div className="kebab-dropdown">
+                              <button
+                                type="button"
+                                className="kebab-item"
+                                onClick={() => {
+                                  setOpenMapMenuId(null)
+                                  const latest = reports.find(r => r.id === report.id) ?? report;
+                                  setSelectedReport(latest);
+                                  setSelectedOfficer(latest.assigned_officer_id ? String(latest.assigned_officer_id) : "");
+
+
+                                }}
+                              >View Full Details
+                              </button>
+
+                              {/*<button
+                                type="button"
+                                className="kebab-item danger"
+                                onClick={async () => {
+                                  setOpenMapMenuId(null);
+
+                                  try {
+                                    const updated = await patchReport(report.id, {
+                                      status: "critical"
+                                    });
+
+                                    setReports(prev =>
+                                      prev.map(r =>
+                                        r.id === report.id ? { ...r, ...updated } : r
+                                      )
+                                    );
+
+                                    toast.success("Report escalated to Critical status");
+
+                                  } catch (err: any) {
+                                    console.error(err);
+                                    toast.error(err?.message || "Failed to escalate report");
+                                  }
+                                }}
+                              >
+                                Escalate
+                              </button>
+
+                              <button
+                                type="button"
+                                className="kebab-item danger"
+                                onClick={() => {
+                                  setOpenMapMenuId(null);
+                                  setConfirmArchiveId(report.id);
+                                }}
+                                disabled={isArchived}
+                              >
+                                Archive
+                              </button>*/}
+
+
+                            </div>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );

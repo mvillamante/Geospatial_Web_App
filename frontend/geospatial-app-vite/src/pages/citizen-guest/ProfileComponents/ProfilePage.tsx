@@ -189,6 +189,7 @@ const ProfilePage: React.FC = () => {
 
 
         const data = await res.json();
+        localStorage.setItem("user_barangay", data.barangay || ""); // Save Current User's Barangay
 
         const rawStatus = (data.verification_status || "unverified").toLowerCase();
 
@@ -289,7 +290,6 @@ const ProfilePage: React.FC = () => {
           };
         });
         setReports(mapped);
-        console.log("bbd", mapped)
       } catch (e: any) {
         setReportsError(e?.message || "Something went wrong");
         setReports([]);
@@ -409,9 +409,9 @@ const ProfilePage: React.FC = () => {
       const token = localStorage.getItem("access_token");
 
       const formData = new FormData();
-      formData.append("barangay", barangay.trim()),
-        formData.append("address", address.trim()),
-        formData.append("id_image", barangayIdFile);
+      formData.append("barangay", barangay.trim());
+      formData.append("address", address.trim());
+      formData.append("id_image", barangayIdFile);
 
       const res = await fetch(`${API_URL}/api/resident-verification/request/`, {
         method: "POST",

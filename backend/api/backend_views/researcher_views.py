@@ -8,6 +8,8 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
 import random, string
+from rest_framework.views import APIView
+from django.db.models import Q
 
 # Public Researcher Request Submission
 class CreateResearcherRequestView(generics.CreateAPIView):
@@ -42,7 +44,100 @@ class ResearcherRequestListView(generics.ListAPIView):
     serializer_class = ResearcherRequestSerializer
     permission_classes = [IsAuthenticated, IsAdminRole]
 
+class ResearcherOverviewView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminRole]
 
+    def get(self, request):
+        search = request.query_params.get("search")
+        status_param = request.query_params.get("status")
+
+        # Researcher Requests
+        request_qs = ResearcherRequest.objects.all()
+
+        # Researchers
+        researcher_qs = CustomUser.objects.filter(extra_roles__contains=["Researcher"])
+
+        if search:
+            request_qs = request_qs.filter(
+                Q(first_name__icontains=search) |
+                Q(last_name__icontains=search) |
+                Q(email__icontains=search)
+            )
+
+            researcher_qs = researcher_qs.filter(
+                Q(first_name__icontains=search) |
+                Q(last_name__icontains=search) |
+                Q(email__icontains=search)
+            )
+
+        request_data = [
+            {
+                "id": r.id,
+                "type": "request",
+                "first_name": r.first_name,
+                "last_name": r.last_name,
+                "email": r.email,
+                "status": r.status.lower(),
+                "created_at": r.created_at,
+                "reviewed_at": r.reviewed_at, 
+                "purpose": r.purpose,
+                "orgSchool": r.orgSchool,
+                "attachment": r.attachment.url if r.attachment else None,
+            }
+            for r in request_qs
+        ]
+
+        researcher_data = [
+            {
+                "id": r.id,
+                "type": "researcher",
+                "first_name": r.first_name,
+                "last_name": r.last_name,
+                "email": r.email,
+                "status": "active" if r.is_active else "inactive",
+                "created_at": r.date_joined,
+                "last_login": r.last_login,
+            }
+            for r in researcher_qs
+        ]
+
+        combined = request_data + researcher_data
+
+        if status_param and status_param.lower() != "all":
+            combined = [
+                item for item in combined
+                if item["status"] == status_param.lower()
+            ]
+
+        return Response({
+            "count": len(combined),
+            "results": combined
+        })
+
+    permission_classes = [IsAuthenticated, IsAdminRole]
+
+    def patch(self, request, pk):
+        try:
+            user = CustomUser.objects.get(pk=pk, extra_roles__contains=["Researcher"])
+        except CustomUser.DoesNotExist:
+            return Response({"detail": "Researcher not found."}, status=404)
+
+        action = request.data.get("action")
+
+        if action == "activate":
+            user.is_active = True
+        elif action == "deactivate":
+            user.is_active = False
+        else:
+            return Response({"detail": "Invalid action."}, status=400)
+
+        user.save()
+
+        return Response({
+            "id": user.id,
+            "status": "active" if user.is_active else "inactive"
+        })
+        
 # Serializer specifically for admin approve/reject action
 class ApproveRejectSerializer(serializers.Serializer):
     action = serializers.ChoiceField(choices=["approve", "reject"])

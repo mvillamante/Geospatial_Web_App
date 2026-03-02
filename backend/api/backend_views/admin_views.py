@@ -33,7 +33,10 @@ class UserListView(ListAPIView):
     pagination_class = AdminUserPagination
 
     def get_queryset(self):
-        qs = CustomUser.objects.all()
+        qs = CustomUser.objects.filter(
+            Q(role__iexact="admin") |
+            Q(role__iexact="officer")
+        )
 
         # Get query params
         role = self.request.query_params.get('role')

@@ -319,6 +319,11 @@ class PasswordResetOTP(models.Model):
     Stores a hashed OTP for password reset.
     Use email_or_phone to find the user.
     """
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
     email_or_phone = models.CharField(max_length=255, db_index=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     otp_hash = models.CharField(max_length=64)

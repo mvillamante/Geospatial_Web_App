@@ -21,6 +21,8 @@ load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Load .env from backend directory so GROQ_API_KEY etc. are found when running locally
+load_dotenv(dotenv_path=BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production

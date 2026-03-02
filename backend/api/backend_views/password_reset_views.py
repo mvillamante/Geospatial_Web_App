@@ -48,27 +48,33 @@ class PasswordResetRequestOTP(APIView):
                 {"detail": "If the account exists, an OTP was sent. Please wait a minute before retrying."},
                 status=status.HTTP_200_OK,
             )
-        
+
+        user = find_user_by_email_or_phone(email_or_phone)
+
         otp = generate_otp(6)
         otp_hash = PasswordResetOTP.hash_otp(otp)
         expires_at = make_expiry()
 
+        # Delete previous OTPs for this identifier
         PasswordResetOTP.objects.filter(
             email_or_phone=email_or_phone
         ).delete()
 
+        # Create OTP entry
         PasswordResetOTP.objects.create(
-            user=user,
+            email_or_phone=email_or_phone,
+            user=user if user else None,
             otp_hash=otp_hash,
             expires_at=expires_at
-        )
+)
 
-        user = find_user_by_email_or_phone(email_or_phone)
+        # Send only if user exists (avoid enumeration)
         if user:
             if "@" in email_or_phone:
                 send_otp_email(email_or_phone, otp)
             else:
                 send_otp_sms(email_or_phone, otp)
+
         return Response(
             {"detail": "If the account exists, an OTP has been sent."},
             status=status.HTTP_200_OK,

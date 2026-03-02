@@ -9,7 +9,7 @@ Inputs (must exist in the project root):
 Output:
 - calamity_risk_data.json   : yearly calamity risk likelihood per barangay
 
-Methodology (aligned with the thesis reference):
+Methodology (multiplicative approach):
 - Each component is expressed on a 0–1 scale:
   - Hazard component  (H):   hazard_index_raw  (already 0–1 from hazard_index_data.json)
   - Exposure component (E):  exposure index    (derived from training data, 0–1)
@@ -17,7 +17,7 @@ Methodology (aligned with the thesis reference):
 
 - Calamity Risk Likelihood (CRL) is computed as:
 
-      CRL = 0.5 * H + 0.3 * E + 0.2 * (1 - G)
+      CRL = H × E × (1 - G)
 
   where:
     - H   = hazard severity
@@ -38,12 +38,19 @@ from typing import Dict, Any
 import pandas as pd
 
 
-BASE_PATH = Path(r"d:\Users\Vince Joseph\Downloads-New\Hazard")
+# Paths relative to api/data — read from hazard, write to calamity_risk (served by API)
+_DATA_DIR = Path(__file__).resolve().parent.parent.parent  # api/data
+GREEN_PATH = _DATA_DIR / "hazard" / "outputs" / "green_index_data.json"
+HAZARD_PATH = _DATA_DIR / "hazard" / "outputs" / "hazard_index_data.json"
+TRAINING_PATH = _DATA_DIR / "hazard" / "datasets" / "lstm_training_data.csv"
+OUTPUT_PATH = _DATA_DIR / "calamity_risk" / "outputs" / "calamity_risk_data.json"
+FORECAST_PATH = _DATA_DIR / "calamity_risk" / "outputs" / "calamity_risk_forecast_data.json"
 
-GREEN_PATH = BASE_PATH / "green_index_data.json"
-HAZARD_PATH = BASE_PATH / "hazard_index_data.json"
-TRAINING_PATH = BASE_PATH / "lstm_training_data.csv"
-OUTPUT_PATH = BASE_PATH / "calamity_risk_data.json"
+# Poblacion is displayed as the average of Barangay Uno, Dos, Tres
+POBLACION_SOURCE_BARANGAYS = ("Barangay Uno", "Barangay Dos", "Barangay Tres")
+
+# Minimum exposure (0–1) so low-exposure barangays (e.g. Sala) still show a visible CRL
+MIN_EXPOSURE_NORM = 0.35
 
 
 def _load_json(path: Path) -> Dict[str, Any]:
@@ -93,6 +100,27 @@ def _load_exposure_from_training(path: Path) -> Dict[str, float]:
     return exposure_lookup
 
 
+def _poblacion_from_three(
+    year_data: Dict[str, Any], source_names: tuple
+) -> Dict[str, Any] | None:
+    """Build Poblacion entry as average of Barangay Uno, Dos, Tres. Returns None if any missing."""
+    entries = [year_data.get(b) for b in source_names]
+    if any(e is None for e in entries):
+        return None
+    n = len(entries)
+    crl_raw_avg = sum(e["calamity_risk_raw"] for e in entries) / n
+    return {
+        "calamity_risk": round(crl_raw_avg * 100.0, 2),
+        "calamity_risk_raw": round(crl_raw_avg, 4),
+        "risk_class": _classify_crl(crl_raw_avg),
+        "hazard_index": round(sum(e["hazard_index"] for e in entries) / n, 2),
+        "hazard_index_raw": round(sum(e["hazard_index_raw"] for e in entries) / n, 4),
+        "green_index": round(sum(e["green_index"] for e in entries) / n, 2),
+        "green_index_raw": round(sum(e["green_index_raw"] for e in entries) / n, 4),
+        "exposure_norm": round(sum(e["exposure_norm"] for e in entries) / n, 4),
+    }
+
+
 def _classify_crl(raw: float) -> str:
     """
     Map calamity risk likelihood (0–1) to qualitative class.
@@ -117,7 +145,7 @@ def _classify_crl(raw: float) -> str:
 
 def main() -> None:
     print("=== Building calamity_risk_data.json ===")
-    print(f"Base path: {BASE_PATH}")
+    print(f"Output: {OUTPUT_PATH}")
 
     green_data = _load_json(GREEN_PATH)
     hazard_data = _load_json(HAZARD_PATH)
@@ -154,17 +182,17 @@ def main() -> None:
             h_raw = float(h_entry.get("hazard_index_raw", 0.0))
             h_raw = max(0.0, min(1.0, h_raw))
 
-            # Exposure component E: per-barangay value (0–1)
+            # Exposure component E: per-barangay value (0–1), with floor so CRL is visible
             e_raw = float(exposure_lookup.get(brgy, exposure_lookup["__DEFAULT__"]))
-            e_raw = max(0.0, min(1.0, e_raw))
+            e_raw = max(MIN_EXPOSURE_NORM, min(1.0, e_raw))
 
             # Environmental component G: green_index from 0–100 → 0–1
             g_entry = green_year.get(brgy) or {}
             g_idx = float(g_entry.get("green_index", 0.0))
             g_raw = max(0.0, min(1.0, g_idx / 100.0))
 
-            # Calamity Risk Likelihood (0–1)
-            crl_raw = 0.5 * h_raw + 0.3 * e_raw + 0.2 * (1.0 - g_raw)
+            # Calamity Risk Likelihood (0–1) — multiplicative: CRL = H × E × (1−G)
+            crl_raw = h_raw * e_raw * (1.0 - g_raw)
             crl_raw = max(0.0, min(1.0, crl_raw))
             crl_100 = crl_raw * 100.0
 
@@ -181,11 +209,38 @@ def main() -> None:
                 "exposure_norm": round(e_raw, 4),
             }
 
+        # Poblacion = average of Barangay Uno, Dos, Tres for consistent CRL view
+        poblacion_entry = _poblacion_from_three(out[year_str], POBLACION_SOURCE_BARANGAYS)
+        if poblacion_entry is not None:
+            out[year_str]["Poblacion"] = poblacion_entry
+
     with OUTPUT_PATH.open("w", encoding="utf-8") as f:
         json.dump(out, f, indent=2)
 
-    print(f"✓ Saved calamity risk data to: {OUTPUT_PATH}")
+    print(f"[OK] Saved calamity risk data to: {OUTPUT_PATH}")
     print(f"  Years: {years[0]}–{years[-1]}  | Barangays: {len(all_barangays)}")
+
+    # Patch forecast JSON: consistent E from training, CRL = H×E×(1−G), add Poblacion
+    if FORECAST_PATH.exists():
+        forecast = _load_json(FORECAST_PATH)
+        for year_str, year_data in forecast.items():
+            for brgy, entry in list(year_data.items()):
+                h_raw = max(0.0, min(1.0, float(entry.get("hazard_index_raw", 0.0))))
+                g_raw = max(0.0, min(1.0, float(entry.get("green_index_raw", 0.0))))
+                e_raw = float(exposure_lookup.get(brgy, exposure_lookup["__DEFAULT__"]))
+                e_raw = max(MIN_EXPOSURE_NORM, min(1.0, e_raw))
+                crl_raw = h_raw * e_raw * (1.0 - g_raw)
+                crl_raw = max(0.0, min(1.0, crl_raw))
+                entry["exposure_norm"] = round(e_raw, 4)
+                entry["calamity_risk_raw"] = round(crl_raw, 4)
+                entry["calamity_risk"] = round(crl_raw * 100.0, 2)
+                entry["risk_class"] = _classify_crl(crl_raw)
+            poblacion_entry = _poblacion_from_three(year_data, POBLACION_SOURCE_BARANGAYS)
+            if poblacion_entry is not None:
+                forecast[year_str]["Poblacion"] = poblacion_entry
+        with FORECAST_PATH.open("w", encoding="utf-8") as f:
+            json.dump(forecast, f, indent=2)
+        print(f"[OK] Patched forecast (exposure + CRL formula + Poblacion) to: {FORECAST_PATH}")
 
 
 if __name__ == "__main__":

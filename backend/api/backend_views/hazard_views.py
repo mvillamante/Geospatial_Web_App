@@ -95,6 +95,8 @@ DATA_DIR: Path = getattr(settings, "HAZARD_DATA_DIR", Path(__file__).resolve().p
 GREEN_INDEX_OUTPUTS: Path = DATA_DIR / "green_index" / "outputs"
 HAZARD_INDEX_OUTPUTS: Path = DATA_DIR / "hazard_index" / "outputs"
 CALAMITY_RISK_OUTPUTS: Path = DATA_DIR / "calamity_risk" / "outputs"
+# Hazard outputs (same folder as pipeline/viewed JSON) — use so map and AI insight share one source
+HAZARD_OUTPUTS: Path = DATA_DIR / "hazard" / "outputs"
 
 # Datasets by purpose (geography = barangay boundaries, hazards = earthquake/typhoon)
 DATASETS_DIR: Path = DATA_DIR / "datasets"
@@ -120,6 +122,15 @@ def _load_json(path: Path) -> Dict[str, Any]:
         raise FileNotFoundError(f"Expected data file not found: {path}")
     with path.open("r", encoding="utf-8") as fh:
         return json.load(fh)
+
+
+def _calamity_risk_path(filename: str) -> Path:
+    """Return path to calamity risk JSON. Prefer hazard/outputs (same as viewed JSON) so map and AI insight use one source."""
+    for base in (HAZARD_OUTPUTS, CALAMITY_RISK_OUTPUTS):
+        p = base / filename
+        if p.exists():
+            return p
+    return CALAMITY_RISK_OUTPUTS / filename
 
 
 def _json_response_for_data(
@@ -169,7 +180,7 @@ def calamity_risk(request):
     """
     year = request.GET.get("year")
     return _json_response_for_data(
-        CALAMITY_RISK_OUTPUTS / "calamity_risk_data.json",
+        _calamity_risk_path("calamity_risk_data.json"),
         year=year,
         label="Calamity risk",
     )
@@ -186,19 +197,20 @@ def calamity_risk_forecast(request):
     """
     year = request.GET.get("year")
     return _json_response_for_data(
-        CALAMITY_RISK_OUTPUTS / "calamity_risk_forecast_data.json",
+        _calamity_risk_path("calamity_risk_forecast_data.json"),
         year=year,
         label="Calamity risk forecast",
     )
 
 
 def _calamity_risk_ai_insight_payload(year: str, data: Dict[str, Any]) -> Dict[str, Any]:
-    """Build context payload for AI from calamity risk likelihood data for one year (higher = higher risk)."""
+    """Build context payload for AI from calamity risk likelihood data for one year (higher = higher risk).
+    Uses only "calamity_risk" (0-100%), not calamity_risk_raw (0-1), so Key Insights match left panel."""
     if not data:
         return {"year": year, "city_average": None, "top": [], "bottom": []}
     values: List[tuple[str, float]] = []
     for barangay, record in data.items():
-        cr = record.get("calamity_risk")
+        cr = record.get("calamity_risk")  # 0-100 scale (same as map/left panel); do not use calamity_risk_raw
         if cr is not None:
             try:
                 values.append((barangay, float(cr)))
@@ -220,18 +232,23 @@ def _calamity_risk_ai_insight_payload(year: str, data: Dict[str, Any]) -> Dict[s
 
 
 def _calamity_risk_fallback_insights(payload: Dict[str, Any]) -> Dict[str, str]:
-    """Build 3 short data-driven calamity risk insights when AI is unavailable."""
+    """Build 3 short data-driven calamity risk insights when AI is unavailable.
+    Used for the summary paragraph so numbers always match the left panel (AI can hallucinate)."""
     year = payload.get("year", "?")
     avg = payload.get("city_average")
     top = payload.get("top") or []
     bottom = payload.get("bottom") or []
-    suffix = " (Data only.)"
     if top and bottom and avg is not None:
         top_s = ", ".join(f"{t['barangay']} ({t['calamity_risk']}%)" for t in top[:3])
         bot_s = ", ".join(f"{b['barangay']} ({b['calamity_risk']}%)" for b in bottom[:3])
-        summary = f"In {year}, city avg calamity risk {avg}%. Highest: {top_s}. Lowest: {bot_s}.{suffix}"
+        avg_display = round(float(avg), 1)  # Match left panel toFixed(1)
+        summary = (
+            f"As of {year}, Cabuyao's city average calamity risk stands at {avg_display}%. "
+            f"The highest risk barangays are {top_s}; lowest are {bot_s}."
+        )
     else:
-        summary = f"Calamity risk for {year}.{suffix}"
+        summary = f"Calamity risk for {year}. (Data only.)"
+    suffix = " (Data only.)"
     risk_peak = (
         "Calamity risk likelihood peaks in the late 2020s under current assumptions; heavy rainfall and typhoon seasons compound risk." + suffix
     )
@@ -257,18 +274,10 @@ def calamity_risk_ai_insight(request):
             {"error": "Missing required query parameter: year"},
             status=400,
         )
-    api_key = os.getenv("GROQ_API_KEY")
-    if not api_key:
-        return JsonResponse(
-            {"error": "AI not configured. Set GROQ_API_KEY in your environment.", "summary": None},
-            status=503,
-        )
-    # Use same data source order as frontend: forecast first, then historical (so Key Insights match map/left panel).
+    # Use same data source and order as map/left panel: forecast first, then historical (_calamity_risk_path prefers hazard/outputs = viewed JSON).
     full: Dict[str, Any] = {}
-    for path in (
-        CALAMITY_RISK_OUTPUTS / "calamity_risk_forecast_data.json",
-        CALAMITY_RISK_OUTPUTS / "calamity_risk_data.json",
-    ):
+    for filename in ("calamity_risk_forecast_data.json", "calamity_risk_data.json"):
+        path = _calamity_risk_path(filename)
         if not path.exists():
             continue
         try:
@@ -285,12 +294,25 @@ def calamity_risk_ai_insight(request):
         )
     payload = _calamity_risk_ai_insight_payload(year, full[year])
 
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        fallback = _calamity_risk_fallback_insights(payload)
+        return JsonResponse({
+            "summary": fallback["summary"],
+            "risk_peak_insight": fallback["risk_peak"],
+            "adaptation_insight": fallback["adaptation"],
+            "year": year,
+            "payload": payload,
+        })
+
     now = time.time()
+    fallback_for_summary = _calamity_risk_fallback_insights(payload)
     if year in _CALAMITY_AI_INSIGHT_CACHE:
         cached, cached_at = _CALAMITY_AI_INSIGHT_CACHE[year]
         if now - cached_at < _CALAMITY_AI_INSIGHT_CACHE_TTL:
+            # Always use payload-based summary so numbers match left panel
             return JsonResponse({
-                "summary": cached["summary"],
+                "summary": fallback_for_summary["summary"],
                 "risk_peak_insight": cached["risk_peak"],
                 "adaptation_insight": cached["adaptation"],
                 "year": year,
@@ -367,11 +389,17 @@ def calamity_risk_ai_insight(request):
             if len(chunks) >= 3:
                 parts = chunks[:3]
         fallback = _calamity_risk_fallback_insights(payload)
+        # Always use payload-based summary for paragraph 1 so numbers match the left panel
+        # (AI can hallucinate wrong values like 6.72% vs actual 42.1%). Use AI only for p2/p3.
         if len(parts) >= 3:
-            insights = {"summary": parts[0], "risk_peak": parts[1], "adaptation": parts[2]}
+            insights = {
+                "summary": fallback["summary"],
+                "risk_peak": parts[1],
+                "adaptation": parts[2],
+            }
         else:
             insights = {
-                "summary": parts[0] if len(parts) >= 1 else fallback["summary"],
+                "summary": fallback["summary"],
                 "risk_peak": parts[1] if len(parts) >= 2 else fallback["risk_peak"],
                 "adaptation": parts[2] if len(parts) >= 3 else fallback["adaptation"],
             }
@@ -496,15 +524,6 @@ def green_index_ai_insight(request):
             {"error": "Missing required query parameter: year"},
             status=400,
         )
-    api_key = os.getenv("GROQ_API_KEY")
-    if not api_key:
-        return JsonResponse(
-            {
-                "error": "AI not configured. Set GROQ_API_KEY in your environment. Get a free key at https://console.groq.com/keys",
-                "summary": None,
-            },
-            status=503,
-        )
     try:
         full = _load_json(GREEN_INDEX_OUTPUTS / "green_index_data.json")
     except FileNotFoundError as exc:
@@ -519,6 +538,17 @@ def green_index_ai_insight(request):
             status=404,
         )
     payload = _green_index_ai_insight_payload(year, full[year])
+
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        fallback = _green_index_fallback_insights(payload)
+        return JsonResponse({
+            "summary": fallback["summary"],
+            "hotspots_insight": fallback["hotspots"],
+            "areas_for_greening_insight": fallback["areas_for_greening"],
+            "year": year,
+            "payload": payload,
+        })
 
     # Return cached insights if still valid (reduces API calls and avoids 429)
     now = time.time()
@@ -1473,12 +1503,6 @@ def hazard_index_ai_insight(request):
             {"error": "Missing required query parameter: year"},
             status=400,
         )
-    api_key = os.getenv("GROQ_API_KEY")
-    if not api_key:
-        return JsonResponse(
-            {"error": "AI not configured. Set GROQ_API_KEY in your environment.", "summary": None},
-            status=503,
-        )
     try:
         full = _load_json(HAZARD_INDEX_OUTPUTS / "hazard_index_data.json")
     except FileNotFoundError as exc:
@@ -1493,6 +1517,18 @@ def hazard_index_ai_insight(request):
             status=404,
         )
     payload = _hazard_index_ai_insight_payload(year, full[year])
+
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        fallback = _hazard_index_fallback_insights(payload)
+        return JsonResponse({
+            "summary": fallback["summary"],
+            "hotspots_insight": fallback["hotspots"],
+            "lower_risk_insight": fallback["lower_risk"],
+            "earthquake_typhoon_insight": fallback["earthquake_typhoon"],
+            "year": year,
+            "payload": payload,
+        })
 
     now = time.time()
     if year in _HAZARD_AI_INSIGHT_CACHE:

@@ -62,7 +62,7 @@ class MeSerializer(serializers.ModelSerializer):
         if not value:
             return value
         
-        qs = CustomUser.objects.filter(email_iexact=value)
+        qs = CustomUser.objects.filter(email__iexact=value)
         if self.instance:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():

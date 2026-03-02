@@ -209,7 +209,7 @@ const UserMgmtPage: React.FC = () => {
         }));
 
         setAllRequests(mapped);
-        setResearchPendingCount(mapped.filter(r => r.status === "Pending").length);
+        setPendingCount(mapped.filter(r => r.status === "pending").length);
       } catch (err) {
         console.error(err);
       }
@@ -393,7 +393,7 @@ const UserMgmtPage: React.FC = () => {
                   </tr>
                 ) : (
                   users.map((user) => {
-                    const alreadyRequested = allRequests.some(r => r.email === user.email && r.status === "Pending");
+                    const alreadyRequested = allRequests.some(r => r.email === user.email && r.status === "pending");
                     const displayRole = user.role === "Citizen" && !user.extra_roles?.some(r => r.toLowerCase() === "researcher")
                       ? "Citizen"
                       : user.extra_roles?.some(r => r.toLowerCase() === "researcher")

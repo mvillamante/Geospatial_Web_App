@@ -6,7 +6,7 @@ import { fetchEvacCenters, createEvacCenter, updateEvacCenter, deleteEvacCenter 
 
 import { Search, MapPin, Phone, Navigation, Users } from 'lucide-react';
 import { GrLocationPin } from "react-icons/gr";
-import { MdOutlineModeEdit, MdAdd, MdPlace } from "react-icons/md";
+import { MdOutlineModeEdit, MdAdd, MdPlace, MdClose } from "react-icons/md";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { RiDeleteBinFill } from "react-icons/ri";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
@@ -248,6 +248,23 @@ function EvacCenterPage() {
     }
   };
 
+  const [showScrollButtons, setShowScrollButtons] = useState(false);
+  useEffect(() => {
+      const checkOverflow = () => {
+          const grid = gridRef.current;
+          if (!grid) return;
+
+          setShowScrollButtons(
+              grid.scrollWidth > grid.clientWidth
+          );
+      };
+
+      checkOverflow();
+      window.addEventListener("resize", checkOverflow);
+
+      return () => window.removeEventListener("resize", checkOverflow);
+  }, [filteredCenters]);
+
   return (
     <div className="evac-page">
       <div className="evac-map-wrapper">
@@ -370,6 +387,15 @@ function EvacCenterPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="evac-search"
             />
+
+            {searchQuery && (
+                <button
+                    className="evac-search-clear"
+                    onClick={() => setSearchQuery("")}
+                >
+                    <MdClose size={16} />
+                </button>
+            )}
           </div>
           {userRole === "Officer" && (
             <div className="evac-add-center">
@@ -384,130 +410,141 @@ function EvacCenterPage() {
 
       <div className="evac-grid-wrapper">
         {/* Left Arrow */}
-        <button className="scroll-btn left" onClick={() => scrollGrid(-300)}>
-          <HiChevronLeft size={24} />
-        </button>
+        {showScrollButtons && (
+          <button className="scroll-btn left" onClick={() => scrollGrid(-300)}>
+            <HiChevronLeft size={24} />
+          </button>
+        )}
 
         <div className="evac-grid officer" ref={gridRef} style={{ overflowX: "hidden" }}>
-          {filteredCenters.map(center => {
-            const isExiting = closingId === center.id;
-            return (
-              <div
-                key={center.id}
-                className={`evac-card ${userRole === "Officer" ? "officer" : ""} animate-card ${
-                  isExiting ? "exit" : ""
-                }`}
-              >
-                <h2 className="evac-card-name">
-                  <span
-                    ref={(el) => {
-                      if (!el) return;
-                      el.title = el.scrollWidth > el.clientWidth ? center.name : "";
-                    }}
-                  >
-                    {center.name}
-                  </span>
-                  {userRole === "Officer" && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span
-                        className="evac-tag"
-                        style={{
-                          background: getTagColors(center.type).bg,
-                          color: getTagColors(center.type).text,
-                        }}
-                      >
-                        {center.type.charAt(0).toUpperCase() + center.type.slice(1)}
-                      </span>
-
-                      <div className="evac-capacity">
-                        <Users className="evac-capacity-icon" />
-                        {center.capacity}
-                      </div>
-                    </div>
-                  )}
-                  {userRole === "Citizen" && (
-                    <span className="evac-capacity">
-                      <Users className="evac-capacity-icon" />
-                      {center.capacity}
+          
+          {filteredCenters.length === 0 ? (
+              <div className="evac-empty-state">
+                  No evacuation centers found.
+              </div>
+          ) : (
+              filteredCenters.map(center => {
+              const isExiting = closingId === center.id;
+              return (
+                <div
+                  key={center.id}
+                  className={`evac-card ${userRole === "Officer" ? "officer" : ""} animate-card ${
+                    isExiting ? "exit" : ""
+                  }`}
+                >
+                  <h2 className="evac-card-name">
+                    <span
+                      ref={(el) => {
+                        if (!el) return;
+                        el.title = el.scrollWidth > el.clientWidth ? center.name : "";
+                      }}
+                    >
+                      {center.name}
                     </span>
-                  )}
-                </h2>
+                    {userRole === "Officer" && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span
+                          className="evac-tag"
+                          style={{
+                            background: getTagColors(center.type).bg,
+                            color: getTagColors(center.type).text,
+                          }}
+                        >
+                          {center.type.charAt(0).toUpperCase() + center.type.slice(1)}
+                        </span>
 
-                <p className={`evac-barangay ${!center.barangay ? "muted" : ""}`}>
-                  {center.barangay || "Barangay not specified"}
-                </p>
-
-                <div className="evac-info">
-                  <>
-                    {userRole === "Officer" ? (
-                      <div className="evac-info-row">
-                        <GrLocationPin className="evac-info-icon location-pin" />
-                        {center.coordinates}
-                      </div>
-                    ) : (
-                      <div className="evac-info-row">
-                        <MapPin className="evac-info-icon" />
-                        <span>{center.address}</span>
+                        <div className="evac-capacity">
+                          <Users className="evac-capacity-icon" />
+                          {center.capacity}
+                        </div>
                       </div>
                     )}
+                    {userRole === "Citizen" && (
+                      <span className="evac-capacity">
+                        <Users className="evac-capacity-icon" />
+                        {center.capacity}
+                      </span>
+                    )}
+                  </h2>
 
-                    <div className="evac-info-row">
-                      <Phone className="evac-info-icon" />
-                      {center.contact ? (
-                        <a
-                          href={`tel:${center.contact.replace(/[^0-9+]/g, "")}`}
-                          className="evac-contact-link"
-                        >
-                          {center.contact}
-                        </a>
+                  <p className={`evac-barangay ${!center.barangay ? "muted" : ""}`}>
+                    {center.barangay || "Barangay not specified"}
+                  </p>
+
+                  <div className="evac-info">
+                    <>
+                      {userRole === "Officer" ? (
+                        <div className="evac-info-row">
+                          <GrLocationPin className="evac-info-icon location-pin" />
+                          {center.coordinates}
+                        </div>
                       ) : (
-                        <span className="evac-contact-muted">
-                          No contact available
-                        </span>
+                        <div className="evac-info-row">
+                          <MapPin className="evac-info-icon" />
+                          <span>{center.address}</span>
+                        </div>
                       )}
-                    </div>
-                  </>
+
+                      <div className="evac-info-row">
+                        <Phone className="evac-info-icon" />
+                        {center.contact ? (
+                          <a
+                            href={`tel:${center.contact.replace(/[^0-9+]/g, "")}`}
+                            className="evac-contact-link"
+                          >
+                            {center.contact}
+                          </a>
+                        ) : (
+                          <span className="evac-contact-muted">
+                            No contact available
+                          </span>
+                        )}
+                      </div>
+                    </>
+                  </div>
+
+                  {userRole === "Officer" && (
+                    <>
+                      <hr className="evac-hr-divider" />
+                      <div className="evac-actions">
+                        <button
+                          className="evac-edit-btn"
+                          onClick={() => handleEditCenter(center)}
+                        >
+                          <MdOutlineModeEdit /> Edit
+                        </button>
+                        <button
+                          className="evac-delete-btn"
+                          onClick={() => handleDeleteCenter(center.id)}
+                        >
+                          <RiDeleteBinFill />
+                        </button>
+                      </div>
+                    </>
+                  )}
+
+                  {userRole === "Citizen" && (
+                    <button
+                      className="evac-btn"
+                      onClick={() => handleGetDirections(center.coordinates)}
+                    >
+                      <Navigation className="evac-btn-icon" />
+                      Get Directions
+                    </button>
+                  )}
                 </div>
-
-                {userRole === "Officer" && (
-                  <>
-                    <hr className="evac-hr-divider" />
-                    <div className="evac-actions">
-                      <button
-                        className="evac-edit-btn"
-                        onClick={() => handleEditCenter(center)}
-                      >
-                        <MdOutlineModeEdit /> Edit
-                      </button>
-                      <button
-                        className="evac-delete-btn"
-                        onClick={() => handleDeleteCenter(center.id)}
-                      >
-                        <RiDeleteBinFill />
-                      </button>
-                    </div>
-                  </>
-                )}
-
-                {userRole === "Citizen" && (
-                  <button
-                    className="evac-btn"
-                    onClick={() => handleGetDirections(center.coordinates)}
-                  >
-                    <Navigation className="evac-btn-icon" />
-                    Get Directions
-                  </button>
-                )}
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
 
         {/* Right Arrow */}
-        <button className="scroll-btn right" onClick={() => scrollGrid(300)}>
-          <HiChevronRight size={24} />
-        </button>
+        {showScrollButtons && (
+          <button className="scroll-btn right" onClick={() => scrollGrid(300)}>
+            <HiChevronRight size={24} />
+          </button>
+        )}
       </div>
 
       {/* Officer Add/Edit Modal */}

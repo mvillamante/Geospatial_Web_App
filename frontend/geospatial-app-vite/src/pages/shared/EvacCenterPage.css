@@ -19,7 +19,7 @@
 
 .evac-search-wrapper {
   position: relative;
-  width: 320px;
+  width: 600px;
   max-width: 100%;
 }
 
@@ -49,6 +49,32 @@
   width: 18px;
   height: 18px;
   pointer-events: none;
+}
+
+.evac-search-clear {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+
+    border: none;
+    background: transparent;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+    color: #64748b;
+
+    padding: 4px;
+    border-radius: 50%;
+
+    transition: 0.2s ease;
+}
+
+.evac-search-clear:hover {
+    background: #f1f5f9;
+    color: #0f172a;
 }
 
 
@@ -1211,4 +1237,17 @@
     font-size: 0.7rem;
   }
 
+}
+
+.evac-empty-state {
+    width: 100%;
+    text-align: center;
+    padding: 40px 20px;
+
+    color: #64748b;
+    font-size: 15px;
+
+    border-radius: 14px;
+    background: white;
+    border: 1px dashed #e2e8f0;
 }

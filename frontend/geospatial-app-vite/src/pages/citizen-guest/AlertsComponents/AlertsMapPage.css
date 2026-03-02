@@ -1384,4 +1384,20 @@ li.critical::before {
     font-size: 14px;
     padding: 12px 16px;
   }
+
+  .leaflet-control-attribution {
+    font-size: 8.5px;
+    padding: 2px 5px;
+    max-width: 200px;
+    top: -7px;
+  }
+}
+
+@media (max-width: 360px) {
+  .leaflet-control-attribution {
+    font-size: 8px;
+    padding: 2px 4px;
+    max-width: 110px;
+    right: 4px !important;
+  }
 }

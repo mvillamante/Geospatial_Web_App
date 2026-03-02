@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { FaFacebook, FaEnvelope } from "react-icons/fa";
+import { FaFacebook, FaEnvelope, FaSyncAlt } from "react-icons/fa";
 import {
     Pin,
     Search,
@@ -92,6 +92,9 @@ export default function CommunityFeedPage() {
     const [contact, setContact] = useState<QuickContact | null>(null);
     const location = useLocation() as any;
 
+    const [showScrollTop, setShowScrollTop] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+
     useEffect(() => {
         const openId = location.state?.openPostId;
         if (!openId || posts.length === 0) return;
@@ -126,26 +129,53 @@ export default function CommunityFeedPage() {
         fetchContact();
     }, []);
 
+    const fetchFeed = async () => {
+        try {
+            if (refreshing) return;
+
+            setRefreshing(true);
+            setLoading(true);
+            setError(null);
+
+            const res = await fetch(`${API_URL}/api/community-feed/`);
+
+            if (!res.ok) throw new Error("Failed to fetch feed");
+
+            const data = await res.json();
+
+            setPosts(data);
+
+        } catch (err: any) {
+            setError(err.message ?? "Something went wrong");
+
+        } finally {
+            setRefreshing(false);
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchFeed = async () => {
-            try {
-                setLoading(true);
-                const API_URL = import.meta.env.VITE_API_URL;
-                const res = await fetch(`${API_URL}/api/community-feed/`);
-                if (!res.ok) throw new Error("Failed to fetch feed");
-
-                const data = await res.json();
-                setPosts(data);
-            } catch (err: any) {
-                setError(err.message ?? "Something went wrong");
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchFeed();
     }, []);
 
+    useEffect(() => {
+        const container = document.querySelector(".main-content");
+        if (!container) return;
+
+        const handleScroll = () => {
+            if (container.scrollTop > 200) {
+                setShowScrollTop(true);
+            } else {
+                setShowScrollTop(false);
+            }
+        };
+
+        container.addEventListener("scroll", handleScroll);
+
+        return () => container.removeEventListener("scroll", handleScroll);
+    }, []);
+
+    
 
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
@@ -206,6 +236,18 @@ export default function CommunityFeedPage() {
                     )}
 
                     <section className="feed-list">
+                        {/* Refresh Button Row */}
+                        <div className="feed-refresh-row">
+                            <button
+                                className="refresh-btn"
+                                onClick={fetchFeed}
+                                disabled={refreshing}
+                            >
+                                <FaSyncAlt className={refreshing ? "spin" : ""} />
+                                <span>{refreshing ? "Refreshing..." : "Refresh Feed"}</span>
+                            </button>
+                        </div>
+
                         {loading ? (
                             <div className="empty-state">Loading updates…</div>
                         ) : error ? (
@@ -213,10 +255,23 @@ export default function CommunityFeedPage() {
                         ) : normal.length === 0 && pinned.length === 0 ? (
                             <div className="empty-state">No updates yet.</div>
                         ) : (
-                            normal.map((p) => <PostRow key={p.id} post={p} onOpen={() => setSelected(p)} />)
+                            <>
+                                {normal.map((p) => <PostRow key={p.id} post={p} onOpen={() => setSelected(p)} />)}
+                            </>
                         )}
                     </section>
 
+                    {showScrollTop && (
+                        <button
+                            className="scroll-top-btn"
+                            onClick={() => {
+                                const container = document.querySelector(".main-content");
+                                container?.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                        >
+                            ↑
+                        </button>
+                    )}
                 </main>
 
                 <aside className="feed-rail">

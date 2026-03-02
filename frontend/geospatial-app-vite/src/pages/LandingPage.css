@@ -99,12 +99,6 @@
     z-index: 2000;
 }
 
-.landing-logo-img {
-    height: 95px;
-    width: auto;
-    object-fit: contain;
-}
-
 .landing-page .hero {
     padding: 10rem 5% 4rem;
     text-align: center;
@@ -126,10 +120,40 @@
 }
 
 .landing-page .logo-img {
-    height: 150px;
     width: auto;
     object-fit: contain;
     display: block;
+}
+
+.landing-logo-img {
+    height: 95px;
+    width: auto;
+    object-fit: contain;
+}
+
+.landing-logo-img {
+    height: 95px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .landing-logo-img {
+        height: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .landing-logo-img {
+        height: 75px;
+    }
+}
+
+@media (max-width: 360px) {
+    .landing-logo-img {
+        height: 55px;
+    }
 }
 
 /* Links */
@@ -341,6 +365,24 @@
     box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
 }
 
+@media (max-width: 768px) {
+    .dashboard-map-container {
+        height: 380px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-map-container {
+        height: 300px;
+    }
+}
+
+@media (max-width: 360px) {
+    .dashboard-map-container {
+        height: 260px;
+    }
+}
+
 /* ===============================
    SECTIONS
 ================================= */
@@ -535,11 +577,6 @@
 @media (max-width: 480px) {
     .landing-page .nav {
         padding: 0 4%;
-    }
-
-    .landing-page .logo-img,
-    .landing-page .logo img {
-        height: 40px;
     }
 
     .stats-grid {

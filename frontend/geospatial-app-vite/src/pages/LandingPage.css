@@ -254,8 +254,8 @@
 .landing-page .researcher-btn:hover {
     background: transparent;
     border-color: var(--brand-orange);
-    box-shadow: 0 10px 10px rgba(249, 115, 22, 0.30);
-
+    background-color: var(--brand-orange);
+    color: white;
 }
 
 .landing-page .cta-group {

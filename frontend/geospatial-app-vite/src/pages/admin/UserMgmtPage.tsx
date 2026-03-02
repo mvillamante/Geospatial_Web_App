@@ -86,7 +86,8 @@ const UserMgmtPage: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
-  const [pendingCount, setPendingCount] = useState(0);
+  const [researchPendingCount, setResearchPendingCount] = useState(0);
+  const [verificationPendingCount, setVerificationPendingCount] = useState(0);
 
   const [loading, setLoading] = useState(false);
 
@@ -208,7 +209,7 @@ const UserMgmtPage: React.FC = () => {
         }));
 
         setAllRequests(mapped);
-        setPendingCount(mapped.filter(r => r.status === "Pending").length);
+        setResearchPendingCount(mapped.filter(r => r.status === "Pending").length);
       } catch (err) {
         console.error(err);
       }
@@ -272,7 +273,7 @@ const UserMgmtPage: React.FC = () => {
 
     const activeTab = tabRefs.current[activeIdx];
     if (activeTab) setUnderlineStyle({ left: activeTab.offsetLeft, width: activeTab.offsetWidth });
-  }, [tab, pendingCount]);
+  }, [tab, researchPendingCount, verificationPendingCount]);
 
   return (
     <div className="user-page">
@@ -283,11 +284,11 @@ const UserMgmtPage: React.FC = () => {
         <button ref={el => { tabRefs.current[0] = el; }} onClick={() => setTab('users')} className={tab === 'users' ? 'tab active' : 'tab'}>Staff</button>
         <button ref={el => { tabRefs.current[1] = el; }} onClick={() => setTab('requests')} className={tab === 'requests' ? 'tab active' : 'tab'}>
           Researchers
-          {pendingCount > 0 && <span className="request-count">{pendingCount}</span>}
+          {researchPendingCount > 0 && <span className="request-count">{researchPendingCount}</span>}
         </button>
         <button ref={el => { tabRefs.current[2] = el; }} onClick={() => setTab('verification')} className={tab === 'verification' ? 'tab active' : 'tab'}>
           Residents
-          {/*pendingCount > 0 && <span className="request-count">{pendingCount}</span>*/}
+          {verificationPendingCount > 0 && <span className="request-count">{verificationPendingCount}</span>}
         </button>
         <span className="tab-underline" style={{ left: underlineStyle.left, width: underlineStyle.width }} />
       </div>
@@ -517,13 +518,13 @@ const UserMgmtPage: React.FC = () => {
         <ResearcherRequestsTab
           requests={allRequests}
           pageSize={pageSize}
-          onPendingCountChange={setPendingCount}
+          onPendingCountChange={setResearchPendingCount}
         />
       )}
 
       {/* verification Tab */}
       {tab === 'verification' && (
-        <VerificationRequestsTab pageSize={pageSize} onPendingCountChange={setPendingCount} />
+        <VerificationRequestsTab pageSize={pageSize} onPendingCountChange={setVerificationPendingCount} />
       )}
 
       {/* Create User Modal */}

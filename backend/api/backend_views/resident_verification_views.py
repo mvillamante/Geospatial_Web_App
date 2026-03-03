@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, permission_classes
 from api.models import ResidentVerificationRequest
 from api.serializer import ResidentVerificationRequestSerializer
 from api.admin_permissions import IsAdminRole
-
+from django.db.models import Q
 from api.supabase_storage import create_signed_url
 
 @api_view(["GET"])
@@ -32,7 +32,16 @@ class ResidentVerificationListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated, IsAdminRole]
 
     def get_queryset(self):
-        return ResidentVerificationRequest.objects.all().order_by('-created_at')
+        queryset = ResidentVerificationRequest.objects.all().order_by('-created_at')
+        search = self.request.GET.get("search")
+        if search:
+            search = search.strip()
+            # search first_name OR last_name
+            queryset = queryset.filter(
+                Q(user__first_name__icontains=search) |
+                Q(user__last_name__icontains=search)
+            )
+        return queryset
 
 class ApproveRejectResidentVerificationView(generics.UpdateAPIView):
     queryset = ResidentVerificationRequest.objects.all()

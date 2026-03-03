@@ -2,9 +2,10 @@ import '../../pages/admin/UserMgmtPage.css';
 import React, { useState, useEffect } from "react";
 import { CheckCircle, XCircle } from "lucide-react";
 // import { LuEllipsis } from "react-icons/lu";
-import { FiEye, FiX } from "react-icons/fi";
+import { FiEye, FiX, FiSearch} from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
 import placeholderImg from '../../assets/placeholder_img/SampleID.png';
+import { LuEllipsis } from 'react-icons/lu';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -38,15 +39,23 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
   const [rejectReason, setRejectReason] = useState("");
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
+  const [openMenu, setOpenMenu] = useState<number | null>(null);
+  
   const fetchVerifications = async (page = 1) => {
     try {
       setLoading(true);
 
       const token = localStorage.getItem("access_token");
+      const params = new URLSearchParams();
+      params.append("page", page.toString());
+      params.append("page_size", pageSize.toString());
+
+      if (debouncedSearch) params.append("search", debouncedSearch); 
+
       const res = await fetch(
-        `${API_URL}/api/admin/resident-verifications/?page=${page}&page_size=${pageSize}`,
+        `${API_URL}/api/admin/resident-verifications/?${params.toString()}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) throw new Error("Failed to fetch");
@@ -80,7 +89,15 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
     }
   };
 
-  useEffect(() => { fetchVerifications(1); }, []);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  useEffect(() => { fetchVerifications(1); }, [debouncedSearch]);
 
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
 
@@ -185,6 +202,35 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
 
   return (
     <>
+      {/* =========================
+          SEARCH BAR
+      ========================= */}
+      <div className="filters">
+        <div className="filters-left">
+          {/* Optional: Add filters if needed */}
+        </div>
+        <div className="filters-right">
+          <div className="search-wrapper">
+            <FiSearch className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search by citizen name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            {searchTerm.trim() && (
+              <button
+                className="search-clear"
+                onClick={() => setSearchTerm("")}
+                type="button"
+              >
+                <FiX />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
       <div className="verification-table-wrapper">
         <table>
           <thead>
@@ -233,15 +279,61 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
                   </td> */}
                   <td className="center muted">{formatDistanceToNow(new Date(v.created_at), { addSuffix: true })}</td>
                   <td className="center"><span className={`badge ${v.status}`}>{v.status}</span></td>
+                  {/* =========================
+                      ACTIONS COLUMN
+                  ========================= */}
+                  <td className="center actions">
+                    <div className="action-menu">
+                      <button
+                        className="menu-button"
+                        onClick={() =>
+                          setOpenMenu(openMenu === v.id ? null : v.id)
+                        }
+                      >
+                        <LuEllipsis size={18} />
+                      </button>
 
-                  <td className="center">
-                    <button
-                      className="view-btn"
-                      onClick={() => setModalVerification(v)}
-                      title="View Details"
-                    >
-                      <FiEye size={20} />
-                    </button>
+                      {openMenu === v.id && (
+                        <div className="menu-dropdown">
+                          {/* View Details */}
+                          <button
+                            className="menu-item"
+                            onClick={() => {
+                              setModalVerification(v);
+                              setOpenMenu(null);
+                            }}
+                          >
+                            <FiEye size={14} /> View
+                          </button>
+
+                          {/* Approve / Reject only if Pending */}
+                          {v.status === "Pending" && (
+                            <>
+                              <button
+                                className="menu-item"
+                                onClick={() => {
+                                  approveVerification(v.id);
+                                  setOpenMenu(null);
+                                }}
+                              >
+                                <CheckCircle size={14} /> Approve
+                              </button>
+
+                              <button
+                                className="menu-item"
+                                onClick={() => {
+                                  setModalVerification(v);
+                                  setRejectReason("");
+                                  setOpenMenu(null);
+                                }}
+                              >
+                                <XCircle size={14} /> Reject
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))

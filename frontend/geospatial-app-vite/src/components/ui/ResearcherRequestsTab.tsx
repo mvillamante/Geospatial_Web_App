@@ -76,7 +76,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
         fullName: `${r.first_name} ${r.last_name}`,
         email: r.email,
         createdAt: r.created_at
-          ? format(new Date(r.created_at), "MMMM d, yyyy hh:mm:ss a")
+          ? format(new Date(r.created_at), "MMMM d, yyyy")
           : "Unknown",
 
         reviewedAt: r.reviewed_at

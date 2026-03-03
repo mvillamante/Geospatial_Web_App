@@ -45,6 +45,9 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
   const [statusFilter, setStatusFilter] = useState<RequestStatus | "all">("pending");
   const [openMenu, setOpenMenu] = useState<number | null>(null);
   const [modalResearcher, setModalResearcher] = useState<ResearcherRequest | null>(null);
+  const [signedUrls, setSignedUrls] = useState<Record<number, string>>({});
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
   // Fetch requests
   const fetchRequests = async (page = 1) => {
     try {
@@ -104,6 +107,37 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    if (requests.length === 0) return;
+
+    const fetchUrls = async () => {
+      const token = localStorage.getItem("access_token");
+      const updated: Record<number, string> = {};
+
+      for (const req of requests) {
+        if (!req.attachment) continue;
+
+        try {
+          // Call the PK-based endpoint
+          const res = await fetch(
+            `${API_URL}/api/admin/researcher/${req.id}/attachment/`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          if (!res.ok) continue;
+          const data = await res.json();
+          updated[req.id] = data.url;
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      setSignedUrls(updated);
+    };
+
+    fetchUrls();
+  }, [requests]);
+
   const isResearcherView =
     statusFilter === "active" || statusFilter === "inactive";
   useEffect(() => { fetchRequests(1); }, [debouncedSearch, statusFilter]);
@@ -263,6 +297,31 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
       </div>
     </div>
   );
+
+  const handleViewAttachment = async (id: number) => {
+    try {
+      const token = localStorage.getItem("access_token");
+
+      const res = await fetch(
+        `${API_URL}/api/admin/researcher/${id}/attachment/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to get signed URL");
+
+      const data = await res.json();
+
+      window.open(data.url, "_blank");
+
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load attachment.");
+    }
+  };
 
   return (
     <>
@@ -518,17 +577,33 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
               <p><strong>Attachment:</strong></p>
               <div className="modal-box">
                 {modalResearcher.attachment ? (
-                  <a
-                    href={modalResearcher.attachment}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View Attachment
-                  </a>
-                ) : (
-                  "No attachment uploaded."
-                )}
+                  <img 
+                    src={signedUrls[modalResearcher.id]} 
+                    alt="Attachment" 
+                    style={{ maxWidth: "100%", maxHeight: "300px", objectFit: "contain", cursor: "pointer" }}
+                    onClick={() => setIsImageModalOpen(true)}
+                  />
+                ) : "No attachment uploaded."}
               </div>
+              {isImageModalOpen && modalResearcher && (
+                <div
+                  className="image-modal-backdrop"
+                  onClick={() => setIsImageModalOpen(false)}
+                >
+                  <button
+                    className="close-image-btn"
+                    onClick={() => setIsImageModalOpen(false)}
+                  >
+                    <FiX size={20} />
+                  </button>
+
+                  <img
+                    src={signedUrls[modalResearcher.id]}
+                    alt="Enlarged Attachment"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -10,6 +10,7 @@ from django.conf import settings
 import random, string
 from rest_framework.views import APIView
 from django.db.models import Q
+from api.supabase_storage import upload_private_photo, create_signed_url
 
 # Public Researcher Request Submission
 class CreateResearcherRequestView(generics.CreateAPIView):
@@ -22,20 +23,50 @@ class CreateResearcherRequestView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # Ensure first_name and last_name are present
         first_name = serializer.validated_data.get("first_name")
         last_name = serializer.validated_data.get("last_name")
+
         if not first_name or not last_name:
             return Response(
                 {"detail": "First name and last name are required."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        serializer.save(status="pending")  # default status
+        attachment = request.FILES.get("attachment")
+        attachment_path = None
+
+        if attachment:
+            attachment_path = upload_private_photo(attachment,bucket="researcher-attachments")
+
+        serializer.save(
+            status="pending",
+            attachment=attachment_path
+        )
+
         return Response(
             {"detail": "Researcher request submitted successfully."},
             status=status.HTTP_201_CREATED
         )
+
+class ResearcherAttachmentSignedURLView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminRole]
+
+    def get(self, request, pk):
+        try:
+            req_obj = ResearcherRequest.objects.get(pk=pk)
+        except ResearcherRequest.DoesNotExist:
+            return Response({"detail": "Not found."}, status=404)
+
+        if not req_obj.attachment:
+            return Response({"detail": "No attachment."}, status=400)
+
+        signed_url = create_signed_url(
+            req_obj.attachment,
+            bucket="researcher-attachments",
+            expires_in_seconds=300
+        )
+
+        return Response({"url": signed_url})
 
 # Admin (list all pending requests)
 class ResearcherRequestListView(generics.ListAPIView):
@@ -82,7 +113,7 @@ class ResearcherOverviewView(APIView):
                 "reviewed_at": r.reviewed_at, 
                 "purpose": r.purpose,
                 "orgSchool": r.orgSchool,
-                "attachment": r.attachment.url if r.attachment else None,
+                "attachment": r.attachment,
             }
             for r in request_qs
         ]

@@ -62,6 +62,7 @@ urlpatterns = [
     path("admin/researcher_requests/", ResearcherRequestListView.as_view(), name="researcher_requests_list"),
     path("admin/researcher_requests/<int:pk>/", ApproveRejectResearcherRequestView.as_view(), name="researcher_request_update"),
     path("admin/researcher_overview/", ResearcherOverviewView.as_view(), name="researcher_overview"),
+    path("admin/researcher/<int:pk>/attachment/", ResearcherAttachmentSignedURLView.as_view(),),
 
     path("resident-verification/request/", ResidentVerificationRequestView.as_view(), name="resident_verification"),
     path('get-signed-url/', get_signed_url, name='get_signed_url'),

@@ -319,6 +319,11 @@ class PasswordResetOTP(models.Model):
     Stores a hashed OTP for password reset.
     Use email_or_phone to find the user.
     """
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
     email_or_phone = models.CharField(max_length=255, db_index=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     otp_hash = models.CharField(max_length=64)
@@ -474,7 +479,7 @@ class ResearcherRequest(models.Model):
     email = models.EmailField()
     orgSchool = models.CharField(max_length=255, blank=True, null=True)
     purpose = models.TextField(blank=True, null=True)
-    attachment = models.FileField(upload_to="researcher_attachments/", blank=True, null=True)
+    attachment = models.CharField(max_length=500, blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     rejection_reason = models.TextField(blank=True, null=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)

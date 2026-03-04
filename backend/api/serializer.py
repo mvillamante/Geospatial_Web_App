@@ -62,7 +62,7 @@ class MeSerializer(serializers.ModelSerializer):
         if not value:
             return value
         
-        qs = CustomUser.objects.filter(email_iexact=value)
+        qs = CustomUser.objects.filter(email__iexact=value)
         if self.instance:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
@@ -378,7 +378,7 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
         if not obj.reply_image_url:
             return None
         
-        return create_signed_url(obj.reply_image_url, expires_in_seconds=3600)
+        return create_signed_url(obj.reply_image_url,bucket="incident-photos",expires_in_seconds=3600)
         
     def get_category_display(self, obj):
         if obj.category == "others" and obj.other_category:
@@ -416,9 +416,11 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
         return full if full else (obj.assigned_officer.username or "Officer")
 
     def get_photo_url(self, obj):
-        if not obj.photo_path:
-            return None
-        return create_signed_url(obj.photo_path, expires_in_seconds=3600)
+        return create_signed_url(
+            obj.photo_path, 
+            bucket="incident-photos",  
+            expires_in_seconds=3600
+        )
 
 class AssignOfficerSerializer(serializers.Serializer):
     officer_id = serializers.IntegerField()
@@ -508,9 +510,11 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
        return instance
     
     def get_photo_url(self, obj):
-        if not obj.photo_path:
-            return None
-        return create_signed_url(obj.photo_path, expires_in_seconds=3600)
+        return create_signed_url(
+            obj.photo_path, 
+            bucket="incident-photos",  
+            expires_in_seconds=3600
+        )
 
     def get_lgu_post(self, obj):
         if (obj.status or "").lower() != "resolved":
@@ -558,7 +562,7 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
         if not obj.reply_image_url:
             return None
         
-        return create_signed_url(obj.reply_image_url, expires_in_seconds=3600)
+            return create_signed_url(obj.reply_image_url,bucket="incident-photos",expires_in_seconds=3600)
     
     
 class IncidentReportUpdateSerializer(serializers.ModelSerializer):
@@ -655,6 +659,7 @@ class PublicLandingPageSerializer(serializers.Serializer):
 class ResearcherRequestSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField()
     last_name = serializers.CharField()
+    attachment = serializers.FileField(required=False, allow_null=True)
 
     class Meta:
         model = ResearcherRequest

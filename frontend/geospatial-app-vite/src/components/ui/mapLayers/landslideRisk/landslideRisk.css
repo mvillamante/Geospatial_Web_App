@@ -25,21 +25,21 @@
 }
 
 .landslide-zone-label.high {
-  background: linear-gradient(135deg, rgba(180, 83, 9, 0.95), rgba(146, 64, 14, 0.95));
+  background: linear-gradient(135deg, rgba(68, 32, 10, 0.96), rgba(124, 45, 18, 0.96));
   color: var(--text-white);
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.6);
 }
 
 .landslide-zone-label.moderate {
-  background: linear-gradient(135deg, rgba(217, 119, 6, 0.95), rgba(180, 83, 9, 0.95));
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.96), rgba(234, 88, 12, 0.96));
   color: var(--text-white);
   border: 2px solid rgba(255, 255, 255, 0.4);
 }
 
 .landslide-zone-label.low {
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.95), rgba(217, 119, 6, 0.95));
-  color: #78350f;
-  border: 2px solid rgba(217, 119, 6, 0.5);
+  background: linear-gradient(135deg, rgba(250, 204, 21, 0.96), rgba(234, 179, 8, 0.96));
+  color: #422006;
+  border: 2px solid rgba(202, 138, 4, 0.7);
 }
 
 .landslide-zone-label-icon {
@@ -76,21 +76,21 @@
 }
 
 .landslide-zone-tooltip.high {
-  background: linear-gradient(135deg, #92400e, #b45309);
+  background: linear-gradient(135deg, #431407, #7c2d12);
   color: var(--text-white);
-  border: 2px solid #78350f;
+  border: 2px solid #1b0b02;
 }
 
 .landslide-zone-tooltip.moderate {
-  background: linear-gradient(135deg, #b45309, #d97706);
+  background: linear-gradient(135deg, #c2410c, #f97316);
   color: var(--text-white);
-  border: 2px solid #92400e;
+  border: 2px solid #7c2d12;
 }
 
 .landslide-zone-tooltip.low {
-  background: linear-gradient(135deg, #d97706, #fbbf24);
-  color: #78350f;
-  border: 2px solid #b45309;
+  background: linear-gradient(135deg, #eab308, #facc15);
+  color: #422006;
+  border: 2px solid #ca8a04;
 }
 
 .leaflet-tooltip.landslide-zone-tooltip::before {

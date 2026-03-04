@@ -1138,59 +1138,32 @@ export default function LeafletMap(props: LeafletMapProps) {
 
     const fetchBarangayBoundaries = async () => {
       try {
-        const res = await fetch("https://overpass-api.de/api/interpreter", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: `
-            [out:json][timeout:25];
-            area["name"="Cabuyao"]["boundary"="administrative"]->.a;
-            relation["admin_level"="10"](area.a);
-            out geom;
-          `,
-        });
+        const res = await fetch(`${API_URL}/api/hazard/barangays/`);
+        if (!res.ok) throw new Error(`Failed to load barangay GeoJSON: ${res.status}`);
+        const geoJson = await res.json();
 
-        if (!res.ok) throw new Error("Overpass failed");
-        const data: OverpassResponse = await res.json();
+        L.geoJSON(geoJson as any, {
+          style: () => ({
+            color: "#1e40af",
+            weight: 2,
+            opacity: 0.9,
+            fillOpacity: 0, // outline only
+          }),
+          onEachFeature: (feature, layer) => {
+            const name =
+              (feature.properties &&
+                (feature.properties.brgy_name || feature.properties.name)) ||
+              "Unnamed Barangay";
 
-        data.elements.forEach((el) => {
-          if (!el.members) return;
+            (layer as L.Path).bindTooltip(name, {
+              sticky: true,
+              direction: "center",
+              className: "barangay-boundary-tooltip",
+            });
+          },
+        }).addTo(layerGroup);
 
-          const outers: [number, number][][] = [];
-          const inners: [number, number][][] = [];
-
-          el.members.forEach((m) => {
-            if (m.type !== "way" || !m.geometry) return;
-
-            const ring = m.geometry.map(g => [g.lat, g.lon] as [number, number]);
-
-            if (m.role === "outer") {
-              outers.push(ring);
-            } else if (m.role === "inner") {
-              inners.push(ring);
-            }
-          });
-
-          if (!outers.length) return;
-
-          const name = el.tags?.name || "Unnamed Barangay";
-
-          const polygon = L.polygon(
-            outers.map(outer => [outer, ...inners]),
-            {
-              color: "#1e40af",
-              weight: 2,
-              fillColor: "#60a5fa",
-              fillOpacity: 0.45,
-            }
-          ).addTo(layerGroup);
-
-          polygon.bindTooltip(name, {
-            sticky: true,
-            direction: "center",
-            className: "barangay-boundary-tooltip",
-          });
-        });
-        console.log("[Barangay Boundaries] toggle ON");
+        console.log("[Barangay Boundaries] toggle ON (from backend GeoJSON)");
       } catch (err) {
         console.error("Failed to load barangay boundaries:", err);
       }

@@ -1,6 +1,16 @@
 import L from "leaflet";
 import { floodZonesData, floodZoneColors, getFloodZoneRings } from "./floodZonesData";
-import floodZoneIcon from "../../../../assets/icons/floodzone.png";
+
+// LiPAD 25-year flood hazard WMS (Cabuyao)
+// Defaults can be overridden via:
+//   VITE_LIPAD_WMS_URL, VITE_LIPAD_25YR_LAYER
+const LIPAD_WMS_URL =
+  import.meta.env.VITE_LIPAD_WMS_URL ??
+  "https://lipad-fmc.dream.upd.edu.ph/geoserver/geonode/wms";
+
+const LIPAD_25YR_LAYER =
+  import.meta.env.VITE_LIPAD_25YR_LAYER ??
+  "geonode:ph043404000_fh25yr_10m";
 
 /**
  * Creates and adds flood zones layer to the map
@@ -10,20 +20,39 @@ import floodZoneIcon from "../../../../assets/icons/floodzone.png";
 export function createFloodZonesLayer(map: L.Map): L.LayerGroup {
   const floodZonesGroup = L.layerGroup().addTo(map);
 
+  // 1) LiPAD 25-year flood hazard raster overlay (semi‑transparent)
+  const lipadFloodLayer = L.tileLayer.wms(LIPAD_WMS_URL, {
+    layers: LIPAD_25YR_LAYER,
+    format: "image/png",
+    transparent: true,
+    opacity: 0.7,
+    tiled: true,
+    attribution: "LiPAD LiDAR Portal (UP DREAM Program)",
+  });
+  lipadFloodLayer.addTo(floodZonesGroup);
+
+  const cleanZoneName = (name: string): string =>
+    name
+      .replace(/25[-\s]*year/gi, "")
+      .replace(/\(\s*\)/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
   floodZonesData.forEach((zone) => {
     const colors = floodZoneColors[zone.riskLevel];
     const rings = getFloodZoneRings(zone);
+    const displayName = cleanZoneName(zone.name);
 
-    // Create flood zone polygon(s) — one per ring for full barangay bounds (Poblacion may have multiple)
+    // Create barangay boundary polygon(s) — one per ring for full barangay bounds (Poblacion may have multiple)
     const polygons: L.Polygon[] = [];
     rings.forEach((ring) => {
       const polygon = L.polygon(ring, {
-        color: colors.stroke,
-        weight: 3,
+        color: "#111827",
+        weight: 1.5,
         opacity: 0.9,
         fillColor: colors.fill,
-        fillOpacity: 0.4,
-        dashArray: zone.riskLevel === "high" ? undefined : "8, 4",
+        fillOpacity: 0.18,
+        dashArray: "3, 2",
       }).addTo(floodZonesGroup);
       polygons.push(polygon);
     });
@@ -42,18 +71,18 @@ export function createFloodZonesLayer(map: L.Map): L.LayerGroup {
     }
 
     const popupContent = `
-      <div class="flood-zone-popup" style="min-width: 240px;">
-        <h3 style="margin: 0 0 10px 0; color: ${colors.stroke}; font-size: 15px; font-weight: 600;">
-          <img src="${floodZoneIcon}" alt="" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 6px;" />${zone.name}
+      <div class="flood-zone-popup" style="min-width: 220px;">
+        <h3 style="margin: 0 0 8px 0; color: #0f172a; font-size: 14px; font-weight: 600;">
+          ${displayName}
         </h3>
         <div style="margin-bottom: 10px;">
           <span style="
             display: inline-block;
-            padding: 4px 12px;
+            padding: 3px 10px;
             border-radius: 12px;
             background: ${colors.fill}30;
             color: ${colors.stroke};
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             text-transform: uppercase;
             border: 1px solid ${colors.stroke};
@@ -61,22 +90,9 @@ export function createFloodZonesLayer(map: L.Map): L.LayerGroup {
             ${colors.label}
           </span>
         </div>
-        <p style="margin: 0 0 10px 0; font-size: 12px; color: #555; line-height: 1.5;">
+        <p style="margin: 0; font-size: 11px; color: #555; line-height: 1.4;">
           ${zone.description}
         </p>
-        <div style="
-          padding: 8px 12px;
-          background: #f0f9ff;
-          border-radius: 8px;
-          border-left: 3px solid ${colors.stroke};
-        ">
-          <p style="margin: 0; font-size: 11px; color: #1e40af; font-weight: 500;">
-            📍Affected Barangays:
-          </p>
-          <p style="margin: 4px 0 0 0; font-size: 12px; color: #374151;">
-            ${zone.affectedBarangays.join(", ")}
-          </p>
-        </div>
       </div>
     `;
     polygons.forEach((p) => p.bindPopup(popupContent));
@@ -85,7 +101,7 @@ export function createFloodZonesLayer(map: L.Map): L.LayerGroup {
     const polygon = polygons[0];
     polygon.bindTooltip(`
       <div style="text-align: center;">
-        <img src="${floodZoneIcon}" alt="" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;" /><strong>${zone.name}</strong><br>
+        <strong>${displayName}</strong><br>
         <span style="color: ${colors.stroke}; font-weight: 600;">${colors.label}</span>
       </div>
     `, {
@@ -103,17 +119,15 @@ export function createFloodZonesLayer(map: L.Map): L.LayerGroup {
     const labelIcon = L.divIcon({
       html: `
         <div class="flood-zone-label ${zone.riskLevel}">
-          <img src="${floodZoneIcon}" alt="Flood Zone" class="flood-zone-label-icon" />
-          <span class="flood-zone-label-text">${zone.name.split(' ').slice(0, 2).join(' ')}</span>
+          <span class="flood-zone-label-text">${displayName}</span>
         </div>
       `,
       className: "flood-zone-label-wrapper",
-      iconSize: [120, 40],
-      iconAnchor: [60, 20],
+      iconSize: [110, 32],
+      iconAnchor: [55, 18],
     });
 
-    const labelMarker = L.marker(center, { icon: labelIcon })
-      .addTo(floodZonesGroup);
+    const labelMarker = L.marker(center, { icon: labelIcon }).addTo(floodZonesGroup);
 
     // Clicking label opens the polygon's popup
     labelMarker.on('click', () => {

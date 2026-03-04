@@ -17,29 +17,72 @@ const MapLegends: React.FC<MapLegendsProps> = ({ activeLayers }) => {
         <div className="flood-zone-legend">
           <h4>
             <img src={floodZoneIcon} alt="Flood Zone" className="flood-legend-icon" /> 
-            Flood Zone Legend
+            Flood Hazard Map (LiPAD)
           </h4>
-          <div className="flood-legend-subtitle">Cabuyao, Laguna</div>
+          <div className="flood-legend-subtitle">
+            City of Cabuyao, Laguna · Source: LiPAD LiDAR Portal (UP DREAM)
+          </div>
           <ul>
-            <li className="high"><span className="legend-color"></span><span className="legend-text">High Risk Zone</span></li>
-            <li className="moderate"><span className="legend-color"></span><span className="legend-text">Moderate Risk Zone</span></li>
-            <li className="low"><span className="legend-color"></span><span className="legend-text">Low Risk Zone</span></li>
+            <li className="municipal-boundary">
+              <span className="legend-color"></span>
+              <span className="legend-text">Municipal Boundary</span>
+            </li>
+            <li className="high">
+              <span className="legend-color"></span>
+              <span className="legend-text">High Flood Hazard</span>
+            </li>
+            <li className="moderate">
+              <span className="legend-color"></span>
+              <span className="legend-text">Medium Flood Hazard</span>
+            </li>
+            <li className="low">
+              <span className="legend-color"></span>
+              <span className="legend-text">Low Flood Hazard</span>
+            </li>
+            <li className="area-assessed">
+              <span className="legend-color"></span>
+              <span className="legend-text">Area Assessed</span>
+            </li>
+            <li className="area-not-assessed">
+              <span className="legend-color"></span>
+              <span className="legend-text">Area Not Assessed</span>
+            </li>
           </ul>
-          <div className="flood-legend-note"><span>💡</span><span>Click on zones for details</span></div>
         </div>
       )}
 
       {/* Landslide Risk Legend */}
       {activeLayers.includes("Landslide Risk") && (
         <div className="landslide-risk-legend">
-          <h4><img src={landslideIcon} alt="Landslide" className="landslide-legend-icon" /> Landslide Risk Legend</h4>
-          <div className="landslide-legend-subtitle">Cabuyao, Laguna</div>
+          <h4>
+            <img
+              src={landslideIcon}
+              alt="Landslide"
+              className="landslide-legend-icon"
+            />{" "}
+            Earthquake‑Induced Landslide Hazard
+          </h4>
+          <div className="landslide-legend-subtitle">
+            Cabuyao, Laguna · Official landslide hazard map
+          </div>
           <ul>
-            <li className="high"><span className="legend-color"></span><span className="legend-text">High Risk Zone</span></li>
-            <li className="moderate"><span className="legend-color"></span><span className="legend-text">Moderate Risk Zone</span></li>
-            <li className="low"><span className="legend-color"></span><span className="legend-text">Low Risk Zone</span></li>
+            <li className="high">
+              <span className="legend-color"></span>
+              <span className="legend-text">High Susceptibility</span>
+            </li>
+            <li className="moderate">
+              <span className="legend-color"></span>
+              <span className="legend-text">Moderate Susceptibility</span>
+            </li>
+            <li className="low">
+              <span className="legend-color"></span>
+              <span className="legend-text">Low Susceptibility</span>
+            </li>
           </ul>
-          <div className="landslide-legend-note"><span>💡</span><span>Click on zones for details</span></div>
+          <div className="landslide-legend-note">
+            <span>💡</span>
+            <span>Click on zones for details</span>
+          </div>
         </div>
       )}
 

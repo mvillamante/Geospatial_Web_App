@@ -31,9 +31,25 @@ export function getLandslideZoneRings(zone: LandslideRiskData): [number, number]
 
 export const landslideRiskData: LandslideRiskData[] = landslideRiskBoundary as LandslideRiskData[];
 
-// Landslide zone color configuration by risk level
+// Landslide zone color configuration by risk level (high contrast brown/orange/yellow)
 export const landslideZoneColors: Record<RiskLevel, ZoneColors> = {
-  high: { fill: "#b45309", stroke: "#92400e", label: "High Risk Zone" },
-  moderate: { fill: "#d97706", stroke: "#b45309", label: "Moderate Risk Zone" },
-  low: { fill: "#fbbf24", stroke: "#d97706", label: "Low Risk Zone" },
+  high: {
+    // Very dark brown for high-risk zones
+    fill: "#7c2d12",
+    stroke: "#431407",
+    label: "High Risk Zone",
+  },
+  moderate: {
+    // Bright orange for moderate risk
+    fill: "#f97316",
+    stroke: "#c2410c",
+    label: "Moderate Risk Zone",
+  },
+  low: {
+    // Vivid yellow for low risk
+    fill: "#facc15",
+    stroke: "#ca8a04",
+    label: "Low Risk Zone",
+  },
 };
+

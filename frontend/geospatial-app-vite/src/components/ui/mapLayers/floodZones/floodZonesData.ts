@@ -31,7 +31,20 @@ export const floodZonesData: FloodZoneData[] = floodZonesBoundary as FloodZoneDa
 
 // Flood zone color configuration by risk level
 export const floodZoneColors: Record<RiskLevel, ZoneColors> = {
-  high: { fill: "#3b82f6", stroke: "#1d4ed8", label: "High Risk Zone" },
-  moderate: { fill: "#60a5fa", stroke: "#2563eb", label: "Moderate Risk Zone" },
-  low: { fill: "#93c5fd", stroke: "#3b82f6", label: "Low Risk Zone" },
+  // LiPAD flood hazard legend colors
+  high: {
+    fill: "#e53935",
+    stroke: "#b71c1c",
+    label: "High Flood Hazard",
+  },
+  moderate: {
+    fill: "#ffb74d",
+    stroke: "#f57c00",
+    label: "Medium Flood Hazard",
+  },
+  low: {
+    fill: "#fff176",
+    stroke: "#fbc02d",
+    label: "Low Flood Hazard",
+  },
 };

@@ -727,8 +727,8 @@
         121.1462538
       ]
     ],
-    "riskLevel": "high",
-    "description": "Higher slope (max 10.5\u00b0). Steeper terrain with elevated landslide susceptibility during heavy or prolonged rainfall.",
+    "riskLevel": "low",
+    "description": "Low landslide potential in available data; generally stable terrain with localized slope concerns during extreme rainfall.",
     "affectedBarangays": [
       "Banlic"
     ],
@@ -1723,8 +1723,8 @@
         121.100576
       ]
     ],
-    "riskLevel": "high",
-    "description": "Higher slope (max 13.4\u00b0). Steeper terrain with elevated landslide susceptibility during heavy or prolonged rainfall.",
+    "riskLevel": "low",
+    "description": "Low landslide potential in available data; generally stable terrain with localized slope concerns during extreme rainfall.",
     "affectedBarangays": [
       "Pulo"
     ],
@@ -15821,8 +15821,8 @@
         121.0151983
       ]
     ],
-    "riskLevel": "low",
-    "description": "Minimal landslide potential in available data; monitor steep cut slopes and drainage during heavy rainfall.",
+    "riskLevel": "high",
+    "description": "Higher slope terrain with elevated landslide susceptibility, especially along steep ridges and escarpments during heavy or prolonged rainfall.",
     "affectedBarangays": [
       "Casile"
     ],
@@ -17109,8 +17109,8 @@
         121.0540407
       ]
     ],
-    "riskLevel": "low",
-    "description": "Minimal landslide potential in available data; monitor steep cut slopes and drainage during heavy rainfall.",
+    "riskLevel": "high",
+    "description": "Higher slope terrain with elevated landslide susceptibility, especially along steep ridges and escarpments during heavy or prolonged rainfall.",
     "affectedBarangays": [
       "Pittland"
     ],

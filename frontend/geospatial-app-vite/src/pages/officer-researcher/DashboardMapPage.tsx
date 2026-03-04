@@ -164,8 +164,8 @@ const DashboardMapPage: React.FC = () => {
     {
       group: "Hazard Zones",
       items: [
-        { key: "Fault Lines", name: "Fault Lines" },
-        { key: "Flood Zones", name: "Flood Zones" },
+        { key: "Fault Lines", name: "Fault" },
+        { key: "Flood Zones", name: "Flood Zone" },
         { key: "Landslide Risk", name: "Landslide Risk" },
         { key: "Verified Reports", name: "Hazard Location" },
       ],

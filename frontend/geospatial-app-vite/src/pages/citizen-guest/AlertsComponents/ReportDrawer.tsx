@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import PinLocationPicker from "./PinLocationPicker";
 import { isWithinCabuyao } from '../../../../src/utils/validateCabuyao';
 import { getIncidentCategories } from "../../../constants"
+import { toast } from "sonner";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -270,13 +271,11 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
       setError("Location is required. Please enable location or pin on map.");
       return;
     }
-
-    console.log(`test ${coords?.lat}, ${coords?.lon}`);
     if (!isWithinCabuyao(coords.lat, coords.lon)) {
       setError("You must be within Cabuyao to submit a report.");
       return;
     }
-
+    toast.success("Report submitted successfully");
     setSubmitting(true);
     setError(null);
 
@@ -299,7 +298,7 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
 
       // Photo
       if (photoFile) form.append("photo", photoFile);
-      
+
       const API_URL = import.meta.env.VITE_API_URL;
       const res = await fetch(`${API_URL}/api/reports/`, {
         method: "POST",

@@ -89,6 +89,10 @@ const NavHeader: React.FC = () => {
     "/main/citizen/profile": {
       title: "Profile",
       subtitle: "View your report history and manage your personal information",
+    },
+    "/main/citizen/settings": {
+      title: "Settings",
+      subtitle: "Manage your account preferences, notifications, and privacy settings",
     }
   };
 

@@ -551,11 +551,6 @@ function NotificationCard({ n, onOpen }: { n: NotificationItem; onOpen?: () => v
         const category = capitalize(n.reportCategory ?? "Report");
         const barangay = n.reportBarangay ? ` • ${n.reportBarangay}` : "";
 
-        // const from = n.statusFrom;
-        // const to = n.statusTo;
-
-        console.log("REPORT STATUS TO:", n.statusTo);
-
 
         if (n.statusTo === "in_progress") {
             return {

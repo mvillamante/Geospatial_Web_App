@@ -388,14 +388,22 @@ const AuthModal: React.FC<AuthModalProps> = ({
                                 </div>
                             </div>
 
-                            <div className="form-group">
+                            <div className="form-group password-group">
                                 <label>Password</label>
-                                <input
-                                    type="password"
-                                    value={signupPassword}
-                                    onChange={(e) => setSignupPassword(e.target.value)}
-                                    placeholder="Password"
-                                />
+                                <div className="password-wrapper">
+                                    <input
+                                        type={showSignupPassword ? "text" : "password"}
+                                        value={signupPassword}
+                                        onChange={(e) => setSignupPassword(e.target.value)}
+                                        placeholder="Password"
+                                    />
+                                    <span
+                                        className="eye-icon"
+                                        onClick={() => setShowSignupPassword(!showSignupPassword)}
+                                    >
+                                        {showSignupPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+                                    </span>
+                                </div>
                             </div>
 
                             <div className="form-group password-group">

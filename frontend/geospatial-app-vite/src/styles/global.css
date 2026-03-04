@@ -45,25 +45,13 @@ body {
 .reportverify-page,
 .profile-page,
 .notif-page,
-.sys-page {
+.sys-page,
+.settings-page {
   background: #f8fafc;
   padding: 1.5rem 2.5rem 2rem 2.5rem;
   min-height: 50vh;
 }
 
-
-.user-page h1,
-.cms-page h1,
-.dashboard-page h1,
-.reportverify-page h1,
-.reportsmgmt-page h1,
-.feed-page h1,
-.sys-page h1,
-.dashboard-alerts h1,
-.notif-header h1 {
-  font-size: 1.8rem;
-  color: #0f172a;
-}
 
 .reportverify-header,
 .evac-header,

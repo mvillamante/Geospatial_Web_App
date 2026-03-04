@@ -1444,7 +1444,6 @@ export default function LeafletMap(props: LeafletMapProps) {
       return;
     }
 
-    const token = localStorage.getItem("access_token");
 
     if (!verifiedReportsLayerRef.current) {
       verifiedReportsLayerRef.current = L.layerGroup().addTo(map);
@@ -1460,7 +1459,6 @@ export default function LeafletMap(props: LeafletMapProps) {
     fetch(url, {
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
         },
     })
       .then(res => res.json())

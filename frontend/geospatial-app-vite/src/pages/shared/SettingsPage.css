@@ -1,0 +1,242 @@
+.settings-page {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.settings-page h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.settings-subtitle {
+  color: #64748b;
+  margin-bottom: 2rem;
+}
+
+.settings-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.75rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+}
+
+.settings-card h2 {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.settings-item {
+  margin-bottom: 1.5rem;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings-header button {
+  background: #eef2ff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.settings-header button:hover {
+  background: #e0e7ff;
+}
+
+.expand {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.35s ease;
+}
+
+.expand.open {
+  max-height: 300px;
+  opacity: 1;
+  margin-top: 0.75rem;
+}
+
+.expand input {
+  width: 100%;
+  padding: 0.7rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 0.75rem;
+}
+
+/* ===============================
+   DELETE MODAL
+================================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-card {
+  background: white;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 18px;
+  padding: 2rem;
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.2);
+  animation: slideUp 0.25s ease;
+}
+
+.modal-card h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.modal-card p {
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.8rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.danger-confirm {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: white;
+  padding: 0.7rem 1.2rem;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.danger-confirm:hover {
+  transform: translateY(-1px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.form-actions button {
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.form-actions button:first-child {
+  background: linear-gradient(135deg, #ef4444, #cb542d);
+  color: white;
+}
+
+.cancel-btn {
+  background: #f1f5f9;
+}
+
+.cancel-btn:hover {
+  background: #e2e8f0;
+}
+
+.settings-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 1rem;
+}
+
+.settings-row:last-child {
+  border-bottom: none;
+}
+
+.settings-row select {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.toggle {
+  position: relative;
+  width: 46px;
+  height: 26px;
+}
+
+.toggle input {
+  display: none;
+}
+
+.toggle .slider {
+  position: absolute;
+  inset: 0;
+  background: #e2e8f0;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.toggle .slider::before {
+  content: "";
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  top: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.toggle input:checked + .slider {
+  background: linear-gradient(135deg, #ef4444, #cb542d);
+}
+
+.toggle input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
+.danger-btn {
+  margin-top: 1.5rem;
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 12px;
+  border: none;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.danger-btn:hover {
+  background: #fecaca;
+}

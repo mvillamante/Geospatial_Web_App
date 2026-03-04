@@ -64,7 +64,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
       const mapped: VerificationRequest[] = data.results.map((v: any) => ({
         id: v.id,
         citizen_id: v.citizen_id,
-        citizen_name: v.citizen_name,
+        citizen_name: `${v.first_name} ${v.last_name}`,
         barangay: v.barangay,
         barangay_id: v.barangay_id,
         address: v.address,
@@ -358,7 +358,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
           >
             <h2>Resident Verification Details</h2>
             <p><strong>Citizen Name:</strong> {modalVerification.citizen_name}</p>
-            <p><strong>Citizen ID:</strong> {modalVerification.citizen_id}</p>
+            {/* <p><strong>Citizen ID:</strong> {modalVerification.citizen_id}</p> */}
             <p><strong>Barangay:</strong> {modalVerification.barangay}</p>
             <p><strong>Address:</strong> {modalVerification.address}</p>
             <p><strong>Status:</strong> {modalVerification.status}</p>

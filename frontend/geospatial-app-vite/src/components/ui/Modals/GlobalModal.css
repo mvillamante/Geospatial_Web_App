@@ -25,6 +25,8 @@
   padding: 3rem;
   max-width: 500px;
   min-height: 300px;
+  max-height: 90vh;
+  overflow-y: auto;
   width: 100%;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
   position: relative;
@@ -39,7 +41,7 @@
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-50px);
+    transform: translateY(-30px);
   }
 
   to {
@@ -185,7 +187,7 @@
 }
 
 .modal-form .btn-submit.review-btn {
-  background: linear-gradient(135deg, #7fabf1, #587ecf);
+  background: #3b82f6;
 }
 
 .modal-form .btn-submit:hover {
@@ -221,43 +223,6 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@media (max-width: 480px) {
-  .modal-content {
-    padding: 1.75rem;
-    border-radius: 15px;
-  }
-
-  .modal-content.modal-signup {
-    padding: 1.75rem;
-  }
-
-  .modal-header h2 {
-    font-size: 1.5rem;
-  }
-
-  .modal-form .form-row {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .modal-content {
-    max-width: 90%;
-    padding: 2rem;
-  }
-
-  .modal-content.modal-signup {
-    padding: 2rem;
-  }
-}
-
-@media (max-width: 600px) {
-  .modal-content {
-    padding: 2rem 1.5rem;
   }
 }
 
@@ -323,13 +288,6 @@
   color: #0369a1;
 }
 
-@media (max-width: 600px) {
-  .create-user-modal .dropdown-options {
-    left: 0;
-    right: 0;
-    min-width: auto;
-  }
-}
 
 .input-error {
   color: #dc2626;
@@ -342,6 +300,7 @@
 
 .create-user-modal.confirm-step {
   padding: 1rem 1.5rem;
+  width: 100%;
   max-width: 520px;
   border-radius: 20px;
   background: var(--white-bg);
@@ -426,16 +385,10 @@
   background: #cbd5e1;
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .create-user-modal.confirm-step {
-    padding: 1.5rem;
-  }
-}
 
 /* Forgot Password */
 .forgot-password {
-  margin-top: 15px;
+  margin-top: 20px;
   font-size: 0.9rem;
   color: #64748b;
   text-align: right;
@@ -551,9 +504,85 @@
   font-size: 20px;
   border-radius: 8px;
   border: 1px solid #ccc;
+  margin-bottom: 10px;
 }
 
 .timer-text {
   color: gray;
   font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  modal-content {
+    max-width: 92%;
+    padding: 2rem;
+  }
+  .modal-content.modal-signup {
+    padding: 2rem;
+  }
+  .modal-header h2 {
+    font-size: 1.6rem;
+  }
+  .modal-form .form-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .create-user-modal.confirm-step {
+    padding: 1.75rem;
+  }
+  .create-user-modal.confirm-step .confirm-buttons {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 0.75rem;
+  }
+  .modal-content {
+    padding: 1.5rem;
+    border-radius: 16px;
+    max-height: 92vh;
+    -webkit-overflow-scrolling: touch;
+  }
+  .modal-header h2 {
+    font-size: 1.4rem;
+  }
+  .modal-header p {
+    font-size: 0.85rem;
+  }
+  .modal-close {
+    top: 1rem;
+    right: 1rem;
+  }
+  .modal-form input,
+  .modal-form select {
+    padding: 0.75rem 0.9rem;
+    font-size: 0.9rem;
+  }
+  .modal-form .btn-submit {
+    padding: 0.9rem;
+  }
+  .otp-container {
+    gap: 6px;
+  }
+  .otp-input {
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 360px) {
+  .modal-content {
+    padding: 1.25rem;
+  }
+  .modal-header h2 {
+    font-size: 1.25rem;
+  }
+  .otp-input {
+    width: 38px;
+    height: 44px;
+    font-size: 16px;
+  }
 }

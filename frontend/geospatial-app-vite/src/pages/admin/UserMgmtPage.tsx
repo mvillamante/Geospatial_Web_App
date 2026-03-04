@@ -1,7 +1,7 @@
 import './UserMgmtPage.css';
 import { formatDistanceToNow } from 'date-fns';
-import VerificationRequestsTab 
-from "../../components/ui/VerificationRequestsTab";
+import VerificationRequestsTab
+  from "../../components/ui/VerificationRequestsTab";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Power, PowerOff, CircleChevronDown } from 'lucide-react';
 import { LuEllipsis } from "react-icons/lu";
@@ -181,7 +181,34 @@ const UserMgmtPage: React.FC = () => {
     fetchUsers(1);
   }, [fetchUsers, departmentRefreshKey]);
 
-  /* FETCH RESEARCHER REQUESTS HIDDEN ON MOUNT */
+  useEffect(() => {
+    const fetchVerificationCount = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+
+        const res = await fetch(
+          `${API_URL}/api/admin/resident-verifications/?page=1&page_size=1000`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch verification requests");
+
+        const data = await res.json();
+
+        const pending = data.results.filter(
+          (r: any) => r.status?.toLowerCase() === "pending"
+        ).length;
+
+        setVerificationPendingCount(pending);
+
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchVerificationCount();
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -533,8 +560,8 @@ const UserMgmtPage: React.FC = () => {
           departmentRefreshKey={departmentRefreshKey}
           onClose={() => setShowCreateModal(false)}
           onCreated={async () => {
-            setShowCreateModal(false);         
-            await fetchUsers(1);               
+            setShowCreateModal(false);
+            await fetchUsers(1);
           }}
         />
       )}

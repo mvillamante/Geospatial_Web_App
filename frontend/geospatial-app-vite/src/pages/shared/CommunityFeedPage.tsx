@@ -175,7 +175,7 @@ export default function CommunityFeedPage() {
         return () => container.removeEventListener("scroll", handleScroll);
     }, []);
 
-    
+
 
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
@@ -210,15 +210,38 @@ export default function CommunityFeedPage() {
                                 />
                             </label>
 
-                            <label className="filter">
-                                <SlidersHorizontal size={16} />
-                                <select value={filter} onChange={(e) => setFilter(e.target.value as any)}>
-                                    <option value="all">All</option>
-                                    <option value="advisory">Advisories</option>
-                                    <option value="announcement">Announcements</option>
-                                    <option value="guide">Guides</option>
-                                </select>
-                            </label>
+                            <div className="filter-chips">
+                                <button
+                                    className={`filter-pill ${filter === "all" ? "active" : ""}`}
+                                    onClick={() => setFilter("all")}
+                                >
+                                    All
+                                </button>
+
+                                <button
+                                    className={`filter-pill advisory ${filter === "advisory" ? "active" : ""}`}
+                                    onClick={() => setFilter("advisory")}
+                                >
+                                    <AlertTriangle size={14} />
+                                    Advisory
+                                </button>
+
+                                <button
+                                    className={`filter-pill announcement ${filter === "announcement" ? "active" : ""}`}
+                                    onClick={() => setFilter("announcement")}
+                                >
+                                    <Megaphone size={14} />
+                                    Announcement
+                                </button>
+
+                                <button
+                                    className={`filter-pill guide ${filter === "guide" ? "active" : ""}`}
+                                    onClick={() => setFilter("guide")}
+                                >
+                                    <BookOpen size={14} />
+                                    Guide
+                                </button>
+                            </div>
                         </div>
                     </header>
 

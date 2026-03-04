@@ -140,16 +140,22 @@
   position: absolute;
   top: -6px;
   right: -8px;
+
   min-width: 18px;
   height: 18px;
   padding: 0 6px;
+
   border-radius: 999px;
   background: #ef4444;
   color: #fff;
+
   font-size: 11px;
   font-weight: 800;
-  line-height: 18px;
-  text-align: center;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   border: 2px solid var(--white-bg);
   pointer-events: none;
 }
@@ -165,16 +171,22 @@
   position: absolute;
   top: -6px;
   right: -10px;
+
   min-width: 18px;
   height: 18px;
   padding: 0 6px;
+
   border-radius: 999px;
   background: #ef4444;
   color: #fff;
+
   font-size: 11px;
   font-weight: 800;
-  line-height: 18px;
-  text-align: center;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   border: 2px solid var(--white-bg);
   pointer-events: none;
 }

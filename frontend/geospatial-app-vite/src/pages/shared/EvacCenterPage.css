@@ -19,7 +19,7 @@
 
 .evac-search-wrapper {
   position: relative;
-  width: 320px;
+  width: 600px;
   max-width: 100%;
 }
 
@@ -49,6 +49,32 @@
   width: 18px;
   height: 18px;
   pointer-events: none;
+}
+
+.evac-search-clear {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+
+    border: none;
+    background: transparent;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+    color: #64748b;
+
+    padding: 4px;
+    border-radius: 50%;
+
+    transition: 0.2s ease;
+}
+
+.evac-search-clear:hover {
+    background: #f1f5f9;
+    color: #0f172a;
 }
 
 
@@ -336,96 +362,6 @@
   gap: 6px;
 }
 
-@media (max-height: 800px){
-
-  .evac-reminders{
-    margin: 0.9rem;
-    padding: 1rem;
-    border-radius: 10px;
-    font-size: 0.82rem;
-  }
-
-  .evac-reminders-title{
-    font-size: 14px;
-    margin-bottom: 0.3rem;
-  }
-
-  .evac-reminders-list{
-    gap: 4px;
-    font-size: 0.8rem;
-  }
-
-}
-
-/* =========================
-   Responsive
-========================= */
-@media (max-width: 1024px) {
-  .evac-search-wrapper {
-    width: 35%;
-  }
-}
-
-@media (max-width: 768px) {
-  .evac-page {
-    min-height: 100vh;
-    padding-bottom: calc(110px + env(safe-area-inset-bottom));
-  }
-
-  .evac-search-wrapper {
-    width: 100%;
-  }
-
-  .evac-search-add-container {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .evac-grid {
-    grid-template-columns: 1fr;
-    justify-items: center
-  }
-
-  .evac-grid.officer {
-    grid-auto-flow: row;
-    grid-auto-columns: unset;
-    overflow-x: visible;
-  }
-
-  .evac-card {
-    width: 100%;
-    max-width: 800px; 
-    border-radius: 14px;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
-  }
-
-  .evac-card-name {
-    font-size: 1rem;
-  }
-
-  .evac-barangay {
-    font-size: 0.9rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .evac-info-row {
-    font-size: 0.85rem;
-  }
-
-  .evac-btn {
-    border-radius: 999px;
-    padding: 0.7rem;
-    font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .evac-search-wrapper {
-    width: 100%;
-    margin-left: 0;
-  }
-}
-
 /* For Officer */
 .evac-add-center {
   display: flex;
@@ -470,14 +406,62 @@
 .evac-side-content {
   display: flex;
   flex-direction: row;
-  justify-content: right;
-  align-items: center;
+  align-items: stretch;
   gap: 1rem;
   width: 80%;
   background-color: var(--white-bg);
   border-radius: 15px;
   box-shadow: 0 6px 16px rgba(163, 169, 182, 0.18);
   padding: 15px;
+}
+
+.evac-side-content-filtermap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.evac-side-content-filtermap .role-select {
+  padding: 0.35rem 1.8rem 0.35rem 1.85rem;
+}
+
+.filter-hint {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 6px;
+  margin-left: 6px;
+}
+
+.evac-side-content-map {
+  width: 100%;
+  height: 61vh;
+}
+
+@media (max-width: 1024px) {
+  .evac-side-content-map {
+    width: 70%;
+    height: 62vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .evac-side-content-map {
+    width: 100%;
+    height: 66vh;
+  }
+}
+
+@media (max-height: 800px) {
+  .evac-side-content-map {
+    height: 66vh;
+  }
+}
+
+@media (max-width: 500px) {
+  .evac-side-content-map {
+    height: 40vh;
+  }
 }
 
 /* =========================
@@ -775,42 +759,6 @@
   color: #4b5563;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-
-  .form-row.two,
-  .form-row.three {
-    grid-template-columns: 1fr;
-  }
-
-  .evac-page .modal {
-    padding: 1.5rem 1rem 1rem;
-  }
-
-  .evac-page .modal-actions {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .evac-page .modal-actions button {
-    width: 100%;
-  }
-
-  .evac-stat-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-    width: 100%;
-    flex-wrap: wrap;
-    padding: 0;
-  }
-
-  .evac-stat-card {
-    width: 100%;
-  }
-}
-
-
 /* Map */
 .map-modal-overlay {
   position: fixed;
@@ -940,29 +888,6 @@
   border-radius: 10px;
 }
 
-@media (max-width: 768px) {
-  .evac-add-btn {
-    width: 100%;
-    justify-content: center;
-    border-radius: 14px;
-  }
-
-  .evac-actions {
-    gap: 0.6rem;
-  }
-
-  .evac-delete-btn,
-  .inline-icon-btn {
-    width: 46px;
-    height: 46px;
-    border-radius: 14px;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-}
-
 .empty-evac-state {
   height: 100%;
   display: flex;
@@ -999,36 +924,192 @@
 
 
 /* =========================
-   Map & Side Content Responsiveness
+   Unified Responsive System
 ========================= */
+
+/* Large Tablets / Small Laptops */
+@media (max-width: 1280px) {
+
+  .evac-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+}
+
+/* Tablets */
 @media (max-width: 1024px) {
+
+  .evac-search-wrapper {
+    width: 50%;
+  }
+
   .evac-map-wrapper {
-    flex-wrap: wrap;
-    gap: 1rem;
+    align-items: stretch;
   }
 
   .evac-side-content {
-    width: 60%;
-    height: auto;
+    width: 100%;
     flex-direction: column;
+    padding: 12px;
   }
 
   .evac-stat-container {
-    width: 35%;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    padding: 0;
+  }
+
+  .evac-stat-card {
+    flex: 1 1 45%;
+    min-width: 200px;
+    width: 100%;
+  }
+
+  .evac-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
+  .evac-card {
+    padding: 1.2rem;
+  }
+
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+
+  .selected-evac-card h2 {
+    font-size: 1.25rem;
+  }
+
+  .evac-reminders {
+    font-size: 0.9rem;
+    padding: 1.2rem;
+    margin: 0;
+  }
+
+  .evac-reminders-title {
+    font-size: 1rem;
+  }
+
+  .evac-reminders-list {
+    font-size: 0.85rem;
+  }
+
+  .evac-grid {
+    font-size: 0.95rem;
+  }
+
+  .evac-card-name {
+    font-size: 0.98rem;
+    gap: 5;
+    justify-content: flex-end;
+  }
+
+  .evac-capacity {
+    width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .evac-page {
+    min-height: 100vh;
+    padding: 15px;
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+  }
+
+  /* Header */
+  .evac-header-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .evac-search-add-container {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .evac-search-wrapper {
+    width: 100%;
+  }
+
+  /* Grid */
+  .evac-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .evac-grid.officer {
+    grid-auto-columns: unset;
+    overflow-x: visible;
+    padding: 0;
+    margin-bottom: 15px;
+  }
+
+  .evac-card {
+    max-width: 230px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+  .evac-card.officer {
     height: auto;
   }
 
-  .leaflet-map {
-    height: 45vh;
+  .evac-grid-wrapper {
+    margin: 15px 0;
+    align-items: stretch;
+  }
+
+  .scroll-btn {
+    border-radius: 0%;
+    height: auto;
+    width: auto;
+  }
+
+  .scroll-btn.left {
+    border-top-left-radius: 25px;
+    border-bottom-left-radius: 25px;
+  }
+
+  .scroll-btn.right {
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+  }
+
+  /* Buttons */
+  .evac-btn {
+    border-radius: 14px;
+    padding: 0.5rem;
+    font-size: 0.78rem;
+  }
+  .evac-btn .evac-btn-icon {
+    width: 15px;
+    height: 15px;
+  }
+
+  .evac-add-center {
+    justify-content: center;
     width: 100%;
   }
-}
 
-@media (max-width: 768px) {
-  .evac-page {
-    padding-bottom: calc(110px + env(safe-area-inset-bottom));
+  .evac-add-btn {
+    width: 100%;
+    justify-content: center;
+    border-radius: 14px;
+    padding: 0.9rem;
+    font-size: 0.9rem;
   }
 
+  /* Map Layout */
   .evac-map-wrapper {
     flex-direction: column;
     gap: 1rem;
@@ -1036,26 +1117,10 @@
 
   .evac-side-content {
     width: 100%;
-    padding: 0;
-  }
-
-  .selected-evac-card {
-    max-height: none;
-    width: 100%;
-  }
-
-  .evac-reminders {
     flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  .evac-reminders-title {
-    margin-bottom: 1rem;
-  }
-
-  .evac-stat-card {
-    flex: 1;
+    align-items: stretch;
+    box-shadow: none;
+    padding: 0;
   }
 
   .leaflet-map {
@@ -1063,15 +1128,126 @@
     width: 100% !important;
   }
 
-  .evac-grid.officer {
-    display: grid;
-    grid-template-columns: 1fr;
-    overflow-x: visible;
-    padding-bottom: 0;
-    gap: 1rem;
+  /* Stats */
+  .evac-stat-container {
+    grid-template-columns: 1fr 1fr;
+    padding: 0;
   }
 
-  .scroll-btn {
-    display: none;
+  .evac-stat-card {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 14px;
   }
+
+  .evac-card-value {
+    font-size: 1.4rem;
+  }
+
+  /* Modal */
+  .evac-page .modal-overlay {
+    padding: 1rem;
+  }
+
+  .evac-page .modal {
+    width: 100%;
+    max-height: 85vh;
+    padding: 1.25rem 1rem;
+    border-radius: 14px;
+  }
+
+  .evac-page .modal-actions {
+    flex-direction: column;
+  }
+
+  .evac-page .modal-actions button {
+    width: 100%;
+  }
+
+  /* Inputs */
+  .coord-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pick-map-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+}
+
+/* Small Phones */
+@media (max-width: 480px) {
+  .selected-evac-card h2 {
+    font-size: 1.1rem;
+  }
+
+  .evac-reminders {
+    padding: 1rem;
+    font-size: 0.85rem;
+  }
+
+  .evac-reminders-title {
+    font-size: 0.95rem;
+  }
+
+  .evac-reminders-list {
+    font-size: 0.68rem;
+  }
+
+  .evac-grid {
+    font-size: 0.9rem;
+  }
+
+  .evac-card-name {
+    font-size: 0.9rem;
+  }
+
+  .evac-grid {
+    gap: 0.75rem;
+  }
+
+  .evac-card {
+    padding: 0.85rem;
+  }
+
+  .evac-card-name {
+    font-size: 0.95rem;
+  }
+
+  .evac-search {
+    height: 42px;
+    font-size: 0.9rem;
+  }
+
+  .evac-stat-container {
+    grid-template-columns: 1fr;
+  }
+
+  .evac-stat-card {
+    padding: 0.9rem;
+  }
+
+  .evac-card-value {
+    font-size: 1.25rem;
+  }
+
+  .evac-tag {
+    font-size: 0.7rem;
+  }
+
+}
+
+.evac-empty-state {
+    width: 100%;
+    text-align: center;
+    padding: 40px 20px;
+
+    color: #64748b;
+    font-size: 15px;
+
+    border-radius: 14px;
+    background: white;
+    border: 1px dashed #e2e8f0;
 }

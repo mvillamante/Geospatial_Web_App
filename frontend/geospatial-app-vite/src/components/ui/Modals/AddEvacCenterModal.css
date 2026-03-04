@@ -107,14 +107,6 @@
   gap: 14px;
 }
 
-.evac-page .modal .form-row.two {
-  grid-template-columns: 1fr 1fr;
-}
-
-.evac-page .modal .form-row.three {
-  grid-template-columns: 1fr 1fr 1fr;
-}
-
 /* Coordinate Row */
 .evac-page .modal .coord-row {
   display: flex;
@@ -275,11 +267,6 @@
 @media (max-width: 768px) {
   .evac-page .modal {
     padding: 1.5rem 1rem;
-  }
-
-  .evac-page .modal .form-row.two,
-  .evac-page .modal .form-row.three {
-    grid-template-columns: 1fr;
   }
 
   .evac-page .modal-actions {

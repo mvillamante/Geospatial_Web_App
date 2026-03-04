@@ -117,8 +117,8 @@ const CmsPage: React.FC = () => {
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [isPublishing, setIsPublishing] = useState(false);
-
+  const [publishingStatus, setPublishingStatus] = useState<"idle" | "draft" | "publish">("idle");
+  const [showViewModal, setShowViewModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   const fetchGuides = async () => {
@@ -237,10 +237,10 @@ const CmsPage: React.FC = () => {
   };
 
   const createGuide = async (publishImmediately = false) => {
-    if (isPublishing) return; // prevent double click
+    if (publishingStatus !== "idle") return; // prevent double click
 
     try {
-      setIsPublishing(true);
+      setPublishingStatus(publishImmediately ? "publish" : "draft");
 
       const res = await fetch("/api/cms/guides/create/", {
         method: "POST",
@@ -282,9 +282,7 @@ const CmsPage: React.FC = () => {
           isPinned: false,
           createdAt: created.created_at,
           updatedAt: created.updated_at,
-          publishedAt: publishImmediately
-            ? new Date().toISOString()
-            : undefined,
+          publishedAt: publishImmediately ? new Date().toISOString() : undefined,
           attachments: uploadedImage ? [uploadedImage] : [],
         },
         ...prev,
@@ -292,10 +290,12 @@ const CmsPage: React.FC = () => {
 
       setNewGuide({ postTitle: "", postType: "advisory", postBody: "" });
       setShowCreateModal(false);
+      setImagePreview(null);
+
     } catch (err) {
       console.error(err);
     } finally {
-      setIsPublishing(false); // always reset
+      setPublishingStatus("idle"); // always reset after either action
     }
   };
 
@@ -626,6 +626,16 @@ const CmsPage: React.FC = () => {
                             {!viewArchived ? (
                               <>
                                 <button
+                                  className="dropdown-item view-details"
+                                  onClick={() => {
+                                    setEditingGuide({ ...guide }); // Reuse editingGuide state to show details
+                                    setShowViewModal(true);
+                                    setOpenMenuId(null);
+                                  }}
+                                >
+                                  <Eye size={16} /> View Full Details
+                                </button>
+                                <button
                                   className="dropdown-item"
                                   disabled={guide.status === "Published"}
                                   title={guide.status === "Published" ? "Unpublish to edit" : "Edit"}
@@ -800,20 +810,60 @@ const CmsPage: React.FC = () => {
               <div style={{ display: "flex", gap: "8px" }}>
                 <button
                   className="btn-tertiary"
-                  disabled={isPublishing}
+                  disabled={publishingStatus !== "idle"}
                   onClick={() => createGuide(false)}
                 >
-                  {isPublishing ? "Saving..." : "Save Draft"}
+                  {publishingStatus === "draft" ? "Saving..." : "Save Draft"}
                 </button>
 
                 <button
                   className="btn-primary"
-                  disabled={isPublishing}
+                  disabled={publishingStatus !== "idle"}
                   onClick={() => createGuide(true)}
                 >
-                  {isPublishing ? "Publishing..." : "Publish Content"}
+                  {publishingStatus === "publish" ? "Publishing..." : "Publish Content"}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Content Modal */}
+      {showViewModal && editingGuide && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Content Details</h2>
+
+            <label>Title</label>
+            <input value={editingGuide.postTitle} readOnly />
+
+            <label>Type</label>
+            <input value={capitalize(editingGuide.postType)} readOnly />
+
+            <label>Status</label>
+            <input value={editingGuide.status} readOnly />
+
+            <label>Body</label>
+            <div className="editor-input" dangerouslySetInnerHTML={{ __html: editingGuide.postBody || "" }} />
+
+            {editingGuide.attachments && editingGuide.attachments.length > 0 && (
+              <>
+                <label>Attachments</label>
+                <div className="attachment-preview">
+                  {editingGuide.attachments.map(att => (
+                    <div key={att.id} className="attachment-wrapper">
+                      <img src={att.file_url} alt="attachment" />
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <div className="modal-actions">
+              <button className="btn-secondary" onClick={() => setShowViewModal(false)}>
+                Close
+              </button>
             </div>
           </div>
         </div>

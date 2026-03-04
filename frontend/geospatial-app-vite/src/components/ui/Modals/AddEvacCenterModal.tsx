@@ -87,7 +87,7 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = (
             </div>
 
             {/* Barangay, Type, Capacity */}
-            <div className="form-row three">
+            <div className="form-row">
               <div className="form-group small">
                 <label>Barangay</label>
                 <select name="barangay" value={formState.barangay} onChange={handleChange} required>

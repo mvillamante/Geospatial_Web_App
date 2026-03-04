@@ -82,15 +82,19 @@ export default function EvacCenterEditor({
             </div>
 
             <div className="form-row two">
-              <div className="view-card">
-                <span className="icon">📞</span>
-                <span className="label">Contact</span>
+              <div className="view-card small">
+                <div className="card-header">
+                  <span className="icon">📞</span>
+                  <span className="label">Contact</span>
+                </div>
                 <span className="value">{center.contact || "-"}</span>
               </div>
 
-              <div className="view-card">
-                <span className="icon">👥</span>
-                <span className="label">Capacity</span>
+              <div className="view-card small">
+                <div className="card-header">
+                  <span className="icon">👥</span>
+                  <span className="label">Capacity</span>
+                </div>
                 <span className="value">{center.capacity || 0} persons</span>
               </div>
             </div>

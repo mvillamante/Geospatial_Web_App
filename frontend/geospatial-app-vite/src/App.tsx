@@ -7,13 +7,15 @@ import {
   AlertsMapPage, ProfilePage, NotificationPage,
   DashboardMapPage, ReportVerifyPage,
   PwaAuthPage,
-  HomePage
+  HomePage, SettingsPage
 } from "./pages";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { Toaster } from "sonner";
 
 const App: React.FC = () => {
   return (
     <Router>
+      <Toaster richColors position="top-right" />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         {/* PWA Routes  */}
@@ -141,6 +143,7 @@ const App: React.FC = () => {
           <Route path="citizen/community-feed" element={<CommunityFeedPage />} />
           <Route path="citizen/profile" element={<ProfilePage />} />
           <Route path="citizen/notifications" element={<NotificationPage />} />
+          <Route path="citizen/settings" element={<SettingsPage />} />
 
           <Route path="citizen-pwa/login" element={<PwaAuthPage />} />
 
@@ -159,6 +162,7 @@ const App: React.FC = () => {
             path="guest/notifications"
             element={<Navigate to="/main/citizen-pwa/login" replace />}
           />
+
         </Route>
 
       </Routes>

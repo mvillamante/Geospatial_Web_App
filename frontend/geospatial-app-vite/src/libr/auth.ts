@@ -70,7 +70,9 @@ export const getUserRoleAndDisplayName = () => {
 
   const profilePath = `/main/${userRole.toLowerCase()}/profile`;
 
-  return { currentUserId, userRole, userRole2, displayName, profilePath };
+  const settingsPath = `/main/${userRole.toLowerCase()}/settings`;
+
+  return { currentUserId, userRole, userRole2, displayName, profilePath, settingsPath };
 };
 
 

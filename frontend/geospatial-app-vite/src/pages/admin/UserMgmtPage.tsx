@@ -1,7 +1,7 @@
 import './UserMgmtPage.css';
 import { formatDistanceToNow } from 'date-fns';
-import VerificationRequestsTab 
-from "../../components/ui/VerificationRequestsTab";
+import VerificationRequestsTab
+  from "../../components/ui/VerificationRequestsTab";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Power, PowerOff, CircleChevronDown } from 'lucide-react';
 import { LuEllipsis } from "react-icons/lu";
@@ -86,7 +86,8 @@ const UserMgmtPage: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
-  const [pendingCount, setPendingCount] = useState(0);
+  const [researchPendingCount, setResearchPendingCount] = useState(0);
+  const [verificationPendingCount, setVerificationPendingCount] = useState(0);
 
   const [loading, setLoading] = useState(false);
 
@@ -180,7 +181,34 @@ const UserMgmtPage: React.FC = () => {
     fetchUsers(1);
   }, [fetchUsers, departmentRefreshKey]);
 
-  /* FETCH RESEARCHER REQUESTS HIDDEN ON MOUNT */
+  useEffect(() => {
+    const fetchVerificationCount = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+
+        const res = await fetch(
+          `${API_URL}/api/admin/resident-verifications/?page=1&page_size=1000`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch verification requests");
+
+        const data = await res.json();
+
+        const pending = data.results.filter(
+          (r: any) => r.status?.toLowerCase() === "pending"
+        ).length;
+
+        setVerificationPendingCount(pending);
+
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchVerificationCount();
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -208,7 +236,7 @@ const UserMgmtPage: React.FC = () => {
         }));
 
         setAllRequests(mapped);
-        setPendingCount(mapped.filter(r => r.status === "Pending").length);
+        setPendingCount(mapped.filter(r => r.status === "pending").length);
       } catch (err) {
         console.error(err);
       }
@@ -272,7 +300,7 @@ const UserMgmtPage: React.FC = () => {
 
     const activeTab = tabRefs.current[activeIdx];
     if (activeTab) setUnderlineStyle({ left: activeTab.offsetLeft, width: activeTab.offsetWidth });
-  }, [tab, pendingCount]);
+  }, [tab, researchPendingCount, verificationPendingCount]);
 
   return (
     <div className="user-page">
@@ -283,11 +311,11 @@ const UserMgmtPage: React.FC = () => {
         <button ref={el => { tabRefs.current[0] = el; }} onClick={() => setTab('users')} className={tab === 'users' ? 'tab active' : 'tab'}>Staff</button>
         <button ref={el => { tabRefs.current[1] = el; }} onClick={() => setTab('requests')} className={tab === 'requests' ? 'tab active' : 'tab'}>
           Researchers
-          {pendingCount > 0 && <span className="request-count">{pendingCount}</span>}
+          {researchPendingCount > 0 && <span className="request-count">{researchPendingCount}</span>}
         </button>
         <button ref={el => { tabRefs.current[2] = el; }} onClick={() => setTab('verification')} className={tab === 'verification' ? 'tab active' : 'tab'}>
           Residents
-          {/*pendingCount > 0 && <span className="request-count">{pendingCount}</span>*/}
+          {verificationPendingCount > 0 && <span className="request-count">{verificationPendingCount}</span>}
         </button>
         <span className="tab-underline" style={{ left: underlineStyle.left, width: underlineStyle.width }} />
       </div>
@@ -392,7 +420,7 @@ const UserMgmtPage: React.FC = () => {
                   </tr>
                 ) : (
                   users.map((user) => {
-                    const alreadyRequested = allRequests.some(r => r.email === user.email && r.status === "Pending");
+                    const alreadyRequested = allRequests.some(r => r.email === user.email && r.status === "pending");
                     const displayRole = user.role === "Citizen" && !user.extra_roles?.some(r => r.toLowerCase() === "researcher")
                       ? "Citizen"
                       : user.extra_roles?.some(r => r.toLowerCase() === "researcher")
@@ -517,13 +545,13 @@ const UserMgmtPage: React.FC = () => {
         <ResearcherRequestsTab
           requests={allRequests}
           pageSize={pageSize}
-          onPendingCountChange={setPendingCount}
+          onPendingCountChange={setResearchPendingCount}
         />
       )}
 
       {/* verification Tab */}
       {tab === 'verification' && (
-        <VerificationRequestsTab pageSize={pageSize} onPendingCountChange={setPendingCount} />
+        <VerificationRequestsTab pageSize={pageSize} onPendingCountChange={setVerificationPendingCount} />
       )}
 
       {/* Create User Modal */}
@@ -532,8 +560,8 @@ const UserMgmtPage: React.FC = () => {
           departmentRefreshKey={departmentRefreshKey}
           onClose={() => setShowCreateModal(false)}
           onCreated={async () => {
-            setShowCreateModal(false);         
-            await fetchUsers(1);               
+            setShowCreateModal(false);
+            await fetchUsers(1);
           }}
         />
       )}

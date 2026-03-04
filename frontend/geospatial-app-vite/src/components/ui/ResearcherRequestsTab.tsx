@@ -1,19 +1,27 @@
 import '../../pages/admin/UserMgmtPage.css';
+import { FiCheckCircle, FiEye, FiSearch, FiX } from "react-icons/fi";
+import { LuEllipsis } from "react-icons/lu";
 import React, { useState, useEffect } from "react";
-import { CheckCircle, XCircle } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { CheckCircle, XCircle, Power, PowerOff } from "lucide-react";
+import { formatDistanceToNow, format } from "date-fns";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export type RequestStatus = 'Pending' | 'Approved' | 'Rejected';
+export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'active' | 'inactive';
 
 export interface ResearcherRequest {
   id: number;
-  fullName: string;      
+  type: "request" | "researcher";
+  fullName: string;
   email: string;
-  date: string;
+
+  createdAt: string;       
+  reviewedAt?: string;    
+  lastlogin?: string;
+
   purpose: string;
   orgSchool: string;
+  attachment?: string;    
   status: RequestStatus;
 }
 
@@ -32,13 +40,34 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
   const [rejectingId, setRejectingId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
+  const [statusFilter, setStatusFilter] = useState<RequestStatus | "all">("pending");
+  const [openMenu, setOpenMenu] = useState<number | null>(null);
+  const [modalResearcher, setModalResearcher] = useState<ResearcherRequest | null>(null);
+  const [signedUrls, setSignedUrls] = useState<Record<number, string>>({});
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
   // Fetch requests
   const fetchRequests = async (page = 1) => {
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`${API_URL}/api/admin/researcher_requests/?page=${page}&page_size=${pageSize}`, {
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      });
+      const params = new URLSearchParams();
+      params.append("page", page.toString());
+      params.append("page_size", pageSize.toString());
+
+      if (debouncedSearch) params.append("search", debouncedSearch);
+      if (statusFilter !== "all") params.append("status", statusFilter.toLowerCase());
+      
+      const res = await fetch(
+        `${API_URL}/api/admin/researcher_overview/?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!res.ok) throw new Error("Failed to fetch requests");
 
@@ -46,12 +75,25 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
 
       const mapped: ResearcherRequest[] = data.results.map((r: any) => ({
         id: r.id,
-        fullName: r.first_name && r.last_name ? `${r.first_name} ${r.last_name}` : "Anonymous",
-        email: r.email || "Unknown",
-        date: r.created_at ? formatDistanceToNow(new Date(r.created_at), { addSuffix: true }) : "Unknown",
-        status: (r.status.charAt(0).toUpperCase() + r.status.slice(1)) as RequestStatus,
+        type: r.type,
+        fullName: `${r.first_name} ${r.last_name}`,
+        email: r.email,
+        createdAt: r.created_at
+          ? format(new Date(r.created_at), "MMMM d, yyyy")
+          : "Unknown",
+
+        reviewedAt: r.reviewed_at
+          ? format(new Date(r.reviewed_at), "MMMM d, yyyy hh:mm:ss a")
+          : undefined,
+        lastlogin: r.last_login
+          ? formatDistanceToNow(new Date(r.last_login), { addSuffix: true })
+          : r.type === "researcher"
+            ? "Never"
+            : undefined,
+        status: r.status.toLowerCase(),
         purpose: r.purpose,
-        orgSchool: r.orgSchool
+        orgSchool: r.orgSchool,
+        attachment: r.attachment || undefined,
       }));
 
       setRequests(mapped);
@@ -59,15 +101,86 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
       setTotalPages(Math.ceil(data.count / pageSize));
 
       // Update parent with pending count
-      onPendingCountChange?.(mapped.filter(r => r.status === "Pending").length);
+      onPendingCountChange?.(mapped.filter(r => r.status === "pending").length);
 
     } catch (err) {
       console.error(err);
     }
   };
 
-  useEffect(() => { fetchRequests(); }, []);
+  useEffect(() => {
+    if (requests.length === 0) return;
 
+    const fetchUrls = async () => {
+      const token = localStorage.getItem("access_token");
+      const updated: Record<number, string> = {};
+
+      for (const req of requests) {
+        if (!req.attachment) continue;
+
+        try {
+          // Call the PK-based endpoint
+          const res = await fetch(
+            `${API_URL}/api/admin/researcher/${req.id}/attachment/`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          if (!res.ok) continue;
+          const data = await res.json();
+          updated[req.id] = data.url;
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      setSignedUrls(updated);
+    };
+
+    fetchUrls();
+  }, [requests]);
+
+  const isResearcherView =
+    statusFilter === "active" || statusFilter === "inactive";
+  useEffect(() => { fetchRequests(1); }, [debouncedSearch, statusFilter]);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  const toggleResearcherStatus = async (id: number, currentStatus: RequestStatus) => {
+    const action = currentStatus === "active" ? "deactivate" : "activate";
+
+    const confirmed = window.confirm(
+      `Are you sure you want to ${action} this researcher?`
+    );
+    if (!confirmed) return;
+
+    try {
+      const token = localStorage.getItem("access_token");
+
+      const res = await fetch(
+        `${API_URL}/api/admin/users/${id}/toggle-status/`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to update status");
+
+      await fetchRequests(currentPage);
+
+      setOpenMenu(null);
+
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update researcher status.");
+    }
+  };
   // const generateTempPassword = () => {
   //   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
   //   let password = "";
@@ -109,7 +222,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
       // const updated = await res.json();
 
       setRequests(prev =>
-        prev.map(r => r.id === id ? { ...r, status: "Approved" } : r)
+        prev.map(r => r.id === id ? { ...r, status: "approved" } : r)
       );
 
       alert(`The request from ${req.fullName} has been approved.\nAn email has been sent to ${req.email} with login credentials.`);
@@ -185,62 +298,315 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
     </div>
   );
 
+  const handleViewAttachment = async (id: number) => {
+    try {
+      const token = localStorage.getItem("access_token");
+
+      const res = await fetch(
+        `${API_URL}/api/admin/researcher/${id}/attachment/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to get signed URL");
+
+      const data = await res.json();
+
+      window.open(data.url, "_blank");
+
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load attachment.");
+    }
+  };
+
   return (
     <>
+      <div className="filters">
+        <div className="filters-left">
+          <div className="select-wrapper">
+            <FiCheckCircle className="select-icon" />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as RequestStatus | "all")}
+              className="status-select"
+            >
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div className="filters-right">
+          <div className="search-wrapper">
+            <FiSearch className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            {searchTerm.trim() && (
+              <button
+                className="search-clear"
+                onClick={() => setSearchTerm("")}
+                type="button"
+              >
+                x
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
       <div className="requests-table-wrapper">
         <table>
           <thead>
             <tr>
               <th className="center">User</th>
-              <th className="center">Created At</th>
-              <th className="center">Purpose</th>
-              <th className="center">Organization/School</th>
+              <th className="center">
+                {isResearcherView ? "Date Joined" : "Created At"}
+              </th>
+              {isResearcherView && (
+                <th className="center">Last Login</th>
+              )}
+              {!isResearcherView && (
+                <>
+                  <th className="center">Purpose</th>
+                  <th className="center">Organization/School</th>
+                </>
+              )}
+
               <th className="center">Status</th>
-              <th className="center">Actions</th>
+              {isResearcherView && (
+                <th className="center">Actions</th>
+              )}
+              {!isResearcherView && (
+                <th className="center">Actions</th>
+              )}
             </tr>
           </thead>
-          <tbody>
-            {requests.length === 0 ? (
-              <tr>
-                <td colSpan={9} className="empty">
-                  Loading Researcher Requests...
-                </td>
-              </tr>
-            ) : requests.map(req => (
-              <tr key={req.id}>
-                <td className="user-name">{req.fullName}<br/><small>{req.email}</small></td>
-                <td className="center muted">{req.date}</td>
-                <td className="center muted">{req.purpose}</td>
-                <td className="center muted">{req.orgSchool}</td>
-                <td className="center"><span className={`badge ${req.status}`}>{req.status}</span></td>
-                <td className="center actions">
-                  {req.status === "Pending" && (
-                    rejectingId !== req.id ? (
+            <tbody>
+              {requests.length === 0 ? (
+                <tr>
+                  <td colSpan={isResearcherView ? 6 : 6} className="empty">
+                    No records found.
+                  </td>
+                </tr>
+              ) : (
+                requests.map(req => (
+                  <tr key={req.id}>
+                    <td className="user-name">
+                      {req.fullName}
+                      <br />
+                      <small>{req.email}</small>
+                    </td>
+
+                    <td className="center muted">{req.createdAt}</td>
+                    {isResearcherView && (
+                      <td className="center muted">
+                        {req.lastlogin || "—"}
+                      </td>
+                    )}
+                    {!isResearcherView && (
                       <>
-                        <button className="approve-btn" onClick={() => approveRequest(req.id)}>
-                          <CheckCircle size={16}/> Approve
-                        </button>
-                        <button className="reject-btn" onClick={() => handleRejectStart(req.id)}>
-                          <XCircle size={16}/> Reject
-                        </button>
+                        <td className="center muted">
+                          {req.purpose || "-"}
+                        </td>
+                        <td className="center muted">
+                          {req.orgSchool || "-"}
+                        </td>
                       </>
-                    ) : (
-                      <div className="reject-box">
-                        <textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)}
-                          placeholder="Enter reason..." rows={3} autoFocus />
-                        <div className="reject-actions">
-                          <button className="cancel-btn" onClick={handleRejectCancel}>Cancel</button>
-                          <button className="confirm-btn" disabled={!rejectReason.trim()}
-                            onClick={() => handleRejectConfirm(req.id)}>Confirm</button>
+                    )}
+
+                    <td className="center">
+                      <span className={`badge ${req.status}`}>
+                        {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                      </span>
+                    </td>
+                    {isResearcherView && (
+                      <td className="right actions">
+                        <div className="action-menu">
+                          <button
+                            className="menu-button"
+                            onClick={() =>
+                              setOpenMenu(openMenu === req.id ? null : req.id)
+                            }
+                          >
+                            <LuEllipsis size={18} />
+                          </button>
+
+                          {openMenu === req.id && (
+                            <div className="menu-dropdown">
+                              <button
+                                className="menu-item"
+                                onClick={() => {
+                                  const action =
+                                    req.status === "active" ? "deactivate" : "activate";
+
+                                  if (
+                                    !window.confirm(
+                                      `Are you sure you want to ${action} this researcher?`
+                                    )
+                                  )
+                                    return;
+
+                                  toggleResearcherStatus(req.id, req.status);
+                                  setOpenMenu(null);
+                                }}
+                              >
+                                {req.status === "active" ? (
+                                  <PowerOff size={14} />
+                                ) : (
+                                  <Power size={14} />
+                                )}
+                                {req.status === "active"
+                                  ? "Deactivate"
+                                  : "Activate"}
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    )
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
+                      </td>
+                    )}
+                    {!isResearcherView && (
+                      <td className="center actions">
+                        {req.status === "pending" && (
+                          rejectingId !== req.id ? (
+                            <>
+                              <button
+                                className="approve-btn"
+                                onClick={() => approveRequest(req.id)}
+                              >
+                                <CheckCircle size={16} /> Approve
+                              </button>
+
+                              <button
+                                className="reject-btn"
+                                onClick={() => handleRejectStart(req.id)}
+                              >
+                                <XCircle size={16} /> Reject
+                              </button>
+                            </>
+                          ) : (
+                            <div className="reject-box">
+                              <textarea
+                                value={rejectReason}
+                                onChange={e => setRejectReason(e.target.value)}
+                                placeholder="Enter reason..."
+                                rows={3}
+                                autoFocus
+                              />
+                              <div className="reject-actions">
+                                <button
+                                  className="cancel-btn"
+                                  onClick={handleRejectCancel}
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  className="confirm-btn"
+                                  disabled={!rejectReason.trim()}
+                                  onClick={() => handleRejectConfirm(req.id)}
+                                >
+                                  Confirm
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      {req.status === "approved" && (
+                        <button
+                          className="view-btn"
+                          onClick={() => setModalResearcher(req)}
+                          title="View Details"
+                        >
+                          <FiEye size={18} />
+                        </button>
+                      )}
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
+            </tbody>
         </table>
+        {modalResearcher && (
+          <div
+            className="verification-modal-backdrop"
+            onClick={() => setModalResearcher(null)}
+          >
+            <div
+              className="verification-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                className="close-modal"
+                onClick={() => setModalResearcher(null)}
+              >
+                <FiX size={20} />
+              </button>
+
+              <h2>Researcher Request Details</h2>
+
+              <p><strong>Full Name:</strong> {modalResearcher.fullName}</p>
+              <p><strong>Email:</strong> {modalResearcher.email}</p>
+              <p>  <strong>Status:</strong> {modalResearcher.status.charAt(0).toUpperCase() + modalResearcher.status.slice(1)}</p>
+
+              <p><strong>Created At:</strong> {modalResearcher.createdAt}</p>
+
+              {modalResearcher.reviewedAt && (
+                <p><strong>Reviewed At:</strong> {modalResearcher.reviewedAt}</p>
+              )}
+
+              <p><strong>Purpose:</strong></p>
+              <div className="modal-box">
+                {modalResearcher.purpose || "No purpose provided."}
+              </div>
+
+              <p><strong>Organization / School:</strong></p>
+              <div className="modal-box">
+                {modalResearcher.orgSchool || "Not specified."}
+              </div>
+
+              <p><strong>Attachment:</strong></p>
+              <div className="modal-box">
+                {modalResearcher.attachment ? (
+                  <img 
+                    src={signedUrls[modalResearcher.id]} 
+                    alt="Attachment" 
+                    style={{ maxWidth: "100%", maxHeight: "300px", objectFit: "contain", cursor: "pointer" }}
+                    onClick={() => setIsImageModalOpen(true)}
+                  />
+                ) : "No attachment uploaded."}
+              </div>
+              {isImageModalOpen && modalResearcher && (
+                <div
+                  className="image-modal-backdrop"
+                  onClick={() => setIsImageModalOpen(false)}
+                >
+                  <button
+                    className="close-image-btn"
+                    onClick={() => setIsImageModalOpen(false)}
+                  >
+                    <FiX size={20} />
+                  </button>
+
+                  <img
+                    src={signedUrls[modalResearcher.id]}
+                    alt="Enlarged Attachment"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
       {renderPagination()}
     </>

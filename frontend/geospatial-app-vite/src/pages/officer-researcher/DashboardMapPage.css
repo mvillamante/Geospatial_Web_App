@@ -2638,6 +2638,9 @@ body.no-dashboard-body-scroll .main-content {
   line-height: 1.4;
 }
 .import-index-tabs {
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 10px;
   display: flex;
   gap: 4px;
   margin-bottom: 12px;
@@ -2647,18 +2650,20 @@ body.no-dashboard-body-scroll .main-content {
   padding: 8px 10px;
   font-size: 12px;
   font-weight: 600;
-  border: 1px solid #e5e7eb;
+  border: none;
   border-radius: 8px;
-  background: #fff;
+  background: transparent;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  color: #74748b;
+  transition: all 0.2s cubic-bezier(0.4, 0.2, 1);
 }
 .import-index-tabs button:hover:not(:disabled) {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.5);
+  color: #1e293b;
 }
 .import-index-tabs button.active {
   background: #ecfdf5;

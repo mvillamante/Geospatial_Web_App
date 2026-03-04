@@ -658,7 +658,7 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
     <div className="right-panel-content import-section">
       <h4>Import Section</h4>
       <p className="import-subtitle">
-        <strong>collection → processing → analysis → interpretation</strong>
+        <strong>Collection → Processing → Analysis → Interpretation</strong>
       </p>
 
       {/* Index type tabs */}

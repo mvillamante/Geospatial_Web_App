@@ -3,10 +3,12 @@ import { useSearchParams } from "react-router-dom";
 import { X } from "lucide-react";
 import { FiUser, FiCheckCircle, FiSearch } from "react-icons/fi";
 import { HiChevronUpDown, HiChevronDown, HiChevronUp } from "react-icons/hi2";
+import { HiOutlineTable, HiOutlineMap } from "react-icons/hi";
 import { toast } from "sonner";
 import "./ReportsMgmtPage.css";
 
-import { getIncidentCategories } from "../../constants";
+import LeafletMap from "../../components/ui/LeafletMap";
+import { getIncidentCategories, getIncidentLabel, type IncidentCategories } from "../../constants"
 import Pagination from "../../components/ui/Pagination";
 
 type ReportStatus =
@@ -14,7 +16,8 @@ type ReportStatus =
   | "In Progress"
   | "Rejected"
   | "Resolved"
-  | "Archived";
+  | "Archived"
+  | "Critical";
 
 const reportStatuses: ReportStatus[] = [
   "Pending",
@@ -45,22 +48,11 @@ interface Report {
   assigned_officer_id?: number | null;
   department_id?: number | null;
   photo_url?: string | null;
+  
 }
 
+
 const API_URL = import.meta.env.VITE_API_URL;
-
-const reportCategory = (c: string) =>
-  c ? c.charAt(0).toUpperCase() + c.slice(1) : "";
-
-const reportCategoryLabel = (r: Report) => {
-  const raw =
-    r.category === "others" && r.other_category?.trim()
-      ? r.other_category.trim()
-      : r.category;
-
-  return reportCategory(raw);
-};
-
 
 const formatDateTime = (iso: string) => {
   const dt = new Date(iso);
@@ -82,6 +74,8 @@ const badgeClass = (status: ReportStatus) => {
       return "badge archived";
     case "In Progress":
       return "badge in_progress";
+    case "Critical":
+      return "badge critical";
     default:
       return "badge";
   }
@@ -121,6 +115,7 @@ const normalizeStatus = (raw: any): ReportStatus => {
   if (s === "rejected") return "Rejected";
   if (s === "resolved") return "Resolved";
   if (s === "archived") return "Archived";
+  if (s === "critical") return "Critical";
 
   return "Pending";
 };
@@ -149,14 +144,36 @@ const ReportsMgmtPage: React.FC = () => {
   const [loadingOfficers, setLoadingOfficers] = useState(false);
   const [selectedOfficer, setSelectedOfficer] = useState<string>("");
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [openMapMenuId, setOpenMapMenuId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState<string | 'All'>('All');
+  const [selectedReportMap, setSelectedReportMap] = useState<Report | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<IncidentCategories | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<ReportStatus | 'All'>('All');
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
 
+  const [reportTimeFilter, setReportTimeFilter] = useState<"today" | "7days" | "last30days" | "last12months" | "all">("all");
   const categories = useMemo(() => getIncidentCategories(), []);
+
+  const selectedReportForMap = useMemo<ReportMapPreview | null>(() => {
+    if (!selectedReportMap) return null;
+
+    return {
+      ...selectedReportMap,
+      incident_type:
+        selectedReportMap.category === "others" && selectedReportMap.other_category?.trim()
+          ? selectedReportMap.other_category
+          : selectedReportMap.category,
+
+      verified_critical_level:
+        selectedReportMap.verified_critical_level ?? null,
+
+      status: normalizeStatus(selectedReportMap.status),
+
+      assigned_officer_id: selectedReportMap.assigned_officer_id ?? null,
+    };
+  }, [selectedReportMap]);
 
   const [searchParams] = useSearchParams();
 
@@ -232,6 +249,12 @@ const ReportsMgmtPage: React.FC = () => {
 
   useEffect(() => {
     const onDocClick = () => setOpenMenuId(null);
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, []);
+
+  useEffect(() => {
+    const onDocClick = () => setOpenMapMenuId(null);
     document.addEventListener("click", onDocClick);
     return () => document.removeEventListener("click", onDocClick);
   }, []);
@@ -323,13 +346,35 @@ const ReportsMgmtPage: React.FC = () => {
     });
   };
 
+  const now = new Date();
+  const matchesTimeFilter = (dateString: string) => {
+    if (reportTimeFilter === "all") return true;
+
+    const reportDate = new Date(dateString);
+    const diffMs = now.getTime() - reportDate.getTime();
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+    switch (reportTimeFilter) {
+      case "today":
+        return reportDate.toDateString() === now.toDateString();
+      case "7days":
+        return diffDays <= 7;
+      case "last30days":
+        return diffDays <= 30;
+      case "last12months":
+        return diffDays <= 365;
+      default:
+        return true;
+    }
+  };
+
   const filteredReports = reports
     .filter((r) => {
       const isArchived = normalizeStatus(r.status) === "Archived";
       return viewArchived ? isArchived : !isArchived;
     })
     .filter((r) =>
-      categoryFilter === "All"
+      categoryFilter === "all"
         ? true
         : r.category.toLowerCase() === categoryFilter.toLowerCase() ||
         r.other_category?.toLowerCase() === categoryFilter.toLowerCase()
@@ -337,6 +382,7 @@ const ReportsMgmtPage: React.FC = () => {
     .filter((r) =>
       statusFilter === "All" ? true : normalizeStatus(r.status) === statusFilter
     )
+    .filter((r) => matchesTimeFilter(r.created_at))
     .filter((r) => {
       const q = searchQuery.trim().toLowerCase();
       if (!q) return true;
@@ -344,7 +390,7 @@ const ReportsMgmtPage: React.FC = () => {
       return (
         includes(r.id, q) ||
         includes(r.user_label, q) ||
-        includes(reportCategoryLabel(r), q) ||
+        includes(r.category, q) ||
         includes(r.location_display, q) ||
         includes(r.description, q) ||
         includes(r.assigned_officer_label, q)
@@ -395,49 +441,74 @@ const ReportsMgmtPage: React.FC = () => {
   /* Loading */
   const [loadingReports, setLoadingReports] = useState(true);
 
+  const [viewMode, setViewMode] = useState("table");
 
   return (
     <div className="reportsmgmt-page">
       <div className="page-head">
 
-        <div className="page-actions">
-          <div
-            className="tab-indicator"
-            ref={indicatorRef}
-            style={{
-              width: indicatorWidth,
-              transform: `translateX(${indicatorOffset}px)`
+        <div className="view-toggle">
+          <button
+            className={`icon-toggle ${viewMode === "table" ? "active" : ""}`}
+            onClick={() => setViewMode("table")}
+          >
+            <HiOutlineTable />
+            <span className="view-toggle-text">Table View</span>
+          </button>
+
+          <button
+            className={`icon-toggle ${viewMode === "map" ? "active" : ""}`}
+            onClick={() => {
+              setViewMode("map");
+              setViewArchived(false);
             }}
-          />
-          <button
-            type="button"
-            className={`tab-btn ${!viewArchived ? "active" : ""}`}
-            onClick={() => setViewArchived(false)}
-            ref={activeTabRef(false)}
           >
-            Active
+            <HiOutlineMap />
+            <span className="view-toggle-text">Map View</span>
           </button>
-          <button
-            type="button"
-            className={`tab-btn ${viewArchived ? "active" : ""}`}
-            onClick={() => setViewArchived(true)}
-            ref={activeTabRef(true)}
-          >
-            Archived
-          </button>
+
         </div>
       </div>
 
       {/* Filters + Search + Create User */}
       <div className="filters">
         <div className="filters-left">
+          {viewMode === "table" && (
+            <div className="page-actions">
+              <div
+                className="tab-indicator"
+                ref={indicatorRef}
+                style={{
+                  width: indicatorWidth,
+                  transform: `translateX(${indicatorOffset}px)`
+                }}
+              />
+              <button
+                type="button"
+                className={`tab-btn ${!viewArchived ? "active" : ""}`}
+                onClick={() => setViewArchived(false)}
+                ref={activeTabRef(false)}
+              >
+                Active
+              </button>
+              <button
+                type="button"
+                className={`tab-btn ${viewArchived ? "active" : ""}`}
+                onClick={() => setViewArchived(true)}
+                ref={activeTabRef(true)}
+              >
+                Archived
+              </button>
+            </div>
+          )}
+
           <div className="select-wrapper">
             <FiUser className="select-icon" />
-            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="role-select">
-              <option value="All">All Categories</option>
+            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as IncidentCategories | "all")} className="role-select">
+              <option value="all">All Categories</option>
               {categories.map((c) => (
-                <option key={c} value={c}>
-                  {c}
+                <option key={c.value} value={c.value}>
+                  {c.label}
                 </option>
               ))}
             </select>
@@ -453,6 +524,45 @@ const ReportsMgmtPage: React.FC = () => {
               ))}
             </select>
           </div>
+
+          {viewMode === "map" && (
+            <div className="select-wrapper">
+              <FiCheckCircle className="select-icon" />
+              <select value={reportTimeFilter} onChange={(e) =>
+                    setReportTimeFilter(
+                      e.target.value as
+                        | "today"
+                        | "7days"
+                        | "last30days"
+                        | "last12months"
+                        | "all"
+                    )
+                  } 
+                className="status-select">
+
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="7days">Last 7 Days</option>
+                <option value="last30days">Last 30 Days</option>
+                <option value="last12months">Last 12 Months</option>
+              </select>
+            </div>
+          )}
+
+          {( searchQuery || categoryFilter !== "all" || statusFilter !== "All" || reportTimeFilter !== "all" ||sortOrder !== null) && (
+            <button
+              className="clear-filter-btn"
+              onClick={() => {
+                setSearchQuery("");
+                setCategoryFilter("all");
+                setStatusFilter("All");
+                setReportTimeFilter("all");
+                setSortOrder(null);
+              }}
+            >
+              Clear Filters
+            </button>
+          )}
         </div>
 
         <div className="filters-right">
@@ -476,133 +586,286 @@ const ReportsMgmtPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="reports-table-wrapper">
-        <table className="reports-table">
-          <thead>
-            <tr>
-              <th className="center">Report ID</th>
-              <th className="center">Reporter</th>
-              <th className="center">Category</th>
-              <th className="center">Location</th>
-              <th onClick={toggleSort} className="sort-header center">
-                Submitted{" "}
-                {sortOrder === "asc" ? (
-                  <HiChevronUp />
-                ) : sortOrder === "desc" ? (
-                  <HiChevronDown />
-                ) : (
-                  <HiChevronUpDown />
-                )}
-              </th>
-              <th className="center">Status</th>
-              <th className="center">Assigned Officer</th>
-              <th className="th-actions center">Actions</th>
-            </tr>
-          </thead>
+      {viewMode === "map" && (
+        <div className="map-view-wrapper">
 
-          <tbody>
-            {loadingReports ? (
-              <tr>
-                <td colSpan={9} className="empty">
-                  Loading Reports...
-                </td>
-              </tr>
-            ) : filteredReports.length === 0 ? (
-              <tr>
-                <td colSpan={9} className="empty">
-                  No Reports Found.
-                </td>
-              </tr>
-            ) : (
-              paginatedReports.map((report) => {
-                const status = normalizeStatus(report.status);
-                const isArchived = normalizeStatus(report.status) === "Archived";
-                const { date, time } = formatDateTime(report.created_at);
+          <div className="map-container">
+            <LeafletMap
+              selectedReport={selectedReportForMap}
+              categoryFilter={categoryFilter}
+              reportTimeFilter={reportTimeFilter}
+              activeLayers={["Verified Reports"]}
+            />
+          </div>
 
-                return (
-                  <tr key={report.id}>
-                    <td className="table-id center">#R-0{report.id}</td>
-                    <td className="center">{report.user_label}</td>
-                    <td className="table-category center muted">{reportCategoryLabel(report)}</td>
-                    <td className="location-cell center" title={report.location_display}>
-                      {report.location_display || "-"}
-                    </td>
-                    <td>
-                      <div className="dt center">
-                        <div className="dt-date">{date}</div>
-                        <div className="dt-time muted">{time}</div>
-                      </div>
-                    </td>
-                    <td className="center">
-                      <span className={badgeClass(status)}>{status}</span>
-                    </td>
-                    <td className="assigned center">
-                      {report.assigned_officer_label ? (
-                        <span className="assigned-chip">{report.assigned_officer_label}</span>
-                      ) : (
-                        <span className="muted">Unassigned</span>
-                      )}
-                    </td>
+          <div className="mini-table-wrapper">
+            <table className="mini-table">
+              <thead>
+                <tr>
+                  <th>Report ID</th>
+                  <th>Reporter</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
 
-                    <td className="center">
-                      <div className="row-menu" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          type="button"
-                          className="kebab-btn"
-                          aria-label="Actions"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setOpenMenuId((prev) => (prev === report.id ? null : report.id));
-                          }}
-                        >...</button>
+              <tbody>
+                {filteredReports.map((report) => {
+                  const status = normalizeStatus(report.status);
+                  const isArchived = normalizeStatus(report.status) === "Archived";
 
-                        {openMenuId === report.id && (
-                          <div className="kebab-dropdown">
-                            <button
-                              type="button"
-                              className="kebab-item"
-                              onClick={() => {
-                                setOpenMenuId(null)
-                                const latest = reports.find(r => r.id === report.id) ?? report;
-                                setSelectedReport(latest);
-                                setSelectedOfficer(latest.assigned_officer_id ? String(latest.assigned_officer_id) : "");
+                  return (
+                    <tr key={report.id} onClick={() => setSelectedReportMap(report)} title="Click to navigate to pin">
+                      <td className="center">#R-0{report.id}</td>
+                      <td className="center">{report.user_label}</td>
+                      <td className="muted">{getIncidentLabel(report.category as IncidentCategories)}</td>
+
+                      <td className="center">
+                        <span className={badgeClass(status)}>{status}</span>
+                      </td>
+
+                      <td className="center">
+                        <div className="row-menu" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            className="kebab-btn"
+                            aria-label="Actions"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMapMenuId((prev) => (prev === report.id ? null : report.id));
+                            }}
+                          >...</button>
+
+                          {openMapMenuId === report.id && (
+                            <div className="kebab-dropdown">
+                              <button
+                                type="button"
+                                className="kebab-item"
+                                onClick={() => {
+                                  setOpenMapMenuId(null)
+                                  const latest = reports.find(r => r.id === report.id) ?? report;
+                                  setSelectedReport(latest);
+                                  setSelectedOfficer(latest.assigned_officer_id ? String(latest.assigned_officer_id) : "");
 
 
-                              }}
-                            >View Full Details
-                            </button>
+                                }}
+                              >View Full Details
+                              </button>
+
+                              {/*<button
+                                type="button"
+                                className="kebab-item danger"
+                                onClick={async () => {
+                                  setOpenMapMenuId(null);
+
+                                  try {
+                                    const updated = await patchReport(report.id, {
+                                      status: "critical"
+                                    });
+
+                                    setReports(prev =>
+                                      prev.map(r =>
+                                        r.id === report.id ? { ...r, ...updated } : r
+                                      )
+                                    );
+
+                                    toast.success("Report escalated to Critical status");
+
+                                  } catch (err: any) {
+                                    console.error(err);
+                                    toast.error(err?.message || "Failed to escalate report");
+                                  }
+                                }}
+                              >
+                                Escalate
+                              </button>
+
+                              <button
+                                type="button"
+                                className="kebab-item danger"
+                                onClick={() => {
+                                  setOpenMapMenuId(null);
+                                  setConfirmArchiveId(report.id);
+                                }}
+                                disabled={isArchived}
+                              >
+                                Archive
+                              </button>*/}
 
 
-                            <button
-                              type="button"
-                              className="kebab-item danger"
-                              onClick={() => {
-                                setOpenMenuId(null);
-                                setConfirmArchiveId(report.id);
-                              }}
-                              disabled={isArchived}
-                            >
-                              Archive
-                            </button>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
 
+        </div>
+      )}
 
-                          </div>
-                        )}
-                      </div>
+      {viewMode === "table" && (
+        <>
+          <div className="reports-table-wrapper">
+            <table className="reports-table">
+              <thead>
+                <tr>
+                  <th className="center">Report ID</th>
+                  <th className="center">Reporter</th>
+                  <th className="center">Category</th>
+                  <th className="center">Location</th>
+                  <th onClick={toggleSort} className="sort-header center">
+                    Submitted{" "}
+                    {sortOrder === "asc" ? (
+                      <HiChevronUp />
+                    ) : sortOrder === "desc" ? (
+                      <HiChevronDown />
+                    ) : (
+                      <HiChevronUpDown />
+                    )}
+                  </th>
+                  <th className="center">Status</th>
+                  <th className="center">Assigned Officer</th>
+                  <th className="th-actions center">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {loadingReports ? (
+                  <tr>
+                    <td colSpan={9} className="empty">
+                      Loading Reports...
                     </td>
                   </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+                ) : filteredReports.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="empty">
+                      No Reports Found.
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedReports.map((report) => {
+                    const status = normalizeStatus(report.status);
+                    const isArchived = normalizeStatus(report.status) === "Archived";
+                    const { date, time } = formatDateTime(report.created_at);
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+                    return (
+                      <tr key={report.id}>
+                        <td className="table-id center">#R-0{report.id}</td>
+                        <td className="center">{report.user_label}</td>
+                        <td className="table-category center muted">{getIncidentLabel(report.category as IncidentCategories)}</td>
+                        <td className="location-cell center" title={report.location_display}>
+                          {report.location_display || "-"}
+                        </td>
+                        <td>
+                          <div className="dt center">
+                            <div className="dt-date">{date}</div>
+                            <div className="dt-time muted">{time}</div>
+                          </div>
+                        </td>
+                        <td className="center">
+                          <span className={badgeClass(status)}>{status}</span>
+                        </td>
+                        <td className="assigned center">
+                          {report.assigned_officer_label ? (
+                            <span className="assigned-chip">{report.assigned_officer_label}</span>
+                          ) : (
+                            <span className="muted">Unassigned</span>
+                          )}
+                        </td>
+
+                        <td className="center">
+                          <div className="row-menu" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              className="kebab-btn"
+                              aria-label="Actions"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenMenuId((prev) => (prev === report.id ? null : report.id));
+                              }}
+                            >...</button>
+
+                            {openMenuId === report.id && (
+                              <div className="kebab-dropdown">
+                                <button
+                                  type="button"
+                                  className="kebab-item"
+                                  onClick={() => {
+                                    setOpenMenuId(null)
+                                    const latest = reports.find(r => r.id === report.id) ?? report;
+                                    setSelectedReport(latest);
+                                    setSelectedOfficer(latest.assigned_officer_id ? String(latest.assigned_officer_id) : "");
+
+
+                                  }}
+                                >View Full Details
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="kebab-item danger"
+                                  onClick={async () => {
+                                    setOpenMenuId(null);
+
+                                    try {
+                                      const updated = await patchReport(report.id, {
+                                        status: "critical"
+                                      });
+
+                                      setReports(prev =>
+                                        prev.map(r =>
+                                          r.id === report.id ? { ...r, ...updated } : r
+                                        )
+                                      );
+
+                                      toast.success("Report escalated to Critical status");
+
+                                    } catch (err: any) {
+                                      console.error(err);
+                                      toast.error(err?.message || "Failed to escalate report");
+                                    }
+                                  }}
+                                >
+                                  Escalate
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="kebab-item danger"
+                                  onClick={() => {
+                                    setOpenMenuId(null);
+                                    setConfirmArchiveId(report.id);
+                                  }}
+                                  disabled={isArchived}
+                                >
+                                  Archive
+                                </button>
+
+
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </>
+      )}
 
       {confirmArchiveId !== null && (
         <div className="modal-overlay" onClick={() => setConfirmArchiveId(null)}>
@@ -648,7 +911,7 @@ const ReportsMgmtPage: React.FC = () => {
             <div className="modal-head">
               <div>
                 <div className="modal-title">
-                  Report #{selectedReport.id} • {reportCategoryLabel(selectedReport)}
+                  Report #{selectedReport.id} • {getIncidentLabel(selectedReport.category as IncidentCategories)}
                 </div>
                 <div className="modal-sub">
                   {selectedReport.user_label} •{" "}

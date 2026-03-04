@@ -62,9 +62,10 @@ export async function createEvacuationCentersLayer(
     showOnMap?: boolean;
     showPopupOnMap?: boolean;
     onSelectCenter?: (center: EvacuationCenterData) => void;
+    barangayFilter?: string | null;
   }
 ): Promise<L.LayerGroup | null> {
-  const { showOnMap = true, showPopupOnMap = true, onSelectCenter } = options || {};
+  const { showOnMap = true, showPopupOnMap = true, onSelectCenter, barangayFilter } = options || {};
 
   const oldLayer = (map as any)._evacuationLayer as L.LayerGroup | undefined;
   if (oldLayer) {
@@ -87,7 +88,20 @@ export async function createEvacuationCentersLayer(
   }
 
   if (showOnMap && evacuationCentersGroup) {
-    centers.forEach(center => {
+    const normalizeBarangay = (text: string) =>
+      text
+        .toLowerCase()
+        .replace(/barangay/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    const filteredCenters = barangayFilter
+      ? centers.filter(center =>
+          normalizeBarangay(center.barangay) === normalizeBarangay(barangayFilter)
+        )
+      : centers;
+
+    filteredCenters.forEach(center => {
       const config = evacuationTypeConfig[center.type];
 
       const markerIcon = L.divIcon({

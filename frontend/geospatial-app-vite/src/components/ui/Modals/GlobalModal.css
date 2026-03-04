@@ -1,227 +1,231 @@
 /* ======================== GlobalModal.css =====================*/
 
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(8px);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
 }
 
 .modal.active {
-    display: flex;
+  display: flex;
 }
 
 .modal-content {
-    background: var(--white-bg);
-    border-radius: 20px;
-    padding: 3rem;
-    max-width: 500px;
-    min-height: 300px;
-    width: 100%;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-    position: relative;
-    animation: modalSlideIn 0.3s ease-out;
+  background: var(--white-bg);
+  border-radius: 20px;
+  padding: 3rem;
+  max-width: 500px;
+  min-height: 300px;
+  max-height: 90vh;
+  overflow-y: auto;
+  width: 100%;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  position: relative;
+  animation: modalSlideIn 0.3s ease-out;
 }
 
 .modal-content.modal-signup {
-    max-width: 520px; 
-    padding: 2rem 3rem;
+  max-width: 520px;
+  padding: 2rem 3rem;
 }
 
 @keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-50px);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .modal-form .form-row {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .modal-form .form-row .form-group {
-    flex: 1;
-    margin-bottom: 0;
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.modal-form .password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.modal-form .password-wrapper input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.modal-form .eye-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.modal-form .eye-icon:hover {
+  color: #000;
+}
+
+.modal-form .btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .modal-close {
-    position: absolute;
-    top: 1.25rem;
-    right: 1.25rem;
-    background: transparent;
-    border: none;
-    font-size: 1.5rem;
-    color: #94a3b8;
-    cursor: pointer;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    transition: all 0.3s;
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #94a3b8;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.3s;
 }
 
 .modal-close:hover {
-    background: #f1f5f9;
-    color: #0f172a;
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 .modal-header {
-    text-align: center;
-    margin-bottom: 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
 .modal-header h2 {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 0.5rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
 }
 
 .modal-header p {
-    color: #64748b;
-    font-size: 0.95rem;
+  color: #64748b;
+  font-size: 0.95rem;
 }
 
 .modal-form .form-row {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .modal-form .form-group {
-    margin-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .modal-form label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #0f172a;
-    font-size: 0.9rem;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 0.9rem;
 }
 
 .modal-form input,
 .modal-form select {
-    width: 100%;
-    padding: 0.875rem 1rem;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    background: #f8fafc;
-    transition: all 0.3s;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: #f8fafc;
+  transition: all 0.3s;
 }
 
 .modal-form input:focus {
-    outline: none;
-    border-color: #3b82f6;
-    background: var(--white-bg);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+  border-color: #3b82f6;
+  background: var(--white-bg);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .modal-form .btn-submit {
-    width: 100%;
-    padding: 1rem;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: var(--text-white);
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    margin-top: 0.5rem;
-    transition: all 0.3s;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: var(--text-white);
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
 .modal-form .btn-submit.review-btn {
-    background: linear-gradient(135deg, #7fabf1, #587ecf);
+  background: #3b82f6;
 }
 
 .modal-form .btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
 .modal-footer {
-    text-align: center;
-    margin-top: 1.5rem;
-    color: #64748b;
-    font-size: 0.9rem;
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #64748b;
+  font-size: 0.9rem;
 }
 
 .modal-footer span {
-    color: #2563eb;
-    font-weight: 600;
-    cursor: pointer;
+  color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .modal-footer span:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 
 
 @keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-50px);
-    } to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-@media (max-width: 480px) {
-    .modal-content {
-        padding: 1.75rem;
-        border-radius: 15px;
-    }
-
-    .modal-content.modal-signup {
-        padding: 1.75rem;
-    }
-    .modal-header h2 {
-        font-size: 1.5rem;
-    }
-    .modal-form .form-row {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .modal-content {
-        max-width: 90%;
-        padding: 2rem;
-    }
-
-    .modal-content.modal-signup {
-        padding: 2rem;
-    }
-}
-
-@media (max-width: 600px) {
-    .modal-content {
-        padding: 2rem 1.5rem;
-    }
-}
 /* ======================== AuthModal =====================*/
 
 /* ======================== CreateUserModal =====================*/
@@ -270,7 +274,7 @@
   max-height: 150px;
   overflow-y: auto;
   z-index: 100;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .create-user-modal .dropdown-options li {
@@ -284,29 +288,23 @@
   color: #0369a1;
 }
 
-@media (max-width: 600px) {
-  .create-user-modal .dropdown-options {
-    left: 0;
-    right: 0;
-    min-width: auto;
-  }
-}
 
 .input-error {
-    color: #dc2626;
-    font-size: 0.85rem;
-    margin-top: 0.25rem;
-    display: block;
-    font-weight: 500;
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  display: block;
+  font-weight: 500;
 }
 
 
 .create-user-modal.confirm-step {
   padding: 1rem 1.5rem;
+  width: 100%;
   max-width: 520px;
   border-radius: 20px;
   background: var(--white-bg);
-  box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
   display: block;
   flex-direction: column;
   gap: 0;
@@ -387,16 +385,10 @@
   background: #cbd5e1;
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .create-user-modal.confirm-step {
-    padding: 1.5rem;
-  }
-}
 
 /* Forgot Password */
 .forgot-password {
-  margin-top: 15px;
+  margin-top: 20px;
   font-size: 0.9rem;
   color: #64748b;
   text-align: right;
@@ -405,7 +397,7 @@
 }
 
 .forgot-password:hover {
-  color: #2563eb; 
+  color: #2563eb;
   text-decoration: underline;
 }
 
@@ -481,20 +473,116 @@
 
 
 .manage-dept-modal .save-btn {
-    padding: 6px 12px;
-    border-radius: 4px;
-    border: none;
-    background-color: #007bff;
-    color: var(--text-white);
-    cursor: pointer;
-    font-size: 0.875rem;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  background-color: #007bff;
+  color: var(--text-white);
+  cursor: pointer;
+  font-size: 0.875rem;
 }
 
 .manage-dept-modal .save-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .manage-dept-modal .save-btn:hover:not(:disabled) {
-    background-color: #0056b3;
+  background-color: #0056b3;
+}
+
+.otp-container {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.otp-input {
+  width: 50px;
+  height: 55px;
+  text-align: center;
+  font-size: 20px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.timer-text {
+  color: gray;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  modal-content {
+    max-width: 92%;
+    padding: 2rem;
+  }
+  .modal-content.modal-signup {
+    padding: 2rem;
+  }
+  .modal-header h2 {
+    font-size: 1.6rem;
+  }
+  .modal-form .form-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .create-user-modal.confirm-step {
+    padding: 1.75rem;
+  }
+  .create-user-modal.confirm-step .confirm-buttons {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 0.75rem;
+  }
+  .modal-content {
+    padding: 1.5rem;
+    border-radius: 16px;
+    max-height: 92vh;
+    -webkit-overflow-scrolling: touch;
+  }
+  .modal-header h2 {
+    font-size: 1.4rem;
+  }
+  .modal-header p {
+    font-size: 0.85rem;
+  }
+  .modal-close {
+    top: 1rem;
+    right: 1rem;
+  }
+  .modal-form input,
+  .modal-form select {
+    padding: 0.75rem 0.9rem;
+    font-size: 0.9rem;
+  }
+  .modal-form .btn-submit {
+    padding: 0.9rem;
+  }
+  .otp-container {
+    gap: 6px;
+  }
+  .otp-input {
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 360px) {
+  .modal-content {
+    padding: 1.25rem;
+  }
+  .modal-header h2 {
+    font-size: 1.25rem;
+  }
+  .otp-input {
+    width: 38px;
+    height: 44px;
+    font-size: 16px;
+  }
 }

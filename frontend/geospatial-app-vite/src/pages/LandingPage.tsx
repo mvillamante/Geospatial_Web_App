@@ -25,6 +25,7 @@ const LandingPage: React.FC = () => {
   const location = useLocation();
   const { refreshUser } = useAuth(); // Get current user from context
 
+  const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [activeSection, setActiveSection] = useState("home");
@@ -35,9 +36,19 @@ const LandingPage: React.FC = () => {
   const [stats, setStats] = useState<LandingStats | null>(null);
 
 
-  // Fetch user info on mount
   useEffect(() => {
-    refreshUser().finally(() => setLoading(false));
+    const start = Date.now();
+
+    refreshUser().finally(() => {
+      const elapsed = Date.now() - start;
+      const remainingTime = 1500 - elapsed;
+
+      if (remainingTime > 0) {
+        setTimeout(() => setLoading(false), remainingTime);
+      } else {
+        setLoading(false);
+      }
+    });
   }, [refreshUser]);
 
   useEffect(() => {
@@ -129,31 +140,17 @@ const LandingPage: React.FC = () => {
       {/* Navigation */}
       <div className="content">
         <nav className="nav">
+
           <div className="logo">
             <div className="logo-icon">
               <img src="./hazspot-logo(2).png" alt="HazSpot logo" className="landing-logo-img" />
             </div>
             {/* <span>HazSpot</span> */}
           </div>
-          <div className="nav-links">
-            <a
-              href="#home"
-              className={activeSection === "home" ? "active" : ""}
-            >
-              Home
-            </a>
-            <a
-              href="#about"
-              className={activeSection === "about" ? "active" : ""}
-            >
-              About
-            </a>
-            <a
-              href="#howitworks"
-              className={activeSection === "howitworks" ? "active" : ""}
-            >
-              How It Works
-            </a>
+          <div className={`nav-links ${isOpen ? "active" : ""}`}>
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#howitworks">How It Works</a>
           </div>
           <div className="nav-buttons">
             <button className="btn btn-outline blue" onClick={() => setModalType("login")}>Login</button>
@@ -169,7 +166,7 @@ const LandingPage: React.FC = () => {
           </p>
           <div className="cta-group">
             <button className="btn btn-primary" onClick={() => setModalType("signup")}>Get Started</button>
-            <button className="btn btn-secondary" onClick={() => navigate("/main/guest/community-feed", { replace: true })}>Explore the Map</button>
+            <button className="btn btn-secondary" onClick={() => navigate("/main/guest/community-feed", { replace: true })}>View Community Feed</button>
           </div>
 
           <div className="dashboard-preview">
@@ -178,7 +175,7 @@ const LandingPage: React.FC = () => {
             </div>
 
             <div className="dashboard-map-container">
-              <LeafletMap />
+              <LeafletMap  activeLayers={["Verified Reports"]}/>
             </div>
 
             {/* Stats Section */}

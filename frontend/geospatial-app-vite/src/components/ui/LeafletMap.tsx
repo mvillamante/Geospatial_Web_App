@@ -135,6 +135,7 @@ interface LeafletMapProps {
   selectedReport?: Report | null;
   reportClickTimestamp?: number | null;
 
+  locationFilter?: string;
   reportTimeFilter?: string;
   categoryFilter?: string;
 
@@ -171,6 +172,7 @@ export default function LeafletMap(props: LeafletMapProps) {
     searchedSeverity = null,
     selectedReport = null,
     reportClickTimestamp: _reportClickTimestamp = null, // kept for API compatibility
+    locationFilter = "all",
     reportTimeFilter = "",
     categoryFilter = "",
     activeLayers = [],
@@ -1297,6 +1299,7 @@ export default function LeafletMap(props: LeafletMapProps) {
 
     const showEvacuationCenters = activeLayers.includes("Evacuation Centers");
 
+    // Remove layer if toggle OFF
     if (!showEvacuationCenters) {
       if (evacuationCentersLayerRef.current) {
         evacuationCentersLayerRef.current.remove();
@@ -1305,22 +1308,39 @@ export default function LeafletMap(props: LeafletMapProps) {
       return;
     }
 
-    if (evacuationCentersLayerRef.current) return;
+    const normalizeBarangay = (text: string) =>
+      text
+        .toLowerCase()
+        .replace(/barangay/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
 
     const loadLayer = async () => {
-      evacuationCentersLayerRef.current =
-        await createEvacuationCentersLayer(map, {
-          showOnMap: true,
-          showPopupOnMap,
-          onSelectCenter: onSelectEvacuationCenter,
-        });
+      if (evacuationCentersLayerRef.current) {
+        evacuationCentersLayerRef.current.remove();
+        evacuationCentersLayerRef.current = null;
+      }
+
+      const layer = await createEvacuationCentersLayer(map, {
+        showOnMap: true,
+        showPopupOnMap,
+        onSelectCenter: onSelectEvacuationCenter,
+        barangayFilter:
+          locationFilter === "near_me"
+            ? normalizeBarangay(localStorage.getItem("user_barangay") || "")
+            : null,
+      });
+      evacuationCentersLayerRef.current = layer;
     };
 
     loadLayer();
 
-  }, [activeLayers, showPopupOnMap, onSelectEvacuationCenter]);
-
-
+  }, [
+    activeLayers,
+    showPopupOnMap,
+    onSelectEvacuationCenter,
+    locationFilter
+  ]);
 
   // Handle Roads layer toggle
   useEffect(() => {
@@ -1397,7 +1417,6 @@ export default function LeafletMap(props: LeafletMapProps) {
       return;
     }
 
-    const token = localStorage.getItem("access_token");
 
     if (!verifiedReportsLayerRef.current) {
       verifiedReportsLayerRef.current = L.layerGroup().addTo(map);
@@ -1413,7 +1432,6 @@ export default function LeafletMap(props: LeafletMapProps) {
     fetch(url, {
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
         },
     })
       .then(res => res.json())
@@ -1493,7 +1511,7 @@ export default function LeafletMap(props: LeafletMapProps) {
 
 
 
-  return (
+  return (  
     <div
       className="leaflet-map-wrapper"
       style={{ height, width }}

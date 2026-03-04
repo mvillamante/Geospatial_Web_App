@@ -32,9 +32,14 @@ const NavigationMenu: React.FC = () => {
 
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
 
-  const { userRole, userRole2, displayName, profilePath } = getUserRoleAndDisplayName();
+  const { userRole, userRole2, displayName, profilePath, settingsPath } = getUserRoleAndDisplayName();
+
+  const effectiveRole = (userRole2.includes("Researcher") ? "Researcher" : "") || userRole;
+
 
   useEffect(() => {
+    if (effectiveRole !== "Citizen") return;
+
     const fetchUnreadCount = async () => {
       try {
         const res = await fetch(`${API_URL}/api/notifications/unread-count/`, {
@@ -72,12 +77,19 @@ const NavigationMenu: React.FC = () => {
   const isGuestRoute = location.pathname.startsWith("/main/guest");
   if (!userRole && !isGuestRoute) return null;
 
-  const isCitizenRoute = location.pathname.startsWith("/main/citizen");
-  if (userRole === "Citizen" && isMobile && isCitizenRoute) {
+  const isPublicRoute =
+    location.pathname.startsWith("/main/citizen") ||
+    location.pathname.startsWith("/main/guest");
+
+  const isPublicUser = ["Citizen", "Guest"].includes(effectiveRole);
+
+  const basePath = effectiveRole === "Guest" ? "guest" : "citizen";
+
+  if (isPublicUser && isMobile && isPublicRoute) {
     return (
       <div className="pwa-bottom-nav">
         <NavLink
-          to="/main/citizen/community-feed"
+          to={`/main/${basePath}/community-feed`}
           className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
         >
           <FaBullhorn size={22} />
@@ -85,42 +97,47 @@ const NavigationMenu: React.FC = () => {
         </NavLink>
 
         <NavLink
-          to="/main/citizen/alerts-map"
+          to={`/main/${basePath}/alerts-map`}
           className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
         >
           <FaMapMarkedAlt size={22} />
           <span>Map</span>
         </NavLink>
 
-        <NavLink
-          to="/main/citizen/notifications"
-          className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
-        >
-          <span className="pwa-icon-wrap">
-            <FaBell size={22} />
-            {notificationCount > 0 && (
-              <span className="pwa-badge">{notificationCount > 99 ? "99+" : notificationCount}</span>
-            )}
-          </span>
-          <span>Alerts</span>
-        </NavLink>
+        {effectiveRole === "Citizen" && (
+          <NavLink
+            to={`/main/${basePath}/notifications`}
+            className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
+          >
+            <span className="pwa-icon-wrap">
+              <FaBell size={22} />
+              {notificationCount > 0 && (
+                <span className="pwa-badge">
+                  {notificationCount > 99 ? "99+" : notificationCount}
+                </span>
+              )}
+            </span>
+            <span>Alerts</span>
+          </NavLink>
+        )}
 
-
         <NavLink
-          to="/main/citizen/evac-center"
+          to={`/main/${basePath}/evac-center`}
           className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
         >
           <MdPlace size={22} />
           <span>Centers</span>
         </NavLink>
 
-        <NavLink
-          to={profilePath}
-          className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
-        >
-          <FaUser size={22} />
-          <span>Profile</span>
-        </NavLink>
+        {effectiveRole === "Citizen" && (
+          <NavLink
+            to={profilePath}
+            className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
+          >
+            <FaUser size={22} />
+            <span>Profile</span>
+          </NavLink>
+        )}
       </div>
     );
   }
@@ -154,9 +171,6 @@ const NavigationMenu: React.FC = () => {
       { label: "Evacuation Center", path: "guest/evac-center", icon: MdPlace },
     ],
   };
-
-  const effectiveRole = (userRole2.includes("Researcher") ? "Researcher" : "") || userRole;
-
 
   const isGuest = effectiveRole === "Guest";
 
@@ -248,7 +262,7 @@ const NavigationMenu: React.FC = () => {
               <button
                 className="dropdown-menu-btn"
                 onClick={() => {
-                  navigate("");
+                  navigate((settingsPath));
                   setIsDropdownOpen(false);
                 }}
               >

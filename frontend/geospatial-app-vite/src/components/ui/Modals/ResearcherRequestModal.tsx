@@ -46,7 +46,8 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
         alert("Researcher request submitted successfully.");
         onClose();
       } else {
-        alert("Error submitting request: " + JSON.stringify(data));
+        console.log("Backend error:", data);
+        alert("Error submitting request. Check console.");
       }
     } catch (err) {
       console.error(err);
@@ -126,7 +127,7 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
                 accept="image/*,.pdf"
                 onChange={(e) => setProofFile(e.target.files ? e.target.files[0] : null)}
               />
-              <small>Upload school/company ID or endorsement letter (optional).</small>
+              <small>Upload school/company ID (optional).</small>
             </div>
 
             <div className="modal-actions">

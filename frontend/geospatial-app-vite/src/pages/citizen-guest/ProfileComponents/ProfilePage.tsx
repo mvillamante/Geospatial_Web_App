@@ -4,6 +4,10 @@ import ReportCard from './ReportCard';
 import "./ProfilePage.css";
 import { getUserRoleAndDisplayName } from "../../../libr/auth";
 import type { Report, ReportStatus } from "../../../types/report";
+import { FaCog } from "react-icons/fa";
+import { toast } from "sonner";
+
+import { getCabuyaoBarangays, getIncidentCategories } from "../../../constants"
 
 // export type ReportCardModel = {
 //   id: number;
@@ -72,6 +76,13 @@ function toProgressStatus(raw: string | undefined | null): ProgressStatus {
 }
 const ProfilePage: React.FC = () => {
   const location = useLocation();
+  useEffect(() => {
+    if (location.state?.openVerifyModal) {
+      setShowVerifyModal(true);
+
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
   const [autoOpenReportId, setAutoOpenReportId] = useState<number | null>(null);
 
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>("unverified");
@@ -90,26 +101,6 @@ const ProfilePage: React.FC = () => {
   const [barangayIdFile, setBarangayIdFile] = useState<File | null>(null);
 
   const [verifyLoading, setVerifyLoading] = useState(false);
-
-  const CABUYAO_BARANGAYS = [
-    "Banaybanay",
-    "Bigaa",
-    "Butong",
-    "Casile",
-    "Diezmo",
-    "Gulod",
-    "Mamatid",
-    "Marinig",
-    "Niugan",
-    "Pittland",
-    "Pulo",
-    "Sala",
-    "San Isidro",
-    "Baclaran",
-    "Barangay Dos",
-    "Barangay Tres",
-    "Barangay Uno"
-  ]
 
   const navigate = useNavigate();
   const { displayName, userRole, userRole2 } = getUserRoleAndDisplayName();
@@ -161,18 +152,9 @@ const ProfilePage: React.FC = () => {
     navigate("/");
   }
 
-  const categoryTitleMap: Record<string, string> = {
-    fire: "Fire Incident",
-    flood: "Flood Incident",
-    landslide: "Landslide Alert",
-    typhoon: "Severe Weather Alert",
-    earthquake: "Earthquake Alert",
-    vehicular_accident: "Vehicular Accident",
-    chemical_gas_leak: "Chemical / Gas Leak",
-    fallen_tree: "Fallen Tree Hazard",
-    infrastructure_damage: "Infrastructure Damage",
-    others: "Reported Incident",
-  };
+  const categoryTitleMap = Object.fromEntries(
+    getIncidentCategories().map(cat => [cat.value, cat.label])
+  );
 
   function toReportStatus(raw: string | undefined | null): ReportStatus {
     const s = (raw || "").toLowerCase();
@@ -216,6 +198,7 @@ const ProfilePage: React.FC = () => {
 
 
         const data = await res.json();
+        localStorage.setItem("user_barangay", data.barangay || ""); // Save Current User's Barangay
 
         const rawStatus = (data.verification_status || "unverified").toLowerCase();
 
@@ -297,11 +280,11 @@ const ProfilePage: React.FC = () => {
 
           return {
             id: r.id,
-            title: customTitle ?? (categoryTitleMap[r.category] || "Incident Report"),
+            title: customTitle || categoryTitleMap[r.category] || "Incident Report",
             description: r.description || "No description provided.",
-            category: r.category,                         // ✅ added
+            category: r.category,
             other_category: r.other_category ?? null,
-            location_display: r.location_display || "Unknown location",  // ✅ fixed key
+            location_display: r.location_display || "Unknown location",
             date: dateStr,
             status,
             progressStatus,
@@ -334,110 +317,34 @@ const ProfilePage: React.FC = () => {
   }, [isStaff]);
 
 
-  const saveProfile = async () => {
-    try {
-      const token = localStorage.getItem("access_token");
-      const API_URL = import.meta.env.VITE_API_URL;
-      const res = await fetch(`${API_URL}/api/users/me/`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          phone: phone.trim(),
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || "Failed to update profile");
-      }
-
-      setOriginalEmail(email);
-      setOriginalPhone(phone);
-      setIsEditingProfile(false);
-      alert("Profile updated!")
-    } catch (e: any) {
-      alert(e?.message || "Update failed");
-    }
-  };
-
-  const cancelEditProfile = () => {
-    setEmail(originalEmail);
-    setPhone(originalPhone);
-    setIsEditingProfile(false);
-  }
-
-  const changePassword = async () => {
-    if (newPassword !== confirmPassword) {
-      alert("New password and confirm password do not match.");
-      return;
-    }
-    if (newPassword.length < 8) {
-      alert("Password must be at least 8 characters.");
-      return;
-    }
-
-    setPasswordLoading(true);
-    try {
-      const token = localStorage.getItem("access_token");
-      const API_URL = import.meta.env.VITE_API_URL;
-
-      const res = await fetch(`${API_URL}/api/users/change-password/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          current_password: currentPassword,
-          new_password: newPassword,
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || "Failed to change password");
-      }
-
-      alert("Password changed successfully!");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (e: any) {
-      alert(e?.message || "Password change failed");
-    } finally {
-      setPasswordLoading(false);
-    }
-  };
-
   // const isVerifiedResident = verificationStatus === "verified";
 
 
   const submitVerificationRequest = async () => {
     if (!barangay.trim()) {
-      alert("Please select your barangay.");
+      toast.error("Please select your barangay.");
       return;
     }
+
     if (!address.trim()) {
-      alert("Please enter your address.");
+      toast.error("Please enter your address.");
       return;
     }
+
     if (!barangayIdFile) {
-      alert("Please upload your Barangay ID.");
+      toast.error("Please upload your Barangay ID.");
       return;
     }
 
     setVerifyLoading(true);
+
     try {
       const token = localStorage.getItem("access_token");
 
       const formData = new FormData();
-      formData.append("barangay", barangay.trim()),
-        formData.append("address", address.trim()),
-        formData.append("id_image", barangayIdFile);
+      formData.append("barangay", barangay.trim());
+      formData.append("address", address.trim());
+      formData.append("id_image", barangayIdFile);
 
       const res = await fetch(`${API_URL}/api/resident-verification/request/`, {
         method: "POST",
@@ -448,10 +355,12 @@ const ProfilePage: React.FC = () => {
       });
 
       const data = await res.json().catch(() => ({}));
+
       if (!res.ok) {
-        alert(data.detail || "Failed to submit verification request.");
-        return;
+        throw new Error(data.detail || "Failed to submit verification request.");
       }
+
+      toast.success("Verification request submitted!");
 
       setVerificationStatus("pending");
       setVerificationReason("");
@@ -461,9 +370,8 @@ const ProfilePage: React.FC = () => {
       setAddress("");
       setBarangayIdFile(null);
 
-      alert("Verification request submitted!");
     } catch (e: any) {
-      alert(e?.message || "Verification request failed");
+      toast.error(e?.message || "Verification request failed");
     } finally {
       setVerifyLoading(false);
     }
@@ -510,6 +418,16 @@ const ProfilePage: React.FC = () => {
               {userRole2?.[0] ? ` & ${userRole2[0]}` : ""}
             </p>
 
+            <div className="profile-mobile-actions">
+              <button
+                className="settings-btn"
+                onClick={() => navigate(`/main/${userRole.toLowerCase()}/settings`)}
+              >
+                <FaCog />
+                <span>Settings</span>
+              </button>
+            </div>
+
             <div className="contact-section">
               <div className="contact-row">
                 <span className="contact-label">Email</span>
@@ -538,27 +456,6 @@ const ProfilePage: React.FC = () => {
                   />
                 ) : (
                   <span className="contact-value">{phone || "—"}</span>
-                )}
-              </div>
-
-              <div className="contact-actions">
-                {!isEditingProfile ? (
-                  <button
-                    className="edit-btn"
-                    onClick={() => setIsEditingProfile(true)}
-                    disabled={profileLoading}
-                  >
-                    Edit
-                  </button>
-                ) : (
-                  <>
-                    <button className="save-btn" onClick={saveProfile}>
-                      Save
-                    </button>
-                    <button className="cancel-btn" onClick={cancelEditProfile}>
-                      Cancel
-                    </button>
-                  </>
                 )}
               </div>
             </div>
@@ -631,19 +528,6 @@ const ProfilePage: React.FC = () => {
         )}
       </div>
 
-      {/* Security */}
-      <div className="section-header section-header-row">
-        <h3 className="section-title">Security</h3>
-
-        <button
-          className="security-toggle-btn"
-          onClick={() => setShowPasswordForm((v) => !v)}
-          aria-expanded={showPasswordForm}
-        >
-          {showPasswordForm ? "Close" : "Change Password"}
-        </button>
-      </div>
-
       {showPasswordForm && (
         <div className="security-card">
           <div className="security-row">
@@ -671,25 +555,6 @@ const ProfilePage: React.FC = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
-          </div>
-
-          <div className="security-actions">
-            <button className="save-btn" onClick={changePassword} disabled={passwordLoading}>
-              {passwordLoading ? "Changing..." : "Update Password"}
-            </button>
-
-            <button
-              className="cancel-btn"
-              onClick={() => {
-                setShowPasswordForm(false);
-                setCurrentPassword("");
-                setNewPassword("");
-                setConfirmPassword("");
-              }}
-              disabled={passwordLoading}
-            >
-              Cancel
-            </button>
           </div>
         </div>
       )}
@@ -776,7 +641,7 @@ const ProfilePage: React.FC = () => {
               <label>Barangay</label>
               <select value={barangay} onChange={(e) => setBarangay(e.target.value)}>
                 <option value="">Select barangay</option>
-                {CABUYAO_BARANGAYS.map((b) => (
+                {getCabuyaoBarangays().map((b) => (
                   <option key={b} value={b}>
                     {b}
                   </option>

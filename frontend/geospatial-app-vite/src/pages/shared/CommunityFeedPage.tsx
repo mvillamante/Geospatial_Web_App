@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { FaFacebook, FaEnvelope } from "react-icons/fa";
+import { FaFacebook, FaEnvelope, FaSyncAlt } from "react-icons/fa";
 import {
     Pin,
     Search,
@@ -92,6 +92,9 @@ export default function CommunityFeedPage() {
     const [contact, setContact] = useState<QuickContact | null>(null);
     const location = useLocation() as any;
 
+    const [showScrollTop, setShowScrollTop] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+
     useEffect(() => {
         const openId = location.state?.openPostId;
         if (!openId || posts.length === 0) return;
@@ -126,25 +129,52 @@ export default function CommunityFeedPage() {
         fetchContact();
     }, []);
 
-    useEffect(() => {
-        const fetchFeed = async () => {
-            try {
-                setLoading(true);
-                const API_URL = import.meta.env.VITE_API_URL;
-                const res = await fetch(`${API_URL}/api/community-feed/`);
-                if (!res.ok) throw new Error("Failed to fetch feed");
+    const fetchFeed = async () => {
+        try {
+            if (refreshing) return;
 
-                const data = await res.json();
-                setPosts(data);
-            } catch (err: any) {
-                setError(err.message ?? "Something went wrong");
-            } finally {
-                setLoading(false);
+            setRefreshing(true);
+            setLoading(true);
+            setError(null);
+
+            const res = await fetch(`${API_URL}/api/community-feed/`);
+
+            if (!res.ok) throw new Error("Failed to fetch feed");
+
+            const data = await res.json();
+
+            setPosts(data);
+
+        } catch (err: any) {
+            setError(err.message ?? "Something went wrong");
+
+        } finally {
+            setRefreshing(false);
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchFeed();
+    }, []);
+
+    useEffect(() => {
+        const container = document.querySelector(".main-content");
+        if (!container) return;
+
+        const handleScroll = () => {
+            if (container.scrollTop > 200) {
+                setShowScrollTop(true);
+            } else {
+                setShowScrollTop(false);
             }
         };
 
-        fetchFeed();
+        container.addEventListener("scroll", handleScroll);
+
+        return () => container.removeEventListener("scroll", handleScroll);
     }, []);
+
 
 
     const filtered = useMemo(() => {
@@ -180,15 +210,38 @@ export default function CommunityFeedPage() {
                                 />
                             </label>
 
-                            <label className="filter">
-                                <SlidersHorizontal size={16} />
-                                <select value={filter} onChange={(e) => setFilter(e.target.value as any)}>
-                                    <option value="all">All</option>
-                                    <option value="advisory">Advisories</option>
-                                    <option value="announcement">Announcements</option>
-                                    <option value="guide">Guides</option>
-                                </select>
-                            </label>
+                            <div className="filter-chips">
+                                <button
+                                    className={`filter-pill ${filter === "all" ? "active" : ""}`}
+                                    onClick={() => setFilter("all")}
+                                >
+                                    All
+                                </button>
+
+                                <button
+                                    className={`filter-pill advisory ${filter === "advisory" ? "active" : ""}`}
+                                    onClick={() => setFilter("advisory")}
+                                >
+                                    <AlertTriangle size={14} />
+                                    Advisory
+                                </button>
+
+                                <button
+                                    className={`filter-pill announcement ${filter === "announcement" ? "active" : ""}`}
+                                    onClick={() => setFilter("announcement")}
+                                >
+                                    <Megaphone size={14} />
+                                    Announcement
+                                </button>
+
+                                <button
+                                    className={`filter-pill guide ${filter === "guide" ? "active" : ""}`}
+                                    onClick={() => setFilter("guide")}
+                                >
+                                    <BookOpen size={14} />
+                                    Guide
+                                </button>
+                            </div>
                         </div>
                     </header>
 
@@ -206,6 +259,18 @@ export default function CommunityFeedPage() {
                     )}
 
                     <section className="feed-list">
+                        {/* Refresh Button Row */}
+                        <div className="feed-refresh-row">
+                            <button
+                                className="refresh-btn"
+                                onClick={fetchFeed}
+                                disabled={refreshing}
+                            >
+                                <FaSyncAlt className={refreshing ? "spin" : ""} />
+                                <span>{refreshing ? "Refreshing..." : "Refresh Feed"}</span>
+                            </button>
+                        </div>
+
                         {loading ? (
                             <div className="empty-state">Loading updates…</div>
                         ) : error ? (
@@ -213,10 +278,23 @@ export default function CommunityFeedPage() {
                         ) : normal.length === 0 && pinned.length === 0 ? (
                             <div className="empty-state">No updates yet.</div>
                         ) : (
-                            normal.map((p) => <PostRow key={p.id} post={p} onOpen={() => setSelected(p)} />)
+                            <>
+                                {normal.map((p) => <PostRow key={p.id} post={p} onOpen={() => setSelected(p)} />)}
+                            </>
                         )}
                     </section>
 
+                    {showScrollTop && (
+                        <button
+                            className="scroll-top-btn"
+                            onClick={() => {
+                                const container = document.querySelector(".main-content");
+                                container?.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                        >
+                            ↑
+                        </button>
+                    )}
                 </main>
 
                 <aside className="feed-rail">

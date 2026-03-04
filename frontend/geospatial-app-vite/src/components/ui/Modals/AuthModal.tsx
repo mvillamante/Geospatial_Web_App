@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { AiOutlineClose } from "react-icons/ai";
+import { AiOutlineClose, AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { saveUserSession } from "../../../libr/auth";
@@ -7,7 +7,12 @@ import { normalizePrimaryRole, normalizeSecondaryRole, roleToBasePath } from "..
 import "./GlobalModal.css";
 import type { User } from "../../../libr/fetchCurrentUser";
 
-type AuthModalType = "login" | "signup" | "forgotPassword" | "verifyOtp";
+type AuthModalType =
+    | "login"
+    | "signup"
+    | "forgotPassword"
+    | "verifyOtp"
+    | "resetPassword";
 
 interface AuthModalProps {
     type?: AuthModalType;
@@ -24,16 +29,27 @@ const AuthModal: React.FC<AuthModalProps> = ({
     const navigate = useNavigate();
     const { refreshUser } = useAuth();
 
-    // const [otpValues, setOtpValues] = useState(["", "", "", ""]);
+    const [loginLoading, setLoginLoading] = useState(false);
+    const [signupLoading, setSignupLoading] = useState(false);
+
+    const [showLoginPassword, setShowLoginPassword] = useState(false);
+    const [showSignupPassword, setShowSignupPassword] = useState(false);
+    const [showSignupConfirm, setShowSignupConfirm] = useState(false);
+    const [showResetPassword, setShowResetPassword] = useState(false);
+    const [showResetConfirm, setShowResetConfirm] = useState(false);
+
     const [resetTarget, setResetTarget] = useState("");
-    const [resetOtp, setResetOtp] = useState("");
+    const [otpValues, setOtpValues] = useState(["", "", "", ""]);
     const [resetNewPass, setResetNewPass] = useState("");
     const [resetConfirmPass, setResetConfirmPass] = useState("");
     const [resetLoading, setResetLoading] = useState(false);
 
+    const [resendTimer, setResendTimer] = useState(60);
+    const [canResend, setCanResend] = useState(false);
 
     const [loginInput, setLoginInput] = useState("");
     const [loginPassword, setLoginPassword] = useState("");
+
     const [signupFirstName, setSignupFirstName] = useState("");
     const [signupLastName, setSignupLastName] = useState("");
     const [signupPhone, setSignupPhone] = useState("");
@@ -41,34 +57,58 @@ const AuthModal: React.FC<AuthModalProps> = ({
     const [signupPassword, setSignupPassword] = useState("");
     const [signupConfirm, setSignupConfirm] = useState("");
 
-    // useEffect(() => {
-    //     const handleResize = () => setIsMobile(window.innerWidth < 768);
-    //     window.addEventListener("resize", handleResize);
-    //     return () => window.removeEventListener("resize", handleResize);
-    // }, []);
+    /* ================= EFFECTS ================= */
 
     useEffect(() => {
         document.body.style.overflow = "hidden";
-        return () => { document.body.style.overflow = "auto"; };
+        return () => {
+            document.body.style.overflow = "auto";
+        };
     }, []);
 
+    useEffect(() => {
+        if (type === "verifyOtp" && resendTimer > 0) {
+            const timer = setTimeout(() => {
+                setResendTimer((prev) => prev - 1);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+
+        if (resendTimer === 0) setCanResend(true);
+    }, [resendTimer, type]);
+
+    /* ================= HELPERS ================= */
+
+    const fullOtp = otpValues.join("");
+
+    const maskEmailOrPhone = (value: string) => {
+        if (!value.includes("@")) {
+            return value.slice(0, 2) + "****" + value.slice(-2);
+        }
+        const [name, domain] = value.split("@");
+        return name.slice(0, 2) + "****@" + domain;
+    };
+
     const handleNavigation = (user: User) => {
-        if (!user) return;
-
         const primaryRole = normalizePrimaryRole(user.role);
-        const secondaryRole = normalizeSecondaryRole(primaryRole, user.extra_roles?.[0]);
-
-        // Use primary if it exists, otherwise secondary (like Researcher)
+        const secondaryRole = normalizeSecondaryRole(
+            primaryRole,
+            user.extra_roles?.[0]
+        );
         const roleForNavigation = primaryRole || secondaryRole;
-
         navigate(roleToBasePath(roleForNavigation), { replace: true });
     };
 
+    /* ================= LOGIN ================= */
+
     const handleLogin = async () => {
-        if (!loginInput || !loginPassword) return alert("Please fill in all fields");
+        if (!loginInput || !loginPassword)
+            return alert("Please fill in all fields");
 
         try {
-            const response = await fetch(`${API_URL}/api/login_user/`, {
+            setLoginLoading(true);
+
+            const res = await fetch(`${API_URL}/api/login_user/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -77,155 +117,167 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 }),
             });
 
-            const result = await response.json();
-            if (!response.ok) {
-                alert(result.error);
-                return;
-            }
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error);
 
             saveUserSession(result.user, result.access_token);
-            console.log("Login successful:", result);
             await refreshUser();
             onClose();
             handleNavigation(result.user);
-
-        } catch (error) {
-            if (error instanceof Error) {
-                alert("Login failed: " + error.message);
-            } else {
-                alert("Login failed.");
-            }
+        } catch (err: any) {
+            alert(err.message);
+        } finally {
+            setLoginLoading(false);
         }
     };
 
-    // const handleOtpChange = (value: string, index: number) => {
-    //     if (!/^\d?$/.test(value)) return;
-
-    //     const newOtp = [...otpValues];
-    //     newOtp[index] = value;
-    //     setOtpValues(newOtp);
-
-    //     if (value && index < 3) {
-    //         const nextInput = document.getElementById(`otp-${index-1}`);
-    //         nextInput?.focus();
-    //     }
-    // }
-
-    const formatName = (firstName: string, lastName: string): string =>
-        `${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}.` +
-        `${lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase()}`;
+    /* ================= SIGNUP ================= */
 
     const handleSignup = async () => {
-        if (!signupFirstName || !signupLastName || !signupPhone || !signupEmail || !signupPassword || !signupConfirm) {
+        if (
+            !signupFirstName ||
+            !signupLastName ||
+            !signupPhone ||
+            !signupEmail ||
+            !signupPassword ||
+            !signupConfirm
+        )
             return alert("Please fill in all required fields.");
-        }
-        if (signupPassword !== signupConfirm) {
+
+        if (signupPassword !== signupConfirm)
             return alert("Passwords do not match.");
-        }
 
         try {
-            const userData = {
-                username: formatName(signupFirstName, signupLastName),
-                first_name: signupFirstName,
-                last_name: signupLastName,
-                phone: signupPhone,
-                email: signupEmail,
-                password: signupPassword,
-                role: "citizen",
-            };
+            setSignupLoading(true);
 
-            const response = await fetch(`${API_URL}/api/sign_up/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(userData),
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                alert(data.message);
-                saveUserSession(data.user, data.access_token);
-                await refreshUser();
-                onClose();
-                handleNavigation(data.user);
-            } else {
-                alert(data.error || "Signup failed.");
-            }
-        } catch (error) {
-            const message =
-                error instanceof Error ? error.message : "Something went wrong";
-            alert("Signup failed: " + message);
-        }
-    };
-
-    const handleRequestOtp = async () => {
-        if (!resetTarget.trim()) return alert("Please enter your email or phone number.");
-
-        setResetLoading(true);
-        try {
-            const res = await fetch(`${API_URL}/api/password-reset/request/`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email_or_phone: resetTarget.trim() }),
-            });
-
-            const data = await res.json().catch(() => ({}));
-
-            if (!res.ok)
-                throw new Error(data.detail || "Failed to send OTP");
-
-            alert("OTP sent successfully");
-            switchModal("verifyOtp");
-        } catch (e: any) {
-            alert(e?.message || "Failed to send OTP");
-        } finally {
-            setResetLoading(false);
-        }
-    };
-
-    const handleConfirmOtp = async () => {
-        if (!resetTarget.trim()) return alert("Missing email/phone.");
-        if (!resetOtp.trim()) return alert("Enter the OTP.");
-        if (!resetNewPass || !resetConfirmPass) return alert("Enter your new password.");
-        if (resetNewPass.length < 8) return alert("Password must be at least 8 characters.");
-        if (resetNewPass !== resetConfirmPass) return alert("Passwords do not match.");
-
-        setResetLoading(true);
-        try {
-            const res = await fetch(`${API_URL}/api/password-reset/confirm/`, {
+            const res = await fetch(`${API_URL}/api/sign_up/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    email_or_phone: resetTarget.trim(),
-                    otp: resetOtp.trim(),
-                    new_password: resetNewPass,
+                    username: signupFirstName + "." + signupLastName,
+                    first_name: signupFirstName,
+                    last_name: signupLastName,
+                    phone: signupPhone,
+                    email: signupEmail,
+                    password: signupPassword,
+                    role: "citizen",
                 }),
             });
 
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.detail || "Failed to reset password");
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
 
-            alert("Password reset successful. Please log in.");
-
-            setResetOtp("");
-            setResetNewPass("");
-            setResetConfirmPass("");
-            switchModal("login");
-        } catch (e: any) {
-            alert(e?.message || "Failed to reset password");
+            saveUserSession(data.user, data.access_token);
+            await refreshUser();
+            onClose();
+            handleNavigation(data.user);
+        } catch (err: any) {
+            alert(err.message);
         } finally {
-            setResetLoading(false);
+            setSignupLoading(false);
         }
     };
 
+    /* ================= RESET FLOW ================= */
+
+    const handleRequestOtp = async () => {
+        if (!resetTarget.trim())
+            return alert("Please enter your email or phone.");
+
+        setResetLoading(true);
+
+        const res = await fetch(`${API_URL}/api/password-reset/request/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email_or_phone: resetTarget.trim() }),
+        });
+
+        const data = await res.json();
+        setResetLoading(false);
+
+        if (!res.ok) return alert(data.detail);
+
+        setResendTimer(60);
+        setCanResend(false);
+        switchModal("verifyOtp");
+    };
+
+    const handleVerifyOtp = async () => {
+        if (fullOtp.length !== 6)
+            return alert("Enter full OTP");
+
+        setResetLoading(true);
+
+        const res = await fetch(`${API_URL}/api/password-reset/verify/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email_or_phone: resetTarget.trim(),
+                otp: fullOtp,
+            }),
+        });
+
+        const data = await res.json();
+        setResetLoading(false);
+
+        if (!res.ok) return alert(data.detail);
+
+        switchModal("resetPassword");
+    };
+
+    const handleResetPassword = async () => {
+        if (!resetNewPass || !resetConfirmPass)
+            return alert("Enter your new password.");
+
+        if (resetNewPass !== resetConfirmPass)
+            return alert("Passwords do not match.");
+
+        setResetLoading(true);
+
+        const res = await fetch(`${API_URL}/api/password-reset/confirm/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email_or_phone: resetTarget.trim(),
+                new_password: resetNewPass,
+            }),
+        });
+
+        const data = await res.json();
+        setResetLoading(false);
+
+        if (!res.ok) return alert(data.detail);
+
+        alert("Password reset successful.");
+        switchModal("login");
+    };
+
+    const handleOtpChange = (value: string, index: number) => {
+        if (!/^\d?$/.test(value)) return;
+
+        const updated = [...otpValues];
+        updated[index] = value;
+        setOtpValues(updated);
+
+        if (value && index < 3)
+            document.getElementById(`otp-${index + 1}`)?.focus();
+        if (!value && index > 0)
+            document.getElementById(`otp-${index - 1}`)?.focus();
+    };
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className={`modal-content ${type === "signup" ? "modal-signup" : ""}`} onClick={(e) => e.stopPropagation()}>
+            <div
+                className={`modal-content ${type === "signup" ? "modal-signup" : ""
+                    }`}
+                onClick={(e) => e.stopPropagation()}
+            >
                 <button className="modal-close" onClick={onClose}>
                     <AiOutlineClose size={24} />
                 </button>
 
-                {type === "login" ? (
+                {/* LOGIN */}
+                {type === "login" && (
                     <>
                         <div className="modal-header">
                             <h2>Welcome Back</h2>
@@ -236,40 +288,36 @@ const AuthModal: React.FC<AuthModalProps> = ({
                             <div className="form-group">
                                 <label>Phone Number or Email</label>
                                 <input
-                                    type="text"
                                     value={loginInput}
                                     onChange={(e) => setLoginInput(e.target.value)}
-                                    placeholder="Enter phone number or email"
                                 />
                             </div>
 
-                            <div className="form-group">
+                            <div className="form-group password-group">
                                 <label>Password</label>
-                                <input
-                                    type="password"
-                                    value={loginPassword}
-                                    onChange={(e) => setLoginPassword(e.target.value)}
-                                    placeholder="Enter password"
-                                />
+                                <div className="password-wrapper">
+                                    <input
+                                        type={showLoginPassword ? "text" : "password"}
+                                        value={loginPassword}
+                                        onChange={(e) => setLoginPassword(e.target.value)}
+                                    />
+                                    <span
+                                        className="eye-icon"
+                                        onClick={() => setShowLoginPassword(!showLoginPassword)}
+                                    >
+                                        {showLoginPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+                                    </span>
+                                </div>
                             </div>
 
-                            <button className="btn-submit" onClick={handleLogin}>
-                                Login
+                            <button
+                                className="btn-submit"
+                                onClick={handleLogin}
+                                disabled={loginLoading}
+                            >
+                                {loginLoading ? "Logging in..." : "Login"}
                             </button>
                         </div>
-
-                        <div
-                            className="forgot-password"
-                            onClick={() => switchModal("forgotPassword")}
-                            role="button"
-                            tabIndex={0}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter" || e.key === " ") switchModal("forgotPassword");
-                            }}
-                        >
-                            Forgot password?
-                        </div>
-
                         <div className="modal-footer">
                             <p>
                                 Don't have an account?{" "}
@@ -278,8 +326,17 @@ const AuthModal: React.FC<AuthModalProps> = ({
                                 </span>
                             </p>
                         </div>
+
+                        <div
+                            className="forgot-password"
+                            onClick={() => switchModal("forgotPassword")}
+                        >
+                            Forgot password?
+                        </div>
                     </>
-                ) : type === "signup" ? (
+                )}
+
+                {type === "signup" && (
                     <>
                         <div className="modal-header">
                             <h2>Sign Up</h2>
@@ -297,6 +354,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                                         placeholder="First Name"
                                     />
                                 </div>
+
                                 <div className="form-group">
                                     <label>Last Name</label>
                                     <input
@@ -318,6 +376,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                                         placeholder="Phone Number"
                                     />
                                 </div>
+
                                 <div className="form-group">
                                     <label>Email Address</label>
                                     <input
@@ -329,28 +388,48 @@ const AuthModal: React.FC<AuthModalProps> = ({
                                 </div>
                             </div>
 
-                            <div className="form-group">
+                            <div className="form-group password-group">
                                 <label>Password</label>
-                                <input
-                                    type="password"
-                                    value={signupPassword}
-                                    onChange={(e) => setSignupPassword(e.target.value)}
-                                    placeholder="Password"
-                                />
+                                <div className="password-wrapper">
+                                    <input
+                                        type={showSignupPassword ? "text" : "password"}
+                                        value={signupPassword}
+                                        onChange={(e) => setSignupPassword(e.target.value)}
+                                        placeholder="Password"
+                                    />
+                                    <span
+                                        className="eye-icon"
+                                        onClick={() => setShowSignupPassword(!showSignupPassword)}
+                                    >
+                                        {showSignupPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+                                    </span>
+                                </div>
                             </div>
 
-                            <div className="form-group">
+                            <div className="form-group password-group">
                                 <label>Confirm Password</label>
-                                <input
-                                    type="password"
-                                    value={signupConfirm}
-                                    onChange={(e) => setSignupConfirm(e.target.value)}
-                                    placeholder="Confirm Password"
-                                />
+                                <div className="password-wrapper">
+                                    <input
+                                        type={showSignupConfirm ? "text" : "password"}
+                                        value={signupConfirm}
+                                        onChange={(e) => setSignupConfirm(e.target.value)}
+                                        placeholder="Confirm Password"
+                                    />
+                                    <span
+                                        className="eye-icon"
+                                        onClick={() => setShowSignupConfirm(!showSignupConfirm)}
+                                    >
+                                        {showSignupConfirm ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+                                    </span>
+                                </div>
                             </div>
 
-                            <button className="btn-submit" onClick={handleSignup}>
-                                Create Account
+                            <button
+                                className="btn-submit"
+                                onClick={handleSignup}
+                                disabled={signupLoading}
+                            >
+                                {signupLoading ? "Creating Account..." : "Create Account"}
                             </button>
                         </div>
 
@@ -363,7 +442,10 @@ const AuthModal: React.FC<AuthModalProps> = ({
                             </p>
                         </div>
                     </>
-                ) : type === "forgotPassword" ? (
+                )}
+
+                {/* FORGOT PASSWORD */}
+                {type === "forgotPassword" && (
                     <>
                         <div className="modal-header">
                             <h2>Reset Password</h2>
@@ -374,98 +456,112 @@ const AuthModal: React.FC<AuthModalProps> = ({
                             <div className="form-group">
                                 <label>Email or Phone</label>
                                 <input
-                                    type="text"
                                     value={resetTarget}
                                     onChange={(e) => setResetTarget(e.target.value)}
-                                    placeholder="Enter email or phone number"
                                 />
                             </div>
 
-                            <button className="btn-submit" onClick={handleRequestOtp} disabled={resetLoading}>
+                            <button
+                                className="btn-submit"
+                                onClick={handleRequestOtp}
+                                disabled={resetLoading}
+                            >
                                 {resetLoading ? "Sending..." : "Send OTP"}
+                            </button>
+                        </div>
+                    </>
+                )}
+
+                {/* VERIFY OTP */}
+                {type === "verifyOtp" && (
+                    <>
+                        <div className="modal-header">
+                            <h2>Verify OTP</h2>
+                            <p>
+                                OTP sent to{" "}
+                                <strong>{maskEmailOrPhone(resetTarget)}</strong>
+                            </p>
+                        </div>
+
+                        <div className="modal-form">
+                            <div className="otp-container">
+                                {otpValues.map((digit, index) => (
+                                    <input
+                                        key={index}
+                                        id={`otp-${index}`}
+                                        maxLength={1}
+                                        value={digit}
+                                        onChange={(e) =>
+                                            handleOtpChange(e.target.value, index)
+                                        }
+                                        className="otp-input"
+                                    />
+                                ))}
+                            </div>
+
+                            <button
+                                className="btn-submit"
+                                onClick={handleVerifyOtp}
+                                disabled={resetLoading}
+                            >
+                                {resetLoading ? "Verifying..." : "Verify OTP"}
                             </button>
                         </div>
 
                         <div className="modal-footer">
-                            <p>
-                                Back to{" "}
-                                <span className="link" onClick={() => switchModal("login")}>
-                                    Login
+                            {canResend ? (
+                                <span className="link" onClick={handleRequestOtp}>
+                                    Resend OTP
                                 </span>
-                            </p>
+                            ) : (
+                                <span className="timer-text">
+                                    Resend in {resendTimer}s
+                                </span>
+                            )}
                         </div>
                     </>
-                ) : (
-                    // verifyOtp
+                )}
+
+                {/* RESET PASSWORD */}
+                {type === "resetPassword" && (
                     <>
                         <div className="modal-header">
-                            <h2>Verify OTP</h2>
-                            <p>Enter the OTP and set your new password.</p>
+                            <h2>Set New Password</h2>
                         </div>
 
                         <div className="modal-form">
-                            <div className="form-group">
-                                <label>Email or Phone</label>
-                                <input
-                                    type="text"
-                                    value={resetTarget}
-                                    onChange={(e) => setResetTarget(e.target.value)}
-                                    placeholder="Email or phone"
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label>OTP</label>
-                                <input
-                                    type="text"
-                                    value={resetOtp}
-                                    onChange={(e) => setResetOtp(e.target.value)}
-                                    placeholder="Enter OTP"
-                                />
-                            </div>
-
                             <div className="form-group">
                                 <label>New Password</label>
                                 <input
                                     type="password"
                                     value={resetNewPass}
-                                    onChange={(e) => setResetNewPass(e.target.value)}
-                                    placeholder="New password"
+                                    onChange={(e) =>
+                                        setResetNewPass(e.target.value)
+                                    }
                                 />
                             </div>
 
                             <div className="form-group">
-                                <label>Confirm New Password</label>
+                                <label>Confirm Password</label>
                                 <input
                                     type="password"
                                     value={resetConfirmPass}
-                                    onChange={(e) => setResetConfirmPass(e.target.value)}
-                                    placeholder="Confirm new password"
+                                    onChange={(e) =>
+                                        setResetConfirmPass(e.target.value)
+                                    }
                                 />
                             </div>
 
-                            <button className="btn-submit" onClick={handleConfirmOtp} disabled={resetLoading}>
+                            <button
+                                className="btn-submit"
+                                onClick={handleResetPassword}
+                                disabled={resetLoading}
+                            >
                                 {resetLoading ? "Updating..." : "Reset Password"}
                             </button>
                         </div>
-
-                        <div className="modal-footer">
-                            <p>
-                                Didn’t get a code?{" "}
-                                <span className="link" onClick={handleRequestOtp}>
-                                    Resend OTP
-                                </span>
-                            </p>
-                            <p style={{ marginTop: 8 }}>
-                                Back to{" "}
-                                <span className="link" onClick={() => switchModal("login")}>
-                                    Login
-                                </span>
-                            </p>
-                        </div>
                     </>
                 )}
-
             </div>
         </div>
     );

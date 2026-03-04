@@ -1,10 +1,11 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./AlertsMapPage.css";
 import LeafletMap from "../../../components/ui/LeafletMap";
 import AlertsPanel from "./AlertsPanel";
 import type { Report } from "./AlertsPanel";
 import ReportDrawer from "./ReportDrawer";
+import { toast } from "sonner";
 
 interface SelectedReportWithTimestamp {
   report: Report;
@@ -20,8 +21,24 @@ const AlertsMapPage: React.FC = () => {
   const openIncidentId = location.state?.openIncidentId;
   // const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [panelCollapsed, setPanelCollapsed] = useState(false);
 
+  const snapPoints = [0.15, 0.55, 0.9];
+  const [snapIndex, setSnapIndex] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
+  const [currentHeight, setCurrentHeight] = useState(snapPoints[1]);
+
+  const startYRef = useRef(0);
+  const startHeightRef = useRef(0);
+  const velocityRef = useRef(0);
+  const lastMoveTimeRef = useRef(0);
+
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    startYRef.current = e.touches[0].clientY;
+    startHeightRef.current = currentHeight;
+    lastMoveTimeRef.current = Date.now();
+  };
   const [userBarangay, setUserBarangay] = useState("");
 
   const [searchedBarangay, setSearchedBarangay] = useState("");
@@ -52,12 +69,59 @@ const AlertsMapPage: React.FC = () => {
     setSearchedSeverity(null);
   };
 
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+
+    const currentY = e.touches[0].clientY;
+    const deltaY = startYRef.current - currentY;
+    const deltaHeight = deltaY / window.innerHeight;
+
+    const newHeight = Math.min(
+      0.95,
+      Math.max(0.1, startHeightRef.current + deltaHeight)
+    );
+
+    const now = Date.now();
+    velocityRef.current = deltaY / (now - lastMoveTimeRef.current);
+    lastMoveTimeRef.current = now;
+
+    setCurrentHeight(newHeight);
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+
+    let projectedHeight = currentHeight;
+
+    // Add momentum
+    if (Math.abs(velocityRef.current) > 0.5) {
+      projectedHeight += velocityRef.current * 0.2;
+    }
+
+    // Find nearest snap point
+    const closestIndex = snapPoints.reduce((prev, curr, index) => {
+      return Math.abs(curr - projectedHeight) <
+        Math.abs(snapPoints[prev] - projectedHeight)
+        ? index
+        : prev;
+    }, 0);
+
+    setSnapIndex(closestIndex);
+    setCurrentHeight(snapPoints[closestIndex]);
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   useEffect(() => {
     async function checkVerification() {
       const token = localStorage.getItem("access_token");
-
-      console.log("isVerified:", isVerified);
-      console.log("userBarangay:", userBarangay);
 
       if (!token) {
         setIsVerified(false);
@@ -83,6 +147,8 @@ const AlertsMapPage: React.FC = () => {
 
     checkVerification();
   }, []);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   return (
     <div className="main-layout-map">
@@ -119,18 +185,35 @@ const AlertsMapPage: React.FC = () => {
         </div>
 
         <div
-          className={`alerts-panel ${panelCollapsed ? "collapsed" : ""}`}
-          onClick={() => panelCollapsed && setPanelCollapsed(false)}
+          className="alerts-panel"
+          onTouchStart={(e) => {
+            if (!(e.target as HTMLElement).closest(".sheet-handle-btn")) return;
+            handleTouchStart(e);
+          }}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={
+            isMobile
+              ? {
+                height: `${currentHeight * 100}vh`,
+                transition: isDragging
+                  ? "none"
+                  : "height 320ms cubic-bezier(0.22, 1, 0.36, 1)"
+              }
+              : {}
+          }
         >
           <button
             type="button"
             className="sheet-handle-btn"
             onClick={(e) => {
               e.stopPropagation();
-              setPanelCollapsed((v) => !v);
+
+              const nextIndex = (snapIndex + 1) % snapPoints.length;
+              setSnapIndex(nextIndex);
+              setCurrentHeight(snapPoints[nextIndex]);
             }}
-            aria-expanded={!panelCollapsed}
-            aria-label={panelCollapsed ? "Expand reports panel" : "Collapse reports panel"}
+            aria-label="Adjust reports panel height"
           >
             <div className="sheet-handle" />
           </button>
@@ -142,11 +225,13 @@ const AlertsMapPage: React.FC = () => {
               if (isVerified === null) return;
 
               if (!token) {
+                toast.error("You must log in before reporting an incident");
                 setShowRedirectPopup(true);
                 return;
               }
 
               if (isVerified === false) {
+                toast.warning("Please verify your account first");
                 setShowVerifyPrompt(true);
                 return;
               }
@@ -154,11 +239,17 @@ const AlertsMapPage: React.FC = () => {
               setIsDrawerOpen(true);
             }}
             onBarangaySearch={(b, s) => {
-              setPanelCollapsed(false);
+              setSnapIndex(1);
+              setCurrentHeight(snapPoints[1]);
               handleBarangaySearch(b, s);
             }}
+
             onSelectReport={(r) => {
-              setPanelCollapsed(false);
+              const fullIndex = 2;
+
+              setSnapIndex(fullIndex);
+              setCurrentHeight(snapPoints[fullIndex]);
+
               handleSelectReport(r);
             }}
             initialOpenIncidentId={openIncidentId}

@@ -94,6 +94,7 @@ urlpatterns = [
     path("reports/<int:report_id>/", IncidentReportPatchView.as_view(), name="report-patch"),
     path("reports/list/officers/", OfficerListView.as_view(), name="officer-list"),
     path("reports/<int:pk>/reply/", send_report_reply, name="report-reply"),
+    path("reports/public/verified-reports", PublicVerifiedReportsView.as_view(), name="public-incident-reports"),
     
     # Public Views
     path("public/landing-page/", PublicLandingPageView.as_view(), name="public-landing-page"),

@@ -33,16 +33,13 @@ class ResidentVerificationListView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = ResidentVerificationRequest.objects.all().order_by('-created_at')
-        search = self.request.GET.get("search")
-        if search:
-            search = search.strip()
-            # search first_name OR last_name
-            queryset = queryset.filter(
-                Q(user__first_name__icontains=search) |
-                Q(user__last_name__icontains=search)
-            )
-        return queryset
 
+        status_param = self.request.query_params.get("status")
+        if status_param:
+            queryset = queryset.filter(status=status_param.lower())
+
+        return queryset
+    
 class ApproveRejectResidentVerificationView(generics.UpdateAPIView):
     queryset = ResidentVerificationRequest.objects.all()
     serializer_class = ResidentVerificationRequestSerializer

@@ -98,17 +98,14 @@ CALAMITY_RISK_OUTPUTS: Path = DATA_DIR / "calamity_risk" / "outputs"
 # Hazard outputs (same folder as pipeline/viewed JSON) — use so map and AI insight share one source
 HAZARD_OUTPUTS: Path = DATA_DIR / "hazard" / "outputs"
 
-# Datasets by purpose (geography = barangay boundaries, hazards = earthquake/typhoon)
 DATASETS_DIR: Path = DATA_DIR / "datasets"
 GEOGRAPHY_DIR: Path = DATASETS_DIR / "geography"
 HAZARDS_DIR: Path = DATASETS_DIR / "hazards"
 
-# Index-specific model artifacts (for model_info endpoint)
 GREEN_INDEX_ARTIFACTS: Path = DATA_DIR / "green_index" / "model_artifacts"
 HAZARD_ARTIFACTS: Path = DATA_DIR / "hazard" / "model_artifacts"  # canonical location for hazard/green models
 HAZARD_INDEX_ARTIFACTS: Path = DATA_DIR / "hazard_index" / "model_artifacts"
 CALAMITY_RISK_ARTIFACTS: Path = DATA_DIR / "calamity_risk" / "model_artifacts"
-# Workspace-level fallback artifacts (outside backend/api/data)
 WORKSPACE_ARTIFACTS: Path = Path(r"C:\Users\arbut\geoappxd\Hazard\model_artifacts")
 
 
@@ -163,6 +160,27 @@ def _json_response_for_data(
         return JsonResponse({"year": year, "data": data[year]})
 
     return JsonResponse(data)
+
+
+def _iter_geom_coords(geom: Dict[str, Any]):
+    gtype = geom.get("type")
+    coords = geom.get("coordinates")
+    if not coords:
+        return
+    if gtype == "Point":
+        yield coords
+    elif gtype in ("MultiPoint", "LineString"):
+        for pt in coords:
+            yield pt
+    elif gtype in ("Polygon", "MultiLineString"):
+        for ring in coords:
+            for pt in ring:
+                yield pt
+    elif gtype == "MultiPolygon":
+        for poly in coords:
+            for ring in poly:
+                for pt in ring:
+                    yield pt
 
 
 # ---------------------------------------------------------------------------
@@ -1686,6 +1704,25 @@ def barangay_geojson(request):
             status=404,
         )
     return JsonResponse(data)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def landslide_kmz_geojson(request):
+    """
+    Deprecated endpoint for the old Cabuyao landslide KMZ/GeoJSON API.
+
+    The frontend now uses a static, preprocessed landslide risk layer, so this
+    endpoint no longer serves live hazard map data.
+    """
+    return JsonResponse(
+        {
+            "error": "The landslide KMZ/GeoJSON endpoint has been removed. "
+            "The application now uses a static local landslide risk layer instead."
+        },
+        status=410,
+    )
+
 
 
 def _load_csv_as_json(csv_path: Path) -> List[Dict[str, Any]]:

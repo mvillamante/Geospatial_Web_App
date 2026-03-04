@@ -124,6 +124,14 @@ class MyIncidentReportsView(generics.ListAPIView):
     def get_queryset(self):
         return IncidentReport.objects.filter(user=self.request.user).order_by("-created_at")
 
+class PublicVerifiedReportsView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        reports = IncidentReport.objects.filter(status="verified")
+        serializer = IncidentReportListSerializer(reports, many=True)
+        return Response({"results": serializer.data})
+    
 class IncidentReportsQueueView(generics.ListAPIView):
     serializer_class = IncidentReportQueueSerializer
 
@@ -218,7 +226,7 @@ class IncidentReportPatchView(generics.UpdateAPIView):
 
 class VerifiedIncidentReportsView(generics.ListAPIView):
     serializer_class = IncidentReportListSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         queryset = self.base_queryset()

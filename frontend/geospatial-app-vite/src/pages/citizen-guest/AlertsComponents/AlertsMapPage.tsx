@@ -245,10 +245,10 @@ const AlertsMapPage: React.FC = () => {
             }}
 
             onSelectReport={(r) => {
-              const fullIndex = 2;
+              const collapsedIndex = 0;
 
-              setSnapIndex(fullIndex);
-              setCurrentHeight(snapPoints[fullIndex]);
+              setSnapIndex(collapsedIndex);
+              setCurrentHeight(snapPoints[collapsedIndex]);
 
               handleSelectReport(r);
             }}

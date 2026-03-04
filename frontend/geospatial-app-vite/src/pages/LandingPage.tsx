@@ -7,11 +7,13 @@ import { useAuth } from "../context/AuthContext";
 import AuthModal from "../components/ui/Modals/AuthModal";
 import LeafletMap from "../components/ui/LeafletMap";
 import ResearcherRequestModal from "../components/ui/Modals/ResearcherRequestModal";
+import TermsModal from "../components/ui/Modals/TermsModal";
+import PrivacyModal from "../components/ui/Modals/PrivacyModal";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 type AuthModalType = "login" | "signup" | "forgotPassword" | "verifyOtp";
-type ModalType = AuthModalType | "researcherRequest" | null;
+type ModalType = AuthModalType | "researcherRequest" | "terms" | "privacy" | null;
 
 type LandingStats = {
   activeHazards: number;
@@ -31,7 +33,7 @@ const LandingPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState("home");
 
   const closeModal = () => setModalType(null);
-  const switchModal = (type: "login" | "signup" | "forgotPassword" | "verifyOtp") => setModalType(type);
+  const switchModal = (type: AuthModalType) => setModalType(type);
 
   const [stats, setStats] = useState<LandingStats | null>(null);
 
@@ -124,12 +126,20 @@ const LandingPage: React.FC = () => {
       id="home"
       className={`landing-page ${modalType ? "modal-open" : ""}`}
     >
+      {modalType === "terms" && (
+        <TermsModal onClose={closeModal} />
+      )}
+      {modalType === "privacy" && (
+        <PrivacyModal onClose={closeModal} />
+      )}
       {modalType &&
-        modalType !== "researcherRequest" && (
+        ["login", "signup", "forgotPassword", "verifyOtp", "resetPassword"].includes(modalType) && (
           <AuthModal
-            type={modalType}
+            type={modalType as AuthModalType}
             onClose={closeModal}
             switchModal={switchModal}
+            openTerms={() => setModalType("terms")}
+            openPrivacy={() => setModalType("privacy")}
           />
         )}
 
@@ -148,9 +158,26 @@ const LandingPage: React.FC = () => {
             {/* <span>HazSpot</span> */}
           </div>
           <div className={`nav-links ${isOpen ? "active" : ""}`}>
-            <a href="#home">Home</a>
-            <a href="#about">About</a>
-            <a href="#howitworks">How It Works</a>
+            <a
+              href="#home"
+              className={activeSection === "home" ? "active" : ""}
+            >
+              Home
+            </a>
+
+            <a
+              href="#about"
+              className={activeSection === "about" ? "active" : ""}
+            >
+              About
+            </a>
+
+            <a
+              href="#howitworks"
+              className={activeSection === "howitworks" ? "active" : ""}
+            >
+              How It Works
+            </a>
           </div>
           <div className="nav-buttons">
             <button className="btn btn-outline blue" onClick={() => setModalType("login")}>Login</button>
@@ -175,7 +202,7 @@ const LandingPage: React.FC = () => {
             </div>
 
             <div className="dashboard-map-container">
-              <LeafletMap  activeLayers={["Verified Reports"]}/>
+              <LeafletMap activeLayers={["Verified Reports"]} />
             </div>
 
             {/* Stats Section */}
@@ -289,6 +316,10 @@ const LandingPage: React.FC = () => {
 
         {/* Footer */}
         <footer className="footer">
+          <div className="footer-links">
+            <button onClick={() => setModalType("terms")}>Terms & Conditions</button>
+            <button onClick={() => setModalType("privacy")}>Privacy Policy</button>
+          </div>
           <div className="footer-bottom">
             © Copyright 2026. All Rights Reserved by HazSpot
           </div>

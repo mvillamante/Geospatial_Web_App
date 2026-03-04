@@ -6,6 +6,7 @@ import { saveUserSession } from "../../../libr/auth";
 import { normalizePrimaryRole, normalizeSecondaryRole, roleToBasePath } from "../../../utils/roles";
 import "./GlobalModal.css";
 import type { User } from "../../../libr/fetchCurrentUser";
+import { toast } from "sonner";
 
 type AuthModalType =
     | "login"
@@ -18,12 +19,16 @@ interface AuthModalProps {
     type?: AuthModalType;
     onClose: () => void;
     switchModal: (type: AuthModalType) => void;
+    openTerms?: () => void;
+    openPrivacy?: () => void;
 }
 
 const AuthModal: React.FC<AuthModalProps> = ({
     type = "login",
     onClose,
     switchModal,
+    openTerms,
+    openPrivacy
 }) => {
     const API_URL = import.meta.env.VITE_API_URL;
     const navigate = useNavigate();
@@ -39,7 +44,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
     const [showResetConfirm, setShowResetConfirm] = useState(false);
 
     const [resetTarget, setResetTarget] = useState("");
-    const [otpValues, setOtpValues] = useState(["", "", "", ""]);
+    const [otpValues, setOtpValues] = useState(["", "", "", "", " ", " "]);
     const [resetNewPass, setResetNewPass] = useState("");
     const [resetConfirmPass, setResetConfirmPass] = useState("");
     const [resetLoading, setResetLoading] = useState(false);
@@ -56,13 +61,17 @@ const AuthModal: React.FC<AuthModalProps> = ({
     const [signupEmail, setSignupEmail] = useState("");
     const [signupPassword, setSignupPassword] = useState("");
     const [signupConfirm, setSignupConfirm] = useState("");
+    const [agreeTerms, setAgreeTerms] = useState(false);
 
     /* ================= EFFECTS ================= */
 
     useEffect(() => {
+        const originalStyle = window.getComputedStyle(document.body).overflow;
+
         document.body.style.overflow = "hidden";
+
         return () => {
-            document.body.style.overflow = "auto";
+            document.body.style.overflow = originalStyle;
         };
     }, []);
 
@@ -125,7 +134,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
             onClose();
             handleNavigation(result.user);
         } catch (err: any) {
-            alert(err.message);
+            toast.error(err.message);
         } finally {
             setLoginLoading(false);
         }
@@ -134,6 +143,9 @@ const AuthModal: React.FC<AuthModalProps> = ({
     /* ================= SIGNUP ================= */
 
     const handleSignup = async () => {
+        if (!agreeTerms) {
+            return toast.warning("You must agree to the Terms & Conditions and Privacy Policy.");
+        }
         if (
             !signupFirstName ||
             !signupLastName ||
@@ -266,7 +278,14 @@ const AuthModal: React.FC<AuthModalProps> = ({
     };
 
     return (
-        <div className="modal-overlay" onClick={onClose}>
+        <div
+            className="modal-overlay"
+            onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                    onClose();
+                }
+            }}
+        >
             <div
                 className={`modal-content ${type === "signup" ? "modal-signup" : ""
                     }`}
@@ -422,6 +441,36 @@ const AuthModal: React.FC<AuthModalProps> = ({
                                         {showSignupConfirm ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
                                     </span>
                                 </div>
+                            </div>
+
+                            <div className="terms-checkbox">
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        checked={agreeTerms}
+                                        onChange={(e) => setAgreeTerms(e.target.checked)}
+                                    />
+                                    I agree to the{" "}
+                                    <span
+                                        className="link"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            openTerms?.();
+                                        }}
+                                    >
+                                        Terms & Conditions
+                                    </span>
+                                    and
+                                    <span
+                                        className="link"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            openPrivacy?.();
+                                        }}
+                                    >
+                                        Privacy Policy
+                                    </span>
+                                </label>
                             </div>
 
                             <button

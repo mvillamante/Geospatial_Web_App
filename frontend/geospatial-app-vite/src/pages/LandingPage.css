@@ -535,6 +535,35 @@
 }
 
 /* ===============================
+   FOOTER LINKS
+================================= */
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.footer-links button {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.footer-links button:hover {
+    color: var(--brand-blue);
+    transform: translateY(-1px);
+}
+
+.footer-links button:active {
+    transform: translateY(0);
+}
+
+/* ===============================
    RESPONSIVE
 ================================= */
 @media (max-width: 1024px) {

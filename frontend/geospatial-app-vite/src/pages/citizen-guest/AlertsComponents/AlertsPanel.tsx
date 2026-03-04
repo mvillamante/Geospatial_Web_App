@@ -30,21 +30,24 @@ interface AlertsPanelProps {
     isVerificationLoading?: boolean;
     reportTimeFilter: "today" | "7days" | "last30days" | "last12months" | "all";
     setReportTimeFilter: React.Dispatch<React.SetStateAction<"today" | "7days" | "last30days" | "last12months" | "all">>;
+    onCollapsePanel?: () => void;
 }
 
 
 
 
-export default function AlertsPanel({ 
-    onReport, 
-    onSelectReport, 
-    initialOpenIncidentId, 
-    isVerified, 
-    userBarangay, 
+export default function AlertsPanel({
+    onReport,
+    onSelectReport,
+    initialOpenIncidentId,
+    isVerified,
+    userBarangay,
     isVerificationLoading,
     reportTimeFilter,
-    setReportTimeFilter
+    setReportTimeFilter,
+    onCollapsePanel
 }: AlertsPanelProps) {
+
     const hasAutoOpenedRef = useRef(false);
     const [filtersOpen, setFiltersOpen] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
@@ -557,7 +560,7 @@ export default function AlertsPanel({
                                     ${report.verified_critical_level}
                                     ${highlightedId === report.id ? "highlighted" : ""}
                                 `}
-                                onClick={() => onSelectReport?.(report)}
+                                onClick={() => { onSelectReport?.(report); onCollapsePanel?.(); }}
                             >
                                 <div className="report-header">
                                     <span className="report-title">

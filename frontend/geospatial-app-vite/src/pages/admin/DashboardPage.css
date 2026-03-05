@@ -1,16 +1,23 @@
+.dashboard-page {
+  height: 87vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 /* Grids */
 .dashboard-page .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 18px;
-    margin-bottom: 22px;
+    margin: 0;
 }
 
 .dashboard-page .middle-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 18px;
-    margin-bottom: 18px;
 }
 
 .dashboard-page .bottom-grid {
@@ -89,7 +96,7 @@
     text-decoration: underline;
 }
 
-.dashboard-page .action-center {
+.dashboard-page .action-center { 
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -98,7 +105,7 @@
 .dashboard-page .action-center .action-list {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 8px;
     flex: 1;             
 }
 
@@ -106,7 +113,7 @@
 .dashboard-page .action-item {
     border: 1px solid rgba(0,0,0,0.08);
     border-radius: 14px;
-    padding: 16px;
+    padding: 8px 16px;
     background: linear-gradient(
         135deg,
         #fff 0%,
@@ -114,7 +121,7 @@
     );
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: 8px 16px;
+    gap: 5px 16px;
     align-items: center;
     transition: all 0.2s ease;
 }
@@ -122,7 +129,7 @@
 
 .dashboard-page .action-title {
     font-weight: 700;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .dashboard-page .action-sub {
@@ -141,5 +148,51 @@
     padding: 8px 10px;
     border-radius: 10px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+@media (max-height: 800px) {
+    .dashboard-page {
+        background-color: pink;
+        height: 88.9vh;
+        gap: 8px;
+    }
+
+    .dashboard-page .stats-grid,
+    .dashboard-page .middle-grid,
+    .dashboard-page .bottom-grid {
+        gap: 8px;
+    }
+
+    .dashboard-page .middle-grid {
+        grid-template-columns: 1.7fr 1fr;
+    }
+
+    .dashboard-page .span-2 {
+        grid-column: span 1;
+    }
+
+    .dashboard-page .action-center {
+        height: auto;
+    }
+
+    .dashboard-page .action-item {
+        gap: 2px;
+        padding: 7px 10px;
+    }
+
+    .dashboard-page .action-title {
+        font-size: 11px;
+    }
+
+    .dashboard-page .action-sub {
+        font-size: 10.9px;
+    }
+
+    .dashboard-page .action-btn {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
 }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { X } from "lucide-react";
+import { X, MapPin, Users, CheckCircle2 } from "lucide-react";
 import { FiUser, FiCheckCircle, FiSearch } from "react-icons/fi";
 import { HiChevronUpDown, HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { HiOutlineTable, HiOutlineMap } from "react-icons/hi";
@@ -97,15 +97,6 @@ const criticalBadgeClass = (level?: string | null) => {
       return "critical-badge none";
   }
 };
-
-// type ApiStatus =
-//   | "pending"
-//   | "in_progress"
-//   | "needs_info"
-//   | "rejected"
-//   | "resolved"
-//   | "archived"
-//   | "verified";
 
 const normalizeStatus = (raw: any): ReportStatus => {
   const s = String(raw ?? "").toLowerCase();
@@ -221,11 +212,6 @@ const ReportsMgmtPage: React.FC = () => {
 
   const includes = (value: any, q: string) =>
     String(value ?? "").toLowerCase().includes(q);
-
-  // const openDetails = (report: Report) => {
-  //   const latest = reports.find((r) => r.id === report.id) ?? report;
-  //   setSelectedReport(latest);
-  // };
 
   const archiveReport = async (reportId: number) => {
     try {
@@ -413,6 +399,17 @@ const ReportsMgmtPage: React.FC = () => {
     currentPage * pageSize
   );
 
+  const reportStats = useMemo(() => {
+    const base = filteredReports;
+
+    return {
+      total: base.length,
+      pending: base.filter(r => normalizeStatus(r.status) === "Pending").length,
+      inProgress: base.filter(r => normalizeStatus(r.status) === "In Progress").length,
+      resolved: base.filter(r => normalizeStatus(r.status) === "Resolved").length,
+    };
+  }, [filteredReports]);
+
   /* PAGINATION */
   const handlePageChange = (page: number) => { if (page < 1 || page > totalPages) return; setCurrentPage(page); };
 
@@ -589,13 +586,50 @@ const ReportsMgmtPage: React.FC = () => {
       {viewMode === "map" && (
         <div className="map-view-wrapper">
 
-          <div className="map-container">
-            <LeafletMap
-              selectedReport={selectedReportForMap}
-              categoryFilter={categoryFilter}
-              reportTimeFilter={reportTimeFilter}
-              activeLayers={["Verified Reports"]}
-            />
+          <div className="map-stats-wrapper">
+            <div className="map-container">
+              <LeafletMap
+                selectedReport={selectedReportForMap}
+                categoryFilter={categoryFilter}
+                reportTimeFilter={reportTimeFilter}
+                activeLayers={["Verified Reports"]}
+              />
+            </div>
+            
+            {/* Stats */}
+            <div className="report-stat-container">
+              <div className="report-stat-card total">
+                <div className="report-stat-text">
+                  <h3>Total Reports</h3>
+                  <p className="report-card-value">{reportStats.total}</p>
+                </div>
+                <MapPin className="report-card-icon" />
+              </div>
+
+              <div className="report-stat-card pending">
+                <div className="report-stat-text">
+                  <h3>Pending Review</h3>
+                  <p className="report-card-value">{reportStats.pending}</p>
+                </div>
+                <Users className="report-card-icon" />
+              </div>
+
+              <div className="report-stat-card progress">
+                <div className="report-stat-text">
+                  <h3>In Progress</h3>
+                  <p className="report-card-value">{reportStats.inProgress}</p>
+                </div>
+                <Users className="report-card-icon" />
+              </div>
+
+              <div className="report-stat-card resolved">
+                <div className="report-stat-text">
+                  <h3>Resolved</h3>
+                  <p className="report-card-value">{reportStats.resolved}</p>
+                </div>
+                <CheckCircle2 className="report-card-icon" />
+              </div>
+            </div>
           </div>
 
           <div className="mini-table-wrapper">
@@ -611,99 +645,111 @@ const ReportsMgmtPage: React.FC = () => {
               </thead>
 
               <tbody>
-                {filteredReports.map((report) => {
-                  const status = normalizeStatus(report.status);
-                  const isArchived = normalizeStatus(report.status) === "Archived";
+                {loadingReports ? (
+                  <tr>
+                    <td colSpan={5} className="empty">
+                      Loading Reports...
+                    </td>
+                  </tr>
+                ) : filteredReports.length === 0 ? (
+                  <tr>
+                    <td colSpan={5  } className="empty">
+                      No Reports Found.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredReports.map((report) => {
+                    const status = normalizeStatus(report.status);
+                    const isArchived = normalizeStatus(report.status) === "Archived";
 
-                  return (
-                    <tr key={report.id} onClick={() => setSelectedReportMap(report)} title="Click to navigate to pin">
-                      <td className="center">#R-0{report.id}</td>
-                      <td className="center">{report.user_label}</td>
-                      <td className="muted">{getIncidentLabel(report.category as IncidentCategories)}</td>
+                    return (
+                      <tr key={report.id} onClick={() => setSelectedReportMap(report)} title="Click to navigate to pin">
+                        <td className="center">#R-0{report.id}</td>
+                        <td className="center">{report.user_label}</td>
+                        <td className="muted text-wrap">{getIncidentLabel(report.category as IncidentCategories)}</td>
 
-                      <td className="center">
-                        <span className={badgeClass(status)}>{status}</span>
-                      </td>
+                        <td className="center">
+                          <span className={badgeClass(status)}>{status}</span>
+                        </td>
 
-                      <td className="center">
-                        <div className="row-menu" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            type="button"
-                            className="kebab-btn"
-                            aria-label="Actions"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenMapMenuId((prev) => (prev === report.id ? null : report.id));
-                            }}
-                          >...</button>
+                        <td className="center">
+                          <div className="row-menu" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              className="kebab-btn"
+                              aria-label="Actions"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenMapMenuId((prev) => (prev === report.id ? null : report.id));
+                              }}
+                            >...</button>
 
-                          {openMapMenuId === report.id && (
-                            <div className="kebab-dropdown">
-                              <button
-                                type="button"
-                                className="kebab-item"
-                                onClick={() => {
-                                  setOpenMapMenuId(null)
-                                  const latest = reports.find(r => r.id === report.id) ?? report;
-                                  setSelectedReport(latest);
-                                  setSelectedOfficer(latest.assigned_officer_id ? String(latest.assigned_officer_id) : "");
-
-
-                                }}
-                              >View Full Details
-                              </button>
-
-                              {/*<button
-                                type="button"
-                                className="kebab-item danger"
-                                onClick={async () => {
-                                  setOpenMapMenuId(null);
-
-                                  try {
-                                    const updated = await patchReport(report.id, {
-                                      status: "critical"
-                                    });
-
-                                    setReports(prev =>
-                                      prev.map(r =>
-                                        r.id === report.id ? { ...r, ...updated } : r
-                                      )
-                                    );
-
-                                    toast.success("Report escalated to Critical status");
-
-                                  } catch (err: any) {
-                                    console.error(err);
-                                    toast.error(err?.message || "Failed to escalate report");
-                                  }
-                                }}
-                              >
-                                Escalate
-                              </button>
-
-                              <button
-                                type="button"
-                                className="kebab-item danger"
-                                onClick={() => {
-                                  setOpenMapMenuId(null);
-                                  setConfirmArchiveId(report.id);
-                                }}
-                                disabled={isArchived}
-                              >
-                                Archive
-                              </button>*/}
+                            {openMapMenuId === report.id && (
+                              <div className="kebab-dropdown">
+                                <button
+                                  className="dropdown-item view-details"
+                                  onClick={() => {
+                                    setOpenMapMenuId(null)
+                                    const latest = reports.find(r => r.id === report.id) ?? report;
+                                    setSelectedReport(latest);
+                                    setSelectedOfficer(latest.assigned_officer_id ? String(latest.assigned_officer_id) : "");
 
 
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                                  }}
+                                >View Full Details
+                                </button>
+
+                                <button
+                                  className="dropdown-item view-details"
+                                  onClick={async () => {
+                                    setOpenMapMenuId(null);
+
+                                    try {
+                                      const updated = await patchReport(report.id, {
+                                        status: "Critical"
+                                      });
+
+                                      setReports(prev =>
+                                        prev.map(r =>
+                                          r.id === report.id ? { ...r, ...updated } : r
+                                        )
+                                      );
+
+                                      toast.success("Report escalated to Critical status");
+
+                                    } catch (err: any) {
+                                      console.error(err);
+                                      toast.error(err?.message || "Failed to escalate report");
+                                    }
+                                  }}
+                                >
+                                  Escalate
+                                </button>
+
+                                <button
+                                  className="dropdown-item view-details danger"
+                                  onClick={() => {
+                                    setOpenMapMenuId(null);
+                                    setConfirmArchiveId(report.id);
+                                  }}
+                                  disabled={isArchived}
+                                >
+                                  Archive
+                                </button>
+
+
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
+
 
         </div>
       )}
@@ -711,7 +757,7 @@ const ReportsMgmtPage: React.FC = () => {
       {viewMode === "table" && (
         <>
           <div className="reports-table-wrapper">
-            <table className="reports-table">
+            <table>
               <thead>
                 <tr>
                   <th className="center">Report ID</th>
@@ -793,8 +839,7 @@ const ReportsMgmtPage: React.FC = () => {
                             {openMenuId === report.id && (
                               <div className="kebab-dropdown">
                                 <button
-                                  type="button"
-                                  className="kebab-item"
+                                  className="dropdown-item view-details"
                                   onClick={() => {
                                     setOpenMenuId(null)
                                     const latest = reports.find(r => r.id === report.id) ?? report;
@@ -807,8 +852,7 @@ const ReportsMgmtPage: React.FC = () => {
                                 </button>
 
                                 <button
-                                  type="button"
-                                  className="kebab-item danger"
+                                  className="dropdown-item view-details"
                                   onClick={async () => {
                                     setOpenMenuId(null);
 
@@ -835,8 +879,7 @@ const ReportsMgmtPage: React.FC = () => {
                                 </button>
 
                                 <button
-                                  type="button"
-                                  className="kebab-item danger"
+                                  className="dropdown-item view-details danger"
                                   onClick={() => {
                                     setOpenMenuId(null);
                                     setConfirmArchiveId(report.id);

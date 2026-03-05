@@ -30,7 +30,7 @@
 /* Content */
 .chart-content {
     width: 100%;
-    height: 260px;
+    height: 200px;
 }
 
 .recharts-legend-item-text {
@@ -40,4 +40,10 @@
 
 .recharts-tooltip-wrapper {
     font-size: 0.75rem;
+}
+
+@media (max-height: 800px) {
+    .chart-card {
+        padding: 12px 17px;
+    }
 }

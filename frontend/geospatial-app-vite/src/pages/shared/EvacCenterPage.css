@@ -1251,3 +1251,12 @@
     background: white;
     border: 1px dashed #e2e8f0;
 }
+
+.evac-loading,
+.evac-empty {
+  width: 100%;
+  padding: 40px 50px;
+  text-align: center;
+  font-size: 15px;
+  color: #6b7280;
+}

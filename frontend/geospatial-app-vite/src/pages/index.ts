@@ -23,5 +23,4 @@ export { default as PwaAuthPage } from "./citizen-pwa/AuthPage";
 // lgu officer and researcher
 export { default as HomePage } from "./officer-researcher/HomePage";
 export { default as DashboardMapPage } from "./officer-researcher/DashboardMapPage";
-export { default as OldDashboardMapPage } from "./officer-researcher/OLDDASHBOARDMAPWAGDTO";
 export { default as ReportVerifyPage } from "./officer-researcher/ReportVerifyPage";

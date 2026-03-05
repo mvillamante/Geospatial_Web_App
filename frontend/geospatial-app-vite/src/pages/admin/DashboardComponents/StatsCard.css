@@ -10,8 +10,8 @@
     transform: translateY(-4px);
 }
 
-.stats-card-content {
-    padding: 24px;
+.stats-card-content { /*ETOETO*/
+    padding: 15px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -28,7 +28,7 @@
 }
 
 .stats-card-value {
-    font-size: 1.875rem;
+    font-size: 1.475rem;
     font-weight: 700;
     color: #111827;
 }
@@ -62,4 +62,27 @@
     width: 32px;
     height: 32px;
     color: #ea580c;
+}
+
+@media (max-height: 800px) {
+    .stats-card-content {
+        padding: 10px 18px;
+    }
+
+    .stats-card-title {
+        font-size: 0.775rem;
+    }
+
+    .stats-card-value {
+        font-size: 1.275rem;
+    }
+    
+    .stats-card-icon-wrapper {
+        padding: 10 px;
+    }
+
+    .stats-card-icon {
+        width: 25px;
+        height: 25px;
+    }
 }

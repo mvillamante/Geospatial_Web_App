@@ -561,37 +561,37 @@ const ReportVerifyPage: React.FC = () => {
       </div> */}
 
       {/* Stats */}
-      <div className="reportverify-stat-container">
-        <div className="reportverify-stat-card total">
-          <div className="reportverify-stat-text">
+      <div className="report-stat-container">
+        <div className="report-stat-card total">
+          <div className="report-stat-text">
             <h3>Total Reports</h3>
-            <p className="reportverify-card-value">{stats.total}</p>
+            <p className="report-card-value">{stats.total}</p>
           </div>
-          <MapPin className="reportverify-card-icon" />
+          <MapPin className="report-card-icon" />
         </div>
 
-        <div className="reportverify-stat-card pending">
-          <div className="reportverify-stat-text">
+        <div className="report-stat-card pending">
+          <div className="report-stat-text">
             <h3>Pending Review</h3>
-            <p className="reportverify-card-value">{stats.pending}</p>
+            <p className="report-card-value">{stats.pending}</p>
           </div>
-          <Users className="reportverify-card-icon" />
+          <Users className="report-card-icon" />
         </div>
 
-        <div className="reportverify-stat-card progress">
-          <div className="reportverify-stat-text">
+        <div className="report-stat-card progress">
+          <div className="report-stat-text">
             <h3>In Progress</h3>
-            <p className="reportverify-card-value">{stats.inProgress}</p>
+            <p className="report-card-value">{stats.inProgress}</p>
           </div>
-          <Users className="reportverify-card-icon" />
+          <Users className="report-card-icon" />
         </div>
 
-        <div className="reportverify-stat-card resolved">
-          <div className="reportverify-stat-text">
+        <div className="report-stat-card resolved">
+          <div className="report-stat-text">
             <h3>Resolved</h3>
-            <p className="reportverify-card-value">{stats.resolved}</p>
+            <p className="report-card-value">{stats.resolved}</p>
           </div>
-          <CheckCircle2 className="reportverify-card-icon" />
+          <CheckCircle2 className="report-card-icon" />
         </div>
       </div>
 

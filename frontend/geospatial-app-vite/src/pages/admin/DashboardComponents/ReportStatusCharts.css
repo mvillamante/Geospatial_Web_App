@@ -2,7 +2,7 @@
     background: #fff;
     border: 1px solid rgba(0,0,0,0.10);
     border-radius: 14px;
-    padding: 14px;
+    padding: 7px 14px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.04);
 }
 
@@ -20,8 +20,4 @@
     font-size: 12px;
     margin: 4px 0 0;
     color: #6b7280;
-}
-
-.chart-card .chart-content {
-    width: 100%;
 }

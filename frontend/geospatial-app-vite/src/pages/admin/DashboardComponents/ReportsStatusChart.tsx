@@ -91,7 +91,7 @@ export const ReportsStatusChart: React.FC = () => {
         </div>
 
         <div className="chart-content">
-            <ResponsiveContainer width="100%" height={260}>
+            <ResponsiveContainer>
                 <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" tick={{fontSize: 12}} />

@@ -69,10 +69,18 @@ export const getUserRoleAndDisplayName = () => {
     (userRole || "Guest");
 
   const profilePath = `/main/${userRole.toLowerCase()}/profile`;
-
   const settingsPath = `/main/${userRole.toLowerCase()}/settings`;
 
-  return { currentUserId, userRole, userRole2, displayName, profilePath, settingsPath };
+  const isResidentVerified = currentUser.is_resident_verified ?? false;
+
+  return { 
+    currentUserId, 
+    userRole, 
+    userRole2, 
+    displayName, 
+    profilePath, 
+    settingsPath,
+    isResidentVerified };
 };
 
 

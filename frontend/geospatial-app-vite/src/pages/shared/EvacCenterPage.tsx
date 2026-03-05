@@ -78,6 +78,7 @@ function EvacCenterPage() {
   const [selectedEvacuationCenter, setSelectedEvacuationCenter] = useState<EvacuationCenter | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [locationFilter, setLocationFilter] = useState<"all" | "near_me">("all");
+  const [loadingCenters, setLoadingCenters] = useState(true);
 
   const userBarangay = localStorage.getItem("user_barangay") || "";
   const normalizeBarangay = (text: string) =>
@@ -88,7 +89,7 @@ function EvacCenterPage() {
       .trim();
 
   //get user role
-  const { userRole } = getUserRoleAndDisplayName();
+  const { userRole, isResidentVerified } = getUserRoleAndDisplayName();
 
   const handleGetDirections = (coordinates: string) => {
     const [lat, lng] = coordinates.split(', ');
@@ -97,9 +98,18 @@ function EvacCenterPage() {
   };
 
   useEffect(() => {
-    fetchEvacCenters().then((data) => {
-      setCenters(data.map(mapApiToCenter));
-    });
+    const loadCenters = async () => {
+      try {
+        const data = await fetchEvacCenters();
+        setCenters(data.map(mapApiToCenter));
+      } catch (err) {
+        console.error("Failed to load evacuation centers:", err);
+      } finally {
+        setLoadingCenters(false);
+      }
+    };
+
+    loadCenters();
   }, []);
 
   // Evac Center Tag Colors
@@ -254,28 +264,30 @@ function EvacCenterPage() {
         <div className="evac-side-content">
           <div className="evac-side-content-filtermap">
             {/* Filter-Row */}
-            <div className="filters">
-              <div className="select-wrapper">
-                <MdPlace className="select-icon" />
-                <select
-                  value={locationFilter}
-                  onChange={(e) => setLocationFilter(e.target.value as "all" | "near_me")}
-                  className="role-select"
-                >
-                  <option value="all">All Centers</option>
-                  <option value="near_me">
-                    Near My Barangay
-                  </option>
-                </select>
-              </div>
-
-              {locationFilter === "near_me" && userBarangay && (
-                <div className="filter-hint">
-                  Showing centers near {" "}
-                  <strong>{userBarangay}</strong>
+            { (userRole === "Citizen" && isResidentVerified) && (
+              <div className="filters">
+                <div className="select-wrapper">
+                  <MdPlace className="select-icon" />
+                  <select
+                    value={locationFilter}
+                    onChange={(e) => setLocationFilter(e.target.value as "all" | "near_me")}
+                    className="role-select"
+                  >
+                    <option value="all">All Centers</option>
+                    <option value="near_me">
+                      Near My Barangay
+                    </option>
+                  </select>
                 </div>
-              )}
-            </div>
+
+                {locationFilter === "near_me" && userBarangay && (
+                  <div className="filter-hint">
+                    Showing centers near {" "}
+                    <strong>{userBarangay}</strong>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Interactive Map Component */}
             <div className="evac-side-content-map">
@@ -393,117 +405,127 @@ function EvacCenterPage() {
         </button>
 
         <div className="evac-grid officer" ref={gridRef} style={{ overflowX: "hidden" }}>
-          {filteredCenters.map(center => {
-            const isExiting = closingId === center.id;
-            return (
-              <div
-                key={center.id}
-                className={`evac-card ${userRole === "Officer" ? "officer" : ""} animate-card ${isExiting ? "exit" : ""
-                  }`}
-              >
-                <h2 className="evac-card-name">
-                  <span
-                    ref={(el) => {
-                      if (!el) return;
-                      el.title = el.scrollWidth > el.clientWidth ? center.name : "";
-                    }}
-                  >
-                    {center.name}
-                  </span>
-                  {userRole === "Officer" && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span
-                        className="evac-tag"
-                        style={{
-                          background: getTagColors(center.type).bg,
-                          color: getTagColors(center.type).text,
-                        }}
-                      >
-                        {center.type.charAt(0).toUpperCase() + center.type.slice(1)}
-                      </span>
-
-                      <div className="evac-capacity">
-                        <Users className="evac-capacity-icon" />
-                        {center.capacity}
-                      </div>
-                    </div>
-                  )}
-                  {userRole === "Citizen" && (
-                    <span className="evac-capacity">
-                      <Users className="evac-capacity-icon" />
-                      {center.capacity}
+          {loadingCenters ? (
+            <div className="evac-loading">
+              Loading evacuation centers...
+            </div>
+          ) : filteredCenters.length === 0 ? (
+            <div className="evac-empty">
+              No evacuation centers found.
+            </div>
+          ) : (
+            filteredCenters.map(center => {
+              const isExiting = closingId === center.id;
+              return (
+                <div
+                  key={center.id}
+                  className={`evac-card ${userRole === "Officer" ? "officer" : ""} animate-card ${isExiting ? "exit" : ""
+                    }`}
+                >
+                  <h2 className="evac-card-name">
+                    <span
+                      ref={(el) => {
+                        if (!el) return;
+                        el.title = el.scrollWidth > el.clientWidth ? center.name : "";
+                      }}
+                    >
+                      {center.name}
                     </span>
-                  )}
-                </h2>
+                    {userRole === "Officer" && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span
+                          className="evac-tag"
+                          style={{
+                            background: getTagColors(center.type).bg,
+                            color: getTagColors(center.type).text,
+                          }}
+                        >
+                          {center.type.charAt(0).toUpperCase() + center.type.slice(1)}
+                        </span>
 
-                <p className={`evac-barangay ${!center.barangay ? "muted" : ""}`}>
-                  {center.barangay || "Barangay not specified"}
-                </p>
-
-                <div className="evac-info">
-                  <>
-                    {userRole === "Officer" ? (
-                      <div className="evac-info-row">
-                        <GrLocationPin className="evac-info-icon location-pin" />
-                        {center.coordinates}
-                      </div>
-                    ) : (
-                      <div className="evac-info-row">
-                        <MapPin className="evac-info-icon" />
-                        <span>{center.address}</span>
+                        <div className="evac-capacity">
+                          <Users className="evac-capacity-icon" />
+                          {center.capacity}
+                        </div>
                       </div>
                     )}
+                    {userRole === "Citizen" && (
+                      <span className="evac-capacity">
+                        <Users className="evac-capacity-icon" />
+                        {center.capacity}
+                      </span>
+                    )}
+                  </h2>
 
-                    <div className="evac-info-row">
-                      <Phone className="evac-info-icon" />
-                      {center.contact ? (
-                        <a
-                          href={`tel:${center.contact.replace(/[^0-9+]/g, "")}`}
-                          className="evac-contact-link"
-                        >
-                          {center.contact}
-                        </a>
+                  <p className={`evac-barangay ${!center.barangay ? "muted" : ""}`}>
+                    {center.barangay || "Barangay not specified"}
+                  </p>
+
+                  <div className="evac-info">
+                    <>
+                      {userRole === "Officer" ? (
+                        <div className="evac-info-row">
+                          <GrLocationPin className="evac-info-icon location-pin" />
+                          {center.coordinates}
+                        </div>
                       ) : (
-                        <span className="evac-contact-muted">
-                          No contact available
-                        </span>
+                        <div className="evac-info-row">
+                          <MapPin className="evac-info-icon" />
+                          <span>{center.address}</span>
+                        </div>
                       )}
-                    </div>
-                  </>
+
+                      <div className="evac-info-row">
+                        <Phone className="evac-info-icon" />
+                        {center.contact ? (
+                          <a
+                            href={`tel:${center.contact.replace(/[^0-9+]/g, "")}`}
+                            className="evac-contact-link"
+                          >
+                            {center.contact}
+                          </a>
+                        ) : (
+                          <span className="evac-contact-muted">
+                            No contact available
+                          </span>
+                        )}
+                      </div>
+                    </>
+                  </div>
+
+                  {userRole === "Officer" && (
+                    <>
+                      <hr className="evac-hr-divider" />
+                      <div className="evac-actions">
+                        <button
+                          className="evac-edit-btn"
+                          onClick={() => handleEditCenter(center)}
+                        >
+                          <MdOutlineModeEdit /> Edit
+                        </button>
+                        <button
+                          className="evac-delete-btn"
+                          onClick={() => handleDeleteCenter(center.id)}
+                        >
+                          <RiDeleteBinFill />
+                        </button>
+                      </div>
+                    </>
+                  )}
+
+                  {(userRole === "Citizen") && (
+                    <button
+                      className="evac-btn"
+                      onClick={() => handleGetDirections(center.coordinates)}
+                    >
+                      <Navigation className="evac-btn-icon" />
+                      Get Directions
+                    </button>
+                  )}  
                 </div>
-
-                {userRole === "Officer" && (
-                  <>
-                    <hr className="evac-hr-divider" />
-                    <div className="evac-actions">
-                      <button
-                        className="evac-edit-btn"
-                        onClick={() => handleEditCenter(center)}
-                      >
-                        <MdOutlineModeEdit /> Edit
-                      </button>
-                      <button
-                        className="evac-delete-btn"
-                        onClick={() => handleDeleteCenter(center.id)}
-                      >
-                        <RiDeleteBinFill />
-                      </button>
-                    </div>
-                  </>
-                )}
-
-                {(userRole === "Citizen" || userRole === "Guest") && (
-                  <button
-                    className="evac-btn"
-                    onClick={() => handleGetDirections(center.coordinates)}
-                  >
-                    <Navigation className="evac-btn-icon" />
-                    Get Directions
-                  </button>
-                )}
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
 

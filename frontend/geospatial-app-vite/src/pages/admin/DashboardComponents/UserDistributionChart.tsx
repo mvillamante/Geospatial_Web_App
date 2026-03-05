@@ -85,7 +85,7 @@ export const UserDistributionChart: React.FC<Props> = ({ small }) => {
       </div>
 
       <div className="chart-content">
-        <ResponsiveContainer width="100%" height={height}>
+        <ResponsiveContainer>
           <PieChart>
             <Pie
               data={data}

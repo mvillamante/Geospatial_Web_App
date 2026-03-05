@@ -2,11 +2,6 @@
     margin-bottom: 2rem;
 }
 
-.muted {
-  color: #9ca3af;
-  font-style: italic;
-}
-
 /* CMS Actions Container */
 .cms-actions {
   display: flex;
@@ -137,6 +132,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin-bottom: 23px;
 }
 
 /* CMS Active / Archived tabs */

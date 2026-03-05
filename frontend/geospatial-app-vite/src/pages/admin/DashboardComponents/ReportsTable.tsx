@@ -230,7 +230,7 @@ export function ReportsTable() {
                     </span>
                   </td>
                   <td className="report-date center muted">{formatDate(report.created_at)}</td>
-                  <td className="center">
+                  <td className="report-assigned center">
                     {report.assigned_officer_label ? (
                       <span className="assigned-chip">{report.assigned_officer_label}</span>
                     ) : (

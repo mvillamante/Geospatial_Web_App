@@ -15,7 +15,9 @@ import { Toaster } from "sonner";
 const App: React.FC = () => {
   return (
     <Router>
-      <Toaster richColors position="top-right" />
+      <Toaster richColors position="top-right" toastOptions={{
+    duration: 2000
+  }}/>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         {/* PWA Routes  */}

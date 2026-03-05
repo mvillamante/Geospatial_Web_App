@@ -9,6 +9,7 @@ import LeafletMap from "../components/ui/LeafletMap";
 import ResearcherRequestModal from "../components/ui/Modals/ResearcherRequestModal";
 import TermsModal from "../components/ui/Modals/TermsModal";
 import PrivacyModal from "../components/ui/Modals/PrivacyModal";
+import Spinner from "../components/ui/Spinner";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -107,15 +108,8 @@ const LandingPage: React.FC = () => {
   }, []);
 
   if (loading) {
-    return (
-      <div className="loading-screen">
-        <div className="spinner"></div>
-        <p className="loading-text">Loading...</p>
-      </div>
-    );
+    return <Spinner />;
   }
-
-
 
 
   // ===== Get user role and display name from localStorage =====
@@ -202,7 +196,10 @@ const LandingPage: React.FC = () => {
             </div>
 
             <div className="dashboard-map-container">
-              <LeafletMap activeLayers={["Verified Reports"]} />
+              <LeafletMap
+                activeLayers={["Verified Reports"]}
+                reportTimeFilter="7days"
+              />
             </div>
 
             {/* Stats Section */}

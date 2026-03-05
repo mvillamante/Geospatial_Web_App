@@ -45,7 +45,7 @@ const PrivacyModal = ({ onClose }) => {
                         <p>
                             The data controller responsible for your personal information is
                             the <strong>HazSpot Development Team</strong>, Noela Mae Andosay, Vince Joseph Arbutante, John Wilbert Laiño, and  Michaella Villamante. You may reach us at{" "}
-                            <strong>hazspot@gmail.com</strong>.
+                            <strong>hazspot12@gmail.com</strong>.
                         </p>
 
                         <h3>2. Personal Data We Collect</h3>

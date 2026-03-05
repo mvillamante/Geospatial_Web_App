@@ -52,7 +52,7 @@ const AlertsMapPage: React.FC = () => {
 
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
 
-  const [reportTimeFilter, setReportTimeFilter] = useState<"all" | "today" | "7days" | "last30days" | "last12months">("all");
+  const [reportTimeFilter, setReportTimeFilter] = useState<"all" | "today" | "7days" | "last30days" | "last12months">("7days");
 
   const handleBarangaySearch = (barangay: string, severity: string | null) => {
     setSearchedBarangay(barangay);

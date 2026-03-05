@@ -30,7 +30,7 @@ const NavigationMenu: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
 
   const { userRole, userRole2, displayName, profilePath, settingsPath } = getUserRoleAndDisplayName();
 

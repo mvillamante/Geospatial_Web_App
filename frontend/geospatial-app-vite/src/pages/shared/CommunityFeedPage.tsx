@@ -1,9 +1,9 @@
 import { useMemo, useState, useEffect } from "react";
 import { FaFacebook, FaEnvelope, FaSyncAlt } from "react-icons/fa";
+
 import {
     Pin,
     Search,
-    SlidersHorizontal,
     AlertTriangle,
     Megaphone,
     BookOpen,

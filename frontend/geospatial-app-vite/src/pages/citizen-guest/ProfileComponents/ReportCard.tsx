@@ -58,11 +58,13 @@ export default function ReportCard({ report, onUpdate, autoOpen }: Props) {
                 <ProgressBar status={mapToProgressStatus(report.status)} />
 
                 <div className="report-actions">
-                    <span className={`status-pill ${report.status.replace("_", "-")}`}>
+                    <span
+                        className={`status-pill ${report.status
+                            .toLowerCase()
+                            .replace(/\s+/g, "-")}`}
+                    >
                         {formatStatus(report.status)}
                     </span>
-
-
 
                     <button className="dots-btn" onClick={() => setOpen(true)}>...</button>
                 </div>

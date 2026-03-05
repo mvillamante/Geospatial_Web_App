@@ -15,12 +15,16 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .evac-search-wrapper {
   position: relative;
-  width: 600px;
-  max-width: 100%;
+  width: 100%;
+  flex: 1;
+  max-width: 400px;
+
 }
 
 .evac-search {
@@ -52,29 +56,29 @@
 }
 
 .evac-search-clear {
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
 
-    border: none;
-    background: transparent;
+  border: none;
+  background: transparent;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    cursor: pointer;
-    color: #64748b;
+  cursor: pointer;
+  color: #64748b;
 
-    padding: 4px;
-    border-radius: 50%;
+  padding: 4px;
+  border-radius: 50%;
 
-    transition: 0.2s ease;
+  transition: 0.2s ease;
 }
 
 .evac-search-clear:hover {
-    background: #f1f5f9;
-    color: #0f172a;
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 
@@ -89,13 +93,13 @@
 }
 
 .evac-grid.officer {
-  display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: max-content;
-  overflow-x: hidden;
+  grid-auto-columns: 280px;
+  overflow-x: auto;
   padding-bottom: 12px;
-  margin-top: 15px;
   gap: 16px;
+  scroll-snap-type: x mandatory;
+  scroll-snap-align: start;
 }
 
 .evac-card {
@@ -130,6 +134,12 @@
   align-items: center;
   gap: 12px;
   min-width: 0;
+}
+
+.evac-btn,
+.evac-add-btn,
+.evac-edit-btn {
+  min-height: 44px;
 }
 
 .evac-card-name span {
@@ -401,14 +411,16 @@
   justify-content: flex-start;
   align-items: center;
   flex: 1;
-} 
+}
 
 .evac-side-content {
   display: flex;
   flex-direction: row;
   align-items: stretch;
   gap: 1rem;
-  width: 80%;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   background-color: var(--white-bg);
   border-radius: 15px;
   box-shadow: 0 6px 16px rgba(163, 169, 182, 0.18);
@@ -446,6 +458,14 @@
 }
 
 @media (max-width: 768px) {
+  .evac-page {
+    padding: 12px;
+  }
+
+  .evac-grid {
+    gap: 0.9rem;
+  }
+
   .evac-side-content-map {
     width: 100%;
     height: 66vh;
@@ -469,12 +489,14 @@
 ========================= */
 
 .evac-stat-container {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
+  width: 100%;
   padding: 15px;
   align-items: center;
 }
+
 /* Stat Card */
 .evac-stat-card {
   background: #ffffff;
@@ -1022,7 +1044,7 @@
   .evac-page {
     min-height: 100vh;
     padding: 15px;
-    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+    padding-bottom: calc(70px + env(safe-area-inset-bottom));
   }
 
   /* Header */
@@ -1043,8 +1065,9 @@
 
   /* Grid */
   .evac-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   }
 
   .evac-grid.officer {
@@ -1055,9 +1078,8 @@
   }
 
   .evac-card {
-    max-width: 230px;
-    margin: 0 auto;
-    padding: 1rem;
+    width: 100%;
+    max-width: 100%;
   }
 
   .evac-card.officer {
@@ -1091,6 +1113,7 @@
     padding: 0.5rem;
     font-size: 0.78rem;
   }
+
   .evac-btn .evac-btn-icon {
     width: 15px;
     height: 15px;
@@ -1240,23 +1263,14 @@
 }
 
 .evac-empty-state {
-    width: 100%;
-    text-align: center;
-    padding: 40px 20px;
-
-    color: #64748b;
-    font-size: 15px;
-
-    border-radius: 14px;
-    background: white;
-    border: 1px dashed #e2e8f0;
-}
-
-.evac-loading,
-.evac-empty {
   width: 100%;
-  padding: 40px 50px;
   text-align: center;
+  padding: 40px 20px;
+
+  color: #64748b;
   font-size: 15px;
-  color: #6b7280;
+
+  border-radius: 14px;
+  background: white;
+  border: 1px dashed #e2e8f0;
 }

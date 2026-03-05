@@ -64,7 +64,7 @@ type IncidentReportAPI = {
 };
 
 type VerificationStatus = "unverified" | "pending" | "verified" | "rejected";
-type ProgressStatus = "Pending" | "In Progress" | "Resolved" | "Needs Info" | "Archived" | "Rejected";
+type ProgressStatus = "pending" | "In Progress" | "Resolved" | "Needs Info" | "Archived" | "Rejected";
 
 function toProgressStatus(raw: string | undefined | null): ProgressStatus {
   const s = (raw || "").toLowerCase();
@@ -178,6 +178,14 @@ const ProfilePage: React.FC = () => {
     }
   }, [location.state, reports]);
 
+  const statusClassMap: Record<ReportStatus, string> = {
+    Pending: "pending",
+    "In Progress": "in-progress",
+    "Needs Info": "needs-info",
+    Resolved: "resolved",
+    Rejected: "rejected",
+    Archived: "archived",
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {

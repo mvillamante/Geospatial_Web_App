@@ -40,8 +40,8 @@ const AuthModal: React.FC<AuthModalProps> = ({
     const [showLoginPassword, setShowLoginPassword] = useState(false);
     const [showSignupPassword, setShowSignupPassword] = useState(false);
     const [showSignupConfirm, setShowSignupConfirm] = useState(false);
-    const [showResetPassword, setShowResetPassword] = useState(false);
-    const [showResetConfirm, setShowResetConfirm] = useState(false);
+    // const [showResetPassword, setShowResetPassword] = useState(false);
+    // const [showResetConfirm, setShowResetConfirm] = useState(false);
 
     const [resetTarget, setResetTarget] = useState("");
     const [otpValues, setOtpValues] = useState(["", "", "", "", " ", " "]);
@@ -280,11 +280,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
     return (
         <div
             className="modal-overlay"
-            onClick={(e) => {
-                if (e.target === e.currentTarget) {
-                    onClose();
-                }
-            }}
+            onClick={(e) => e.stopPropagation()}
         >
             <div
                 className={`modal-content ${type === "signup" ? "modal-signup" : ""
@@ -444,31 +440,34 @@ const AuthModal: React.FC<AuthModalProps> = ({
                             </div>
 
                             <div className="terms-checkbox">
-                                <label>
+                                <label onClick={(e) => e.stopPropagation()}>
                                     <input
                                         type="checkbox"
                                         checked={agreeTerms}
                                         onChange={(e) => setAgreeTerms(e.target.checked)}
                                     />
-                                    I agree to the{" "}
-                                    <span
-                                        className="link"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            openTerms?.();
-                                        }}
-                                    >
-                                        Terms & Conditions
-                                    </span>
-                                    and
-                                    <span
-                                        className="link"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            openPrivacy?.();
-                                        }}
-                                    >
-                                        Privacy Policy
+
+                                    <span className="terms-text">
+                                        I agree to the{" "}
+                                        <span
+                                            className="link"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                openTerms?.();
+                                            }}
+                                        >
+                                            Terms & Conditions
+                                        </span>{" "}
+                                        and{" "}
+                                        <span
+                                            className="link"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                openPrivacy?.();
+                                            }}
+                                        >
+                                            Privacy Policy
+                                        </span>
                                     </span>
                                 </label>
                             </div>

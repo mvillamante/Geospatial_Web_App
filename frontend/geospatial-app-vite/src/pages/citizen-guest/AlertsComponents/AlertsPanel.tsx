@@ -134,7 +134,7 @@ export default function AlertsPanel({
                     const s = String(locationDisplay ?? "").trim();
                     if (!s) return "";
 
-                    const m = s.match(/\b(?:barangay|brgy\.?)\s+([^,|\-]+)\b/i);
+                    const m = s.match(/\b(?:barangay|brgy\.?)\s+([^,]+)/i);
                     if (m?.[1]) return m[1].trim();
 
                     return s.split(",")[0].trim();

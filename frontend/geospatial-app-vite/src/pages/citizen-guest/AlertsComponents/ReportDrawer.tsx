@@ -3,7 +3,7 @@ import filipinoBadWords from "filipino-badwords-list";
 
 import { useEffect, useRef, useState, useMemo } from "react";
 import PinLocationPicker from "./PinLocationPicker";
-import { isWithinCabuyao } from '../../../../src/utils/validateCabuyao';
+// import { isWithinCabuyao } from '../../../../src/utils/validateCabuyao';
 import { getIncidentCategories } from "../../../constants"
 import { toast } from "sonner";
 
@@ -83,16 +83,18 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
   // const [badWords, setBadWords] = useState<string[]>([]);
   const [showProfanityWarning, setShowProfanityWarning] = useState(false);
 
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+
   // Location mode
   const [locationMode, setLocationMode] = useState<"auto" | "pin">("auto");
   const [pinnedCoords, setPinnedCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [pinLoadingAddress, setPinLoadingAddress] = useState(false);
 
   // Form fields
-  const [category, setCategory] = useState("fire");
+  const [category, setCategory] = useState("");
   const [otherCategory, setOtherCategory] = useState("");
   const [description, setDescription] = useState("");
-  const [criticalLevel, setCriticalLevel] = useState("low");
+  const [criticalLevel, setCriticalLevel] = useState("");
 
   // Photo
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -144,10 +146,10 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
     if (!open) return;
 
     // reset fields
-    setCategory("fire");
+    setCategory("");
     setOtherCategory("");
     setDescription("");
-    setCriticalLevel("low");
+    setCriticalLevel("");
     setPhotoFile(null);
     setPhotoPreview(null);
 
@@ -207,13 +209,13 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
           // avoid overriding user pin
           if (locationMode !== "pin") {
             setLocation("Location not available");
-            setError("Unable to determine location");
+            toast.error("Unable to determine location");
           }
         }
       },
       () => {
         if (locationMode !== "pin") {
-          setError("Unable to access location. Please enable location access.");
+          toast.error("Unable to access location. Please enable location access.");
           setLocation("Location not available");
         }
       },
@@ -254,28 +256,46 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
     reverseGeocodeAndSetDisplay(startLat, startLon);
   }
 
+  function validateReport(): boolean {
+    if (!category) {
+      toast.error("Please select a category.");
+      return false;
+    }
+
+    if (!description.trim()) {
+      toast.error("Please add a description.");
+      return false;
+    }
+
+    if (!criticalLevel) {
+      toast.error("Please select a critical level.");
+      return false;
+    }
+
+    if (category === "others" && !otherCategory.trim()) {
+      toast.error("Please specify the category.");
+      return false;
+    }
+
+    if (!coords) {
+      toast.error("Location is required.");
+      return false;
+    }
+
+    if (!photoFile) {
+      toast.error("Please upload a photo of the incident.");
+      return false;
+    }
+
+    return true;
+  }
+
   async function handleSubmit() {
     if (!token) {
-      setError("Not logged in. Please sign in again");
+      toast.error("Not logged in. Please sign in again");
       return;
     }
-    if (!description.trim()) {
-      setError("Please add a description.");
-      return;
-    }
-    if (category === "others" && !otherCategory.trim()) {
-      setError("Please specify the category.");
-      return;
-    }
-    if (!coords) {
-      setError("Location is required. Please enable location or pin on map.");
-      return;
-    }
-    if (!isWithinCabuyao(coords.lat, coords.lon)) {
-      setError("You must be within Cabuyao to submit a report.");
-      return;
-    }
-    toast.success("Report submitted successfully");
+
     setSubmitting(true);
     setError(null);
 
@@ -308,10 +328,10 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data?.detail || data?.error || "Failed to submit report");
-
+      toast.success("Report submitted successfully");
       onClose();
     } catch (e: any) {
-      setError(e?.message || "Failed to submit report");
+      toast.error(e?.message || "Failed to submit report");
     } finally {
       setSubmitting(false);
     }
@@ -322,8 +342,8 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
   }
 
   return (
-    <div className="drawer-overlay">
-      <div className="drawer">
+    <div className="drawer-overlay" onClick={onClose}>
+      <div className="drawer" onClick={(e) => e.stopPropagation()}>
         <div className="drawer-header">
           <h3>Report an Incident</h3>
           <button className="drawer-close" onClick={onClose}>
@@ -337,6 +357,10 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
+            <option value="" disabled>
+              Select category
+            </option>
+
             {categories.map((cat) => (
               <option key={cat.value} value={cat.value}>
                 {cat.label}
@@ -379,7 +403,14 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
           )}
 
           <label>Suggested Critical Level</label>
-          <select value={criticalLevel} onChange={(e) => setCriticalLevel(e.target.value)}>
+          <select
+            value={criticalLevel}
+            onChange={(e) => setCriticalLevel(e.target.value)}
+          >
+            <option value="" disabled>
+              Select severity level
+            </option>
+
             <option value="low">Low</option>
             <option value="moderate">Moderate</option>
             <option value="high">High</option>
@@ -425,7 +456,7 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
             />
           )}
 
-          <label>Photo (Optional)</label>
+          <label>Photo</label>
           <div className="photo-upload">
             <input
               type="file"
@@ -461,7 +492,15 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
         </div>
 
         <div className="drawer-actions">
-          <button className="submit-btn" onClick={handleSubmit} disabled={submitting}>
+          <button
+            className="submit-btn"
+            onClick={() => {
+              if (validateReport()) {
+                setShowSubmitModal(true);
+              }
+            }}
+            disabled={submitting}
+          >
             {submitting ? "Submitting..." : "Submit Report"}
           </button>
           <button className="close-btn" onClick={onClose} disabled={submitting}>
@@ -469,6 +508,45 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
           </button>
         </div>
       </div>
+      {showSubmitModal && (
+        <div
+          className="modal-overlay"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            className="modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3>Submit Report</h3>
+
+            <p>
+              Please confirm that the information you provided is accurate.
+              Submitting false reports may result in account restrictions.
+            </p>
+
+            <div className="modal-actions">
+              <button
+                className="cancel-btn"
+                onClick={() => setShowSubmitModal(false)}
+                disabled={submitting}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="save-btn"
+                onClick={() => {
+                  setShowSubmitModal(false);
+                  handleSubmit();
+                }}
+                disabled={submitting}
+              >
+                Confirm & Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

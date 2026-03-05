@@ -24,8 +24,8 @@ def upload_private_photo(file_obj, bucket: str) -> str:
 
 def create_signed_url(path: str, bucket: str, expires_in_seconds: int = 3600) -> str:
     if not path:
-        return None
-    
+        return None 
+        
     res = supabase.storage.from_(bucket).create_signed_url(
         path,
         expires_in_seconds,

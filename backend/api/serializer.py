@@ -101,11 +101,6 @@ class MeSerializer(serializers.ModelSerializer):
             return req.rejection_reason or ""
         return ""
 
-    def get_researcher_rejection_reason(self, obj):
-        req = ResearcherRequest.objects.filter(user=obj).order_by("-created_at").first()
-        if req and req.status == "rejected":
-            return req.rejection_reason or ""
-        return ""
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -687,7 +682,7 @@ class ResidentVerificationRequestSerializer(serializers.ModelSerializer):
             "created_at",
             "reviewed_at"
         ]
-        read_only_fields = ["id", "citizen_id", "citizen_name", "created_at", "reviewed_at"]
+        read_only_fields = ["id", "citizen_id", 'barangay', 'address', "citizen_name", "created_at", "reviewed_at"]
 
     def get_citizen_name(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}"

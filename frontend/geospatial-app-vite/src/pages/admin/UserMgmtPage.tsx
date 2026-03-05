@@ -489,10 +489,10 @@ const UserMgmtPage: React.FC = () => {
                               <LuEllipsis size={20} />
                             </button>
                             {openMenu === user.id && (
-                              <div className="menu-dropdown">
-                                {alreadyRequested && <div className="menu-item disabled">Pending request</div>}
+                              <div className="kebab-dropdown">
+                                {alreadyRequested && <div className="kebab-item disabled">Pending request</div>}
                                 <button
-                                  className="menu-item"
+                                  className="kebab-item"
                                   onClick={() => {
                                     const action = user.status === 'Active' ? 'deactivate' : 'activate';
                                     if (!window.confirm(`Are you sure you want to ${action} this user?`)) return;
@@ -511,7 +511,7 @@ const UserMgmtPage: React.FC = () => {
                                 )} */}
                                 {(user.role === "Researcher" || user.extra_roles?.some(r => r.toLowerCase() === "researcher")) && (
                                   <button
-                                    className="menu-item"
+                                    className="kebab-item"
                                     onClick={() => {
                                       setChangePWModal({ userId: user.id, userName: user.name });
                                       setOpenMenu(null);

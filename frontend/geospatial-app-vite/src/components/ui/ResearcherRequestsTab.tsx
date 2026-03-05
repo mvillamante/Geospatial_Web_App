@@ -442,9 +442,9 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                           </button>
 
                           {openMenu === req.id && (
-                            <div className="menu-dropdown">
+                            <div className="kebab-dropdown">
                               <button
-                                className="menu-item"
+                                className="kebab-item"
                                 onClick={() => {
                                   const action =
                                     req.status === "active" ? "deactivate" : "activate";

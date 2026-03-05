@@ -214,7 +214,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
             <FiSearch className="search-icon" />
             <input
               type="text"
-              placeholder="Search by citizen name..."
+              placeholder="Search by citizen name or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
@@ -294,10 +294,10 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
                       </button>
 
                       {openMenu === v.id && (
-                        <div className="menu-dropdown">
+                        <div className="kebab-dropdown">
                           {/* View Details */}
                           <button
-                            className="menu-item"
+                            className="kebab-item"
                             onClick={() => {
                               setModalVerification(v);
                               setOpenMenu(null);
@@ -310,7 +310,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
                           {v.status === "Pending" && (
                             <>
                               <button
-                                className="menu-item"
+                                className="kebab-item"
                                 onClick={() => {
                                   approveVerification(v.id);
                                   setOpenMenu(null);
@@ -320,7 +320,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCount
                               </button>
 
                               <button
-                                className="menu-item"
+                                className="kebab-item"
                                 onClick={() => {
                                   setModalVerification(v);
                                   setRejectReason("");

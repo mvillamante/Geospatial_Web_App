@@ -94,6 +94,30 @@
   color: #2563eb;
 }
 
+/* severity level */
+.severity-tag {
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.severity-tag.low {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.severity-tag.moderate {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.severity-tag.high,
+.severity-tag.critical {
+  background: #ffebee;
+  color: #c62828;
+}
+
 /* Badges */
 .badge {
   padding: 4px 10px;

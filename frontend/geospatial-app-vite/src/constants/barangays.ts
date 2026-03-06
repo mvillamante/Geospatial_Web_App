@@ -1,5 +1,5 @@
 const _CABUYAO_BARANGAYS = [
-  "Baclaran", "Banaybanay", "Banlic", "Bigaa", "Butong",
+  "Baclaran", "Banay-Banay", "Banlic", "Bigaa", "Butong",
   "Casile", "Diezmo", "Gulod", "Mamatid", "Marinig",
   "Niugan", "Pittland", "Pulo", "Sala", "San Isidro",
   "Uno (Poblacion 1)", "Dos (Poblacion 2)", "Tres (Poblacion 3)",

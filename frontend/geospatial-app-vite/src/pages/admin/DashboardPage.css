@@ -155,7 +155,7 @@
 
 @media (max-height: 800px) {
     .dashboard-page {
-        background-color: pink;
+        /*background-color: pink;*/
         height: 88.9vh;
         gap: 8px;
     }

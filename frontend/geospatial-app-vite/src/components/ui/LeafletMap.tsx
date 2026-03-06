@@ -324,8 +324,6 @@ export default function LeafletMap(props: LeafletMapProps) {
   }, [onCalamityRiskBarangaySelect]);
 
 
-
-
   // Initialize map
   useEffect(() => {
     if (!mapRef.current) {
@@ -413,20 +411,49 @@ export default function LeafletMap(props: LeafletMapProps) {
 
   // "Go to My Location" button
   useEffect(() => {
+    if (!mapRef.current) return;
+
     const map = mapRef.current;
-    if (!map) return;
-    if (!selectedReport) return;
 
-    const marker = reportMarkersMap.current.get(selectedReport.id);
+    const CABUYAO_CENTER: [number, number] = [14.273, 121.124];
 
-    if (marker) {
-      const latLng = marker.getLatLng();
-      map.flyTo(latLng, 16, { duration: 0.5 });
-      marker.openPopup();
-      marker.setZIndexOffset(1000);
+    const HomeControl = L.Control.extend({
+      onAdd: function () {
+        const container = L.DomUtil.create("div", "leaflet-home-control");
+
+        const btn = L.DomUtil.create("button", "", container);
+        btn.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M12 8l3 8-3-2-3 2 3-8z"></path>
+        </svg>
+        `;
+        btn.title = "Go back to Cabuyao";
+
+        L.DomEvent.disableClickPropagation(btn);
+
+        btn.onclick = () => {
+          map.flyTo(CABUYAO_CENTER, 13, {
+            duration: 0.8
+          });
+        };
+
+        return container;
+      }
+    });
+
+    if ((map as any)._homeControl) {
+      map.removeControl((map as any)._homeControl);
     }
 
-  }, [selectedReport]);
+    const control = new HomeControl({ position: "topleft" });
+    map.addControl(control);
+
+    // store reference
+    (map as any)._homeControl = control;
+
+  }, []);
 
 
   // Reset any generic choropleth placeholder when map view changes

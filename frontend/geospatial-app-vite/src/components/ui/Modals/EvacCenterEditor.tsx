@@ -90,13 +90,13 @@ export default function EvacCenterEditor({
                 <span className="value">{center.contact || "-"}</span>
               </div>
 
-              <div className="view-card small">
+              {/*<div className="view-card small">
                 <div className="card-header">
                   <span className="icon">👥</span>
                   <span className="label">Capacity</span>
                 </div>
                 <span className="value">{center.capacity || 0} persons</span>
-              </div>
+              </div>*/}
             </div>
 
             {/* Facilities (always included) */}
@@ -126,7 +126,7 @@ export default function EvacCenterEditor({
               />
             </div>
 
-            <div className="form-row three">
+            <div className="form-row two">
               <div className="form-group small">
                 <label>Barangay</label>
                 <select
@@ -155,7 +155,7 @@ export default function EvacCenterEditor({
                 </select>
               </div>
 
-              <div className="form-group small">
+              {/*<div className="form-group small">
                 <label>Capacity</label>
                 <input
                   type="number"
@@ -164,7 +164,7 @@ export default function EvacCenterEditor({
                     onChange({ ...center, capacity: Number(e.target.value) })
                   }
                 />
-              </div>
+              </div>*/}
             </div>
 
             <div className="form-group">

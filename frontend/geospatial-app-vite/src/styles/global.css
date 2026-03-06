@@ -195,16 +195,19 @@ td.text-wrap {
 
   .reportsmgmt-page .reports-table-wrapper,
   .cms-page .cms-table-wrapper {
-    height: 58.5vh;
+    height: 53.6vh;
   }
 
   .user-page td {
     padding: 0.5rem 1rem;
   }
 
-  .reportsmgmt-page td,
-  .cms-page td {
+  .reportsmgmt-page td{
     padding: 0.589rem 1rem;
+  }
+
+  .cms-page td {
+    padding: 0.695rem 1rem;
   }
 }
 

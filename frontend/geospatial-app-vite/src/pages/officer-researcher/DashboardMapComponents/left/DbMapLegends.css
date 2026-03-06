@@ -1,8 +1,25 @@
-/*---------------------FLOOD ZONE LEGEND----------------------*/
-.flood-zone-legend {
+.map-legends-container {
   position: absolute;
   bottom: 24px;
   left: 24px;
+
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+
+  z-index: 999;
+
+  pointer-events: none;
+}
+
+.map-legends-container > * {
+  pointer-events: auto;
+  transition: all 0.25s ease;
+}
+
+/*---------------------FLOOD ZONE LEGEND----------------------*/
+.flood-zone-legend {
+  position: relative;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
   backdrop-filter: blur(12px);
   border-radius: 14px;
@@ -169,9 +186,7 @@
 
 /*---------------------LANDSLIDE RISK LEGEND----------------------*/
 .landslide-risk-legend {
-  position: absolute;
-  bottom: 24px;
-  right: 24px;
+  position: relative;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(254, 252, 232, 0.98));
   backdrop-filter: blur(12px);
   border-radius: 16px;
@@ -325,9 +340,7 @@
 
 /*---------------------EVACUATION CENTERS LEGEND----------------------*/
 .evac-centers-legend {
-  position: absolute;
-  bottom: 24px;
-  left: 260px;
+  position: relative;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(236, 253, 245, 0.98));
   backdrop-filter: blur(12px);
   border-radius: 16px;
@@ -474,9 +487,7 @@
 
 /*---------------------ROADS LEGEND----------------------*/
 .roads-legend {
-  position: absolute;
-  bottom: 24px;
-  left: 480px;
+  position: relative;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(238, 242, 255, 0.98));
   backdrop-filter: blur(12px);
   border-radius: 16px;
@@ -675,4 +686,91 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+/*---------------------HAZARD REPORTS LEGEND----------------------*/
+
+.hazard-location-legend {
+  position: relative;
+  z-index: 1000;
+  min-width: 230px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98),
+    rgba(254, 242, 242, 0.97)
+  );
+  backdrop-filter: blur(14px);
+  border-radius: 18px;
+  padding: 18px 22px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  box-shadow:
+    0 12px 40px rgba(220, 38, 38, 0.18),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+  animation: legendSlideIn 0.35s ease-out;
+}
+
+.hazard-location-legend h4 {
+  margin: 0 0 10px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #b91c1c;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  letter-spacing: 0.2px;
+}
+
+.hazard-location-legend .legend-subtitle {
+  font-size: 11px;
+  color: #6b7280;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed rgba(239, 68, 68, 0.25);
+}
+
+.hazard-location-legend ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hazard-location-legend ul li {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: #44403c;
+  padding: 7px 10px;
+  border-radius: 10px;
+  transition:
+    all 0.25s ease,
+    transform 0.2s ease;
+}
+
+.hazard-location-legend ul li:hover {
+  background: rgba(239, 68, 68, 0.06);
+  transform: translateX(4px);
+}
+
+.hazard-location-legend .legend-icon {
+  width: 26px;
+  text-align: center;
+  font-size: 16px;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+.hazard-location-legend .legend-text {
+  flex: 1;
+}
+
+@keyframes legendSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

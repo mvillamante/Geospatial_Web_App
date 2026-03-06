@@ -10,6 +10,8 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
 import '../../../pages/shared/EvacCenterPage.css';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 // Fix leaflet marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -48,10 +50,41 @@ interface MapPickerModalProps {
 
 const MapPickerModal: React.FC<MapPickerModalProps> = ({ open, initial, onClose, onConfirm }) => {
   const [picked, setPicked] = useState<LatLng | null>(initial);
+  const [address, setAddress] = useState<string>("");
 
   useEffect(() => {
     setPicked(initial);
+    setAddress("");
   }, [initial, open]);
+
+  async function reverseGeocode(lat: number, lng: number) {
+    try {
+      const res = await fetch(
+        `${API_URL}/api/geocoding/reverse/?lat=${lat}&lon=${lng}`
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data?.error || "Reverse geocoding failed");
+
+      const formatted =
+        data?.street && data?.barangay && data?.city
+          ? `${data.street}, Barangay ${data.barangay}, ${data.city}`
+          : data?.location || "Location not available";
+
+      setAddress(formatted);
+
+    } catch (err) {
+      console.error(err);
+      setAddress("Address unavailable");
+    }
+  }
+
+  useEffect(() => {
+    if (picked) {
+      reverseGeocode(picked.lat, picked.lng);
+    }
+  }, [picked]);
 
   if (!open) return null;
 
@@ -80,6 +113,12 @@ const MapPickerModal: React.FC<MapPickerModalProps> = ({ open, initial, onClose,
         <div className="map-picked">
           <strong>Selected:</strong>{" "}
           {picked ? `${picked.lat.toFixed(6)}, ${picked.lng.toFixed(6)}` : "None"}
+
+          {picked && (
+            <div className="map-address">
+              <strong>Address:</strong> {address || "Fetching address..."}
+            </div>
+          )}
         </div>
 
         <div className="map-modal-actions">

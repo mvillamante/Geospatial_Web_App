@@ -57,7 +57,7 @@ const CmsPage: React.FC = () => {
 
   useEffect(() => {
     const updatePageSize = () => {
-      setPageSize(window.innerHeight <= 800 ? 7 : 10);
+      setPageSize(window.innerHeight <= 800 ? 6 : 10);
     };
 
     updatePageSize();

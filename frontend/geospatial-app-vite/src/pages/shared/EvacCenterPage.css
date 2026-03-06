@@ -14,9 +14,11 @@
 .evac-search-add-container {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 1rem;
   width: 100%;
   flex-wrap: wrap;
+  margin-bottom: 15px;
 }
 
 .evac-search-wrapper {

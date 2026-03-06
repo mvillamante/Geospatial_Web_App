@@ -74,8 +74,6 @@ const badgeClass = (status: ReportStatus) => {
       return "badge archived";
     case "In Progress":
       return "badge in_progress";
-    case "Critical":
-      return "badge critical";
     default:
       return "badge";
   }
@@ -118,7 +116,7 @@ const ReportsMgmtPage: React.FC = () => {
 
   useEffect(() => {
     const updatePageSize = () => {
-      setPageSize(window.innerHeight <= 800 ? 7 : 10);
+      setPageSize(window.innerHeight <= 800 ? 6 : 10);
     };
 
     updatePageSize();
@@ -437,7 +435,6 @@ const ReportsMgmtPage: React.FC = () => {
 
   /* Loading */
   const [loadingReports, setLoadingReports] = useState(true);
-
   const [viewMode, setViewMode] = useState("table");
 
   return (
@@ -470,35 +467,6 @@ const ReportsMgmtPage: React.FC = () => {
       {/* Filters + Search + Create User */}
       <div className="filters">
         <div className="filters-left">
-          {viewMode === "table" && (
-            <div className="page-actions">
-              <div
-                className="tab-indicator"
-                ref={indicatorRef}
-                style={{
-                  width: indicatorWidth,
-                  transform: `translateX(${indicatorOffset}px)`
-                }}
-              />
-              <button
-                type="button"
-                className={`tab-btn ${!viewArchived ? "active" : ""}`}
-                onClick={() => setViewArchived(false)}
-                ref={activeTabRef(false)}
-              >
-                Active
-              </button>
-              <button
-                type="button"
-                className={`tab-btn ${viewArchived ? "active" : ""}`}
-                onClick={() => setViewArchived(true)}
-                ref={activeTabRef(true)}
-              >
-                Archived
-              </button>
-            </div>
-          )}
-
           <div className="select-wrapper">
             <FiUser className="select-icon" />
             <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as IncidentCategories | "all")} className="role-select">
@@ -563,6 +531,34 @@ const ReportsMgmtPage: React.FC = () => {
         </div>
 
         <div className="filters-right">
+          {viewMode === "table" && (
+            <div className="page-actions">
+              <div
+                className="tab-indicator"
+                ref={indicatorRef}
+                style={{
+                  width: indicatorWidth,
+                  transform: `translateX(${indicatorOffset}px)`
+                }}
+              />
+              <button
+                type="button"
+                className={`tab-btn ${!viewArchived ? "active" : ""}`}
+                onClick={() => setViewArchived(false)}
+                ref={activeTabRef(false)}
+              >
+                Active
+              </button>
+              <button
+                type="button"
+                className={`tab-btn ${viewArchived ? "active" : ""}`}
+                onClick={() => setViewArchived(true)}
+                ref={activeTabRef(true)}
+              >
+                Archived
+              </button>
+            </div>
+          )}
           <div className="search-wrapper">
             <FiSearch className="search-icon" />
             <input
@@ -661,7 +657,7 @@ const ReportsMgmtPage: React.FC = () => {
                   filteredReports.map((report) => {
                     const status = normalizeStatus(report.status);
                     const isArchived = normalizeStatus(report.status) === "Archived";
-
+                    console.log("rah", report);
                     return (
                       <tr key={report.id} onClick={() => setSelectedReportMap(report)} title="Click to navigate to pin">
                         <td className="center">#R-0{report.id}</td>
@@ -699,14 +695,14 @@ const ReportsMgmtPage: React.FC = () => {
                                 >View Full Details
                                 </button>
 
-                                <button
+                                {/*<button
                                   className="dropdown-item view-details"
                                   onClick={async () => {
                                     setOpenMapMenuId(null);
 
                                     try {
                                       const updated = await patchReport(report.id, {
-                                        status: "Critical"
+                                        verified_critical_level: "Critical"
                                       });
 
                                       setReports(prev =>
@@ -724,7 +720,7 @@ const ReportsMgmtPage: React.FC = () => {
                                   }}
                                 >
                                   Escalate
-                                </button>
+                                </button>*/}
 
                                 <button
                                   className="dropdown-item view-details danger"
@@ -774,6 +770,7 @@ const ReportsMgmtPage: React.FC = () => {
                       <HiChevronUpDown />
                     )}
                   </th>
+                  <th className="center">Critical Level</th>
                   <th className="center">Status</th>
                   <th className="center">Assigned Officer</th>
                   <th className="th-actions center">Actions</th>
@@ -812,6 +809,13 @@ const ReportsMgmtPage: React.FC = () => {
                             <div className="dt-date">{date}</div>
                             <div className="dt-time muted">{time}</div>
                           </div>
+                        </td>
+                        <td className="center">
+                          {report.verified_critical_level ? (
+                            <span className={`severity-tag ${report.verified_critical_level}`}>
+                              {report.verified_critical_level.toUpperCase()}
+                            </span>
+                          ) : "---"}
                         </td>
                         <td className="center">
                           <span className={badgeClass(status)}>{status}</span>
@@ -855,24 +859,42 @@ const ReportsMgmtPage: React.FC = () => {
                                   className="dropdown-item view-details"
                                   onClick={async () => {
                                     setOpenMenuId(null);
+                                    toast.warning("Escalate this report?", {
+                                      action: {
+                                        label: "Confirm",
+                                        onClick: async () => {
+                                          try {
+                                            const updated = await patchReport(report.id, {
+                                              verifiedRisk: "critical"
+                                            });
 
-                                    try {
-                                      const updated = await patchReport(report.id, {
-                                        status: "critical"
-                                      });
+                                            setReports(prev =>
+                                              prev.map(r =>
+                                                r.id === report.id
+                                                  ? {
+                                                      ...r,
+                                                      ...updated,
+                                                      lastUpdatedAt: new Date().toISOString()
+                                                    }
+                                                  : r
+                                              )
+                                            );
 
-                                      setReports(prev =>
-                                        prev.map(r =>
-                                          r.id === report.id ? { ...r, ...updated } : r
-                                        )
-                                      );
+                                            setLoadingReports(true);
+                                            toast.success("Report escalated to Critical status");
+                                            setLoadingReports(false);
 
-                                      toast.success("Report escalated to Critical status");
-
-                                    } catch (err: any) {
-                                      console.error(err);
-                                      toast.error(err?.message || "Failed to escalate report");
-                                    }
+                                          } catch (err: any) {
+                                            console.error(err);
+                                            toast.error(err?.message || "Failed to escalate report");
+                                          }
+                                        }
+                                      },
+                                      cancel: {
+                                        label: "Cancel",
+                                        onClick: () => { }
+                                      }
+                                    });
                                   }}
                                 >
                                   Escalate

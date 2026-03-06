@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
+import { toast } from "sonner";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import LeafletMap from "../../components/ui/LeafletMap";
@@ -103,7 +104,7 @@ function EvacCenterPage() {
         const data = await fetchEvacCenters();
         setCenters(data.map(mapApiToCenter));
       } catch (err) {
-        console.error("Failed to load evacuation centers:", err);
+        toast.error("Failed to load evacuation centers");
       } finally {
         setLoadingCenters(false);
       }
@@ -213,23 +214,40 @@ function EvacCenterPage() {
       setMapRefreshKey(prev => prev + 1);
     } catch (err) {
       console.error("Error updating center:", err);
-      alert("Failed to save changes. Please try again.");
+      toast.error("Failed to save changes. Please try again.");
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleDeleteCenter = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this center?")) return;
+  const handleDeleteCenter = (id: number) => {
+    toast.warning("Delete this evacuation center?", {
+      action: {
+        label: "Confirm",
+        onClick: async () => {
+          setClosingId(id);
 
-    setClosingId(id);
+          try {
+            await deleteEvacCenter(id);
 
-    setTimeout(async () => {
-      await deleteEvacCenter(id);
-      setCenters((prev) => prev.filter((c) => c.id !== id));
-      setClosingId(null);
-      setMapRefreshKey(prev => prev + 1);
-    }, 250);
+            setCenters((prev) => prev.filter((c) => c.id !== id));
+
+            toast.success("Evacuation center deleted");
+
+            setMapRefreshKey(prev => prev + 1);
+          } catch (err) {
+            console.error(err);
+            toast.error("Failed to delete evacuation center");
+          } finally {
+            setClosingId(null);
+          }
+        }
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => { }
+      }
+    });
   };
 
   /* Evacuation Center Map */
@@ -244,6 +262,10 @@ function EvacCenterPage() {
       setSelectedEvacuationCenter(null);
       // setIsClosing(false);
     }, 250);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
   };
 
   /* Horizontal Scroll Function */
@@ -386,6 +408,15 @@ function EvacCenterPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="evac-search"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                className="evac-search-clear"
+                onClick={handleClearSearch}
+              >
+                ✕
+              </button>
+            )}
           </div>
           {userRole === "Officer" && (
             <div className="evac-add-center">
@@ -410,7 +441,7 @@ function EvacCenterPage() {
               Loading evacuation centers...
             </div>
           ) : filteredCenters.length === 0 ? (
-            <div className="evac-empty">
+            <div className="evac-empty-state">
               No evacuation centers found.
             </div>
           ) : (
@@ -443,18 +474,18 @@ function EvacCenterPage() {
                           {center.type.charAt(0).toUpperCase() + center.type.slice(1)}
                         </span>
 
-                        <div className="evac-capacity">
+                        {/*<div className="evac-capacity">
                           <Users className="evac-capacity-icon" />
                           {center.capacity}
-                        </div>
+                        </div>*/}
                       </div>
                     )}
-                    {userRole === "Citizen" && (
+                    {/*userRole === "Citizen" && (
                       <span className="evac-capacity">
                         <Users className="evac-capacity-icon" />
                         {center.capacity}
                       </span>
-                    )}
+                    )*/}
                   </h2>
 
                   <p className={`evac-barangay ${!center.barangay ? "muted" : ""}`}>
@@ -565,7 +596,7 @@ function EvacCenterPage() {
             setShowAddModal(false);
           } catch (err) {
             console.error("Error creating center:", err);
-            alert("Failed to save. Please try again.");
+            toast.error("Failed to save evacuation center.");
           } finally {
             setIsSaving(false);
           }

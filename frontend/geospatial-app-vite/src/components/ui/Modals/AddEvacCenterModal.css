@@ -105,6 +105,7 @@
 .evac-page .modal .form-row {
   display: grid;
   gap: 14px;
+  margin: 0;
 }
 
 /* Coordinate Row */
@@ -276,4 +277,10 @@
   .evac-page .modal-actions button {
     width: 100%;
   }
+}
+
+
+.evac-page .required {
+  color: #e53935;
+  margin-left: 4px;
 }

@@ -7,17 +7,15 @@ from supabase import create_client, Client
 supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
 
 def upload_private_photo(file_obj, bucket: str) -> str:
-    """
-    Upload to private bucket.
-    Returns storage path to save in DB.
-    """
     ext = os.path.splitext(file_obj.name)[1].lower() or ".jpg"
     path = f"{uuid.uuid4()}{ext}"
 
+    file_bytes = file_obj.read()
+
     supabase.storage.from_(bucket).upload(
         path,
-        file_obj.read(),
-        {"content-type": file_obj.content_type or "application/octet-stream"},
+        file_bytes,
+        {"content-type": file_obj.content_type or "application/octet-stream"}
     )
 
     return path

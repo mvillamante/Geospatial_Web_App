@@ -182,7 +182,7 @@ class IncidentReportPatchView(generics.UpdateAPIView):
 
         report.refresh_from_db()
 
-        if new_status and old_status != report.status:
+        if old_status != report.status:
 
             title_map = {
                 "in_progress": "Your report is now in progress",
@@ -217,7 +217,7 @@ class IncidentReportPatchView(generics.UpdateAPIView):
             Notification.objects.create(**notif_kwargs)
 
         return Response(
-            IncidentReportQueueSerializer(report).data,
+            IncidentReportQueueSerializer(report, context={"request": request}).data,
             status=status.HTTP_200_OK
         )
 
@@ -259,9 +259,8 @@ class VerifiedIncidentReportsView(generics.ListAPIView):
     def base_queryset(self):
         return (
             IncidentReport.objects
-            .annotate(vcl_lower=Lower("verified_critical_level"))
             .filter(
-                Q(vcl_lower__in=["low", "moderate", "high", "critical"]) |
+                Q(assigned_officer__isnull=False) |
                 Q(status__iexact="resolved")
             )
             .order_by("-created_at")

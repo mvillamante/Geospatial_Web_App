@@ -163,6 +163,7 @@ const ReportsMgmtPage: React.FC = () => {
       assigned_officer_id: selectedReportMap.assigned_officer_id ?? null,
     };
   }, [selectedReportMap]);
+  
 
   const [searchParams] = useSearchParams();
 
@@ -313,7 +314,7 @@ const ReportsMgmtPage: React.FC = () => {
         prev && prev.id === reportId ? { ...prev, ...updated } : prev
       );
 
-      setSelectedOfficer(updated.assigned_officer_id ? String(updated.assigned_officer_id) : "");
+      setSelectedOfficer(updated.assigned_officer_id ? String(updated) : "");
 
       toast.success(updated.assigned_officer_label ? `Assigned to ${updated.assigned_officer_label}` : "Assigned");
     } catch (err: any) {

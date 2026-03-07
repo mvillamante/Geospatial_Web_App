@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import LeafletMap from "../../components/ui/LeafletMap";
 import "./ReportVerifyPage.css";
-import { MapPin, Users, Search, CheckCircle2, XCircle, Tag,
+import {
+  MapPin, Users, Search, CheckCircle2, XCircle, Tag,
   Clock3, ArrowRight, MessageSquareText, Filter, UserPlus, ShieldCheck,
 } from "lucide-react";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
@@ -124,14 +125,15 @@ const ReportVerifyPage: React.FC = () => {
     [reports, selectedId]
   );
 
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
   const selectedReportForMap = useMemo(() => {
     if (!selected) return null;
 
     return {
       id: selected.id,
-      incident_type: selected.category  ,
-      verified_critical_level: selected.verifiedRisk ?? selected.citizenRisk,
+      incident_type: selected.category,
+      verifiedRisk: selected.verifiedRisk ?? selected.citizenRisk,
       barangay: selected.barangay,
       created_at: selected.createdAt,
       latitude: selected.lat,
@@ -148,7 +150,18 @@ const ReportVerifyPage: React.FC = () => {
     myOfficerId != null &&
     selected.assignedOfficerId != null &&
     Number(selected.assignedOfficerId) === myOfficerId;
-  // const isAssignedToSomeone = !!selected && !!selected.assignedTo;
+
+  useEffect(() => {
+    if (!selected) return;
+
+    console.log({
+      assignedOfficerId: selected?.assignedOfficerId,
+      myOfficerId,
+      isAssignedToMe,
+      verifiedRisk: selected?.verifiedRisk,
+      status: selected?.status
+    });
+  }, [selected, myOfficerId, isAssignedToMe]);
 
   const effectiveRisk = (r: CitizenReport) => r.verifiedRisk ?? r.citizenRisk;
 
@@ -298,15 +311,28 @@ const ReportVerifyPage: React.FC = () => {
 
         const data: CitizenReport[] = raw.map((r: any) => ({
           ...r,
-          assignedOfficerId: r.assignedOfficerId != null ? Number(r.assignedOfficerId) : null,
-          lat: r.lat != null ? Number(r.lat) : 0,
-          lng: r.lng != null ? Number(r.lng) : 0,
-          barangay: r.barangay ?? r.location ?? "",
-          lastUpdatedAt: r.lastUpdatedAt ?? r.createdAt,
-          photo_url: r.photo_url ?? r.photoUrl ?? r.photo ?? null,
-          reply_message: r.reply_message ?? null,
-        }));
 
+          assignedOfficerId: r.assignedOfficerId ?? null,
+          assignedTo: r.assignedTo ?? null,
+
+          citizenRisk: normalizeRisk(r.citizenRisk),
+
+          verifiedRisk: r.verifiedRisk
+            ? normalizeRisk(r.verifiedRisk)
+            : undefined,
+
+          lat: r.latitude ?? r.lat ?? 0,
+          lng: r.longitude ?? r.lng ?? 0,
+
+          barangay: r.barangay ?? r.location_display ?? "",
+
+          createdAt: r.createdAt ?? r.created_at,
+          lastUpdatedAt: r.lastUpdatedAt ?? r.last_updated_at ?? r.createdAt,
+
+          photo_url: r.photo_url ?? r.photo ?? null,
+          reply_message: r.reply_message ?? null,
+          reply_image_url: r.reply_image_url ?? null,
+        }));
 
 
         setReports(data);
@@ -332,16 +358,18 @@ const ReportVerifyPage: React.FC = () => {
     if (!selected) return;
 
     try {
-      const updated = await patchReport(selected.id, { verifiedRisk: level });
+      const updated = await patchReport(selected.id, {
+        verifiedRisk: level
+      });
 
       setReports(prev =>
         prev.map(r =>
           r.id === selected.id
             ? {
               ...r,
-              ...updated,
-              verifiedRisk: updated.verified_critical_level ?? level,
-              lastUpdatedAt: updated.lastUpdatedAt ?? r.lastUpdatedAt,
+              // ...updated,
+              verifiedRisk: normalizeRisk(updated.verifiedRisk ?? level),
+              lastUpdatedAt: updated.last_updated_at ?? r.lastUpdatedAt,
             }
             : r
         )
@@ -362,6 +390,9 @@ const ReportVerifyPage: React.FC = () => {
     });
 
     try {
+
+      setLoadingAction("assign");
+
       const updated = await patchReport(selected.id, { assignToMe: true });
       console.log("ASSIGN RESPONSE:", updated);
 
@@ -371,9 +402,9 @@ const ReportVerifyPage: React.FC = () => {
           r.id === selected.id
             ? {
               ...r,
-              ...updated,
               assignedOfficerId: Number(myOfficerId),
-              assignedTo: updated.assignedTo ?? officerName
+              assignedTo: officerName,
+              lastUpdatedAt: new Date().toISOString()
             }
             : r
         )
@@ -387,6 +418,8 @@ const ReportVerifyPage: React.FC = () => {
         assignedTo: undefined,
         status: "pending",
       });
+    } finally {
+      setLoadingAction(null);
     }
   };
 
@@ -396,6 +429,9 @@ const ReportVerifyPage: React.FC = () => {
     if (!selected) return;
 
     try {
+
+      setLoadingAction(status);
+
       const updated = await patchReport(selected.id, { status });
       console.log("PATCH RESPONSE:", updated);
 
@@ -444,6 +480,8 @@ const ReportVerifyPage: React.FC = () => {
     }
 
     try {
+      setLoadingAction("resolve");
+
       const updated = await patchReport(selected.id, {
         status: "resolved",
         lgu_post: {
@@ -475,6 +513,8 @@ const ReportVerifyPage: React.FC = () => {
 
     } catch (e: any) {
       alert(e.message);
+    } finally {
+      setLoadingAction(null);
     }
   };
 
@@ -496,6 +536,9 @@ const ReportVerifyPage: React.FC = () => {
     }
 
     try {
+
+      setLoadingAction("reject");
+
       const updated = await patchReport(selected.id, {
         status: "rejected",
         rejection_reason: reason,
@@ -509,7 +552,7 @@ const ReportVerifyPage: React.FC = () => {
               ...r,
               ...updated,
               status: "rejected",
-              rejection_reason: updated.rejection_reason ?? reason,
+              rejection_reason: reason,
               officerNote: updated.officer_note ?? `Rejected: ${reason}`,
               lastUpdatedAt: updated.lastUpdatedAt ?? r.lastUpdatedAt,
             }
@@ -521,6 +564,8 @@ const ReportVerifyPage: React.FC = () => {
       setRejectReason("");
     } catch (e: any) {
       alert(e.message);
+    } finally {
+      setLoadingAction(null);
     }
   };
 
@@ -530,17 +575,17 @@ const ReportVerifyPage: React.FC = () => {
   };
 
   const categoryMeta = selected
-  ? categories.find(
+    ? categories.find(
       c => c.value === selected.category
     )
-  : null;
+    : null;
 
   const hasActiveFilters =
-  query.trim() !== "" ||
-  statusFilter !== "all" ||
-  categoryFilter !== "all" ||
-  scopeFilter !== "all" ||
-  reportTimeFilter !== "all";
+    query.trim() !== "" ||
+    statusFilter !== "all" ||
+    categoryFilter !== "all" ||
+    scopeFilter !== "all" ||
+    reportTimeFilter !== "all";
 
   const resetFilters = () => {
     setQuery("");
@@ -664,11 +709,11 @@ const ReportVerifyPage: React.FC = () => {
                   onChange={(e) =>
                     setReportTimeFilter(
                       e.target.value as
-                        | "today"
-                        | "7days"
-                        | "last30days"
-                        | "last12months"
-                        | "all"
+                      | "today"
+                      | "7days"
+                      | "last30days"
+                      | "last12months"
+                      | "all"
                     )
                   }
                 >
@@ -679,7 +724,7 @@ const ReportVerifyPage: React.FC = () => {
                   <option value="last12months">Last 12 Months</option>
                 </select>
               </div>
-            </div>  
+            </div>
 
             {hasActiveFilters && (
               <button className="queue-clear-btn" onClick={resetFilters}>
@@ -689,54 +734,54 @@ const ReportVerifyPage: React.FC = () => {
           </div>
 
           <ul className="queue-list">
-          {loading ? (
-            <div className="queue-loading">
-              Loading reports…
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="queue-empty">
-              No reports found.
-            </div>
-          ) : (
-            filtered.map((r) => {
-              const active = r.id === selectedId;
-              const eff = effectiveRisk(r);
+            {loading ? (
+              <div className="queue-loading">
+                Loading reports…
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="queue-empty">
+                No reports found.
+              </div>
+            ) : (
+              filtered.map((r) => {
+                const active = r.id === selectedId;
+                const eff = effectiveRisk(r);
 
-              return (
-                <li
-                  key={r.id}
-                  className={`queue-item ${active ? "active" : ""} risk-${eff}`}
-                  onClick={() => setSelectedId(r.id)}
-                >
-                  <div className="queue-item-top">
-                    <div className="queue-title">{r.title}</div>
-                    <div className={`queue-risk-pill ${normalizeRisk(eff)}`}>
-                      {normalizeRisk(eff).toUpperCase()}
+                return (
+                  <li
+                    key={r.id}
+                    className={`queue-item ${active ? "active" : ""} risk-${eff}`}
+                    onClick={() => setSelectedId(r.id)}
+                  >
+                    <div className="queue-item-top">
+                      <div className="queue-title">{r.title}</div>
+                      <div className={`queue-risk-pill ${normalizeRisk(eff)}`}>
+                        {normalizeRisk(eff).toUpperCase()}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="queue-sub">
-                    <span className="queue-location">{r.barangay}</span>
-                  </div>
-
-                  <div className="queue-meta">
-                    <div className={`queue-status ${r.status}`}>
-                      {statusIcon(r.status)}
-                      <span>{statusLabel[r.status]}</span>
+                    <div className="queue-sub">
+                      <span className="queue-location">{r.barangay}</span>
                     </div>
-                    <span className="queue-time">{formatTime(r.createdAt)}</span>
-                  </div>
-                </li>
-              );
-            })
-          )}
-        </ul>
+
+                    <div className="queue-meta">
+                      <div className={`queue-status ${r.status}`}>
+                        {statusIcon(r.status)}
+                        <span>{statusLabel[r.status]}</span>
+                      </div>
+                      <span className="queue-time">{formatTime(r.createdAt)}</span>
+                    </div>
+                  </li>
+                );
+              })
+            )}
+          </ul>
         </section>
 
         <section className="verify-map">
           <LeafletMap
             selectedReport={selectedReportForMap}
-            activeLayers={["Verified Reports"]}
+            activeLayers={["Queue Reports"]}
             categoryFilter={categoryFilter}
             reportTimeFilter={reportTimeFilter}
           />
@@ -866,11 +911,10 @@ const ReportVerifyPage: React.FC = () => {
                   <button
                     className="btn ghostt"
                     onClick={assignToMe}
-                    disabled={!!selected.assignedTo}
-                    title={selected.assignedTo ? "Already assigned" : "Assign to yourself"}
+                    disabled={!!selected.assignedTo || loadingAction === "assign"}
                   >
                     <UserPlus className="btn-icon" />
-                    Assign to me
+                    {loadingAction === "assign" ? "Assigning..." : "Assign to me"}
                   </button>
                 </div>
 
@@ -918,15 +962,25 @@ const ReportVerifyPage: React.FC = () => {
                   <button
                     className="btn primary"
                     onClick={() => setStatus("in_progress")}
-                    disabled={!isAssignedToMe || !isVerifiedSet || selected.status === "in_progress" || selected.status === "resolved"}
+                    disabled={
+                      !isAssignedToMe ||
+                      !isVerifiedSet ||
+                      selected.status === "in_progress" ||
+                      selected.status === "resolved" ||
+                      loadingAction === "in_progress"
+                    }
                   >
-                    Mark In Progress
+                    {loadingAction === "in_progress" ? "Updating..." : "Mark In Progress"}
                   </button>
 
                   <button
                     className="btn warn"
                     onClick={() => setNeedsInfoMode(true)}
-                    disabled={!isAssignedToMe || !isVerifiedSet || selected.status === "resolved"}
+                    disabled={
+                      !isAssignedToMe ||
+                      !isVerifiedSet ||
+                      selected.status === "resolved"
+                    }
                   >
                     Needs Info
                   </button>
@@ -936,7 +990,11 @@ const ReportVerifyPage: React.FC = () => {
                   <button
                     className="btn success"
                     onClick={openResolveModal}
-                    disabled={!isAssignedToMe || !isVerifiedSet || selected.status === "resolved"}
+                    disabled={
+                      !isAssignedToMe ||
+                      !isVerifiedSet ||
+                      selected.status === "resolved"
+                    }
                   >
                     Mark Resolved
                   </button>
@@ -944,7 +1002,11 @@ const ReportVerifyPage: React.FC = () => {
                   <button
                     className="btn danger"
                     onClick={openRejectModal}
-                    disabled={!isAssignedToMe || !isVerifiedSet || selected.status === "resolved"}
+                    disabled={
+                      !isAssignedToMe ||
+                      !isVerifiedSet ||
+                      selected.status === "resolved"
+                    }
                   >
                     Reject / Fake
                   </button>
@@ -1067,11 +1129,15 @@ const ReportVerifyPage: React.FC = () => {
 
                       <button
                         className="btn warn"
+                        disabled={loadingAction === "needs_info"}
                         onClick={async () => {
                           if (!selected.needs_info_note || selected.needs_info_note.trim().length < 3) {
                             alert("Please type an update/request first (Needs Info message).");
                             return;
                           }
+
+                          setLoadingAction("needs_info");
+
 
                           try {
                             const updated = await patchReport(selected.id, {
@@ -1085,7 +1151,7 @@ const ReportVerifyPage: React.FC = () => {
                                   ? {
                                     ...r,
                                     ...updated,
-                                    status: "needs_info",
+                                    status: "in_progress",
                                     needs_info_note: updated.needs_info_note ?? selected.needs_info_note,
                                     lastUpdatedAt: updated.lastUpdatedAt ?? r.lastUpdatedAt,
                                   }
@@ -1099,7 +1165,7 @@ const ReportVerifyPage: React.FC = () => {
                           }
                         }}
                       >
-                        Send Needs Info
+                        {loadingAction === "needs_info" ? "Sending..." : "Send Needs Info"}
                       </button>
                     </div>
                   )}
@@ -1158,7 +1224,7 @@ const ReportVerifyPage: React.FC = () => {
                       Cancel
                     </button>
                     <button className="btn success" onClick={confirmResolve}>
-                      Publish & Mark Resolved
+                      Mark Resolved
                     </button>
                   </div>
                 </>
@@ -1184,7 +1250,7 @@ const ReportVerifyPage: React.FC = () => {
                       Cancel
                     </button>
                     <button className="btn danger" onClick={confirmReject}>
-                      Confirm Rejection
+                      {loadingAction === "reject" ? "Rejecting..." : "Confirm Rejection"}
                     </button>
                   </div>
                 </>

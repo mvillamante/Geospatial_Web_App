@@ -42,11 +42,6 @@ interface OverpassElement {
     geometry?: Array<{ lat: number; lon: number }>;
   }>;
 }
-
-interface OverpassResponse {
-  elements: OverpassElement[];
-}
-
 // Tile layer configurations for different map types
 const tileLayerConfigs = {
   basic: {
@@ -93,6 +88,15 @@ export interface CalamityRiskBarangayData {
   green_index: number;
   green_index_raw: number;
   exposure_norm: number;
+}
+
+function getSeverityColors(report: any) {
+  const severity =
+    report.verified_critical_level ||
+    report.suggested_critical_level ||
+    "low";
+
+  return severityColors[severity as keyof typeof severityColors] ?? severityColors.low;
 }
 
 /** Get calamity data for a barangay; derive Poblacion from Barangay Uno/Dos/Tres when missing. */
@@ -207,6 +211,7 @@ export default function LeafletMap(props: LeafletMapProps) {
   const trafficLayerRef = useRef<L.Layer | null>(null);
   const ndviLayerRef = useRef<L.LayerGroup | null>(null);
   const verifiedReportsLayerRef = useRef<L.LayerGroup | null>(null);
+  const queueReportsLayerRef = useRef<L.LayerGroup | null>(null);
 
   // Hazard Index choropleth (barangay-level)
   const hazardLayerRef = useRef<L.GeoJSON | null>(null);
@@ -326,6 +331,7 @@ export default function LeafletMap(props: LeafletMapProps) {
 
   // Initialize map
   useEffect(() => {
+    console.log("ACTIVE LAYERS:", activeLayers);
     if (!mapRef.current) {
       const map = L.map("map").setView([14.2349, 121.1211], 13);
       mapRef.current = map;
@@ -411,11 +417,20 @@ export default function LeafletMap(props: LeafletMapProps) {
 
   // "Go to My Location" button
   useEffect(() => {
-    if (!mapRef.current) return;
-
     const map = mapRef.current;
+    if (!map) return;
+    if (!selectedReport) return;
 
-    const CABUYAO_CENTER: [number, number] = [14.273, 121.124];
+    const marker = reportMarkersMap.current.get(selectedReport.id);
+
+    if (marker) {
+      const latLng = marker.getLatLng();
+      map.flyTo(latLng, 16, { duration: 0.5 });
+      marker.openPopup();
+      marker.setZIndexOffset(1000);
+    }
+
+    const CABUYAO_CENTER: [number, number] = [14.228, 121.105];
 
     const HomeControl = L.Control.extend({
       onAdd: function () {
@@ -434,7 +449,7 @@ export default function LeafletMap(props: LeafletMapProps) {
         L.DomEvent.disableClickPropagation(btn);
 
         btn.onclick = () => {
-          map.flyTo(CABUYAO_CENTER, 13, {
+          map.flyTo(CABUYAO_CENTER, 12.5, {
             duration: 0.8
           });
         };
@@ -453,7 +468,7 @@ export default function LeafletMap(props: LeafletMapProps) {
     // store reference
     (map as any)._homeControl = control;
 
-  }, []);
+  }, [selectedReport?.id]);
 
 
   // Reset any generic choropleth placeholder when map view changes
@@ -579,7 +594,7 @@ export default function LeafletMap(props: LeafletMapProps) {
             const hi = d?.hazard_index;
             const fillColor =
               typeof hi === "number" ? getHazardIndexColor(hi) : "#cccccc";
-            
+
             return {
               color: "#ffffff",
               weight: 1.5,
@@ -648,7 +663,7 @@ export default function LeafletMap(props: LeafletMapProps) {
           // Estimate label width based on text length - tighter box around text
           const estimatedWidth = Math.max(60, brgy.length * 7 + 16);
           const estimatedHeight = 22;
-          
+
           L.marker(center, {
             icon: L.divIcon({
               className: "barangay-label",
@@ -1457,9 +1472,9 @@ export default function LeafletMap(props: LeafletMapProps) {
     }
 
     fetch(url, {
-        headers: {
-            "Content-Type": "application/json",
-        },
+      headers: {
+        "Content-Type": "application/json",
+      },
     })
       .then(res => res.json())
       .then(data => {
@@ -1472,9 +1487,9 @@ export default function LeafletMap(props: LeafletMapProps) {
           val?.toLowerCase().replace(/\s+/g, "_").replace(/[\/\-]/g, "");
 
         const filteredReports =
-        !categoryFilter || categoryFilter === "all"
-          ? reports
-          : reports.filter((r: any) =>
+          !categoryFilter || categoryFilter === "all"
+            ? reports
+            : reports.filter((r: any) =>
               normalizedCategory(r.category) ===
               normalizedCategory(categoryFilter)
             );
@@ -1482,31 +1497,28 @@ export default function LeafletMap(props: LeafletMapProps) {
         filteredReports.forEach((r: any) => {
 
           // Wag parseFloat kasi nageerror sa iba :)
-          const lat = r.lat ?? r.latitude;
-          const lng = r.lng ?? r.longitude;
+          const lat = r.lat;
+          const lng = r.lng;
 
           if (lat == null || lng == null) return;
 
-          const severity = (r.verified_critical_level || "low").toLowerCase();
-          const colors =
-            severityColors[severity as keyof typeof severityColors] ??
-            severityColors.low;
-
           const iconEmoji = getIncidentIcon(r.category);
+
+          const colors = getSeverityColors(r);
 
           const reportIcon = L.divIcon({
             html: `
-              <div class="verified-report-marker">
-                <div class="pulse" style="background:${colors.secondary}40;"></div>
-                <div class="pin"
-                    style="
-                      background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
-                      border: 3px solid ${colors.border};
-                    ">
-                  <span class="verified-report-icon">${iconEmoji}</span>
-                </div>
-              </div>
-            `,
+  <div class="verified-report-marker">
+    <div class="pulse" style="background:${colors.secondary}40;"></div>
+    <div class="pin"
+      style="
+        background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
+        border: 3px solid ${colors.border};
+      ">
+      <span class="verified-report-icon">${iconEmoji}</span>
+    </div>
+  </div>
+  `,
             className: "",
             iconSize: [44, 44],
             iconAnchor: [22, 44],
@@ -1537,8 +1549,100 @@ export default function LeafletMap(props: LeafletMapProps) {
   }, [activeLayers, reportTimeFilter, categoryFilter]);
 
 
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
 
-  return (  
+    const showQueueReports = activeLayers.includes("Queue Reports");
+
+    if (!showQueueReports) {
+      if (queueReportsLayerRef.current) {
+        queueReportsLayerRef.current.clearLayers();
+      }
+      return;
+    }
+
+    if (!queueReportsLayerRef.current) {
+      queueReportsLayerRef.current = L.layerGroup().addTo(map);
+    }
+
+    const layerGroup = queueReportsLayerRef.current;
+
+    const token = localStorage.getItem("access_token");
+
+    fetch(`${API_URL}/api/reports/queue/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+
+        const reports = data.results || data;
+        console.log("QUEUE REPORTS:", reports);
+
+        layerGroup.clearLayers();
+
+        reports.forEach((r: any) => {
+
+          // 👇 ADD THIS
+          console.log("STATUS:", r.status, "RISK:", r.citizenRisk, r.verifiedRisk);
+
+          const citizenRisk = r.citizenRisk ?? r.suggested_critical_level;
+          const verifiedRisk = r.verifiedRisk ?? r.verified_critical_level ?? r.suggested_critical_level;
+
+          const lat = r.lat;
+          const lng = r.lng;
+
+          if (lat == null || lng == null) return;
+
+          const iconEmoji = getIncidentIcon(r.category);
+
+          const colors = getSeverityColors({
+            suggested_critical_level: citizenRisk,
+            verified_critical_level: verifiedRisk,
+          });
+
+          const reportIcon = L.divIcon({
+            html: `
+  <div class="verified-report-marker">
+    <div class="pulse" style="background:${colors.secondary}40;"></div>
+    <div class="pin"
+      style="
+        background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
+        border: 3px solid ${colors.border};
+      ">
+      <span class="verified-report-icon">${iconEmoji}</span>
+    </div>
+  </div>
+  `,
+            className: "",
+            iconSize: [44, 44],
+            iconAnchor: [22, 44],
+          });
+
+          const marker = L.marker([lat, lng], { icon: reportIcon })
+            .addTo(layerGroup)
+            .bindPopup(`
+  <div class="verified-popup">
+    <div class="popup-icon">${iconEmoji}</div>
+    <h3>${r.category}</h3>
+    <p>${r.barangay || "Cabuyao, Laguna"}</p>
+    <span class="popup-pill" style="background:${colors.primary}">
+      ${colors.text} RISK
+    </span>
+  </div>
+`)
+
+          reportMarkersMap.current.set(r.id, marker);
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to load queue reports:", err);
+      });
+  }, [activeLayers, selectedReport]);
+
+  return (
     <div
       className="leaflet-map-wrapper"
       style={{ height, width }}
@@ -1551,4 +1655,3 @@ export default function LeafletMap(props: LeafletMapProps) {
     </div>
   );
 }
-

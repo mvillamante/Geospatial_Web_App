@@ -253,9 +253,10 @@ const NotificationPage: React.FC = () => {
                     "Content-Type": "application/json",
                 },
             });
-        } catch (e) {
 
-        }
+            window.dispatchEvent(new Event("notificationsUpdated"));
+
+        } catch { }
     };
 
     const markOneAsRead = async (notificationId: string) => {
@@ -272,10 +273,11 @@ const NotificationPage: React.FC = () => {
                 },
                 body: JSON.stringify({ notification_id: notificationId }),
             });
-        } catch (e) {
 
-        };
-    }
+            window.dispatchEvent(new Event("notificationsUpdated"));
+
+        } catch { }
+    };
 
     // const isToday = (iso?: string) => {
     //     if (!iso) return false;

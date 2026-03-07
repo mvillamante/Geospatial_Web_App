@@ -46,14 +46,21 @@ const NavigationMenu: React.FC = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
         });
         if (!res.ok) return;
+
         const data = await res.json();
         setNotificationCount(data.unread_count ?? 0);
-      } catch {
-
-      }
+      } catch { }
     };
+
     fetchUnreadCount();
-  }, []);
+
+    const handler = () => fetchUnreadCount();
+
+    window.addEventListener("notificationsUpdated", handler);
+
+    return () => window.removeEventListener("notificationsUpdated", handler);
+
+  }, [effectiveRole]);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -84,6 +91,33 @@ const NavigationMenu: React.FC = () => {
   const isPublicUser = ["Citizen", "Guest"].includes(effectiveRole);
 
   const basePath = effectiveRole === "Guest" ? "guest" : "citizen";
+
+  useEffect(() => {
+    if (effectiveRole !== "Citizen") return;
+
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/notifications/unread-count/`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+        setNotificationCount(data.unread_count ?? 0);
+      } catch (err) {
+        console.error("Unread count error:", err);
+      }
+    };
+
+    fetchUnreadCount();
+
+    const interval = setInterval(fetchUnreadCount, 15000); // refresh every 15s
+
+    return () => clearInterval(interval);
+  }, [effectiveRole]);
 
   if (isPublicUser && isMobile && isPublicRoute) {
     return (

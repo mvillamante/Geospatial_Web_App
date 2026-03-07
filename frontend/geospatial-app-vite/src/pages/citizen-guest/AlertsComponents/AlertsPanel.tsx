@@ -223,6 +223,7 @@ export default function AlertsPanel({
             .trim();
 
     const filteredReports = reports
+        .filter(r => r.status !== "rejected")   
         .filter(r => (r.assigned_officer_id != null) || (r.status === "resolved"))
         .filter(r => selectedCategory === "all" || r.incident_type.toLowerCase() === selectedCategory)
         .filter(r => selectedSeverity === "all" || r.verified_critical_level === selectedSeverity)
@@ -312,11 +313,16 @@ export default function AlertsPanel({
         return `${days}d ago`;
     };
 
-    const normalizeUiStatus = (rawStatus: any): "in_progress" | "resolved" => {
+    const normalizeUiStatus = (
+        rawStatus: any
+    ): "in_progress" | "resolved" | "rejected" => {
         const s = String(rawStatus ?? "").toLowerCase();
-        return s === "resolved" ? "resolved" : "in_progress";
-    };
 
+        if (s === "resolved") return "resolved";
+        if (s === "rejected") return "rejected";
+
+        return "in_progress";
+    };
     // function renderLguPost(note: string) {
     //     const lines = note.split("\n");
     //     const blocks: { title?: string; body: string[] }[] = [];

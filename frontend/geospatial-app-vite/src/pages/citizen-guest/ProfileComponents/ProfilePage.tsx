@@ -178,14 +178,14 @@ const ProfilePage: React.FC = () => {
     }
   }, [location.state, reports]);
 
-  const statusClassMap: Record<ReportStatus, string> = {
-    Pending: "pending",
-    "In Progress": "in-progress",
-    "Needs Info": "needs-info",
-    Resolved: "resolved",
-    Rejected: "rejected",
-    Archived: "archived",
-  };
+  // const statusClassMap: Record<ReportStatus, string> = {
+  //   Pending: "pending",
+  //   "In Progress": "in_progress",
+  //   "Needs Info": "needs_info",
+  //   Resolved: "resolved",
+  //   Rejected: "rejected",
+  //   Archived: "archived",
+  // };
 
   useEffect(() => {
     const fetchProfile = async () => {

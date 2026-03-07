@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./DashboardMapPage.css";
 import LeafletMap, { type HazardBarangayData, type GreenIndexBarangayData, type CalamityRiskBarangayData } from "../../components/ui/LeafletMap";
 import type {
-  ReportItem, ChartItem, DownloadItem, ExportItem,
+  ChartItem, DownloadItem, ExportItem,
   HealthItem, StatItem
 } from "../../types/dashboard.types";
 
@@ -37,34 +37,34 @@ const getHazardIndexColor = (hi: number): string => {
 };
 
 const getGreenIndexColor = (gi: number): string => {
-    gi = Math.max(0, Math.min(100, gi));
-    let r: number, g: number, b: number;
-    if (gi >= 70) {
+  gi = Math.max(0, Math.min(100, gi));
+  let r: number, g: number, b: number;
+  if (gi >= 70) {
     const t = (gi - 70) / 30;
     r = Math.round(60 - t * 60);
     g = Math.round(139 + t * (100 - 39));
     b = Math.round(60 - t * 60);
-    } else if (gi >= 40) {
+  } else if (gi >= 40) {
     const t = (gi - 40) / 30;
     r = Math.round(180 - t * 120);
     g = Math.round(180 - t * 41);
     b = Math.round(0 + t * 60);
-    } else {
+  } else {
     const t = gi / 40;
     r = Math.round(92 + t * 88);
     g = Math.round(64 + t * 116);
     b = Math.round(51 - t * 51);
-    }
-    return `rgb(${r},${g},${b})`;
-}; 
+  }
+  return `rgb(${r},${g},${b})`;
+};
 
 const getCalamityRiskColor = (cr: number): string => {
-    const v = Math.max(0, Math.min(1, cr / 100));
-    if (v >= 0.8) return '#b71c1c';
-    if (v >= 0.6) return '#e53935';
-    if (v >= 0.4) return '#ff7043';
-    if (v >= 0.2) return '#ffab91';
-    return '#fce4ec';
+  const v = Math.max(0, Math.min(1, cr / 100));
+  if (v >= 0.8) return '#b71c1c';
+  if (v >= 0.6) return '#e53935';
+  if (v >= 0.4) return '#ff7043';
+  if (v >= 0.2) return '#ffab91';
+  return '#fce4ec';
 };
 
 const DashboardMapPage: React.FC = () => {
@@ -84,6 +84,9 @@ const DashboardMapPage: React.FC = () => {
   // const greenMaxYear = 2030;
   const initialYear = Math.min(maxYear, Math.max(minYear, currentYear));
   const [year, setYear] = useState(initialYear);
+
+  const [reportYear, setReportYear] = useState(new Date().getFullYear());
+  const [reportFormat, setReportFormat] = useState<"pdf" | "docx">("pdf");
   // const [selected, setSelected] = useState("");
   const [ndviOpacity, setNdviOpacity] = useState(0.8);
   const [ndviMonth, setNdviMonth] = useState<number>(1);
@@ -110,13 +113,13 @@ const DashboardMapPage: React.FC = () => {
 
   // ---------- Data Hooks ----------
   const { cityAverage: hazardAvg } =
-    useHazardData(year, selectedLayer === "hazard");
+    useHazardData(year, true);
 
   const { cityAverage: greenAvg } =
-    useGreenIndexData(year, selectedLayer === "green");
+    useGreenIndexData(year, true);
 
   const { cityAverage: calamityAvg } =
-    useCalamityRiskData(year, selectedLayer === "calamity");
+    useCalamityRiskData(year, true);
 
   const toggleRightPanel = () => setIsRightPanelOpen(prev => !prev);
 
@@ -178,7 +181,7 @@ const DashboardMapPage: React.FC = () => {
       ],
     },
   ];
-  
+
   const mapViewAllowedGroups = ["Population Density", "Hazard Zones", "Infrastructure and Road Networks"];
   const visibleMapLayers =
     mapView === "interactive"
@@ -216,7 +219,7 @@ const DashboardMapPage: React.FC = () => {
     data: GreenIndexBarangayData;
   } | null>(null);
   // const [greenYearData, setGreenYearData] = useState<Record<string, GreenIndexBarangayData> | null>(null);
-  
+
   /*----------Calamity Risk (choropleth) details----------*/
   const [selectedCalamityBarangay, setSelectedCalamityBarangay] = useState<{
     barangay: string;
@@ -224,7 +227,7 @@ const DashboardMapPage: React.FC = () => {
     data: CalamityRiskBarangayData;
   } | null>(null);
   // const [calamityYearData, setCalamityYearData] = useState<Record<string, CalamityRiskBarangayData> | null>(null);
-  
+
   /*---------- Get Universal Index Data: left panel indices fixed to 2026 ----------*/
   const {
     universalGreenAvg,
@@ -265,13 +268,13 @@ const DashboardMapPage: React.FC = () => {
   ];
 
   const exportSections = [
-    {
-      title: "Reports",
-      items: [
-        ["Category Summary", "Q4 2025"],
-        ["Yearly Overview", "2024"]
-      ] as ReportItem[],
-    },
+    // {
+    //   title: "Reports",
+    //   items: [
+    //     ["Category Summary", "Q4 2025"],
+    //     ["Yearly Overview", "2024"]
+    //   ] as ReportItem[],
+    // },
     {
       title: "Charts",
       items: [
@@ -305,10 +308,10 @@ const DashboardMapPage: React.FC = () => {
   /*---------- Placeholder Analytics Section (Right Panel)----------*/
   const colors = ["violet", "teal", "orange"]
   const insightIcons = [
-      <FaChartLine />,
-      <FaLeaf />,
-      <FaMountain />,
-    ];
+    <FaChartLine />,
+    <FaLeaf />,
+    <FaMountain />,
+  ];
   const keyInsights = [
     {
       label: "Calamity Risk Trend",
@@ -360,8 +363,8 @@ const DashboardMapPage: React.FC = () => {
         typeof item === "string"
           ? item
           : Array.isArray(item)
-          ? item[0]
-          : item.name;
+            ? item[0]
+            : item.name;
 
       const zipName = label.toLowerCase().endsWith(".zip")
         ? label
@@ -405,8 +408,8 @@ const DashboardMapPage: React.FC = () => {
         typeof item === "string"
           ? item
           : Array.isArray(item)
-          ? item[0]
-          : item.name;
+            ? item[0]
+            : item.name;
 
       const csvName = label.toLowerCase().endsWith(".csv")
         ? label
@@ -417,7 +420,7 @@ const DashboardMapPage: React.FC = () => {
       try {
         // Use fetch to properly handle errors
         const response = await fetch(endpoint);
-        
+
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
           toast.error(errorData.error || `Failed to download ${label}. File may not be available.`);
@@ -427,7 +430,7 @@ const DashboardMapPage: React.FC = () => {
         // Get the CSV content
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        
+
         // Trigger download
         const a = document.createElement("a");
         a.href = url;
@@ -436,7 +439,7 @@ const DashboardMapPage: React.FC = () => {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        
+
         // Clean up the blob URL
         window.URL.revokeObjectURL(url);
 
@@ -665,11 +668,16 @@ const DashboardMapPage: React.FC = () => {
         <DbRightPanel
           isOpen={isRightPanelOpen}
           toggle={toggleRightPanel}
-          rightNav={rightNav}                  
-          setRightNav={setRightNav}             
-          exportSections={exportSections}      
-          recentDownloads={recentDownloads}    
-          handleDownload={handleDownload}      
+          rightNav={rightNav}
+          setRightNav={setRightNav}
+          exportSections={exportSections}
+          recentDownloads={recentDownloads}
+          handleDownload={handleDownload}
+
+          reportYear={reportYear}
+          setReportYear={setReportYear}
+          reportFormat={reportFormat}
+          setReportFormat={setReportFormat}
 
           // Charts / Index props
           universalGreenAvg={universalGreenAvg}

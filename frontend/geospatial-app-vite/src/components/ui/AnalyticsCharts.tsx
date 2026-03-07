@@ -78,7 +78,7 @@ async function exportSvgContainerToImage(
     // Use html2canvas to capture the ENTIRE container including captions, padding, borders, etc.
     const canvas = await html2canvas(container, {
       backgroundColor: "#ffffff",
-      scale: 2, // Higher resolution
+      scale: 1.5, // Higher resolution
       logging: false,
       useCORS: true,
       allowTaint: false,

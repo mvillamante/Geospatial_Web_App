@@ -107,10 +107,6 @@ const LandingPage: React.FC = () => {
     fetchLandingStats();
   }, []);
 
-  if (loading) {
-    return <Spinner />;
-  }
-
 
   // ===== Get user role and display name from localStorage =====
   // const { userRole, userRole2 } = getUserRoleAndDisplayName();
@@ -120,208 +116,213 @@ const LandingPage: React.FC = () => {
       id="home"
       className={`landing-page ${modalType ? "modal-open" : ""}`}
     >
-      {modalType === "terms" && (
-        <TermsModal onClose={closeModal} />
-      )}
-      {modalType === "privacy" && (
-        <PrivacyModal onClose={closeModal} />
-      )}
-      {modalType &&
-        ["login", "signup", "forgotPassword", "verifyOtp", "resetPassword"].includes(modalType) && (
-          <AuthModal
-            type={modalType as AuthModalType}
-            onClose={closeModal}
-            switchModal={switchModal}
-            openTerms={() => setModalType("terms")}
-            openPrivacy={() => setModalType("privacy")}
-          />
-        )}
-
-      {modalType === "researcherRequest" && (
-        <ResearcherRequestModal onClose={closeModal} />
-      )}
-
-      {/* Navigation */}
-      <div className="content">
-        <nav className="nav">
-
-          <div className="logo">
-            <div className="logo-icon">
-              <img src="./hazspot-logo(2).png" alt="HazSpot logo" className="landing-logo-img" />
-            </div>
-            {/* <span>HazSpot</span> */}
-          </div>
-          <div className={`nav-links ${isOpen ? "active" : ""}`}>
-            <a
-              href="#home"
-              className={activeSection === "home" ? "active" : ""}
-            >
-              Home
-            </a>
-
-            <a
-              href="#about"
-              className={activeSection === "about" ? "active" : ""}
-            >
-              About
-            </a>
-
-            <a
-              href="#howitworks"
-              className={activeSection === "howitworks" ? "active" : ""}
-            >
-              How It Works
-            </a>
-          </div>
-          <div className="nav-buttons">
-            <button className="btn btn-outline blue" onClick={() => setModalType("login")}>Login</button>
-            <button className="btn btn-outline" onClick={() => setModalType("signup")}>Sign Up</button>
-          </div>
-        </nav>
-
-        {/* Hero */}
-        <section className="hero">
-          <h1>Mapping Community <span className="highlight-red">Resilience</span><br />for a <span className="highlight-blue">Safer</span> Future</h1>
-          <p>
-            A community-centered platform for understanding hazard risk, strengthening disaster preparedness, and supporting local sustainability initiatives.
-          </p>
-          <div className="cta-group">
-            <button className="btn btn-primary" onClick={() => setModalType("signup")}>Get Started</button>
-            <button className="btn btn-secondary" onClick={() => navigate("/main/guest/community-feed", { replace: true })}>View Community Feed</button>
-          </div>
-
-          <div className="dashboard-preview">
-            <div className="dashboard-header">
-              <div className="dashboard-title">Live Hazard Map</div>
-            </div>
-
-            <div className="dashboard-map-container">
-              <LeafletMap
-                activeLayers={["Verified Reports"]}
-                reportTimeFilter="7days"
+      {loading && <Spinner />}
+      {!loading && (
+        <>
+          {modalType === "terms" && (
+            <TermsModal onClose={closeModal} />
+          )}
+          {modalType === "privacy" && (
+            <PrivacyModal onClose={closeModal} />
+          )}
+          {modalType &&
+            ["login", "signup", "forgotPassword", "verifyOtp", "resetPassword"].includes(modalType) && (
+              <AuthModal
+                type={modalType as AuthModalType}
+                onClose={closeModal}
+                switchModal={switchModal}
+                openTerms={() => setModalType("terms")}
+                openPrivacy={() => setModalType("privacy")}
               />
-            </div>
+            )}
 
-            {/* Stats Section */}
-            <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-label">Active Hazards</div>
-                <div className="stat-value">
-                  {stats ? stats.activeHazards : "—"}
+          {modalType === "researcherRequest" && (
+            <ResearcherRequestModal onClose={closeModal} />
+          )}
+
+          {/* Navigation */}
+          <div className="content">
+            <nav className="nav">
+
+              <div className="logo">
+                <div className="logo-icon">
+                  <img src="./hazspot-logo(2).png" alt="HazSpot logo" className="landing-logo-img" />
                 </div>
+                {/* <span>HazSpot</span> */}
               </div>
+              <div className={`nav-links ${isOpen ? "active" : ""}`}>
+                <a
+                  href="#home"
+                  className={activeSection === "home" ? "active" : ""}
+                >
+                  Home
+                </a>
 
-              <div className="stat-card red">
-                <div className="stat-label">Critical Alerts</div>
-                <div className="stat-value">
-                  {stats ? stats.criticalAlerts : "—"}
-                </div>
+                <a
+                  href="#about"
+                  className={activeSection === "about" ? "active" : ""}
+                >
+                  About
+                </a>
+
+                <a
+                  href="#howitworks"
+                  className={activeSection === "howitworks" ? "active" : ""}
+                >
+                  How It Works
+                </a>
               </div>
-
-              <div className="stat-card">
-                <div className="stat-label">Reports Today</div>
-                <div className="stat-value">
-                  {stats ? stats.reportsToday : "—"}
-                </div>
+              <div className="nav-buttons">
+                <button className="btn btn-outline blue" onClick={() => setModalType("login")}>Login</button>
+                <button className="btn btn-outline" onClick={() => setModalType("signup")}>Sign Up</button>
               </div>
+            </nav>
 
-              <div className="stat-card">
-                <div className="stat-label">Response Time</div>
-                <div className="stat-value">
-                  {stats ? `${stats.avgResponseTimeMinutes}m` : "—"}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* About */}
-        </section>
-        <section id="about">
-          <div className="section-header">
-            <h2>About <span className="highlight-blue">HazSpot</span></h2>
-          </div>
-          <div
-            style={{
-              maxWidth: "900px",
-              margin: "0 auto",
-              textAlign: "center",
-            }}
-          >
-            <p
-              style={{
-                fontSize: "1.1rem",
-                lineHeight: "1.8",
-                color: "#64748b",
-              }}
-            >
-              HazSpot is a comprehensive disaster management platform that delivers real-time risk insights by combining citizen reporting, advanced analytics, and predictive modeling. It empowers local government units to enhance disaster mitigation strategies. Our mission is to transform how communities prepare for, respond to, and recover from disasters through technology-driven collaboration and data-informed decision-making.
-            </p>
-          </div>
-        </section>
-
-        {/* how it works */}
-        <section id="howitworks">
-          <div className="section-header">
-            <h2>
-              How <span className="highlight-red">It Works</span>
-            </h2>
-            <p>See how each community member contributes to safety and preparedness</p>
-          </div>
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon">
-                <FaUser size={28} />
-              </div>
-              <h3>As a Citizen</h3>
+            {/* Hero */}
+            <section className="hero">
+              <h1>Mapping Community <span className="highlight-red">Resilience</span><br />for a <span className="highlight-blue">Safer</span> Future</h1>
               <p>
-                Report incidents anytime and help your community informed. Receive
-                real-time hazard alerts based on your area. Find the closest evacuation center and
-                check Community Feed for official LGU updates. Track the status of your reports and stay informed about
-                community safety.
+                A community-centered platform for understanding hazard risk, strengthening disaster preparedness, and supporting local sustainability initiatives.
               </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">
-                <FaChartBar size={28} />
+              <div className="cta-group">
+                <button className="btn btn-primary" onClick={() => setModalType("signup")}>Get Started</button>
+                <button className="btn btn-secondary" onClick={() => navigate("/main/guest/community-feed", { replace: true })}>View Community Feed</button>
               </div>
-              <h3>As a Researcher/Analyst</h3>
-              <p>
-                Access comprehensive analytics dashboards with exploratory data analysis tools.
-                Monitor predictive model performance, download datasets for research, and view
-                time-series predictions. Analyze trends, patterns, and correlations to improve
-                disaster response strategies.
-              </p>
 
-              <button
-                className="btn btn-outline researcher-btn"
-                onClick={() => setModalType("researcherRequest")}
+              <div className="dashboard-preview">
+                <div className="dashboard-header">
+                  <div className="dashboard-title">Live Hazard Map</div>
+                </div>
+
+                <div className="dashboard-map-container">
+                  <LeafletMap
+                    activeLayers={["Verified Reports"]}
+                    reportTimeFilter="7days"
+                  />
+                </div>
+
+                {/* Stats Section */}
+                <div className="stats-grid">
+                  <div className="stat-card">
+                    <div className="stat-label">Active Hazards</div>
+                    <div className="stat-value">
+                      {stats ? stats.activeHazards : "—"}
+                    </div>
+                  </div>
+
+                  <div className="stat-card red">
+                    <div className="stat-label">Critical Alerts</div>
+                    <div className="stat-value">
+                      {stats ? stats.criticalAlerts : "—"}
+                    </div>
+                  </div>
+
+                  <div className="stat-card">
+                    <div className="stat-label">Reports Today</div>
+                    <div className="stat-value">
+                      {stats ? stats.reportsToday : "—"}
+                    </div>
+                  </div>
+
+                  <div className="stat-card">
+                    <div className="stat-label">Response Time</div>
+                    <div className="stat-value">
+                      {stats ? `${stats.avgResponseTimeMinutes}m` : "—"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* About */}
+            </section>
+            <section id="about">
+              <div className="section-header">
+                <h2>About <span className="highlight-blue">HazSpot</span></h2>
+              </div>
+              <div
+                style={{
+                  maxWidth: "900px",
+                  margin: "0 auto",
+                  textAlign: "center",
+                }}
               >
-                Request Researcher Access
-              </button>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">
-                <FaUniversity size={28} />
+                <p
+                  style={{
+                    fontSize: "1.1rem",
+                    lineHeight: "1.8",
+                    color: "#64748b",
+                  }}
+                >
+                  HazSpot is a comprehensive disaster management platform that delivers real-time risk insights by combining citizen reporting, advanced analytics, and predictive modeling. It empowers local government units to enhance disaster mitigation strategies. Our mission is to transform how communities prepare for, respond to, and recover from disasters through technology-driven collaboration and data-informed decision-making.
+                </p>
               </div>
-              <h3>As an LGU/Decision Maker</h3>
-              <p>
-                Monitor real-time hazard conditions through interactive maps, oversee the validation of community reports, and maintain evacuation center data. With built-in analytics tools, LGU administrators can make informed decisions that enhance public safety and strengthen coordinated disaster response efforts.
-              </p>
-            </div>
-          </div>
-        </section>
+            </section>
 
-        {/* Footer */}
-        <footer className="footer">
-          <div className="footer-links">
-            <button onClick={() => setModalType("terms")}>Terms & Conditions</button>
-            <button onClick={() => setModalType("privacy")}>Privacy Policy</button>
+            {/* how it works */}
+            <section id="howitworks">
+              <div className="section-header">
+                <h2>
+                  How <span className="highlight-red">It Works</span>
+                </h2>
+                <p>See how each community member contributes to safety and preparedness</p>
+              </div>
+              <div className="features-grid">
+                <div className="feature-card">
+                  <div className="feature-icon">
+                    <FaUser size={28} />
+                  </div>
+                  <h3>As a Citizen</h3>
+                  <p>
+                    Report incidents anytime and help your community informed. Receive
+                    real-time hazard alerts based on your area. Find the closest evacuation center and
+                    check Community Feed for official LGU updates. Track the status of your reports and stay informed about
+                    community safety.
+                  </p>
+                </div>
+                <div className="feature-card">
+                  <div className="feature-icon">
+                    <FaChartBar size={28} />
+                  </div>
+                  <h3>As a Researcher/Analyst</h3>
+                  <p>
+                    Access comprehensive analytics dashboards with exploratory data analysis tools.
+                    Monitor predictive model performance, download datasets for research, and view
+                    time-series predictions. Analyze trends, patterns, and correlations to improve
+                    disaster response strategies.
+                  </p>
+
+                  <button
+                    className="btn btn-outline researcher-btn"
+                    onClick={() => setModalType("researcherRequest")}
+                  >
+                    Request Researcher Access
+                  </button>
+                </div>
+                <div className="feature-card">
+                  <div className="feature-icon">
+                    <FaUniversity size={28} />
+                  </div>
+                  <h3>As an LGU/Decision Maker</h3>
+                  <p>
+                    Monitor real-time hazard conditions through interactive maps, oversee the validation of community reports, and maintain evacuation center data. With built-in analytics tools, LGU administrators can make informed decisions that enhance public safety and strengthen coordinated disaster response efforts.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="footer">
+              <div className="footer-links">
+                <button onClick={() => setModalType("terms")}>Terms & Conditions</button>
+                <button onClick={() => setModalType("privacy")}>Privacy Policy</button>
+              </div>
+              <div className="footer-bottom">
+                © Copyright 2026. All Rights Reserved by HazSpot
+              </div>
+            </footer>
           </div>
-          <div className="footer-bottom">
-            © Copyright 2026. All Rights Reserved by HazSpot
-          </div>
-        </footer>
-      </div>
+        </>
+      )}
     </div >
   );
 };

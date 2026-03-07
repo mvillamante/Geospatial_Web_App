@@ -168,7 +168,23 @@ const TermsModal = ({ onClose }) => {
                         <p>
                             For questions, concerns, or reports of violations regarding
                             these Terms of Service, please contact us at:<br />
-                            Email: <strong>hazspot12@gmail.com</strong><br />
+                            Email: <strong>hazspot12@gmail.com</strong><br /><br />
+                            For inquiries related to research or the development of the HazSpot system, you may also contact the research team: <br />
+                            <strong>Development Team:</strong><br />
+                            Andosay, Noela Mae D. <br />
+                            2022nmandosay@live.mcl.edu.ph<br /><br />
+
+                            Laiño, John Wilbert J. <br />
+                            2022jwlaio@live.mcl.edu.ph <br /><br />
+
+                            Arbutante, Vince Joseph B. <br />
+                            2022vjarbutante@live.mcl.edu.ph <br /><br />
+
+                            Villamante, Michaella<br />
+                            2022mvillamante@live.mcl.edu.ph<br />
+
+
+
                         </p>
 
                     </div>

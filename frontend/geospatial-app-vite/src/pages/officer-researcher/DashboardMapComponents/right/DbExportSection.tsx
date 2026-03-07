@@ -30,7 +30,6 @@ const DbExportSection: React.FC<ExportSectionProps> = ({
 
   return (
     <div className="right-panel-content">
-      <h4>Export Section</h4>
 
       {sections.map((section, index) => {
         const itemsToRender =
@@ -58,19 +57,18 @@ const DbExportSection: React.FC<ExportSectionProps> = ({
                   <li className="export-content" key={i}>
                     {/* LEFT ICON */}
                     <span
-                      className={`export-left-icon ${
-                        section.title === "Reports"
+                      className={`export-left-icon ${section.title === "Reports"
                           ? "report"
                           : section.title === "Charts"
-                          ? "chart"
-                          : (item as DownloadItem).type === "report"
-                          ? "download-report"
-                          : "download-chart"
-                      }`}
+                            ? "chart"
+                            : (item as DownloadItem).type === "report"
+                              ? "download-report"
+                              : "download-chart"
+                        }`}
                     >
                       {section.title === "Reports" ||
-                      (isRecent &&
-                        (item as DownloadItem).type === "report") ? (
+                        (isRecent &&
+                          (item as DownloadItem).type === "report") ? (
                         <HiOutlineDocumentReport />
                       ) : (
                         <HiOutlineChartBar />
@@ -110,6 +108,14 @@ const DbExportSection: React.FC<ExportSectionProps> = ({
                         className="export-download-icon"
                         onClick={() =>
                           handleDownload(item as ExportItem, section.title)
+                        }
+                      />
+                    )}
+                    {isRecent && (
+                      <FiDownload
+                        className="export-download-icon"
+                        onClick={() =>
+                          window.open(`/downloads/${(item as DownloadItem).name}`)
                         }
                       />
                     )}

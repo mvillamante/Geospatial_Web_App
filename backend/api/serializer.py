@@ -101,11 +101,6 @@ class MeSerializer(serializers.ModelSerializer):
             return req.rejection_reason or ""
         return ""
 
-    def get_researcher_rejection_reason(self, obj):
-        req = ResearcherRequest.objects.filter(user=obj).order_by("-created_at").first()
-        if req and req.status == "rejected":
-            return req.rejection_reason or ""
-        return ""
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -315,7 +310,7 @@ class IncidentReportCreateSerializer(serializers.ModelSerializer):
 
         photo_path = None
         if photo:
-            photo_path = upload_private_photo(photo)
+            photo_path = upload_private_photo(photo, bucket="incident-photos")
 
         report = IncidentReport.objects.create(
             user=request.user,
@@ -402,8 +397,6 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
     }
 
 
-
-
     def get_user_label(self, obj):
         return f"Citizen #0{obj.user_id}"
 
@@ -466,7 +459,7 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
     createdAt = serializers.DateTimeField(source="created_at")
     lat = serializers.DecimalField(source="latitude", max_digits=10, decimal_places=7, allow_null=True)
     lng = serializers.DecimalField(source="longitude", max_digits=10, decimal_places=7, allow_null=True)
-    assignedOfficerId = serializers.IntegerField(source="assigned_officer_id", allow_null=True)
+    assignedOfficerId = serializers.SerializerMethodField()
     verifiedRisk = serializers.CharField(source="verified_critical_level", required=False, allow_null=True)
     assignedTo = serializers.SerializerMethodField()
     lgu_post = serializers.SerializerMethodField()
@@ -520,6 +513,11 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
         if (obj.status or "").lower() != "resolved":
             return None
         return obj.lgu_post
+    
+    def get_assignedOfficerId(self, obj):
+        if obj.assigned_officer:
+            return obj.assigned_officer.id
+        return None
 
     def get_assignedTo(self, obj):
         u = obj.assigned_officer
@@ -561,16 +559,19 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
     def get_reply_image_url(self, obj):
         if not obj.reply_image_url:
             return None
+
+        return create_signed_url(
+            obj.reply_image_url,
+            bucket="incident-photos",
+            expires_in_seconds=3600
+        )
         
-            return create_signed_url(obj.reply_image_url,bucket="incident-photos",expires_in_seconds=3600)
-    
-    
 class IncidentReportUpdateSerializer(serializers.ModelSerializer):
     verifiedRisk = serializers.CharField(source="verified_critical_level", required=False, allow_null=True)
     assigned_officer = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.filter(role="officer"),write_only=True,required=False)
     assignedTo = serializers.SerializerMethodField()
     officerNote = serializers.CharField(source="officer_note", required=False, allow_blank=True, allow_null=True)
-    rejectionReason = serializers.CharField(source="rejection_reason", required=False, allow_blank=True, allow_null=True)
+    rejection_reason = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     lastUpdatedAt = serializers.DateTimeField(source="last_updated_at", read_only=True)
     reply_message = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     reply_image_url = serializers.CharField(required=False, allow_blank=True, allow_null=True)
@@ -584,7 +585,7 @@ class IncidentReportUpdateSerializer(serializers.ModelSerializer):
             "verifiedRisk",
             "assigned_officer",
             "officerNote",
-            "rejectionReason",
+            "rejection_reason",
             "assignedTo",
             "lastUpdatedAt",
             "needs_info_note",
@@ -687,7 +688,7 @@ class ResidentVerificationRequestSerializer(serializers.ModelSerializer):
             "created_at",
             "reviewed_at"
         ]
-        read_only_fields = ["id", "citizen_id", "citizen_name", "created_at", "reviewed_at"]
+        read_only_fields = ["id", "citizen_id", 'barangay', 'address', "citizen_name", "created_at", "reviewed_at"]
 
     def get_citizen_name(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}"

@@ -51,7 +51,7 @@ class MarkNotificationRead(APIView):
             return Response({"detail": "Notification not found"}, status=status.HTTP_404_NOT_FOUND)
 
         rel, _ = NotificationRead.objects.get_or_create(
-            target_user=request.user, 
+            user=request.user, 
             notification_id=notif_id,
             defaults={"is_read": True, "read_at": now()},
         )
@@ -72,13 +72,13 @@ class MarkAllRead(APIView):
         ids = list(qs.values_list("id", flat=True))
 
         NotificationRead.objects.filter(
-            target_user=request.user,
+            user=request.user,
             notification_id__in=ids
         ).update(is_read=True, read_at=now())
 
         existing_ids = set(
             NotificationRead.objects.filter(
-                target_user=request.user,
+                user=request.user,
                 notification_id__in=ids
             ).values_list("notification_id", flat=True)
         )
@@ -88,7 +88,7 @@ class MarkAllRead(APIView):
         NotificationRead.objects.bulk_create(
             [
                 NotificationRead(
-                    target_user=request.user,
+                    user=request.user,
                     notification_id=nid,
                     is_read=True,
                     read_at=now()
@@ -106,9 +106,8 @@ class UnreadNotificationCount(APIView):
     def get(self, request):
         qs = get_visible_notifications(request.user)
 
-        unread_count = qs.exclude(
-            read__user=request.user,
-            read__is_read=True
-        ).count()
+        unread_count = qs.filter(
+            ~Q(read__user=request.user, read__is_read=True)
+        ).distinct().count()
 
         return Response({"unread_count": unread_count})

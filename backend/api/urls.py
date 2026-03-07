@@ -56,6 +56,8 @@ urlpatterns = [
     path("admin/users/<int:user_id>/change-password/", change_user_password),
     path("admin/departments/", DepartmentListCreateView.as_view()),
     path("admin/departments/<int:pk>/", DepartmentDetailView.as_view(), name="departments-detail"),
+    path("admin/citizen_overview/", CitizenOverviewView.as_view(), name="citizen_overview"),
+    path("admin/citizens/<int:pk>/status/", CitizenStatusUpdateView.as_view(), name="citizen_status_update"),
 
     # Researcher_Views
     path("researcher/request/", CreateResearcherRequestView.as_view(), name="researcher_request_create"),

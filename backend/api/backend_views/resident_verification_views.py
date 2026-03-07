@@ -4,10 +4,11 @@ from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 
-from api.models import ResidentVerificationRequest
+from api.models import ResidentVerificationRequest, CustomUser
 from api.serializer import ResidentVerificationRequestSerializer
 from api.admin_permissions import IsAdminRole
-from django.db.models import Q
+from django.db.models import Q, Value
+from django.db.models.functions import Concat
 from api.supabase_storage import create_signed_url
 
 @api_view(["GET"])
@@ -17,7 +18,6 @@ def get_signed_url(request):
     if not path:
         return Response({"error": "Missing path"}, status=400)
     
-    # Remove domain if accidentally included
     if path.startswith("http://127.0.0.1:8000/"):
         path = path.replace("http://127.0.0.1:8000/", "")
     
@@ -27,12 +27,186 @@ def get_signed_url(request):
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 
-class ResidentVerificationListView(generics.ListAPIView):
-    serializer_class = ResidentVerificationRequestSerializer
+class ResidentVerificationListView(APIView):
     permission_classes = [IsAuthenticated, IsAdminRole]
 
-    def get_queryset(self):
-        queryset = ResidentVerificationRequest.objects.all().order_by('-created_at')
+    def get(self, request):
+        search = request.GET.get("search", "").strip()
+
+        # DEFAULT: only pending requests
+        if not search:
+            requests_qs = ResidentVerificationRequest.objects.select_related("user")\
+                .filter(status__iexact="pending")
+
+        # SEARCH: show all statuses
+        else:
+            requests_qs = ResidentVerificationRequest.objects.select_related("user")\
+                .annotate(
+                    full_name=Concat(
+                        "user__first_name",
+                        Value(" "),
+                        "user__last_name"
+                    )
+                ).filter(
+                    Q(full_name__iexact=search) |
+                    Q(user__email__iexact=search)
+                )
+
+        request_data = [
+            {
+                "id": r.id,
+                "type": "verification_request",
+                "first_name": r.user.first_name,
+                "last_name": r.user.last_name,
+                "barangay": r.barangay,
+                "address": r.address,
+                "email": r.user.email,
+                "status": r.status.lower(),
+                "created_at": r.created_at,
+                "reviewed_at": r.reviewed_at,
+            }
+            for r in requests_qs
+        ]
+
+        citizen_data = []
+
+        # SEARCH: include citizens
+        if search:
+            citizen_qs = CustomUser.objects.filter(
+                role__iexact="citizen"
+            ).annotate(
+                full_name=Concat(
+                    "first_name",
+                    Value(" "),
+                    "last_name"
+                )
+            ).filter(
+                Q(full_name__iexact=search) |
+                Q(email__iexact=search)
+            )
+
+            citizen_data = [
+                {
+                    "id": c.id,
+                    "type": "citizen",
+                    "first_name": c.first_name,
+                    "last_name": c.last_name,
+                    "barangay": c.barangay,
+                    "email": c.email,
+                    "status": "active" if c.is_active else "inactive",
+                    "created_at": c.date_joined,
+                    "last_login": c.last_login,
+                }
+                for c in citizen_qs
+            ]
+
+        combined = request_data + citizen_data
+
+        return Response({
+            "count": len(combined),
+            "results": combined
+        })
+
+class CitizenOverviewView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminRole]
+
+    def get(self, request):
+        search = request.query_params.get("search")
+        status_param = request.query_params.get("status")
+
+        # Citizen verification requests
+        request_qs = ResidentVerificationRequest.objects.filter(
+            user__role="citizen"
+        )
+
+        # Existing citizen users
+        citizen_qs = CustomUser.objects.filter(
+            role__iexact="citizen"
+        )
+
+        # SEARCH
+        if search:
+            request_qs = request_qs.filter(
+                Q(user__first_name__icontains=search) |
+                Q(user__last_name__icontains=search) |
+                Q(user__email__icontains=search)
+            )
+
+            citizen_qs = citizen_qs.filter(
+                Q(first_name__icontains=search) |
+                Q(last_name__icontains=search) |
+                Q(email__icontains=search)
+            )
+
+        #Format requests
+        request_data = [
+            {
+                "id": r.id,
+                "type": "verification_request",
+                "first_name": r.user.first_name,
+                "last_name": r.user.last_name,
+                "email": r.user.email,
+                "status": r.status.lower(),
+                "created_at": r.created_at,
+                "reviewed_at": r.reviewed_at,
+            }
+            for r in request_qs
+        ]
+
+        # Format citizens
+        citizen_data = [
+            {
+                "id": c.id,
+                "type": "citizen",
+                "first_name": c.first_name,
+                "last_name": c.last_name,
+                "email": c.email,
+                "status": "active" if c.is_active else "inactive",
+                "created_at": c.date_joined,
+                "last_login": c.last_login,
+            }
+            for c in citizen_qs
+        ]
+
+        # Combine both
+        combined = request_data + citizen_data
+
+        # Optional status filter
+        if status_param and status_param.lower() != "all":
+            combined = [
+                item for item in combined
+                if item["status"] == status_param.lower()
+            ]
+
+        return Response({
+            "count": len(combined),
+            "results": combined
+        })
+
+class CitizenStatusUpdateView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminRole]
+
+    def patch(self, request, pk):
+        try:
+            user = CustomUser.objects.get(pk=pk, role="citizen")
+        except CustomUser.DoesNotExist:
+            return Response({"detail": "Citizen not found."}, status=404)
+
+        action = request.data.get("action")
+
+        if action == "activate":
+            user.is_active = True
+        elif action == "deactivate":
+            user.is_active = False
+        else:
+            return Response({"detail": "Invalid action."}, status=400)
+
+        user.save()
+
+        return Response({
+            "id": user.id,
+            "status": "active" if user.is_active else "inactive"
+        })
 
         status_param = self.request.query_params.get("status")
         if status_param:

@@ -13,25 +13,25 @@ import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { Toaster } from "sonner";
 import { syncOfflineReports } from "./libr/syncOfflineReports";
 
-useEffect(() => {
-  const handleOnline = () => {
-    const token = localStorage.getItem("access_token");
-    if (!token) return;
-
-    syncOfflineReports(import.meta.env.VITE_API_URL, token);
-  };
-
-  window.addEventListener("online", handleOnline);
-
-  return () => window.removeEventListener("online", handleOnline);
-}, []);
-
 const App: React.FC = () => {
+  useEffect(() => {
+    const handleOnline = () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+
+      syncOfflineReports(import.meta.env.VITE_API_URL, token);
+    };
+
+    window.addEventListener("online", handleOnline);
+
+    return () => window.removeEventListener("online", handleOnline);
+  }, []);
+
   return (
     <Router>
       <Toaster richColors position="top-right" toastOptions={{
-    duration: 2000
-  }}/>
+        duration: 2000
+      }} />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         {/* PWA Routes  */}

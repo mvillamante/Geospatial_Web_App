@@ -87,6 +87,7 @@ const DashboardMapPage: React.FC = () => {
 
   const [reportYear, setReportYear] = useState(new Date().getFullYear());
   const [reportFormat, setReportFormat] = useState<"pdf" | "docx">("pdf");
+  const [reportType, setReportType] = useState<"full" | "green" | "hazard" | "calamity">("full");
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   // const [selected, setSelected] = useState("");
   const [ndviOpacity, setNdviOpacity] = useState(0.8);
@@ -690,6 +691,9 @@ const DashboardMapPage: React.FC = () => {
           setReportYear={setReportYear}
           reportFormat={reportFormat}
           setReportFormat={setReportFormat}
+          reportType={reportType}
+          setReportType={setReportType}
+          setRecentDownloads={setRecentDownloads}
 
           // Charts / Index props
           universalGreenAvg={universalGreenAvg}

@@ -243,14 +243,17 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
     }
   };
 
+  // Cabuyao, Laguna approximate bounds so snapshot captures entire city boundaries
+  const CABUYAO_BOUNDS: L.LatLngBoundsLiteral = [
+    [14.18, 121.06],
+    [14.30, 121.20],
+  ];
+
   const captureChoroplethMap = async (): Promise<string | null> => {
     const mapContainer = document.querySelector(
       ".choroplethview-map .leaflet-container"
     ) as HTMLElement | null;
     if (!mapContainer) return null;
-
-    const DEFAULT_CENTER: L.LatLngExpression = [14.2349, 121.1211];
-    const DEFAULT_ZOOM = 13;
 
     const leafletMap: L.Map | null = (mapContainer as any)._leafletMapInstance ?? null;
     let prevCenter: L.LatLng | null = null;
@@ -261,21 +264,24 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
         prevCenter = leafletMap.getCenter();
         prevZoom = leafletMap.getZoom();
 
-        // Fit to GeoJSON bounds so the entire barangay boundary is visible
+        // Fit to GeoJSON/FeatureGroup bounds so the entire Cabuyao overlay is visible
         let bounds: L.LatLngBounds | null = null;
         leafletMap.eachLayer((layer: L.Layer) => {
-          if (layer instanceof L.GeoJSON) {
-            const layerBounds = layer.getBounds();
+          const l = layer as L.Layer & { getBounds?: () => L.LatLngBounds };
+          if (l.getBounds && typeof l.getBounds === "function") {
+            const layerBounds: L.LatLngBounds = l.getBounds();
             if (layerBounds.isValid()) {
               bounds = bounds ? bounds.extend(layerBounds) : layerBounds;
             }
           }
         });
 
-        if (bounds) {
+        const useBounds = bounds !== null && (bounds as L.LatLngBounds).isValid();
+        if (useBounds && bounds) {
           leafletMap.fitBounds(bounds, { animate: false, padding: [20, 20] });
         } else {
-          leafletMap.setView(DEFAULT_CENTER, DEFAULT_ZOOM, { animate: false });
+          // Fallback: center on Cabuyao bounds so snapshot captures full city
+          leafletMap.fitBounds(CABUYAO_BOUNDS, { animate: false, padding: [20, 20] });
         }
 
         // Wait for tiles to load and the map to settle
@@ -307,9 +313,45 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
     }
   };
 
+  // Reset choropleth map view to center on Cabuyao so snapshot captures full boundaries
+  const resetMapToCabuyao = (): Promise<void> => {
+    const mapContainer = document.querySelector(
+      ".choroplethview-map .leaflet-container"
+    ) as HTMLElement | null;
+    const leafletMap: L.Map | null = mapContainer ? (mapContainer as any)._leafletMapInstance ?? null : null;
+    if (!leafletMap) return Promise.resolve();
+
+    let bounds: L.LatLngBounds | null = null;
+    leafletMap.eachLayer((layer: L.Layer) => {
+      const l = layer as L.Layer & { getBounds?: () => L.LatLngBounds };
+      if (l.getBounds && typeof l.getBounds === "function") {
+        const layerBounds: L.LatLngBounds = l.getBounds();
+        if (layerBounds.isValid()) {
+          bounds = bounds ? bounds.extend(layerBounds) : layerBounds;
+        }
+      }
+    });
+
+    const useBounds = bounds !== null && (bounds as L.LatLngBounds).isValid();
+    if (useBounds && bounds) {
+      leafletMap.fitBounds(bounds, { animate: false, padding: [20, 20] });
+    } else {
+      leafletMap.fitBounds(CABUYAO_BOUNDS, { animate: false, padding: [20, 20] });
+    }
+
+    return new Promise<void>((resolve) => {
+      const done = () => resolve();
+      leafletMap.once("moveend", () => setTimeout(done, 400));
+      setTimeout(done, 1200);
+    });
+  };
+
   // Generate report
   const generateReport = async (reportYear: number) => {
     try {
+      // Reset map to center on Cabuyao first so snapshot captures entire boundaries
+      await resetMapToCabuyao();
+
       setIsGenerating(true);
       onGeneratingChange?.(true);
 

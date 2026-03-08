@@ -3266,21 +3266,19 @@ body.no-dashboard-body-scroll .main-content {
 }
 
 /* ============================================================
-   Report Generating Overlay (on the choropleth map)
+   Report Generating Overlay: full viewport blur, blocks all interaction
    ============================================================ */
 .report-generating-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1100;
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(2px);
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: wait;
   animation: reportOverlayFadeIn 0.2s ease;
 }
 

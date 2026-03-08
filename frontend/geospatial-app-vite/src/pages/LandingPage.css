@@ -80,21 +80,39 @@
 }
 
 @keyframes spin {
-   to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes spinReverse {
-   to { transform: rotate(-360deg); }
+    to {
+        transform: rotate(-360deg);
+    }
 }
 
 @keyframes glowPulse {
-    0%, 100% { transform: scale(1); opacity: 0.6; }
-    50% { transform: scale(1.2); opacity: 1; }
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .loading-text {
@@ -106,12 +124,15 @@
 }
 
 @keyframes pulse {
-    0%, 100% { 
-        opacity: 1; 
+
+    0%,
+    100% {
+        opacity: 1;
         transform: translateY(0);
     }
-    50% { 
-        opacity: 0.6; 
+
+    50% {
+        opacity: 0.6;
         transform: translateY(-3px);
     }
 }
@@ -263,7 +284,7 @@
     color: var(--brand-navy);
 }
 
-.landing-page .hero > p {
+.landing-page .hero>p {
     font-size: 1.15rem;
     color: var(--muted);
     max-width: 760px;
@@ -287,7 +308,8 @@
 .landing-page .researcher-btn {
     margin-top: 1rem;
     padding: 0.6rem 1rem;
-    border: 2px solid transparent;;
+    border: 2px solid transparent;
+    ;
     border-color: var(--brand-orange);
     color: var(--brand-orange);
 }
@@ -306,6 +328,25 @@
     justify-content: center;
     flex-wrap: wrap;
     margin-bottom: 3rem;
+}
+
+.landing-page .btn-install {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 0.95rem 2.2rem;
+    font-size: 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.landing-page .btn-install:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 8px 16px rgba(16, 185, 129, 0.25),
+        0 4px 8px rgba(16, 185, 129, 0.15);
 }
 
 .landing-page .btn-primary {
@@ -332,12 +373,10 @@
 }
 
 #howitworks {
-  background: linear-gradient(
-    135deg,
-    rgba(249, 115, 22, 0.06),
-    rgba(239, 68, 68, 0.04),
-    rgba(37, 99, 235, 0.03)
-  );
+    background: linear-gradient(135deg,
+            rgba(249, 115, 22, 0.06),
+            rgba(239, 68, 68, 0.04),
+            rgba(37, 99, 235, 0.03));
 }
 
 .landing-page .btn-secondary:hover {
@@ -570,9 +609,11 @@
     .landing-page .nav-links {
         display: none;
     }
+
     .landing-page .hero h1 {
         font-size: 3rem;
     }
+
     .landing-page .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -582,6 +623,7 @@
     .landing-page .hero {
         padding: 8rem 5% 3rem;
     }
+
     .landing-page .dashboard-map-container {
         height: 400px;
     }
@@ -592,27 +634,34 @@
         font-size: 2.4rem;
         line-height: 1.15;
     }
+
     .landing-page .hero p {
         font-size: 1rem;
     }
+
     .landing-page .cta-group {
         flex-direction: column;
         align-items: center;
     }
+
     .landing-page .btn-primary,
     .landing-page .btn-secondary {
         width: 100%;
         max-width: 320px;
     }
+
     .landing-page .dashboard-preview {
         padding: 1.25rem;
     }
+
     .landing-page .dashboard-map-container {
         height: 340px;
     }
+
     .landing-page .features-grid {
         grid-template-columns: 1fr;
     }
+
     .landing-logo-img {
         height: 75px;
     }
@@ -623,12 +672,15 @@
     .landing-page .hero h1 {
         font-size: 2rem;
     }
-    .landing-page .hero p{
+
+    .landing-page .hero p {
         font-size: 1rem;
     }
+
     .landing-logo-img {
         height: 65px;
     }
+
     .landing-page .dashboard-map-container {
         height: 240px;
     }

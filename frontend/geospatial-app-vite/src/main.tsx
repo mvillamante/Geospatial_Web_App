@@ -2,11 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./styles/global.css";
 import "./styles/colors.css";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+// import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthContext";
 import App from "./App";
 
-const queryClient = new QueryClient();
+// const queryClient = new QueryClient();
 
 const container = document.getElementById("root");
 

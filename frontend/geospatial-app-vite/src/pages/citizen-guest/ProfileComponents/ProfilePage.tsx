@@ -72,9 +72,11 @@ function toProgressStatus(raw: string | undefined | null): ProgressStatus {
   if (s === "resolved") return "Resolved";
   if (s === "in_progress" || s === "in progress" || s === "verified") return "In Progress";
 
-  return "Pending";
+  return "pending";
 }
 const ProfilePage: React.FC = () => {
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
   const location = useLocation();
   useEffect(() => {
     if (location.state?.openVerifyModal) {
@@ -126,26 +128,23 @@ const ProfilePage: React.FC = () => {
     (r) => r.status?.toLowerCase() === "archived"
   );
 
-
   const [loadingReports, setLoadingReports] = useState(true);
   const [reportsError, setReportsError] = useState<string | null>(null);
 
-  const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
 
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
 
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
 
-  const [originalEmail, setOriginalEmail] = useState("");
-  const [originalPhone, setOriginalPhone] = useState("");
+  // const [originalEmail, setOriginalEmail] = useState("");
+  // const [originalPhone, setOriginalPhone] = useState("");
 
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordLoading, setPasswordLoading] = useState(false);
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  // const [currentPassword, setCurrentPassword] = useState("");
+  // const [newPassword, setNewPassword] = useState("");
+  // const [confirmPassword, setConfirmPassword] = useState("");
+  // const [passwordLoading, setPasswordLoading] = useState(false);
+  // const [showPasswordForm, setShowPasswordForm] = useState(false);
 
   const logout = () => {
     localStorage.removeItem("access_token");
@@ -189,7 +188,6 @@ const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      setProfileLoading(true);
       setProfileError(null);
       try {
         const token = localStorage.getItem("access_token");
@@ -227,13 +225,10 @@ const ProfilePage: React.FC = () => {
 
         setEmail(e);
         setPhone(p);
-        setOriginalEmail(e);
-        setOriginalPhone(p);
       } catch (e: any) {
         setProfileError(e?.message || "Failed to load profile");
-      } finally {
-        setProfileLoading(false);
       }
+
     }
 
     fetchProfile();
@@ -439,32 +434,28 @@ const ProfilePage: React.FC = () => {
             <div className="contact-section">
               <div className="contact-row">
                 <span className="contact-label">Email</span>
-                {isEditingProfile ? (
-                  <input
-                    className="contact-input"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                  />
-                ) : (
-                  <span className="contact-value">{email || "—"}</span>
-                )}
+                {/* <input
+                  className="contact-input"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                /> */}
+                <span className="contact-value">{email || "—"}</span>
               </div>
 
               <div className="contact-row">
                 <span className="contact-label">Phone</span>
-                {isEditingProfile ? (
-                  <input
-                    className="contact-input"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="09xx xxx xxxx"
-                  />
-                ) : (
-                  <span className="contact-value">{phone || "—"}</span>
-                )}
+
+                {/* <input
+                  className="contact-input"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="09xx xxx xxxx"
+                /> */}
+                <span className="contact-value">{phone || "—"}</span>
+
               </div>
             </div>
 
@@ -535,37 +526,6 @@ const ProfilePage: React.FC = () => {
           </div>
         )}
       </div>
-
-      {showPasswordForm && (
-        <div className="security-card">
-          <div className="security-row">
-            <label>Current Password</label>
-            <input
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-            />
-          </div>
-
-          <div className="security-row">
-            <label>New Password</label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-          </div>
-
-          <div className="security-row">
-            <label>Confirm New Password</label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
-        </div>
-      )}
 
       {/* Active Reports */}
       {!isStaff && (
@@ -762,10 +722,41 @@ const ProfilePage: React.FC = () => {
       {/* Logout */}
       <div className="logout-section">
         <span className="logout-label">Session</span>
-        <button className="logout-btn" onClick={logout} type="button">
+        <button
+          className="logout-btn"
+          onClick={() => setShowLogoutModal(true)}
+          type="button"
+        >
           Logout
         </button>
       </div>
+      {showLogoutModal && (
+        <div className="modal-overlay" role="dialog" aria-modal="true">
+          <div className="modal-card">
+            <h3>Logout</h3>
+            <p>Are you sure you want to log out of your account?</p>
+
+            <div className="modal-actions">
+              <button
+                className="cancel-btn"
+                onClick={() => setShowLogoutModal(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="danger-confirm"
+                onClick={() => {
+                  setShowLogoutModal(false);
+                  logout();
+                }}
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 };

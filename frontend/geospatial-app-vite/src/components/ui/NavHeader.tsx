@@ -1,9 +1,12 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { MdArrowBack } from "react-icons/md";
 import "./NavHeader.css";
 
 const NavHeader: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const isGuestRoute = location.pathname.startsWith("/main/guest");
 
   const pageHeaders: Record<string, { title: string; subtitle: string }> = {
     "/main/admin/dashboard": {
@@ -104,10 +107,23 @@ const NavHeader: React.FC = () => {
   return (
     <header className="nav-header">
       <div className="nav-header-content">
-        <h1 className="nav-header-title">{currentHeader.title}</h1>
-        <p className="nav-header-subtitle">{currentHeader.subtitle}</p>
+
+        {isGuestRoute && (
+          <button
+            className="pwa-guest-back-btn"
+            onClick={() => navigate("/")}
+          >
+            <MdArrowBack size={22} />
+          </button>
+        )}
+
+        <div className="nav-header-text">
+          <h1 className="nav-header-title">{currentHeader.title}</h1>
+          <p className="nav-header-subtitle">{currentHeader.subtitle}</p>
+        </div>
+
       </div>
-    </header>
+    </header >
   );
 };
 

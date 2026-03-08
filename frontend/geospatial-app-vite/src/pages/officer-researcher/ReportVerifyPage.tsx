@@ -127,22 +127,22 @@ const ReportVerifyPage: React.FC = () => {
 
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
-  const selectedReportForMap = useMemo(() => {
-    if (!selected) return null;
+const selectedReportForMap = useMemo(() => {
+  if (!selected) return null;
 
-    return {
-      id: selected.id,
-      incident_type: selected.category,
-      verifiedRisk: selected.verifiedRisk ?? selected.citizenRisk,
-      barangay: selected.barangay,
-      created_at: selected.createdAt,
-      latitude: selected.lat,
-      longitude: selected.lng,
-      status: selected.status,
-      assigned_officer_id: selected.assignedOfficerId ?? null,
-      lgu_post: selected.lgu_post ?? null,
-    };
-  }, [selected]);
+  return {
+    id: selected.id,
+    incident_type: selected.category,
+    verified_critical_level: selected.verifiedRisk ?? selected.citizenRisk,
+    barangay: selected.barangay,
+    created_at: selected.createdAt,
+    latitude: selected.lat,
+    longitude: selected.lng,
+    status: selected.status,
+    assigned_officer_id: selected.assignedOfficerId ?? null,
+    lgu_post: selected.lgu_post ?? null,
+  };
+}, [selected]);
 
 
   const isAssignedToMe =
@@ -843,6 +843,7 @@ const ReportVerifyPage: React.FC = () => {
                   <select
                     value={selected.verifiedRisk ?? ""}
                     onChange={(e) => setVerifiedRisk(e.target.value as RiskLevel)}
+                    disabled={selected.status === "resolved" || selected.status === "rejected"}
                   >
                     <option value="" disabled>
                       Not yet verified
@@ -979,10 +980,11 @@ const ReportVerifyPage: React.FC = () => {
                     disabled={
                       !isAssignedToMe ||
                       !isVerifiedSet ||
-                      selected.status === "resolved"
+                      selected.status === "resolved" ||
+                      selected.status === "needs_info"
                     }
                   >
-                    Needs Info
+                    {selected.status === "needs_info" ? "Needs Info Sent" : "Needs Info"}
                   </button>
 
 
@@ -1162,6 +1164,8 @@ const ReportVerifyPage: React.FC = () => {
                             setNeedsInfoMode(false);
                           } catch (e: any) {
                             alert(e.message);
+                          } finally {
+                            setLoadingAction(null);
                           }
                         }}
                       >
@@ -1187,6 +1191,15 @@ const ReportVerifyPage: React.FC = () => {
         modal !== "none" && (
           <div className="modal-backdrop" onClick={() => setModal("none")}>
             <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+
+              <button
+                className="modal-close"
+                onClick={() => setModal("none")}
+                aria-label="Close modal"
+              >
+                ✕
+              </button>
+
               {modal === "resolve" && (
                 <>
                   <div className="modal-title">Publish Resolution Update</div>

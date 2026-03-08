@@ -11,6 +11,8 @@ import LeafletMap from "../../components/ui/LeafletMap";
 import { getIncidentCategories, getIncidentLabel, type IncidentCategories } from "../../constants"
 import Pagination from "../../components/ui/Pagination";
 
+type CriticalLevel = "low" | "moderate" | "high" | "critical";
+
 type ReportStatus =
   | "Pending"
   | "In Progress"
@@ -33,8 +35,16 @@ type Officer = {
   department_id: number;
 }
 
+type MapReport = {
+  id: number;
+  incident_type: string;
+  latitude?: number;
+  longitude?: number;
+  verified_critical_level: CriticalLevel;
+};
 
-interface Report {
+
+interface AdminReport {
   id: number;
   user_label: string;
   category: string;
@@ -42,15 +52,23 @@ interface Report {
   location_display: string;
   created_at: string;
   description: string;
-  verified_critical_level?: string | null;
+  verified_critical_level: CriticalLevel | null;
   status?: ReportStatus;
   assigned_officer_label?: string | null;
   assigned_officer_id?: number | null;
   department_id?: number | null;
   photo_url?: string | null;
-  
+
+  barangay?: string;
+  latitude?: number;
+  longitude?: number;
+
 }
 
+// type ReportMapPreview = Omit<AdminReport, "verified_critical_level"> & {
+//   incident_type: string;
+//   verified_critical_level: CriticalLevel;
+// };
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -135,9 +153,9 @@ const ReportsMgmtPage: React.FC = () => {
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [openMapMenuId, setOpenMapMenuId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [reports, setReports] = useState<Report[]>([]);
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [selectedReportMap, setSelectedReportMap] = useState<Report | null>(null);
+  const [reports, setReports] = useState<AdminReport[]>([]);
+  const [selectedReport, setSelectedReport] = useState<AdminReport | null>(null);
+  const [selectedReportMap, setSelectedReportMap] = useState<AdminReport | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<IncidentCategories | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<ReportStatus | 'All'>('All');
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
@@ -145,25 +163,25 @@ const ReportsMgmtPage: React.FC = () => {
   const [reportTimeFilter, setReportTimeFilter] = useState<"today" | "7days" | "last30days" | "last12months" | "all">("all");
   const categories = useMemo(() => getIncidentCategories(), []);
 
-  const selectedReportForMap = useMemo<ReportMapPreview | null>(() => {
+  const selectedReportForMap = useMemo<MapReport | null>(() => {
     if (!selectedReportMap) return null;
 
+    const incident_type =
+      selectedReportMap.category === "others" &&
+        selectedReportMap.other_category?.trim()
+        ? selectedReportMap.other_category
+        : selectedReportMap.category;
+
     return {
-      ...selectedReportMap,
-      incident_type:
-        selectedReportMap.category === "others" && selectedReportMap.other_category?.trim()
-          ? selectedReportMap.other_category
-          : selectedReportMap.category,
-
+      id: selectedReportMap.id,
+      incident_type,
+      latitude: selectedReportMap.latitude,
+      longitude: selectedReportMap.longitude,
       verified_critical_level:
-        selectedReportMap.verified_critical_level ?? null,
-
-      status: normalizeStatus(selectedReportMap.status),
-
-      assigned_officer_id: selectedReportMap.assigned_officer_id ?? null,
+        selectedReportMap.verified_critical_level ?? "low",
     };
   }, [selectedReportMap]);
-  
+
 
   const [searchParams] = useSearchParams();
 
@@ -314,7 +332,9 @@ const ReportsMgmtPage: React.FC = () => {
         prev && prev.id === reportId ? { ...prev, ...updated } : prev
       );
 
-      setSelectedOfficer(updated.assigned_officer_id ? String(updated) : "");
+      setSelectedOfficer(
+        updated.assigned_officer_id ? String(updated.assigned_officer_id) : ""
+      );
 
       toast.success(updated.assigned_officer_label ? `Assigned to ${updated.assigned_officer_label}` : "Assigned");
     } catch (err: any) {
@@ -495,15 +515,15 @@ const ReportsMgmtPage: React.FC = () => {
             <div className="select-wrapper">
               <FiCheckCircle className="select-icon" />
               <select value={reportTimeFilter} onChange={(e) =>
-                    setReportTimeFilter(
-                      e.target.value as
-                        | "today"
-                        | "7days"
-                        | "last30days"
-                        | "last12months"
-                        | "all"
-                    )
-                  } 
+                setReportTimeFilter(
+                  e.target.value as
+                  | "today"
+                  | "7days"
+                  | "last30days"
+                  | "last12months"
+                  | "all"
+                )
+              }
                 className="status-select">
 
                 <option value="all">All Time</option>
@@ -515,7 +535,7 @@ const ReportsMgmtPage: React.FC = () => {
             </div>
           )}
 
-          {( searchQuery || categoryFilter !== "all" || statusFilter !== "All" || reportTimeFilter !== "all" ||sortOrder !== null) && (
+          {(searchQuery || categoryFilter !== "all" || statusFilter !== "All" || reportTimeFilter !== "all" || sortOrder !== null) && (
             <button
               className="clear-filter-btn"
               onClick={() => {
@@ -589,10 +609,10 @@ const ReportsMgmtPage: React.FC = () => {
                 selectedReport={selectedReportForMap}
                 categoryFilter={categoryFilter}
                 reportTimeFilter={reportTimeFilter}
-                activeLayers={["Verified Reports"]}
+                activeLayers={["Queue Reports"]}
               />
             </div>
-            
+
             {/* Stats */}
             <div className="report-stat-container">
               <div className="report-stat-card total">
@@ -650,7 +670,7 @@ const ReportsMgmtPage: React.FC = () => {
                   </tr>
                 ) : filteredReports.length === 0 ? (
                   <tr>
-                    <td colSpan={5  } className="empty">
+                    <td colSpan={5} className="empty">
                       No Reports Found.
                     </td>
                   </tr>
@@ -873,10 +893,10 @@ const ReportsMgmtPage: React.FC = () => {
                                               prev.map(r =>
                                                 r.id === report.id
                                                   ? {
-                                                      ...r,
-                                                      ...updated,
-                                                      lastUpdatedAt: new Date().toISOString()
-                                                    }
+                                                    ...r,
+                                                    ...updated,
+                                                    lastUpdatedAt: new Date().toISOString()
+                                                  }
                                                   : r
                                               )
                                             );

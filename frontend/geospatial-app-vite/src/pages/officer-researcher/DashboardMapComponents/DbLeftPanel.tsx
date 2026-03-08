@@ -94,7 +94,7 @@ const DbLeftPanel: React.FC<DbLeftPanelProps> = ({
   ndviMonth,
   setNdviMonth,
   year,
-  currentYear,
+  // currentYear,
   indicesYear = 2026,
   setYear,
   minYear,

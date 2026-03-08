@@ -3,10 +3,9 @@
 ========================= */
 .evac-header-wrapper {
   display: flex;
-  flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -15,7 +14,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 1rem;
+  gap: 12px;
   width: 100%;
   flex-wrap: wrap;
   margin-bottom: 15px;
@@ -89,22 +88,26 @@
 ========================= */
 .evac-grid {
   display: grid;
-  gap: 2rem;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  align-items: stretch;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
 }
 
 .evac-grid.officer {
+  display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 280px;
   overflow-x: auto;
   padding-bottom: 12px;
   gap: 16px;
   scroll-snap-type: x mandatory;
+}
+
+.evac-card.officer {
   scroll-snap-align: start;
 }
 
 .evac-card {
+  min-height: 230px;
   width: 100%;
   background: var(--white-bg);
 
@@ -119,7 +122,7 @@
 }
 
 .evac-card.officer {
-  height: 230px;
+  min-height: 230px;
 }
 
 .evac-card:hover {
@@ -185,6 +188,7 @@
 
 .evac-info {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 0.2rem;
   color: #4b5563;
@@ -222,7 +226,7 @@
 
 .evac-btn {
   width: 100%;
-  margin-top: 15px;
+  margin-top: 8px;
   padding: 0.5rem;
   background: var(--primary-btn-color);
   color: var(--text-white);
@@ -239,6 +243,28 @@
   transition: 0.25s ease;
 }
 
+.editor-directions {
+  margin-top: 16px;
+}
+
+.direction-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: var(--primary-btn-color);
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.direction-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
 .evac-btn:hover {
   opacity: 0.9;
   transform: translateY(-2px);
@@ -246,10 +272,15 @@
 
 .selected-evac-card {
   width: 100%;
-  position: relative;
   max-height: calc(80vh - 2rem);
   overflow-y: auto;
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.selected-evac-card>*:not(.designated-site) {
+  flex-grow: 1;
 }
 
 .saving-overlay {
@@ -311,13 +342,14 @@
 ========================= */
 
 .evac-grid-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  position: relative;
+  width: 100%;
 }
 
 .scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   background: rgba(0, 0, 0, 0.05);
   border: none;
   border-radius: 50%;
@@ -327,7 +359,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  z-index: 5;
 }
 
 .scroll-btn.left {
@@ -342,19 +374,26 @@
   background: rgba(0, 0, 0, 0.1);
 }
 
+.evac-grid.officer::-webkit-scrollbar {
+  height: 6px;
+}
+
+.evac-grid.officer::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
 
 /* =========================
    Reminders
 ========================= */
 .evac-reminders {
-  margin: 1.5rem;
+  width: 100%;
   margin-top: 15px;
   background: #fff7d6;
   border: 1px solid #ffe8a3;
   padding: 1.5rem;
   border-radius: 12px;
-  height: 100%;
-  width: 100%;
 }
 
 .evac-reminders-title {
@@ -365,6 +404,11 @@
   margin-bottom: 0.5rem;
 }
 
+.evac-reminders {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
 .evac-reminders-list {
   font-size: 0.85rem;
   color: #8b5e00;
@@ -372,6 +416,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  line-height: 1.5;
 }
 
 /* For Officer */
@@ -409,31 +454,30 @@
 /* Officer Stats */
 .evac-map-wrapper {
   display: flex;
+  gap: 20px;
   flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  flex: 1;
+  width: 100%;
 }
 
 .evac-side-content {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
   align-items: stretch;
-  gap: 1rem;
+  min-width: 0;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   background-color: var(--white-bg);
   border-radius: 15px;
   box-shadow: 0 6px 16px rgba(163, 169, 182, 0.18);
-  padding: 15px;
+  padding: 8px;
 }
 
 .evac-side-content-filtermap {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-width: 0;
+  gap: 12px;
 }
 
 .evac-side-content-filtermap .role-select {
@@ -449,13 +493,27 @@
 
 .evac-side-content-map {
   width: 100%;
-  height: 61vh;
+  height: 100%;
+  min-height: 420px;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 @media (max-width: 1024px) {
   .evac-side-content-map {
-    width: 70%;
     height: 62vh;
+  }
+
+  .evac-map-wrapper {
+    flex-direction: column;
+  }
+
+  .evac-side-content {
+    grid-template-columns: 1fr;
+  }
+
+  .selected-evac-card {
+    max-height: none;
   }
 }
 
@@ -464,13 +522,32 @@
     padding: 12px;
   }
 
+  .evac-info {
+    gap: 0.1rem;
+  }
+
+  .evac-card {
+    min-height: auto;
+  }
+
+  .evac-side-content {
+    padding: 12px;
+    box-shadow: none;
+  }
+
   .evac-grid {
-    gap: 0.9rem;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .evac-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
   }
 
   .evac-side-content-map {
-    width: 100%;
-    height: 66vh;
+    height: 320px;
   }
 }
 
@@ -827,7 +904,7 @@
 }
 
 .leaflet-map {
-  height: 420px;
+  height: 100%;
   width: 100%;
 }
 
@@ -876,13 +953,6 @@
 .map-modal-actions .btn-primary:hover:not(:disabled),
 .map-modal-actions .btn-secondary:hover {
   transform: translateY(-2px);
-}
-
-.coord-row {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-  align-items: center;
 }
 
 .coord-row.inline {
@@ -951,16 +1021,6 @@
    Unified Responsive System
 ========================= */
 
-/* Large Tablets / Small Laptops */
-@media (max-width: 1280px) {
-
-  .evac-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.25rem;
-  }
-
-}
-
 /* Tablets */
 @media (max-width: 1024px) {
 
@@ -974,7 +1034,6 @@
 
   .evac-side-content {
     width: 100%;
-    flex-direction: column;
     padding: 12px;
   }
 
@@ -988,15 +1047,14 @@
     padding: 0;
   }
 
+  .evac-reminders {
+    max-width: 700px;
+  }
+
   .evac-stat-card {
     flex: 1 1 45%;
     min-width: 200px;
     width: 100%;
-  }
-
-  .evac-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 1rem;
   }
 
   .evac-card {
@@ -1008,6 +1066,10 @@
 /* Mobile */
 @media (max-width: 768px) {
 
+  .evac-side-content-map {
+    height: 320px;
+  }
+
   .selected-evac-card h2 {
     font-size: 1.25rem;
   }
@@ -1015,7 +1077,7 @@
   .evac-reminders {
     font-size: 0.9rem;
     padding: 1.2rem;
-    margin: 0;
+    margin-top: 12px;
   }
 
   .evac-reminders-title {
@@ -1032,8 +1094,7 @@
 
   .evac-card-name {
     font-size: 0.98rem;
-    gap: 5;
-    justify-content: flex-end;
+    gap: 5px;
   }
 
   .evac-capacity {
@@ -1045,7 +1106,7 @@
 
   .evac-page {
     min-height: 100vh;
-    padding: 15px;
+    padding: 30px;
     padding-bottom: calc(70px + env(safe-area-inset-bottom));
   }
 
@@ -1057,26 +1118,28 @@
 
   .evac-search-add-container {
     width: 100%;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .evac-search-wrapper {
     width: 100%;
   }
 
+  .evac-page .evac-list {
+    font-size: 1.3rem;
+  }
+
   /* Grid */
   .evac-grid {
-    display: grid;
-    gap: 1.5rem;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .evac-grid.officer {
+    grid-auto-flow: row;
     grid-auto-columns: unset;
     overflow-x: visible;
-    padding: 0;
-    margin-bottom: 15px;
+    padding: 10px;
   }
 
   .evac-card {
@@ -1094,9 +1157,7 @@
   }
 
   .scroll-btn {
-    border-radius: 0%;
-    height: auto;
-    width: auto;
+    display: none;
   }
 
   .scroll-btn.left {
@@ -1142,7 +1203,6 @@
 
   .evac-side-content {
     width: 100%;
-    flex-direction: column;
     align-items: stretch;
     box-shadow: none;
     padding: 0;
@@ -1155,8 +1215,10 @@
 
   /* Stats */
   .evac-stat-container {
-    grid-template-columns: 1fr 1fr;
-    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    width: 100%;
   }
 
   .evac-stat-card {
@@ -1199,6 +1261,11 @@
     width: 100%;
     justify-content: center;
   }
+
+  .selected-evac-card {
+    margin-top: 12px;
+  }
+
 
 }
 

@@ -85,6 +85,7 @@ const DashboardMapPage: React.FC = () => {
   const initialYear = Math.min(maxYear, Math.max(minYear, currentYear));
   const [year, setYear] = useState(initialYear);
 
+  const [reportType, setReportType] = useState<"calamity" | "green" | "hazard" | "full">("full");
   const [reportYear, setReportYear] = useState(new Date().getFullYear());
   const [reportFormat, setReportFormat] = useState<"pdf" | "docx">("pdf");
   const [reportType, setReportType] = useState<"full" | "green" | "hazard" | "calamity">("full");
@@ -658,6 +659,7 @@ const DashboardMapPage: React.FC = () => {
               <div className="map-disabled-wrapper">
                 <LeafletMap
                   mapView="choropleth"
+                  activeLayers={activeLayers}
                 />
 
                 <div className="choroplethmap-overlay">
@@ -685,6 +687,9 @@ const DashboardMapPage: React.FC = () => {
           setRightNav={setRightNav}
           exportSections={exportSections}
           recentDownloads={recentDownloads}
+          setRecentDownloads={setRecentDownloads}
+          reportType={reportType}
+          setReportType={setReportType}
           handleDownload={handleDownload}
 
           reportYear={reportYear}
@@ -695,30 +700,28 @@ const DashboardMapPage: React.FC = () => {
           setReportType={setReportType}
           setRecentDownloads={setRecentDownloads}
 
-          // Charts / Index props
           universalGreenAvg={universalGreenAvg}
           universalHazardAvg={universalHazardAvg}
           universalCalamityAvg={universalCalamityAvg}
           mapView={mapView}
           selected={selectedLayer}
           year={year}
-          // Full per-barangay data for KPI summaries
+
           greenDataByBarangay={universalGreenData}
           hazardDataByBarangay={universalHazardData}
           calamityDataByBarangay={universalCalamityData}
           greenCityAverage={greenAvg}
           hazardCityAverage={hazardAvg}
           calamityCityAverage={calamityAvg}
+
           getHazardIndexColor={getHazardIndexColor}
           getGreenIndexColor={getGreenIndexColor}
           getCalamityRiskColor={getCalamityRiskColor}
 
-          // Analytics props
           keyInsights={keyInsights}
           colors={colors}
           insightIcons={insightIcons}
 
-          // User & EDA modal
           userRole={userRole}
           userRole2={userRole2}
           showEdaModal={showEdaModal}

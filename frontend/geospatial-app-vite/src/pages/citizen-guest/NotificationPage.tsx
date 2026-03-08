@@ -73,12 +73,42 @@ const timeAgo = (iso: string) => {
 const NotificationPage: React.FC = () => {
     const API_URL = import.meta.env.VITE_API_URL;
 
+    const [receiveHazardAlerts, setReceiveHazardAlerts] = useState(true);
+    const [receiveAnnouncements, setReceiveAnnouncements] = useState(true);
+    const [alertSeverity, setAlertSeverity] = useState<Severity>("low");
+
     const [activeTab, setActiveTab] = useState<"all" | NotificationType>("all");
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [timeFilter, setTimeFilter] = useState<TimeFilter>("7days");
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const navigate = useNavigate();
+
+    // Load preferences from settings
+    useEffect(() => {
+        const fetchPreferences = async () => {
+            try {
+                const res = await fetch(`${API_URL}/api/users/me/`, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("access_token")}`
+                    }
+                });
+
+                if (!res.ok) return;
+
+                const data = await res.json();
+
+                setReceiveHazardAlerts(data.receive_hazard_alerts ?? true);
+                setReceiveAnnouncements(data.receive_community_announcements ?? true);
+                setAlertSeverity(data.alert_severity ?? "low");
+
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        fetchPreferences();
+    }, []);
 
     useEffect(() => {
         (async () => {
@@ -137,13 +167,41 @@ const NotificationPage: React.FC = () => {
 
 
     const counts = useMemo(() => {
-        const unreadAll = notifications.filter(n => n.isUnread).length;
-        const unreadOfficial = notifications.filter(n => n.type === "official" && n.isUnread).length;
-        const unreadIncident = notifications.filter(n => n.type === "incident" && n.isUnread).length;
-        const unreadReport = notifications.filter(n => n.type === "report" && n.isUnread).length;
+
+        const severityRank = {
+            low: 1,
+            moderate: 2,
+            high: 3,
+            critical: 4
+        };
+
+        const filtered = notifications.filter(n => {
+
+            if (!receiveHazardAlerts && n.type === "incident") return false;
+
+            if (!receiveAnnouncements && n.type === "official") return false;
+
+            if (n.type === "incident") {
+                const sev = n.severityTo ?? n.severity ?? "low";
+                return severityRank[sev] >= severityRank[alertSeverity];
+            }
+
+            return true;
+        });
+
+        const unreadAll = filtered.filter(n => n.isUnread).length;
+        const unreadOfficial = filtered.filter(n => n.type === "official" && n.isUnread).length;
+        const unreadIncident = filtered.filter(n => n.type === "incident" && n.isUnread).length;
+        const unreadReport = filtered.filter(n => n.type === "report" && n.isUnread).length;
 
         return { unreadAll, unreadOfficial, unreadIncident, unreadReport };
-    }, [notifications]);
+
+    }, [
+        notifications,
+        receiveHazardAlerts,
+        receiveAnnouncements,
+        alertSeverity
+    ]);
 
     // const grouped = useMemo(() => {
     //     const official = notifications.filter(n => n.type === "official");
@@ -180,9 +238,28 @@ const NotificationPage: React.FC = () => {
                 : notifications.filter(n => n.type === activeTab);
 
         base = base.filter(n => {
-            if (n.type !== "incident") return true;
-            const current = n.severityTo ?? n.severity;
-            return current === "high" || current === "critical";
+
+            // Hazard alerts OFF → hide incidents
+            if (!receiveHazardAlerts && n.type === "incident") return false;
+
+            // Community announcements OFF → hide official posts
+            if (!receiveAnnouncements && n.type === "official") return false;
+
+            // Severity filter
+            if (n.type === "incident") {
+                const sev = n.severityTo ?? n.severity ?? "low";
+
+                const severityRank = {
+                    low: 1,
+                    moderate: 2,
+                    high: 3,
+                    critical: 4
+                };
+
+                return severityRank[sev] >= severityRank[alertSeverity];
+            }
+
+            return true;
         });
 
         const now = new Date();
@@ -216,7 +293,14 @@ const NotificationPage: React.FC = () => {
             const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
             return bTime - aTime;
         });
-    }, [activeTab, notifications, timeFilter]);
+    }, [
+        activeTab,
+        notifications,
+        timeFilter,
+        receiveHazardAlerts,
+        receiveAnnouncements,
+        alertSeverity
+    ]);;
 
     const openNotification = async (n: NotificationItem) => {
         if (n.isUnread) {
@@ -383,15 +467,17 @@ const NotificationPage: React.FC = () => {
                     {counts.unreadAll > 0 && <span className="tab-badge">{counts.unreadAll}</span>}
                 </button>
 
-                <button
-                    className={`tab ${activeTab === "official" ? "active" : ""}`}
-                    onClick={() => setActiveTab("official")}
-                >
-                    Official
-                    {counts.unreadOfficial > 0 && (
-                        <span className="tab-badge">{counts.unreadOfficial}</span>
-                    )}
-                </button>
+                {receiveAnnouncements && (
+                    <button
+                        className={`tab ${activeTab === "official" ? "active" : ""}`}
+                        onClick={() => setActiveTab("official")}
+                    >
+                        Official
+                        {counts.unreadOfficial > 0 && (
+                            <span className="tab-badge">{counts.unreadOfficial}</span>
+                        )}
+                    </button>
+                )}
 
                 <button
                     className={`tab ${activeTab === "incident" ? "active" : ""}`}

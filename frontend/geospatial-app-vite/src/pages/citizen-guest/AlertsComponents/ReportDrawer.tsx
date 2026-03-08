@@ -310,8 +310,14 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
       form.append("location_display", location);
 
       // Coordinates
+      if (!coords) {
+        toast.error("Location not available.");
+        return;
+      }
+
       const lat = coords.lat.toFixed(6);
       const lon = coords.lon.toFixed(6);
+
       form.append("latitude", lat);
       form.append("longitude", lon);
       form.append("location_source", locationMode);

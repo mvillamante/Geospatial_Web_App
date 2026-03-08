@@ -25,6 +25,8 @@ const NavigationMenu: React.FC = () => {
   const location = useLocation();
   const { user } = useAuth();
 
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
   const [notificationCount, setNotificationCount] = useState(0);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -37,30 +39,6 @@ const NavigationMenu: React.FC = () => {
   const effectiveRole = (userRole2.includes("Researcher") ? "Researcher" : "") || userRole;
 
 
-  useEffect(() => {
-    if (effectiveRole !== "Citizen") return;
-
-    const fetchUnreadCount = async () => {
-      try {
-        const res = await fetch(`${API_URL}/api/notifications/unread-count/`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
-        });
-        if (!res.ok) return;
-
-        const data = await res.json();
-        setNotificationCount(data.unread_count ?? 0);
-      } catch { }
-    };
-
-    fetchUnreadCount();
-
-    const handler = () => fetchUnreadCount();
-
-    window.addEventListener("notificationsUpdated", handler);
-
-    return () => window.removeEventListener("notificationsUpdated", handler);
-
-  }, [effectiveRole]);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -107,6 +85,7 @@ const NavigationMenu: React.FC = () => {
 
         const data = await res.json();
         setNotificationCount(data.unread_count ?? 0);
+
       } catch (err) {
         console.error("Unread count error:", err);
       }
@@ -114,9 +93,16 @@ const NavigationMenu: React.FC = () => {
 
     fetchUnreadCount();
 
-    const interval = setInterval(fetchUnreadCount, 15000); // refresh every 15s
+    const interval = setInterval(fetchUnreadCount, 15000);
 
-    return () => clearInterval(interval);
+    const handler = () => fetchUnreadCount();
+    window.addEventListener("notificationsUpdated", handler);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("notificationsUpdated", handler);
+    };
+
   }, [effectiveRole]);
 
   if (isPublicUser && isMobile && isPublicRoute) {
@@ -304,12 +290,45 @@ const NavigationMenu: React.FC = () => {
                 <span>Settings</span>
               </button>
 
-              <button className="dropdown-logout-btn" onClick={handleLogout}>
+              <button
+                className="dropdown-logout-btn"
+                onClick={() => {
+                  setIsDropdownOpen(false);
+                  setShowLogoutModal(true);
+                }}
+              >
                 <MdLogout className="dropdown-logout-icon" />
                 <span>Logout</span>
               </button>
             </div>
           )}
+        </div>
+      )}
+      {showLogoutModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3>Logout</h3>
+            <p>Are you sure you want to log out of your account?</p>
+
+            <div className="modal-actions">
+              <button
+                className="cancel-btn"
+                onClick={() => setShowLogoutModal(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="danger-confirm"
+                onClick={() => {
+                  setShowLogoutModal(false);
+                  handleLogout();
+                }}
+              >
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

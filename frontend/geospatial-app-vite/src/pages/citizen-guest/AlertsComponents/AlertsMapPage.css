@@ -116,12 +116,25 @@
 /* =========================
        Alerts Panel
 ========================= */
+
+.sheet-handle-btn {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  padding-bottom: 6px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+}
+
 .dashboard-alerts {
   width: clamp(550px, 32vw, 680px);
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  position: relative;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   box-shadow: 0 12px 30px rgba(2, 6, 23, 0.08);
@@ -240,8 +253,11 @@
   align-items: center;
 }
 
-.sheet-handle-btn {
-  display: none;
+.sheet-handle {
+  width: 48px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
 }
 
 
@@ -832,7 +848,7 @@ li.critical::before {
   position: fixed;
   right: 0;
   top: 0;
-  height: 100vh;
+  height: 100dvh;
   width: min(460px, 100%);
   background: var(--panel-bg);
   display: flex;
@@ -1207,10 +1223,10 @@ li.critical::before {
   }
 
   .sheet-handle {
-    width: 60px;
-    height: 6px;
-    border-radius: 999px;
+    width: 42px;
+    height: 4px;
     background: rgba(0, 0, 0, 0.25);
+    border-radius: 999px;
   }
 
   .alerts-panel {
@@ -1230,7 +1246,7 @@ li.critical::before {
     -webkit-backdrop-filter: blur(14px);
 
     border: 1px solid #e2e8f0;
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12);
 
     overflow: hidden;
     touch-action: none;
@@ -1244,6 +1260,7 @@ li.critical::before {
   .alerts-controls {
     flex: 0 0 auto;
   }
+
 
   .alerts-list-area {
     flex: 1 1 auto;
@@ -1278,7 +1295,7 @@ li.critical::before {
     width: auto;
     height: 100%;
     max-height: none;
-    border: 0;
+    border: none;
     box-shadow: none;
     background: transparent;
   }
@@ -1381,7 +1398,7 @@ li.critical::before {
 
   .drawer-actions {
     padding: 14px 18px;
-    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+    padding-bottom: calc(70px + env(safe-area-inset-bottom));
     gap: 10px;
   }
 

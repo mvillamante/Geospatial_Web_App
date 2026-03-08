@@ -1,7 +1,12 @@
 import { FiX } from "react-icons/fi";
 import { useEffect } from "react";
 
-const TermsModal = ({ onClose }) => {
+interface TermsModalProps {
+  onClose: () => void;
+}
+
+const TermsModal: React.FC<TermsModalProps> = ({ onClose }) => {
+
     useEffect(() => {
         document.body.style.overflow = "hidden";
 

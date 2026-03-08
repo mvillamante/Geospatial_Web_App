@@ -2,8 +2,9 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./LeafletMap.css";
-import type { Report } from "../../pages/citizen-guest/AlertsComponents/AlertsPanel";
+// import type { Report } from "../../pages/citizen-guest/AlertsComponents/AlertsPanel";
 import type { EvacuationCenterData } from "../ui/mapLayers/evacuationCenters/evacuationCentersTypes";
+import { type IncidentCategories } from "../../constants";
 
 // Import layer creation functions from organized modules
 import {
@@ -33,15 +34,23 @@ interface BarangayData {
   risk: "High" | "Medium" | "Low";
 }
 
-interface OverpassElement {
-  center?: { lat: number; lon: number };
-  tags?: { name?: string };
-  members?: Array<{
-    type: string;
-    role?: "outer" | "inner";
-    geometry?: Array<{ lat: number; lon: number }>;
-  }>;
-}
+type MapReport = {
+  id: number;
+  incident_type: string;
+  latitude?: number;
+  longitude?: number;
+  verified_critical_level: "low" | "moderate" | "high" | "critical";
+};
+
+// interface OverpassElement {
+//   center?: { lat: number; lon: number };
+//   tags?: { name?: string };
+//   members?: Array<{
+//     type: string;
+//     role?: "outer" | "inner";
+//     geometry?: Array<{ lat: number; lon: number }>;
+//   }>;
+// }
 // Tile layer configurations for different map types
 const tileLayerConfigs = {
   basic: {
@@ -128,6 +137,11 @@ function getCalamityDataForBarangay(
 }
 
 interface LeafletMapProps {
+  selectedReport?: MapReport | null;
+  categoryFilter?: IncidentCategories | "all";
+  reportTimeFilter?: string;
+  activeLayers: string[];
+
   height?: string;
   width?: string;
   mapView?: "interactive" | "choropleth";
@@ -136,14 +150,9 @@ interface LeafletMapProps {
   dataLayer?: string;
   searchedBarangay?: string;
   searchedSeverity?: string | null;
-  selectedReport?: Report | null;
   reportClickTimestamp?: number | null;
 
   locationFilter?: string;
-  reportTimeFilter?: string;
-  categoryFilter?: string;
-
-  activeLayers?: string[];
   ndviOpacity?: number;
   ndviYear?: number;
   ndviMonth?: number; // 1-12, for selecting clearest image of a specific month
@@ -331,7 +340,6 @@ export default function LeafletMap(props: LeafletMapProps) {
 
   // Initialize map
   useEffect(() => {
-    console.log("ACTIVE LAYERS:", activeLayers);
     if (!mapRef.current) {
       const map = L.map("map").setView([14.2349, 121.1211], 13);
       mapRef.current = map;
@@ -1487,7 +1495,9 @@ export default function LeafletMap(props: LeafletMapProps) {
         layerGroup.clearLayers();
         reportMarkersMap.current.clear();
 
-        const reports = data.results || [];
+        const reports = (data.results || []).filter(
+          (r: any) => r.status !== "rejected"
+        );
 
         const normalizedCategory = (val: string) =>
           val?.toLowerCase().replace(/\s+/g, "_").replace(/[\/\-]/g, "");

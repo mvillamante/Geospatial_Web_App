@@ -4,16 +4,15 @@ import { FaUser, FaChartBar, FaUniversity } from "react-icons/fa";
 import "./LandingPage.css";
 import { useAuth } from "../context/AuthContext";
 // import { getUserRoleAndDisplayName } from "../libr/auth";
-import AuthModal from "../components/ui/Modals/AuthModal";
 import LeafletMap from "../components/ui/LeafletMap";
 import ResearcherRequestModal from "../components/ui/Modals/ResearcherRequestModal";
 import TermsModal from "../components/ui/Modals/TermsModal";
 import PrivacyModal from "../components/ui/Modals/PrivacyModal";
+import AuthModal, { type AuthModalType } from "../components/ui/Modals/AuthModal";
 import Spinner from "../components/ui/Spinner";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-type AuthModalType = "login" | "signup" | "forgotPassword" | "verifyOtp";
 type ModalType = AuthModalType | "researcherRequest" | "terms" | "privacy" | null;
 
 type LandingStats = {
@@ -28,7 +27,7 @@ const LandingPage: React.FC = () => {
   const location = useLocation();
   const { refreshUser } = useAuth(); // Get current user from context
 
-  const [isOpen, setIsOpen] = useState(false);
+  const isOpen = false;
   const [loading, setLoading] = useState(true);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [activeSection, setActiveSection] = useState("home");

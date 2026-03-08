@@ -9,6 +9,16 @@
 
 .nav-header-content {
   display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.pwa-guest-back-btn {
+  display: none;
+}
+
+.nav-header-text {
+  display: flex;
   flex-direction: column;
 }
 
@@ -23,4 +33,21 @@
   font-size: 13px;
   color: #777;
   margin-top: 4px;
+}
+
+.nav-header-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .pwa-guest-back-btn {
+    display: flex;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    margin-right: 6px;
+    align-items: center;
+  }
 }

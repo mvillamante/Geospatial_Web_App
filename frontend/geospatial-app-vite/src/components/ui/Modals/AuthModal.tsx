@@ -8,7 +8,7 @@ import "./GlobalModal.css";
 import type { User } from "../../../libr/fetchCurrentUser";
 import { toast } from "sonner";
 
-type AuthModalType =
+export type AuthModalType =
     | "login"
     | "signup"
     | "forgotPassword"
@@ -40,11 +40,13 @@ const AuthModal: React.FC<AuthModalProps> = ({
     const [showLoginPassword, setShowLoginPassword] = useState(false);
     const [showSignupPassword, setShowSignupPassword] = useState(false);
     const [showSignupConfirm, setShowSignupConfirm] = useState(false);
-    // const [showResetPassword, setShowResetPassword] = useState(false);
-    // const [showResetConfirm, setShowResetConfirm] = useState(false);
 
+    const [showResetPassword, setShowResetPassword] = useState(false);
+    const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+    const [verifiedOtp, setVerifiedOtp] = useState("");
     const [resetTarget, setResetTarget] = useState("");
-    const [otpValues, setOtpValues] = useState(["", "", "", "", " ", " "]);
+    const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""]);
     const [resetNewPass, setResetNewPass] = useState("");
     const [resetConfirmPass, setResetConfirmPass] = useState("");
     const [resetLoading, setResetLoading] = useState(false);
@@ -86,9 +88,23 @@ const AuthModal: React.FC<AuthModalProps> = ({
         if (resendTimer === 0) setCanResend(true);
     }, [resendTimer, type]);
 
+    useEffect(() => {
+        if (type === "verifyOtp") {
+            setOtpValues(["", "", "", "", "", ""]);
+            document.getElementById("otp-0")?.focus();
+        }
+    }, [type]);
+
     /* ================= HELPERS ================= */
 
-    const fullOtp = otpValues.join("");
+    // const fullOtp = otpValues.join("");
+
+    // const resetState = () => {
+    //     setOtpValues(["", "", "", "", "", ""]);
+    //     setResetTarget("");
+    //     setResetNewPass("");
+    //     setResetConfirmPass("");
+    // };
 
     const maskEmailOrPhone = (value: string) => {
         if (!value.includes("@")) {
@@ -111,8 +127,10 @@ const AuthModal: React.FC<AuthModalProps> = ({
     /* ================= LOGIN ================= */
 
     const handleLogin = async () => {
+        if (loginLoading) return;
+
         if (!loginInput || !loginPassword)
-            return alert("Please fill in all fields");
+            return toast.warning("Please fill in all fields");
 
         try {
             setLoginLoading(true);
@@ -121,7 +139,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    username_or_phone: loginInput,
+                    username_or_phone: loginInput.trim(),
                     password: loginPassword,
                 }),
             });
@@ -143,9 +161,8 @@ const AuthModal: React.FC<AuthModalProps> = ({
     /* ================= SIGNUP ================= */
 
     const handleSignup = async () => {
-        if (!agreeTerms) {
-            return toast.warning("You must agree to the Terms & Conditions and Privacy Policy.");
-        }
+        if (signupLoading) return;
+
         if (
             !signupFirstName ||
             !signupLastName ||
@@ -154,10 +171,14 @@ const AuthModal: React.FC<AuthModalProps> = ({
             !signupPassword ||
             !signupConfirm
         )
-            return alert("Please fill in all required fields.");
+            return toast.warning("Please fill in all required fields.");
 
         if (signupPassword !== signupConfirm)
-            return alert("Passwords do not match.");
+            return toast.error("Passwords do not match.");
+
+        if (!agreeTerms) {
+            return toast.warning("You must agree to the Terms & Conditions and Privacy Policy.");
+        }
 
         try {
             setSignupLoading(true);
@@ -167,16 +188,21 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     username: signupFirstName + "." + signupLastName,
-                    first_name: signupFirstName,
-                    last_name: signupLastName,
-                    phone: signupPhone,
-                    email: signupEmail,
+                    first_name: signupFirstName.trim(),
+                    last_name: signupLastName.trim(),
+                    phone: signupPhone.trim(),
+                    email: signupEmail.trim(),
                     password: signupPassword,
                     role: "citizen",
                 }),
             });
 
-            const data = await res.json();
+            let data;
+            try {
+                data = await res.json();
+            } catch {
+                throw new Error("Server error");
+            }
             if (!res.ok) throw new Error(data.error);
 
             saveUserSession(data.user, data.access_token);
@@ -184,7 +210,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
             onClose();
             handleNavigation(data.user);
         } catch (err: any) {
-            alert(err.message);
+            toast.error(err.message);
         } finally {
             setSignupLoading(false);
         }
@@ -193,8 +219,10 @@ const AuthModal: React.FC<AuthModalProps> = ({
     /* ================= RESET FLOW ================= */
 
     const handleRequestOtp = async () => {
+        if (resetLoading) return;
+
         if (!resetTarget.trim())
-            return alert("Please enter your email or phone.");
+            return toast.warning("Please enter your email or phone.");
 
         setResetLoading(true);
 
@@ -204,19 +232,26 @@ const AuthModal: React.FC<AuthModalProps> = ({
             body: JSON.stringify({ email_or_phone: resetTarget.trim() }),
         });
 
-        const data = await res.json();
+        let data;
+        try {
+            data = await res.json();
+        } catch {
+            throw new Error("Server error");
+        }
         setResetLoading(false);
 
-        if (!res.ok) return alert(data.detail);
+        if (!res.ok) return toast.error(data.detail);
 
         setResendTimer(60);
         setCanResend(false);
         switchModal("verifyOtp");
     };
 
-    const handleVerifyOtp = async () => {
-        if (fullOtp.length !== 6)
-            return alert("Enter full OTP");
+    const handleVerifyOtp = async (otp?: string) => {
+        const code = otp ?? otpValues.join("");
+
+        if (code.length !== 6)
+            return toast.info("Enter full OTP");
 
         setResetLoading(true);
 
@@ -225,24 +260,34 @@ const AuthModal: React.FC<AuthModalProps> = ({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 email_or_phone: resetTarget.trim(),
-                otp: fullOtp,
+                otp: code,
             }),
         });
 
-        const data = await res.json();
+        let data;
+        try {
+            data = await res.json();
+        } catch {
+            throw new Error("Server error");
+        }
         setResetLoading(false);
 
-        if (!res.ok) return alert(data.detail);
+        if (!res.ok) return toast.error(data.detail);
 
+        setVerifiedOtp(code);
+
+        setOtpValues(["", "", "", "", "", ""]);
         switchModal("resetPassword");
     };
 
     const handleResetPassword = async () => {
+
+        console.log("VERIFIED OTP:", verifiedOtp, verifiedOtp.length);
         if (!resetNewPass || !resetConfirmPass)
-            return alert("Enter your new password.");
+            return toast.info("Enter your new password.");
 
         if (resetNewPass !== resetConfirmPass)
-            return alert("Passwords do not match.");
+            return toast.error("Passwords do not match.");
 
         setResetLoading(true);
 
@@ -251,17 +296,57 @@ const AuthModal: React.FC<AuthModalProps> = ({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 email_or_phone: resetTarget.trim(),
+                otp: verifiedOtp,
                 new_password: resetNewPass,
             }),
         });
 
-        const data = await res.json();
+        let data;
+        try {
+            data = await res.json();
+        } catch {
+            throw new Error("Server error");
+        }
         setResetLoading(false);
 
-        if (!res.ok) return alert(data.detail);
+        if (!res.ok) {
 
-        alert("Password reset successful.");
+            if (data.new_password) {
+                toast.error("Password must be at least 8 characters.");
+            }
+
+            if (data.detail) {
+                toast.error(data.detail);
+            }
+
+            return;
+
+        }
+
+        toast.success("Password reset successful.");
+
+        setOtpValues(["", "", "", "", "", ""]);
+        setResetTarget("");
+        setResetNewPass("");
+        setResetConfirmPass("");
+
         switchModal("login");
+    };
+
+    const handleOtpPaste = (e: React.ClipboardEvent) => {
+        const paste = e.clipboardData.getData("text").slice(0, 6);
+
+        if (!/^\d+$/.test(paste)) return;
+
+        const values = paste.split("");
+        const filled = [...values, "", "", "", "", "", ""].slice(0, 6);
+
+        setOtpValues(filled);
+
+        const lastIndex = filled.map((v: string) => v !== "").lastIndexOf(true);
+        if (lastIndex >= 0) {
+            document.getElementById(`otp-${lastIndex}`)?.focus();
+        }
     };
 
     const handleOtpChange = (value: string, index: number) => {
@@ -271,10 +356,19 @@ const AuthModal: React.FC<AuthModalProps> = ({
         updated[index] = value;
         setOtpValues(updated);
 
-        if (value && index < 3)
+        if (value && index < 5) {
             document.getElementById(`otp-${index + 1}`)?.focus();
-        if (!value && index > 0)
+        }
+
+        if (!value && index > 0) {
             document.getElementById(`otp-${index - 1}`)?.focus();
+        }
+
+        // Only auto verify when LAST box gets a value
+        if (index === 5 && value) {
+            const otp = updated.join("");
+            setTimeout(() => handleVerifyOtp(otp), 50);
+        }
     };
 
     return (
@@ -305,6 +399,9 @@ const AuthModal: React.FC<AuthModalProps> = ({
                                 <input
                                     value={loginInput}
                                     onChange={(e) => setLoginInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") handleLogin();
+                                    }}
                                 />
                             </div>
 
@@ -315,6 +412,9 @@ const AuthModal: React.FC<AuthModalProps> = ({
                                         type={showLoginPassword ? "text" : "password"}
                                         value={loginPassword}
                                         onChange={(e) => setLoginPassword(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") handleLogin();
+                                        }}
                                     />
                                     <span
                                         className="eye-icon"
@@ -361,7 +461,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                         <div className="modal-form">
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>First Name</label>
+                                    <label>First Name <span className="required">*</span></label>
                                     <input
                                         type="text"
                                         value={signupFirstName}
@@ -371,7 +471,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                                 </div>
 
                                 <div className="form-group">
-                                    <label>Last Name</label>
+                                    <label>Last Name <span className="required">*</span> </label>
                                     <input
                                         type="text"
                                         value={signupLastName}
@@ -383,11 +483,13 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Phone Number</label>
+                                    <label>Phone Number <span className="required">*</span> </label>
                                     <input
                                         type="text"
                                         value={signupPhone}
-                                        onChange={(e) => setSignupPhone(e.target.value)}
+                                        onChange={(e) =>
+                                            setSignupPhone(e.target.value.replace(/\D/g, ""))
+                                        }
                                         placeholder="Phone Number"
                                     />
                                 </div>
@@ -404,7 +506,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                             </div>
 
                             <div className="form-group password-group">
-                                <label>Password</label>
+                                <label>Password <span className="required">*</span> </label>
                                 <div className="password-wrapper">
                                     <input
                                         type={showSignupPassword ? "text" : "password"}
@@ -422,7 +524,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                             </div>
 
                             <div className="form-group password-group">
-                                <label>Confirm Password</label>
+                                <label>Confirm Password <span className="required">*</span> </label>
                                 <div className="password-wrapper">
                                     <input
                                         type={showSignupConfirm ? "text" : "password"}
@@ -504,8 +606,14 @@ const AuthModal: React.FC<AuthModalProps> = ({
                             <div className="form-group">
                                 <label>Email or Phone</label>
                                 <input
+                                    type="text"
                                     value={resetTarget}
                                     onChange={(e) => setResetTarget(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            handleRequestOtp();
+                                        }
+                                    }}
                                 />
                             </div>
 
@@ -532,24 +640,31 @@ const AuthModal: React.FC<AuthModalProps> = ({
                         </div>
 
                         <div className="modal-form">
-                            <div className="otp-container">
+                            <div className="otp-container" onPaste={handleOtpPaste}>
                                 {otpValues.map((digit, index) => (
                                     <input
                                         key={index}
                                         id={`otp-${index}`}
                                         maxLength={1}
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
                                         value={digit}
                                         onChange={(e) =>
                                             handleOtpChange(e.target.value, index)
                                         }
                                         className="otp-input"
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") {
+                                                handleVerifyOtp();
+                                            }
+                                        }}
                                     />
                                 ))}
                             </div>
 
                             <button
                                 className="btn-submit"
-                                onClick={handleVerifyOtp}
+                                onClick={() => handleVerifyOtp()}
                                 disabled={resetLoading}
                             >
                                 {resetLoading ? "Verifying..." : "Verify OTP"}
@@ -578,26 +693,50 @@ const AuthModal: React.FC<AuthModalProps> = ({
                         </div>
 
                         <div className="modal-form">
-                            <div className="form-group">
+                            <div className="form-group password-group">
                                 <label>New Password</label>
-                                <input
-                                    type="password"
-                                    value={resetNewPass}
-                                    onChange={(e) =>
-                                        setResetNewPass(e.target.value)
-                                    }
-                                />
+                                <div className="password-wrapper">
+                                    <input
+                                        type={showResetPassword ? "text" : "password"}
+                                        value={resetNewPass}
+                                        onChange={(e) => setResetNewPass(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") {
+                                                handleResetPassword();
+                                            }
+                                        }}
+                                    />
+                                    <span
+                                        className="eye-icon"
+                                        onClick={() => setShowResetPassword(!showResetPassword)}
+                                    >
+                                        {showResetPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+                                    </span>
+                                </div>
                             </div>
 
-                            <div className="form-group">
+                            <div className="form-group password-group">
                                 <label>Confirm Password</label>
-                                <input
-                                    type="password"
-                                    value={resetConfirmPass}
-                                    onChange={(e) =>
-                                        setResetConfirmPass(e.target.value)
-                                    }
-                                />
+
+                                <div className="password-wrapper">
+                                    <input
+                                        type={showResetConfirm ? "text" : "password"}
+                                        value={resetConfirmPass}
+                                        onChange={(e) => setResetConfirmPass(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") {
+                                                handleResetPassword();
+                                            }
+                                        }}
+                                    />
+
+                                    <span
+                                        className="eye-icon"
+                                        onClick={() => setShowResetConfirm(!showResetConfirm)}
+                                    >
+                                        {showResetConfirm ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+                                    </span>
+                                </div>
                             </div>
 
                             <button
@@ -612,7 +751,9 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 )}
             </div>
         </div>
+
     );
+
 };
 
 export default AuthModal;

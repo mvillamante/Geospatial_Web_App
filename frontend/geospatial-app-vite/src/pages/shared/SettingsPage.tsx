@@ -1,12 +1,22 @@
 import { useState, useEffect } from "react";
 import "./SettingsPage.css";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 function SettingsPage() {
+    const [saving, setSaving] = useState(false);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [confirmDelete, setConfirmDelete] = useState("");
+
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
+
+    const isValidEmail = (email: string) =>
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
     const [originalEmail, setOriginalEmail] = useState("");
     const [originalPhone, setOriginalPhone] = useState("");
@@ -26,6 +36,10 @@ function SettingsPage() {
     const [communityAnnouncements, setCommunityAnnouncements] =
         useState(true);
     const [severity, setSeverity] = useState("low");
+
+    const updatePreference = async (key: string, value: any) => {
+        await updateProfile({ [key]: value });
+    };
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -63,6 +77,7 @@ function SettingsPage() {
 
     const updateProfile = async (updates: any) => {
         try {
+            setSaving(true);
             const token = localStorage.getItem("access_token");
 
             const res = await fetch(`${API_URL}/api/users/me/`, {
@@ -84,6 +99,8 @@ function SettingsPage() {
             toast.success("Profile updated");
         } catch (err: any) {
             toast.error(err.message || "Update failed");
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -193,7 +210,13 @@ function SettingsPage() {
 
                         <div className="form-actions">
                             <button
+                                disabled={saving || email === originalEmail}
                                 onClick={async () => {
+
+                                    if (!isValidEmail(email)) {
+                                        toast.error("Please enter a valid email");
+                                        return;
+                                    }
                                     await updateProfile({ email });
                                     setOriginalEmail(email);
                                     setEditSection(null);
@@ -213,7 +236,7 @@ function SettingsPage() {
                 <div className="settings-item">
                     <div className="settings-header">
                         <span>Phone</span>
-                        <button onClick={() => setEditSection("phone")}>
+                        <button onClick={() => setEditSection("phone")} >
                             Edit
                         </button>
                     </div>
@@ -223,13 +246,22 @@ function SettingsPage() {
                     >
                         <input
                             type="tel"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                         />
 
                         <div className="form-actions">
                             <button
+                                disabled={saving || phone === originalPhone}
                                 onClick={async () => {
+
+                                    if (!/^[0-9]{10,13}$/.test(phone)) {
+                                        toast.error("Invalid phone number");
+                                        return;
+                                    }
+
                                     await updateProfile({ phone });
                                     setOriginalPhone(phone);
                                     setEditSection(null);
@@ -258,24 +290,54 @@ function SettingsPage() {
                         className={`expand ${editSection === "password" ? "open" : ""
                             }`}
                     >
-                        <input
-                            type="password"
-                            placeholder="Current Password"
-                            value={currentPassword}
-                            onChange={(e) => setCurrentPassword(e.target.value)}
-                        />
-                        <input
-                            type="password"
-                            placeholder="New Password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                        />
-                        <input
-                            type="password"
-                            placeholder="Confirm Password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                        />
+                        <div className="password-input">
+                            <input
+                                type={showCurrentPassword ? "text" : "password"}
+                                placeholder="Current Password"
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
+                            />
+
+                            <button
+                                type="button"
+                                className="eye-btn"
+                                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            >
+                                {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
+                        <div className="password-input">
+                            <input
+                                type={showNewPassword ? "text" : "password"}
+                                placeholder="New Password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                            />
+
+                            <button
+                                type="button"
+                                className="eye-btn"
+                                onClick={() => setShowNewPassword(!showNewPassword)}
+                            >
+                                {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
+                        <div className="password-input">
+                            <input
+                                type={showConfirmPassword ? "text" : "password"}
+                                placeholder="Confirm Password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                            />
+
+                            <button
+                                type="button"
+                                className="eye-btn"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
 
                         <div className="form-actions">
                             <button onClick={handlePasswordChange}>
@@ -309,7 +371,7 @@ function SettingsPage() {
                             onChange={(e) => {
                                 const v = e.target.checked;
                                 setHazardAlerts(v);
-                                updateProfile({ receive_hazard_alerts: v });
+                                updatePreference("receive_hazard_alerts", v);
                             }}
                         />
                         <span className="slider"></span>
@@ -367,9 +429,23 @@ function SettingsPage() {
                             </button>
 
                             <button
+
                                 className="danger-confirm"
                                 onClick={handleDeleteAccount}
                                 disabled={deleteLoading}
+                            >
+                                {deleteLoading ? "Deleting..." : "Delete Permanently"}
+                            </button>
+                            <input
+                                placeholder="Type DELETE to confirm"
+                                value={confirmDelete}
+                                onChange={(e) => setConfirmDelete(e.target.value)}
+                            />
+
+                            <button
+                                className="danger-confirm"
+                                onClick={handleDeleteAccount}
+                                disabled={deleteLoading || confirmDelete !== "DELETE"}
                             >
                                 {deleteLoading ? "Deleting..." : "Delete Permanently"}
                             </button>

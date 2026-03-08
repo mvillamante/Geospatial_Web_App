@@ -42,6 +42,14 @@ type MapReport = {
   verified_critical_level: "low" | "moderate" | "high" | "critical";
 };
 
+type MapReportView = {
+  id: number;
+  lat?: number;
+  lng?: number;
+  category?: string;
+  verified_critical_level?: "low" | "moderate" | "high" | "critical" | null;
+};
+
 // interface OverpassElement {
 //   center?: { lat: number; lon: number };
 //   tags?: { name?: string };
@@ -140,10 +148,14 @@ interface LeafletMapProps {
   selectedReport?: MapReport | null;
   categoryFilter?: IncidentCategories | "all";
   reportTimeFilter?: string;
-  activeLayers: string[];
+  activeLayers?: string[];
 
   height?: string;
   width?: string;
+
+  selectedReportView?: MapReportView | null;
+  enablePreview?: boolean;
+
   mapView?: "interactive" | "choropleth";
   mapType?: "basic" | "satellite" | "terrain";
   /** Currently selected data layer in choropleth mode (e.g. "hazard", "green", "calamity") */
@@ -178,6 +190,8 @@ export default function LeafletMap(props: LeafletMapProps) {
   const {
     height = "100%",
     width = "100%",
+    selectedReportView,
+    enablePreview = false,
     mapView = "interactive",
     mapType = "basic",
     dataLayer,
@@ -248,6 +262,8 @@ export default function LeafletMap(props: LeafletMapProps) {
   const calamityYearRef = useRef<number | undefined>(hazardYear);
   const calamityLabelsLayerRef = useRef<L.LayerGroup | null>(null);
   const onCalamityRiskBarangaySelectRef = useRef(onCalamityRiskBarangaySelect);
+
+  const previewMarkerRef = useRef<L.Marker | null>(null);
 
   // Color scale adapted from Hazard/hazard_index_server.py (getHazardColor)
   const getHazardIndexColor = (value: number): string => {
@@ -429,7 +445,7 @@ export default function LeafletMap(props: LeafletMapProps) {
     return () => navigator.geolocation.clearWatch(watcher);
   }, [mapView]);
 
-  // "Go to My Location" button
+  // General Map (includes NAVIGATE to selected report, to Cabuyao)
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -483,6 +499,56 @@ export default function LeafletMap(props: LeafletMapProps) {
     (map as any)._homeControl = control;
 
   }, [selectedReport?.id]);
+
+  // Static Preview Map (for Specific Report) 
+  useEffect(() => {
+
+    if (!enablePreview || !selectedReportView) return;
+    console.log("dont beat urself up", selectedReportView)
+
+    const lat = Number(selectedReportView.lat);
+    const lng = Number(selectedReportView.lng);
+
+    if (!lat || !lng) return;
+
+    const map = mapRef.current;
+    if (!map) return;
+
+    map.setView([lat, lng], 15);
+    if (map && map.zoomControl) {
+      map.zoomControl.remove();
+    }
+
+    previewMarkerRef.current?.remove();
+
+    const iconEmoji = getIncidentIcon(
+      selectedReportView.category || ""
+    );
+
+    const colors = getSeverityColors(selectedReportView);
+
+    const reportIcon = L.divIcon({
+      html: `
+      <div class="verified-report-marker">
+        <div class="pulse" style="background:${colors.secondary}40;"></div>
+        <div class="pin"
+          style="
+            background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
+            border: 3px solid ${colors.border};
+          ">
+          <span class="verified-report-icon">${iconEmoji}</span>
+        </div>
+      </div>
+      `,
+      className: "",
+      iconSize: [44, 44],
+      iconAnchor: [22, 44],
+    });
+
+    previewMarkerRef.current =
+      L.marker([lat, lng], { icon: reportIcon }).addTo(map);
+
+  }, [selectedReportView, enablePreview]);
 
 
   // Reset any generic choropleth placeholder when map view changes
@@ -1524,17 +1590,17 @@ export default function LeafletMap(props: LeafletMapProps) {
 
           const reportIcon = L.divIcon({
             html: `
-  <div class="verified-report-marker">
-    <div class="pulse" style="background:${colors.secondary}40;"></div>
-    <div class="pin"
-      style="
-        background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
-        border: 3px solid ${colors.border};
-      ">
-      <span class="verified-report-icon">${iconEmoji}</span>
-    </div>
-  </div>
-  `,
+            <div class="verified-report-marker">
+              <div class="pulse" style="background:${colors.secondary}40;"></div>
+              <div class="pin"
+                style="
+                  background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
+                  border: 3px solid ${colors.border};
+                ">
+                <span class="verified-report-icon">${iconEmoji}</span>
+              </div>
+            </div>
+            `,
             className: "",
             iconSize: [44, 44],
             iconAnchor: [22, 44],
@@ -1564,7 +1630,7 @@ export default function LeafletMap(props: LeafletMapProps) {
 
   }, [activeLayers, reportTimeFilter, categoryFilter]);
 
-
+  /* Selected Report */
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -1601,9 +1667,6 @@ export default function LeafletMap(props: LeafletMapProps) {
 
         reports.forEach((r: any) => {
 
-          // 👇 ADD THIS
-          console.log("STATUS:", r.status, "RISK:", r.citizenRisk, r.verifiedRisk);
-
           const citizenRisk = r.citizenRisk ?? r.suggested_critical_level;
           const verifiedRisk = r.verifiedRisk ?? r.verified_critical_level ?? r.suggested_critical_level;
 
@@ -1621,17 +1684,17 @@ export default function LeafletMap(props: LeafletMapProps) {
 
           const reportIcon = L.divIcon({
             html: `
-  <div class="verified-report-marker">
-    <div class="pulse" style="background:${colors.secondary}40;"></div>
-    <div class="pin"
-      style="
-        background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
-        border: 3px solid ${colors.border};
-      ">
-      <span class="verified-report-icon">${iconEmoji}</span>
-    </div>
-  </div>
-  `,
+            <div class="verified-report-marker">
+              <div class="pulse" style="background:${colors.secondary}40;"></div>
+              <div class="pin"
+                style="
+                  background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
+                  border: 3px solid ${colors.border};
+                ">
+                <span class="verified-report-icon">${iconEmoji}</span>
+              </div>
+            </div>
+            `,
             className: "",
             iconSize: [44, 44],
             iconAnchor: [22, 44],
@@ -1640,15 +1703,15 @@ export default function LeafletMap(props: LeafletMapProps) {
           const marker = L.marker([lat, lng], { icon: reportIcon })
             .addTo(layerGroup)
             .bindPopup(`
-  <div class="verified-popup">
-    <div class="popup-icon">${iconEmoji}</div>
-    <h3>${r.category}</h3>
-    <p>${r.barangay || "Cabuyao, Laguna"}</p>
-    <span class="popup-pill" style="background:${colors.primary}">
-      ${colors.text} RISK
-    </span>
-  </div>
-`)
+              <div class="verified-popup">
+                <div class="popup-icon">${iconEmoji}</div>
+                <h3>${r.category}</h3>
+                <p>${r.barangay || "Cabuyao, Laguna"}</p>
+                <span class="popup-pill" style="background:${colors.primary}">
+                  ${colors.text} RISK
+                </span>
+              </div>
+            `)
 
           reportMarkersMap.current.set(r.id, marker);
         });
@@ -1657,6 +1720,7 @@ export default function LeafletMap(props: LeafletMapProps) {
         console.error("Failed to load queue reports:", err);
       });
   }, [activeLayers, selectedReport]);
+
 
   return (
     <div

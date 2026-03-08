@@ -60,8 +60,8 @@ interface AdminReport {
   photo_url?: string | null;
 
   barangay?: string;
-  latitude?: number;
-  longitude?: number;
+  lat?: number;
+  lng?: number;
 
 }
 
@@ -175,8 +175,8 @@ const ReportsMgmtPage: React.FC = () => {
     return {
       id: selectedReportMap.id,
       incident_type,
-      latitude: selectedReportMap.latitude,
-      longitude: selectedReportMap.longitude,
+      latitude: selectedReportMap.lat,
+      longitude: selectedReportMap.lng,
       verified_critical_level:
         selectedReportMap.verified_critical_level ?? "low",
     };
@@ -458,6 +458,8 @@ const ReportsMgmtPage: React.FC = () => {
   const [loadingReports, setLoadingReports] = useState(true);
   const [viewMode, setViewMode] = useState("table");
 
+  console.log("defying gravity", selectedReport)
+
   return (
     <div className="reportsmgmt-page">
       <div className="page-head">
@@ -678,7 +680,6 @@ const ReportsMgmtPage: React.FC = () => {
                   filteredReports.map((report) => {
                     const status = normalizeStatus(report.status);
                     const isArchived = normalizeStatus(report.status) === "Archived";
-                    console.log("rah", report);
                     return (
                       <tr key={report.id} onClick={() => setSelectedReportMap(report)} title="Click to navigate to pin">
                         <td className="center">#R-0{report.id}</td>
@@ -1013,37 +1014,46 @@ const ReportsMgmtPage: React.FC = () => {
 
               <div className="modal-top-grid">
                 <div className="modal-info">
-                  <div className="detail-item">
-                    <div className="label">Location</div>
-                    <div className="value">{selectedReport.location_display || "-"}</div>
-                  </div>
-
-                  <div className="detail-item">
-                    <div className="label">Submitted</div>
-                    <div className="value">
-                      {formatDateTime(selectedReport.created_at).date}{" "}
-                      {formatDateTime(selectedReport.created_at).time}
+                  <>
+                    <div className="report-map-preview">
+                      <LeafletMap
+                        selectedReportView={selectedReport}
+                        enablePreview={!!selectedReport}
+                      />
                     </div>
-                  </div>
-
-                  <div className="detail-item">
-                    <div className="label">Verified Critical Level</div>
-                    <div className="value">
-                      {selectedReport.verified_critical_level ? (
-                        <span className={criticalBadgeClass(selectedReport.verified_critical_level)}>
-                          {selectedReport.verified_critical_level}
-                        </span>
-                      ) : (
-                        "—"
-                      )}
+                    <div className="detail-item">
+                      <div className="label">Location</div>
+                      <div className="value">{selectedReport.location_display || "-"}</div>
                     </div>
-                  </div>
+                  </>
 
+                  <div className="reportmodal-row">
+                    <div className="detail-item">
+                      <div className="label">Submitted</div>
+                      <div className="value">
+                        {formatDateTime(selectedReport.created_at).date}{" "}
+                        {formatDateTime(selectedReport.created_at).time}
+                      </div>
+                    </div>
 
-                  <div className="detail-item">
-                    <div className="label">Assigned Officer</div>
-                    <div className="value">
-                      {selectedReport.assigned_officer_label ?? "Unassigned"}
+                    <div className="detail-item">
+                      <div className="label">Verified Critical Level</div>
+                      <div className="value">
+                        {selectedReport.verified_critical_level ? (
+                          <span className={criticalBadgeClass(selectedReport.verified_critical_level)}>
+                            {selectedReport.verified_critical_level}
+                          </span>
+                        ) : (
+                          "—"
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="detail-item">
+                      <div className="label">Assigned Officer</div>
+                      <div className="value">
+                        {selectedReport.assigned_officer_label ?? "Unassigned"}
+                      </div>
                     </div>
                   </div>
                 </div>

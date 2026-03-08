@@ -848,7 +848,7 @@ li.critical::before {
   position: fixed;
   right: 0;
   top: 0;
-  height: 100vh;
+  height: 100dvh;
   width: min(460px, 100%);
   background: var(--panel-bg);
   display: flex;
@@ -1398,7 +1398,7 @@ li.critical::before {
 
   .drawer-actions {
     padding: 14px 18px;
-    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+    padding-bottom: calc(70px + env(safe-area-inset-bottom));
     gap: 10px;
   }
 

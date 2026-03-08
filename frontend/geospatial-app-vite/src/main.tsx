@@ -2,11 +2,18 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./styles/global.css";
 import "./styles/colors.css";
-// import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthContext";
 import App from "./App";
+import { registerSW } from "virtual:pwa-register";
 
-// const queryClient = new QueryClient();
+registerSW({
+  onNeedRefresh() {
+    console.log("New content available, refresh the page.");
+  },
+  onOfflineReady() {
+    console.log("App ready to work offline.");
+  },
+});
 
 const container = document.getElementById("root");
 
@@ -18,21 +25,8 @@ const root = ReactDOM.createRoot(container);
 
 root.render(
   <React.StrictMode>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </React.StrictMode>
 );
-
-
-
-if (import.meta.env.PROD && "serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("/sw.js")
-      .then((reg) => console.log("Service Worker registered:", reg))
-      .catch((err) =>
-        console.log("Service Worker registration failed:", err)
-      );
-  });
-}

@@ -27,6 +27,9 @@ const LandingPage: React.FC = () => {
   const location = useLocation();
   const { refreshUser } = useAuth(); // Get current user from context
 
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+
   const isOpen = false;
   const [loading, setLoading] = useState(true);
   const [modalType, setModalType] = useState<ModalType>(null);
@@ -37,6 +40,18 @@ const LandingPage: React.FC = () => {
 
   const [stats, setStats] = useState<LandingStats | null>(null);
 
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener("beforeinstallprompt", handler);
+
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
 
   useEffect(() => {
     const start = Date.now();
@@ -105,6 +120,20 @@ const LandingPage: React.FC = () => {
 
     fetchLandingStats();
   }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+
+    if (choice.outcome === "accepted") {
+      console.log("User installed HazSpot");
+    }
+
+    setDeferredPrompt(null);
+    setIsInstallable(false);
+  };
 
 
   // ===== Get user role and display name from localStorage =====
@@ -184,8 +213,24 @@ const LandingPage: React.FC = () => {
                 A community-centered platform for understanding hazard risk, strengthening disaster preparedness, and supporting local sustainability initiatives.
               </p>
               <div className="cta-group">
-                <button className="btn btn-primary" onClick={() => setModalType("signup")}>Get Started</button>
-                <button className="btn btn-secondary" onClick={() => navigate("/main/guest/community-feed", { replace: true })}>View Community Feed</button>
+                <button className="btn btn-primary" onClick={() => setModalType("signup")}>
+                  Get Started
+                </button>
+
+                <button
+                  className="btn btn-secondary"
+                  onClick={() =>
+                    navigate("/main/guest/community-feed", { replace: true })
+                  }
+                >
+                  View Community Feed
+                </button>
+
+                {isInstallable && (
+                  <button className="btn btn-install" onClick={handleInstallClick}>
+                    Install HazSpot App
+                  </button>
+                )}
               </div>
 
               <div className="dashboard-preview">

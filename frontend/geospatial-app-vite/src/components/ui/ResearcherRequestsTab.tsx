@@ -298,30 +298,30 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
     </div>
   );
 
-  const handleViewAttachment = async (id: number) => {
-    try {
-      const token = localStorage.getItem("access_token");
+  // const handleViewAttachment = async (id: number) => {
+  //   try {
+  //     const token = localStorage.getItem("access_token");
 
-      const res = await fetch(
-        `${API_URL}/api/admin/researcher/${id}/attachment/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  //     const res = await fetch(
+  //       `${API_URL}/api/admin/researcher/${id}/attachment/`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
 
-      if (!res.ok) throw new Error("Failed to get signed URL");
+  //     if (!res.ok) throw new Error("Failed to get signed URL");
 
-      const data = await res.json();
+  //     const data = await res.json();
 
-      window.open(data.url, "_blank");
+  //     window.open(data.url, "_blank");
 
-    } catch (err) {
-      console.error(err);
-      alert("Failed to load attachment.");
-    }
-  };
+  //   } catch (err) {
+  //     console.error(err);
+  //     alert("Failed to load attachment.");
+  //   }
+  // };
 
   return (
     <>

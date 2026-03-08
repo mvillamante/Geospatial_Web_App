@@ -12,6 +12,7 @@ export interface EvacuationCenterData {
   capacity: number;
   address: string;
   facilities: string[];
+  barangay: string;
 }
 
 export interface EvacuationTypeConfig {

@@ -33,15 +33,15 @@ interface BarangayData {
   risk: "High" | "Medium" | "Low";
 }
 
-interface OverpassElement {
-  center?: { lat: number; lon: number };
-  tags?: { name?: string };
-  members?: Array<{
-    type: string;
-    role?: "outer" | "inner";
-    geometry?: Array<{ lat: number; lon: number }>;
-  }>;
-}
+// interface OverpassElement {
+//   center?: { lat: number; lon: number };
+//   tags?: { name?: string };
+//   members?: Array<{
+//     type: string;
+//     role?: "outer" | "inner";
+//     geometry?: Array<{ lat: number; lon: number }>;
+//   }>;
+// }
 // Tile layer configurations for different map types
 const tileLayerConfigs = {
   basic: {

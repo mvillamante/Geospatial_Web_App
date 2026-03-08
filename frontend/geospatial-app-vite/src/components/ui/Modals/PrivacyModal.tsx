@@ -1,7 +1,12 @@
 import { FiX } from "react-icons/fi";
 import { useEffect } from "react";
 
-const PrivacyModal = ({ onClose }) => {
+
+interface PrivacyModalProps {
+  onClose: () => void;
+}
+
+const PrivacyModal: React.FC<PrivacyModalProps> = ({ onClose }) => {
     useEffect(() => {
         document.body.style.overflow = "hidden";
 

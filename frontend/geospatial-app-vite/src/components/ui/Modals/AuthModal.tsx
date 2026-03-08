@@ -8,7 +8,7 @@ import "./GlobalModal.css";
 import type { User } from "../../../libr/fetchCurrentUser";
 import { toast } from "sonner";
 
-type AuthModalType =
+export type AuthModalType =
     | "login"
     | "signup"
     | "forgotPassword"
@@ -97,14 +97,14 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
     /* ================= HELPERS ================= */
 
-    const fullOtp = otpValues.join("");
+    // const fullOtp = otpValues.join("");
 
-    const resetState = () => {
-        setOtpValues(["", "", "", "", "", ""]);
-        setResetTarget("");
-        setResetNewPass("");
-        setResetConfirmPass("");
-    };
+    // const resetState = () => {
+    //     setOtpValues(["", "", "", "", "", ""]);
+    //     setResetTarget("");
+    //     setResetNewPass("");
+    //     setResetConfirmPass("");
+    // };
 
     const maskEmailOrPhone = (value: string) => {
         if (!value.includes("@")) {
@@ -343,7 +343,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
         setOtpValues(filled);
 
-        const lastIndex = filled.findLastIndex(v => v !== "");
+        const lastIndex = filled.map((v: string) => v !== "").lastIndexOf(true);
         if (lastIndex >= 0) {
             document.getElementById(`otp-${lastIndex}`)?.focus();
         }
@@ -664,7 +664,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
                             <button
                                 className="btn-submit"
-                                onClick={handleVerifyOtp}
+                                onClick={() => handleVerifyOtp()}
                                 disabled={resetLoading}
                             >
                                 {resetLoading ? "Verifying..." : "Verify OTP"}

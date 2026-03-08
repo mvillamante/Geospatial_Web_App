@@ -1,5 +1,5 @@
 import "./AddEvacCenterModal.css";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import MapPickerModal from "./MapPickerModal";
 import { toast } from "sonner";
 
@@ -44,7 +44,6 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = (
   });
 
   const [mapOpen, setMapOpen] = useState(false);
-  const [pinnedCoords, setPinnedCoords] = useState<{ lat: number; lon: number } | null>(null);
 
   if (!open) return null;
   async function reverseGeocodeAndSetAddress(lat: number, lon: number) {
@@ -110,8 +109,6 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = (
       onAdd(newCenter);
 
       toast.success(`Evacuation Center "${newCenter.name}" added successfully`);
-
-      setPinnedCoords(null);
 
       // Reset form
       setFormState({
@@ -284,11 +281,6 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = (
         })() : null}
         onClose={() => setMapOpen(false)}
         onConfirm={(picked) => {
-
-          setPinnedCoords({
-            lat: picked.lat,
-            lon: picked.lng
-          });
 
           reverseGeocodeAndSetAddress(picked.lat, picked.lng);
 

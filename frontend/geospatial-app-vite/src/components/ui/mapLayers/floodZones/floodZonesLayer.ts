@@ -28,7 +28,7 @@ export function createFloodZonesLayer(map: L.Map): L.LayerGroup {
     opacity: 0.7,
     tiled: true,
     attribution: "LiPAD LiDAR Portal (UP DREAM Program)",
-  });
+  } as any);
   lipadFloodLayer.addTo(floodZonesGroup);
 
   const cleanZoneName = (name: string): string =>

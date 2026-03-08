@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import {
   MainLayout, LandingPage,
@@ -11,6 +11,20 @@ import {
 } from "./pages";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { Toaster } from "sonner";
+import { syncOfflineReports } from "./libr/syncOfflineReports";
+
+useEffect(() => {
+  const handleOnline = () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    syncOfflineReports(import.meta.env.VITE_API_URL, token);
+  };
+
+  window.addEventListener("online", handleOnline);
+
+  return () => window.removeEventListener("online", handleOnline);
+}, []);
 
 const App: React.FC = () => {
   return (

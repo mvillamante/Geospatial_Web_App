@@ -22,6 +22,7 @@
     "filipino-badwords-list": "^1.1.2",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
+    "idb": "^8.0.3",
     "jspdf": "^4.2.0",
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",

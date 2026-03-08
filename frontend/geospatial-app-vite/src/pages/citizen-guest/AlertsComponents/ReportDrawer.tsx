@@ -325,6 +325,29 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
       // Photo
       if (photoFile) form.append("photo", photoFile);
 
+      if (!navigator.onLine) {
+        const { dbPromise }= await import("../../../libr/offlineDB");
+        const db = await dbPromise;
+
+        const data: any = {
+          category,
+          description,
+          suggested_critical_level: criticalLevel,
+          location_display: location,
+          latitude: lat,
+          longitude: lon,
+          location_source: locationMode,
+        };
+
+        if (category === "others") data.other_category = otherCategory.trim();
+
+        await db.add("offlineReports", { data });
+
+        toast.success("You are offline. Report saved and will be submitted later.");
+        onClose();
+        return;
+      }
+
       const API_URL = import.meta.env.VITE_API_URL;
       const res = await fetch(`${API_URL}/api/reports/`, {
         method: "POST",

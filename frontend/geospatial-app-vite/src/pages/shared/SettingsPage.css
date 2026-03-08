@@ -2,6 +2,7 @@
   max-width: 850px;
   margin: 0 auto;
   padding: 2rem;
+  padding-bottom: calc(50px + env(safe-area-inset-bottom) + 20px);
 }
 
 .settings-page h1 {
@@ -278,4 +279,11 @@
 
 .danger-btn:hover {
   background: #fecaca;
+}
+
+@media screen and (max-width: 768px) {
+  .settings-page {
+    padding: 1.25rem;
+    padding-bottom: calc(50px + env(safe-area-inset-bottom) + 20px);
+  }
 }

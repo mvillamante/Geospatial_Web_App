@@ -226,7 +226,7 @@
 
 .evac-btn {
   width: 100%;
-  margin-top: 14px;
+  margin-top: 8px;
   padding: 0.5rem;
   background: var(--primary-btn-color);
   color: var(--text-white);
@@ -522,6 +522,14 @@
     padding: 12px;
   }
 
+  .evac-info {
+    gap: 0.1rem;
+  }
+
+  .evac-card {
+    min-height: auto;
+  }
+
   .evac-side-content {
     padding: 12px;
     box-shadow: none;
@@ -535,6 +543,7 @@
   .evac-card {
     width: 100%;
     max-width: 100%;
+    padding: 1rem;
   }
 
   .evac-side-content-map {
@@ -1163,7 +1172,6 @@
 
   /* Buttons */
   .evac-btn {
-  
     border-radius: 14px;
     padding: 0.5rem;
     font-size: 0.78rem;

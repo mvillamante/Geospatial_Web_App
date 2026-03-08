@@ -223,7 +223,7 @@ export default function AlertsPanel({
             .trim();
 
     const filteredReports = reports
-        .filter(r => r.status !== "rejected")   
+        .filter(r => r.status !== "rejected")
         .filter(r => (r.assigned_officer_id != null) || (r.status === "resolved"))
         .filter(r => selectedCategory === "all" || r.incident_type.toLowerCase() === selectedCategory)
         .filter(r => selectedSeverity === "all" || r.verified_critical_level === selectedSeverity)
@@ -360,6 +360,10 @@ export default function AlertsPanel({
     return (
         <aside className="dashboard-alerts">
             <div className="alerts-controls">
+
+                {/* <button className="sheet-handle-btn">
+                    <div className="sheet-handle"></div>
+                </button> */}
                 <div className="alerts-header">
                     <div className="alerts-header-left">
                         {/* <h1 className="alerts-title">Verified Reports</h1> */}

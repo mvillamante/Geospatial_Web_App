@@ -432,26 +432,26 @@ const ProfilePage: React.FC = () => {
             <div className="contact-section">
               <div className="contact-row">
                 <span className="contact-label">Email</span>
-                <input
+                {/* <input
                   className="contact-input"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                />
+                /> */}
                 <span className="contact-value">{email || "—"}</span>
               </div>
 
               <div className="contact-row">
                 <span className="contact-label">Phone</span>
 
-                <input
+                {/* <input
                   className="contact-input"
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="09xx xxx xxxx"
-                />
+                /> */}
                 <span className="contact-value">{phone || "—"}</span>
 
               </div>

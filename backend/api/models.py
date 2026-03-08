@@ -469,7 +469,7 @@ class ResidentVerificationRequest(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="resident_verification_requests")
     barangay = models.CharField(max_length=120)
     address = models.TextField()
-    id_image = models.ImageField(upload_to="verification_ids/")
+    id_image = models.TextField(null=True, blank=True) 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     rejection_reason = models.TextField(blank=True, null=True)
 

@@ -17,6 +17,26 @@
   transition: all 0.25s ease;
 }
 
+.legend-header {
+  position: relative;
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+  padding-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.legend-header::before,
+.legend-header::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 20%;
+  border-top: 4px double #ccc;
+}
+
 /*---------------------FLOOD ZONE LEGEND----------------------*/
 .flood-zone-legend {
   position: relative;

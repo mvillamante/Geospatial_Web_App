@@ -1,449 +1,511 @@
-import '../../pages/admin/UserMgmtPage.css';
-import React, { useState, useEffect } from "react";
-import { CheckCircle, XCircle } from "lucide-react";
-// import { LuEllipsis } from "react-icons/lu";
-import { FiEye, FiX, FiSearch} from "react-icons/fi";
-import { formatDistanceToNow } from "date-fns";
-import placeholderImg from '../../assets/placeholder_img/SampleID.png';
-import { LuEllipsis } from 'react-icons/lu';
+import '../../pages/admin/UserMgmtPage.css'
+import React, { useState, useEffect } from "react"
+import { CheckCircle, XCircle, Power, PowerOff } from "lucide-react"
+import { FiEye, FiX, FiSearch } from "react-icons/fi"
+import { LuEllipsis } from "react-icons/lu"
+import { format, formatDistanceToNow } from "date-fns"
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL
 
-export type VerificationStatus = "Pending" | "Approved" | "Rejected";
+interface VerificationDetails {
+  id: number
+  status: "pending" | "approved" | "rejected"
+  barangay: string
+  address: string
+  id_image: string
+  rejection_reason?: string
+  created_at: string
+  reviewed_at?: string
+}
 
-export interface VerificationRequest {
-  id: number;
-  citizen_id: number;
-  citizen_name: string;
-  barangay: string;
-  barangay_id?: string | null;
-  address: string;
-  id_image: string;
-  status: VerificationStatus;
-  rejection_reason?: string | null;
-  created_at: string;
-  reviewed_at?: string | null;
+interface Citizen {
+  citizen_id: number
+  citizen_name: string
+  barangay: string
+  date_joined: string
+  lastlogin?: string
+  is_active: boolean
+  is_resident_verified: boolean
+  verification?: VerificationDetails | null
 }
 
 interface Props {
-  pageSize?: number;
-  onPendingCountChange?: (count: number) => void;
+  pageSize?: number
 }
 
-const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5, onPendingCountChange }) => {
-  const [verifications, setVerifications] = useState<VerificationRequest[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  // const [openMenuId, setOpenMenuId] = useState<number | null>(null);
-  const [modalVerification, setModalVerification] = useState<VerificationRequest | null>(null);
-  const [rejectReason, setRejectReason] = useState("");
+const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5 }) => {
+
+  const [citizens, setCitizens] = useState<Citizen[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm)
+
+  const [modalCitizen, setModalCitizen] = useState<Citizen | null>(null)
+  const [openMenu, setOpenMenu] = useState<number | null>(null)
+
+  const [rejectReason, setRejectReason] = useState("")
+  const [showRejectBox, setShowRejectBox] = useState(false)
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
-  const [openMenu, setOpenMenu] = useState<number | null>(null);
-  
-  const fetchVerifications = async (page = 1) => {
+
+  /* ===============================
+      FETCH CITIZENS
+  =============================== */
+
+  const fetchCitizens = async () => {
+
     try {
-      setLoading(true);
 
-      const token = localStorage.getItem("access_token");
-      const params = new URLSearchParams();
-      params.append("page", page.toString());
-      params.append("page_size", pageSize.toString());
+      setLoading(true)
 
-      if (debouncedSearch) params.append("search", debouncedSearch); 
+      const token = localStorage.getItem("access_token")
+      const search = debouncedSearch.toLowerCase().trim();
+      const params = new URLSearchParams()
+
+      if (debouncedSearch) params.append("search", debouncedSearch)
 
       const res = await fetch(
         `${API_URL}/api/admin/resident-verifications/?${params.toString()}`,
         { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (!res.ok) throw new Error("Failed to fetch");
+      )
 
-      const data = await res.json();
-      const mapped: VerificationRequest[] = data.results.map((v: any) => ({
-        id: v.id,
-        citizen_id: v.citizen_id,
-        citizen_name: `${v.first_name} ${v.last_name}`,
-        barangay: v.barangay,
-        barangay_id: v.barangay_id,
-        address: v.address,
-        id_image: v.id_image,
-        status: (v.status.charAt(0).toUpperCase() + v.status.slice(1)) as VerificationStatus,
-        rejection_reason: v.rejection_reason,
-        created_at: v.created_at,
-        reviewed_at: v.reviewed_at,
+      if (!res.ok) throw new Error("Failed to fetch citizens")
+
+      const data = await res.json()
+
+      let mapped: Citizen[] = data.results.map((c: any) => ({
+        citizen_id: c.citizen_id,
+        citizen_name: `${c.first_name} ${c.last_name}`,
+        barangay: c.barangay,
+        date_joined: c.date_joined,
+        lastlogin: c.last_login
+          ? formatDistanceToNow(new Date(c.last_login), { addSuffix: true })
+          : "Never",
+        is_active: c.is_active,
+        is_resident_verified: c.is_resident_verified,
+        verification: c.verification || null,
       }));
 
-      setVerifications(mapped);
-      setCurrentPage(page);
-      setTotalPages(Math.ceil(data.count / pageSize));
-
-      if (onPendingCountChange) {
-        onPendingCountChange(mapped.filter((v) => v.status === "Pending").length);
+      if (!search) {
+        // Show only pending verifications if there's no search term
+        mapped = mapped.filter(
+          (c) => c.verification && c.verification.status === "pending"
+        );
+      } else {
+        mapped = mapped.filter((c) => {
+          const fullName = c.citizen_name.toLowerCase();
+          return fullName.includes(search);
+        });
       }
+
+      setCitizens(mapped);
     } catch (err) {
-      console.error("Error fetching verifications:", err);
+      console.error("Error fetching citizens:", err);
     } finally {
       setLoading(false);
     }
-  };
+
+  }
+
+  /* ===============================
+      SEARCH DEBOUNCE
+  =============================== */
 
   useEffect(() => {
+
     const handler = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-    }, 400);
+      setDebouncedSearch(searchTerm)
+    }, 400)
 
-    return () => clearTimeout(handler);
-  }, [searchTerm]);
+    return () => clearTimeout(handler)
 
-  useEffect(() => { fetchVerifications(1); }, [debouncedSearch]);
-
-  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  }, [searchTerm])
 
   useEffect(() => {
-    if (!modalVerification?.id_image) return;
 
-    const fetchSignedUrl = async () => {
-      const token = localStorage.getItem("access_token");
+    fetchCitizens()
 
-      // Get relative path
-      const url = new URL(modalVerification.id_image);
-      const relativePath = url.pathname;
+  }, [debouncedSearch])
 
-      try {
-        const res = await fetch(
-          `${API_URL}/api/get-signed-url/?path=${encodeURIComponent(relativePath)}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (!res.ok) throw new Error("Failed to fetch signed URL");
-        const data = await res.json();
-        setSignedUrl(data.url);
-      } catch (err) {
-        console.error(err);
-      }
-    };
+  /* ===============================
+      APPROVE / REJECT
+  =============================== */
 
-    fetchSignedUrl();
-  }, [modalVerification]);
+  const updateStatus = async (verificationId: number, action: "approve" | "reject") => {
 
-
-  /* =========================
-    APPROVE / REJECT
-  ========================= */
-  const updateStatus = async (id: number, action: "approve" | "reject", reason?: string) => {
     try {
-      const token = localStorage.getItem("access_token");
-      const res = await fetch(`${API_URL}/api/admin/resident-verifications/${id}/`, {
+
+      const token = localStorage.getItem("access_token")
+
+      await fetch(`${API_URL}/api/admin/resident-verifications/${verificationId}/`, {
+
         method: "PATCH",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ action, reason }),
-      });
-      if (!res.ok) throw new Error("Failed to update status");
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          action,
+          reason: rejectReason
+        })
 
-      // Update local state
-      const updated = verifications.map(v =>
-        v.id === id
-          ? {
-            ...v,
-            status: (action === "approve" ? "Approved" : "Rejected") as VerificationStatus
-          }
-          : v
-      );
-      setVerifications(updated);
-      setModalVerification(null); // close modal
+      })
 
-      if (onPendingCountChange) {
-        onPendingCountChange(updated.filter(v => v.status === "Pending").length);
-      }
+      fetchCitizens()
+      setModalCitizen(null)
+
     } catch (err) {
-      console.error("Error updating verification:", err);
-    }
-  };
 
-  const approveVerification = (id: number) => updateStatus(id, "approve");
+      console.error(err)
 
-  // Reject function with confirmation popup
-  const rejectVerification = (id: number) => {
-    if (!rejectReason.trim()) {
-      alert("Please provide a rejection reason.");
-      return;
     }
 
-    const confirmReject = window.confirm(
-      "Are you sure you want to reject this verification request? This action cannot be undone."
-    );
-    if (!confirmReject) return;
+  }
 
-    updateStatus(id, "reject", rejectReason);
-    setRejectReason(""); // clear input
-  };
+  /* ===============================
+      ACTIVATE / DEACTIVATE
+  =============================== */
 
-  /* =========================
-     PAGINATION
-  ========================= */
-  const handlePageChange = (page: number) => {
-    if (page < 1 || page > totalPages) return;
-    fetchVerifications(page);
-  };
+  const toggleCitizenStatus = async (id: number) => {
 
-  const renderPagination = () => (
-    <div className="pagination-wrapper">
-      <div className="pagination">
-        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>Prev</button>
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-          <button key={n} className={n === currentPage ? "active" : ""} onClick={() => handlePageChange(n)}>{n}</button>
-        ))}
-        <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>Next</button>
-      </div>
-    </div>
-  );
+    try {
 
+      const token = localStorage.getItem("access_token")
+
+      await fetch(`${API_URL}/api/admin/users/${id}/toggle-status/`, {
+
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+
+      })
+
+      fetchCitizens()
+
+    } catch (err) {
+
+      console.error(err)
+
+    }
+
+  }
+
+  /* ===============================
+      TABLE
+  =============================== */
 
   return (
     <>
-      {/* =========================
-          SEARCH BAR
-      ========================= */}
+      {/* SEARCH BAR */}
+
       <div className="filters">
-        <div className="filters-left">
-          {/* Optional: Add filters if needed */}
-        </div>
+
         <div className="filters-right">
+
           <div className="search-wrapper">
+
             <FiSearch className="search-icon" />
+
             <input
               type="text"
-              placeholder="Search by citizen name or email..."
+              placeholder="Search citizen..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
             />
-            {searchTerm.trim() && (
-              <button
-                className="search-clear"
-                onClick={() => setSearchTerm("")}
-                type="button"
-              >
+
+            {searchTerm && (
+              <button className="search-clear" onClick={() => setSearchTerm("")}>
                 <FiX />
               </button>
             )}
+
           </div>
+
         </div>
+
       </div>
+
+      {/* TABLE */}
+
       <div className="verification-table-wrapper">
+
         <table>
+
           <thead>
             <tr>
-              {/* <th>#</th> */}
-              {/* <th className="center">Citizen ID</th> */}
-              <th className="center">Citizen Name</th>
+              <th className="center">Citizen</th>
               <th className="center">Barangay</th>
-              {/* <th className="center">Full Address</th> */}
-              {/* <th className="center">Barangay ID</th> */}
-              <th className="center">Requested At</th>
+              <th className="center">Date Joined</th>
+              <th className="center">Last Login</th>
+              <th className="center">Verification</th>
               <th className="center">Status</th>
               <th className="center">Actions</th>
             </tr>
           </thead>
 
           <tbody>
+
             {loading ? (
+
               <tr>
-                <td colSpan={7} className='empty'>
-                  Loading verification requests...
+                <td colSpan={7} className="empty">
+                  Loading citizens...
                 </td>
               </tr>
-            ) : verifications.length === 0 ? (
+
+            ) : citizens.length === 0 ? (
+
               <tr>
-                <td colSpan={7} className="empty">No citizen request found.</td>
+                <td colSpan={7} className="empty">
+                  No citizens found.
+                </td>
               </tr>
+
             ) : (
-              verifications.map((v) => (
-                <tr key={v.id}>
-                  {/* <td className="cell-number">{(currentPage - 1) * pageSize + index + 1}</td> */}
-                  {/* <td className="center muted">{v.citizen_id}</td> */}
-                  <td className="user-name">{v.citizen_name}</td>
-                  <td className="center">{v.barangay}</td>
-                  {/* <td className="center muted">{v.address}</td> */}
-                  {/* <td className="center muted">
-                    {v.id_image ? (
-                      <a
-                        href={`http://127.0.0.1:8000/api/get-signed-url/?path=${encodeURIComponent(v.id_image)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        View ID
-                      </a>
-                    ) : "N/A"}
-                  </td> */}
-                  <td className="center muted">{formatDistanceToNow(new Date(v.created_at), { addSuffix: true })}</td>
-                  <td className="center"><span className={`badge ${v.status}`}>{v.status}</span></td>
-                  {/* =========================
-                      ACTIONS COLUMN
-                  ========================= */}
+
+              citizens.map((c) => (
+
+                <tr key={c.citizen_id}>
+
+                  <td className="user-name">{c.citizen_name}</td>
+
+                  <td className="center muted">{c.barangay || "---"}</td>
+
+                  <td className="center muted">
+                    {format(new Date(c.date_joined), "MMMM d, yyyy")}
+                  </td>
+                  
+                  <td className="center muted">{c.lastlogin || "Never"}</td>
+
+                  {/* Verification */}
+                  <td className="center">
+                    {c.verification ? (
+                      c.verification.status === "pending" ? (
+                        <span className="badge Pending">Pending</span>
+                      ) : c.verification.status === "approved" ? (
+                        <span className="badge Approved">Verified</span>
+                      ) : (
+                        <span className="badge Rejected">Rejected</span>
+                      )
+                    ) : c.is_resident_verified ? (
+                      <span className="badge Approved">Verified</span>
+                    ) : (
+                      <span className="badge Pending">Not Verified</span>
+                    )}
+                  </td>
+
+                  {/* Status */}
+                  <td className="center">
+                    {c.is_active ? (
+                      <span className="badge Approved">Active</span>
+                    ) : (
+                      <span className="badge Rejected">Inactive</span>
+                    )}
+                  </td>
+
+                  {/* Actions */}
                   <td className="center actions">
+
                     <div className="action-menu">
+
                       <button
                         className="menu-button"
                         onClick={() =>
-                          setOpenMenu(openMenu === v.id ? null : v.id)
+                          setOpenMenu(openMenu === c.citizen_id ? null : c.citizen_id)
                         }
                       >
                         <LuEllipsis size={18} />
                       </button>
 
-                      {openMenu === v.id && (
+                      {openMenu === c.citizen_id && (
+
                         <div className="kebab-dropdown">
-                          {/* View Details */}
+
+                          {c.verification && (
+                            <button
+                              className="kebab-item"
+                              onClick={() => {
+                                setModalCitizen(c)
+                                setOpenMenu(null)
+                              }}
+                            >
+                              <FiEye size={14}/> View
+                            </button>
+                          )}
+
                           <button
                             className="kebab-item"
-                            onClick={() => {
-                              setModalVerification(v);
-                              setOpenMenu(null);
-                            }}
+                            onClick={() => toggleCitizenStatus(c.citizen_id)}
                           >
-                            <FiEye size={14} /> View
+                            {c.is_active ? <PowerOff size={14}/> : <Power size={14}/>}
+                            {c.is_active ? "Deactivate" : "Activate"}
                           </button>
 
-                          {/* Approve / Reject only if Pending */}
-                          {v.status === "Pending" && (
-                            <>
-                              <button
-                                className="kebab-item"
-                                onClick={() => {
-                                  approveVerification(v.id);
-                                  setOpenMenu(null);
-                                }}
-                              >
-                                <CheckCircle size={14} /> Approve
-                              </button>
-
-                              <button
-                                className="kebab-item"
-                                onClick={() => {
-                                  setModalVerification(v);
-                                  setRejectReason("");
-                                  setOpenMenu(null);
-                                }}
-                              >
-                                <XCircle size={14} /> Reject
-                              </button>
-                            </>
-                          )}
                         </div>
+
                       )}
+
                     </div>
+
                   </td>
+
                 </tr>
+
               ))
+
             )}
+
           </tbody>
+
         </table>
+
       </div>
 
-      {renderPagination()}
+      {/* ===============================
+          MODAL
+      =============================== */}
 
-      {/* =========================
-          VERIFICATION DETAILS MODAL
-      ========================= */}
-      {modalVerification && (
+      {modalCitizen && modalCitizen.verification && (
+
         <div
           className="verification-modal-backdrop"
-          onClick={() => setModalVerification(null)}
+          onClick={() => setModalCitizen(null)}
         >
+
           <div
             className="verification-modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2>Resident Verification Details</h2>
-            <p><strong>Citizen Name:</strong> {modalVerification.citizen_name}</p>
-            {/* <p><strong>Citizen ID:</strong> {modalVerification.citizen_id}</p> */}
-            <p><strong>Barangay:</strong> {modalVerification.barangay}</p>
-            <p><strong>Address:</strong> {modalVerification.address}</p>
-            <p><strong>Status:</strong> {modalVerification.status}</p>
-            {modalVerification.rejection_reason && (
-              <p><strong>Rejection Reason:</strong> {modalVerification.rejection_reason}</p>
+
+            <h2>Verification Details</h2>
+
+            <p><strong>Name:</strong> {modalCitizen.citizen_name}</p>
+
+            <p><strong>Status:</strong> {modalCitizen.verification.status}</p>
+
+            <p><strong>Address:</strong> {modalCitizen.verification.address}</p>
+
+            <p><strong>Barangay:</strong> {modalCitizen.verification.barangay}</p>
+
+            {modalCitizen.verification.id_image ? (
+              <div className="modal-box">
+                <p><strong>ID Image:</strong></p>
+                <img
+                  src={modalCitizen.verification.id_image}
+                  alt={`${modalCitizen.citizen_name} ID`}
+                  style={{ maxWidth: "100%", maxHeight: "300px", objectFit: "contain", cursor: "pointer", borderRadius: "8px" }}
+                  onClick={() => setIsImageModalOpen(true)}
+                />
+              </div>
+            ) : (
+              <p className="muted">No ID image available.</p>
             )}
-            <p><strong>Requested At:</strong> {new Date(modalVerification.created_at).toLocaleString()}</p>
-            <p><strong>Barangay ID:</strong></p>
-            <img
-              src={signedUrl || placeholderImg}
-              alt="Barangay ID"
-              className="clickable"
-              onClick={() => setIsImageModalOpen(true)}
-            />
-            {/* Image Lightbox Modal */}
-            {isImageModalOpen && (
+            
+            {isImageModalOpen && modalCitizen.verification.id_image && (
               <div
                 className="image-modal-backdrop"
                 onClick={() => setIsImageModalOpen(false)}
               >
+                <button
+                  className="close-image-btn"
+                  onClick={() => setIsImageModalOpen(false)}
+                >
+                  <FiX size={20} />
+                </button>
+
                 <img
-                  src={signedUrl || placeholderImg}
-                  alt="Enlarged ID"
+                  src={modalCitizen.verification.id_image}
+                  alt={`${modalCitizen.citizen_name} ID Enlarged`}
                   onClick={(e) => e.stopPropagation()}
+                  style={{ maxWidth: "90%", maxHeight: "90%", objectFit: "contain" }}
                 />
               </div>
             )}
 
-            {modalVerification.status === "Pending" && (
-              <div className="verification-modal-actions" style={{ display: "flex", gap: "10px", alignItems: "flex-start", marginTop: "10px" }}>
+            {modalCitizen.verification.rejection_reason && (
 
-                {/* Approve Button */}
-                <button
-                  className="approve-btn"
-                  onClick={() => approveVerification(modalVerification.id)}
-                  style={{ flex: "1" }}
-                >
-                  <CheckCircle size={16} /> Approve
-                </button>
+              <p>
+                <strong>Rejection Reason:</strong>
+                {modalCitizen.verification.rejection_reason}
+              </p>
 
-                {/* Reject Toggle */}
-                <button
-                  className="reject-btn"
-                  onClick={() => setRejectReason(prev => prev ? prev : "")} // just triggers textarea display
-                  style={{ flex: "1" }}
-                >
-                  <XCircle size={16} /> Reject
-                </button>
-              </div>
             )}
 
-            {/* Reject textarea + confirm button only show if rejectReason toggle is active */}
-            {rejectReason !== "" && modalVerification.status === "Pending" && (
-              <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "5px" }}>
+            {modalCitizen.verification.status === "pending" && (
+
+              <div className="verification-modal-actions">
+
+                <button
+                  className="approve-btn"
+                  onClick={() =>
+                    updateStatus(modalCitizen.verification!.id, "approve")
+                  }
+                >
+                  <CheckCircle size={16}/> Approve
+                </button>
+
+                <button
+                  className="reject-btn"
+                  onClick={() => setShowRejectBox(true)}
+                >
+                  <XCircle size={16}/> Reject
+                </button>
+
+              </div>
+
+            )}
+
+            {/* Only show reject box when status is pending and Reject clicked */}
+            {modalCitizen.verification.status === "pending" && showRejectBox && (
+              <div className="reject-box-modal">
                 <textarea
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
                   placeholder="Enter rejection reason..."
+                  className="reject-textarea"
                   rows={3}
+                  autoFocus
                 />
-                <button
-                  className="reject-btn"
-                  onClick={() => rejectVerification(modalVerification.id)}
-                  disabled={!rejectReason.trim()}
-                >
-                  <XCircle size={16} /> Confirm Reject
-                </button>
+                <div className="reject-actions">
+                  <button
+                    className="cancel-btn"
+                    onClick={() => {
+                      setShowRejectBox(false);
+                      setRejectReason("");
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="confirm-btn"
+                    disabled={!rejectReason.trim()}
+                    onClick={() =>
+                      updateStatus(modalCitizen.verification!.id, "reject")
+                    }
+                  >
+                    Confirm Reject
+                  </button>
+                </div>
               </div>
             )}
 
             <button
               className="close-modal"
-              onClick={() => {
-                setModalVerification(null);
-                setRejectReason(""); // reset reject toggle
-              }}
-              aria-label="Close"
+              onClick={() => setModalCitizen(null)}
             >
-              <FiX size={20} />
+              <FiX size={20}/>
             </button>
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
 
-export default VerificationRequestsTab;
+          </div>
+
+        </div>
+
+      )}
+
+    </>
+  )
+
+}
+
+export default VerificationRequestsTab

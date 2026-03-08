@@ -709,3 +709,64 @@ td.actions .reject-box .reject-actions .confirm-btn:disabled {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
+
+
+/* Reject box in modal */
+.reject-box-modal {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #f0c0c0;
+  border-radius: 8px;
+  background-color: #fff5f5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.reject-textarea {
+  width: 100%;
+  resize: none;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.reject-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.cancel-btn,
+.confirm-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background-color: #ccc;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background-color: #b3b3b3;
+}
+
+.confirm-btn {
+  background-color: #e53e3e;
+  color: #fff;
+}
+
+.confirm-btn:disabled {
+  background-color: #f5a6a6;
+  cursor: not-allowed;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  background-color: #c53030;
+}

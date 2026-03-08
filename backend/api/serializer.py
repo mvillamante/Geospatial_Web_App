@@ -44,6 +44,11 @@ class MeSerializer(serializers.ModelSerializer):
             "staff_id",
             "barangay",
             "is_resident_verified",
+
+            "receive_hazard_alerts",
+            "receive_community_announcements",
+            "alert_severity",
+            
             "verification_status",
             "verification_rejection_reason",
         )
@@ -278,9 +283,13 @@ class AssignUserRoleSerializer(serializers.ModelSerializer):
 class PasswordResetRequestSerializer(serializers.Serializer):
     email_or_phone = serializers.CharField()
 
+class PasswordResetVerifySerializer(serializers.Serializer):
+    email_or_phone = serializers.CharField()
+    otp = serializers.CharField(min_length=6, max_length=6)
+
 class PasswordResetConfirmSerializer(serializers.Serializer):
     email_or_phone = serializers.CharField()
-    otp = serializers.CharField(min_length=4, max_length=4)
+    otp = serializers.CharField(min_length=6, max_length=6)
     new_password = serializers.CharField(min_length=8)
     
 class IncidentReportCreateSerializer(serializers.ModelSerializer):

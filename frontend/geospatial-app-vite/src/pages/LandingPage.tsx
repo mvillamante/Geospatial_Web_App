@@ -22,12 +22,18 @@ type LandingStats = {
   avgResponseTimeMinutes: number;
 };
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+}
+
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { refreshUser } = useAuth(); // Get current user from context
 
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
 
   const isOpen = false;
@@ -42,9 +48,23 @@ const LandingPage: React.FC = () => {
 
 
   useEffect(() => {
-    const handler = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
+    const checkMobile = () => {
+      const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      setIsMobile(mobile);
+
+      if (window.matchMedia("(display-mode: standalone)").matches) {
+        setIsInstallable(false);
+      }
+    };
+
+    checkMobile();
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const event = e as BeforeInstallPromptEvent;
+      event.preventDefault();
+      setDeferredPrompt(event);
       setIsInstallable(true);
     };
 
@@ -226,7 +246,7 @@ const LandingPage: React.FC = () => {
                   View Community Feed
                 </button>
 
-                {isInstallable && (
+                {isInstallable && isMobile && (
                   <button className="btn btn-install" onClick={handleInstallClick}>
                     Install HazSpot App
                   </button>

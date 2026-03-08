@@ -70,7 +70,7 @@ export const UserDistributionChart: React.FC<Props> = ({ small }) => {
   ];
 
   const COLORS = ["#ea580c", "#fb923c", "#fdba74"];
-  const height = small ? 220 : 320;
+  // const height = small ? 220 : 320;
   const inner = small ? 45 : 60;
   const outer = small ? 70 : 95;
 

@@ -229,14 +229,14 @@ const UserMgmtPage: React.FC = () => {
             : "Unknown",
           purpose: r.purpose,
           orgSchool: r.orgSchool,
-          status: (r.status.charAt(0).toUpperCase() + r.status.slice(1)) as
-            | "Pending"
-            | "Approved"
-            | "Rejected",
+          status: r.status as "pending" | "approved" | "rejected",
         }));
 
         setAllRequests(mapped);
-        setPendingCount(mapped.filter(r => r.status === "pending").length);
+
+        setResearchPendingCount(
+          mapped.filter(r => r.status === "pending").length
+        );
       } catch (err) {
         console.error(err);
       }

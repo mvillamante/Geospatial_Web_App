@@ -2,8 +2,9 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./LeafletMap.css";
-import type { Report } from "../../pages/citizen-guest/AlertsComponents/AlertsPanel";
+// import type { Report } from "../../pages/citizen-guest/AlertsComponents/AlertsPanel";
 import type { EvacuationCenterData } from "../ui/mapLayers/evacuationCenters/evacuationCentersTypes";
+import { type IncidentCategories } from "../../constants";
 
 // Import layer creation functions from organized modules
 import {
@@ -32,6 +33,14 @@ interface BarangayData {
   lon: number;
   risk: "High" | "Medium" | "Low";
 }
+
+type MapReport = {
+  id: number;
+  incident_type: string;
+  latitude?: number;
+  longitude?: number;
+  verified_critical_level: "low" | "moderate" | "high" | "critical";
+};
 
 // interface OverpassElement {
 //   center?: { lat: number; lon: number };
@@ -128,6 +137,11 @@ function getCalamityDataForBarangay(
 }
 
 interface LeafletMapProps {
+  selectedReport?: MapReport | null;
+  categoryFilter?: IncidentCategories | "all";
+  reportTimeFilter?: string;
+  activeLayers: string[];
+
   height?: string;
   width?: string;
   mapView?: "interactive" | "choropleth";
@@ -136,14 +150,9 @@ interface LeafletMapProps {
   dataLayer?: string;
   searchedBarangay?: string;
   searchedSeverity?: string | null;
-  selectedReport?: Report | null;
   reportClickTimestamp?: number | null;
 
   locationFilter?: string;
-  reportTimeFilter?: string;
-  categoryFilter?: string;
-
-  activeLayers?: string[];
   ndviOpacity?: number;
   ndviYear?: number;
   ndviMonth?: number; // 1-12, for selecting clearest image of a specific month

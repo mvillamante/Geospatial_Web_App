@@ -80,6 +80,12 @@
   outline: none;
 }
 
+.risk-control select:disabled {
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
 .risk-control select:focus {
   border-color: rgba(37, 99, 235, 0.45);
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
@@ -246,14 +252,16 @@
 }
 
 .reportverify-page .modal-card {
-  width: 80%;
-  max-height: 90vh;
+  width: 100%;
+  max-width: 700px;
+  max-height: 100vh;
   background: #fff;
   border-radius: 16px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow-md);
   padding: 16px;
   overflow-y: auto;
+  position: relative;
 }
 
 .reportverify-page .modal-title {
@@ -279,6 +287,25 @@
   color: var(--muted-text);
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.reportverify-page .modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+  color: #64748b;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.reportverify-page .modal-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 .reportverify-page .modal-input {

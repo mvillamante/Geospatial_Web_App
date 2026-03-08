@@ -1,6 +1,7 @@
 // import React from "react";
 import { getCabuyaoBarangays } from "../../../constants";
 import "./EvacCenterEditor.css";
+import { Navigation } from "lucide-react";
 
 export interface EvacuationCenter {
   id: number;
@@ -39,6 +40,14 @@ export default function EvacCenterEditor({
   //   ? center.type.charAt(0).toUpperCase() + center.type.slice(1)
   //   : "Unknown";
 
+  const handleGetDirections = () => {
+    if (!center.coordinates) return;
+
+    const [lat, lng] = center.coordinates.split(",").map(v => v.trim());
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    window.open(url, "_blank");
+  };
+
   return (
     <div className="editor-card-wrapper">
       <div className={`editor-card ${readOnly ? "view-only" : "edit-mode"}`}>
@@ -75,10 +84,10 @@ export default function EvacCenterEditor({
             </div>
 
             <div className="form-row">
-            <div className="view-card">
-              <span className="icon">📫</span>
-              <span className="value">{center.address || "-"}</span>
-            </div>
+              <div className="view-card">
+                <span className="icon">📫</span>
+                <span className="value">{center.address || "-"}</span>
+              </div>
             </div>
 
             <div className="form-row two">
@@ -244,11 +253,15 @@ export default function EvacCenterEditor({
           </>
         )}
 
-        {/* Bottom Banner */}
         {readOnly && (
-          <div className="evac-banner">
-            <span className="icon">🆘</span>
-            <span className="text">Designated Evacuation Site</span>
+          <div className="editor-directions">
+            <button
+              className="evac-btn"
+              onClick={handleGetDirections}
+            >
+              <Navigation size={18} className="btn-icon" />
+              Get Directions
+            </button>
           </div>
         )}
 

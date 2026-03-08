@@ -589,7 +589,7 @@ const ReportsMgmtPage: React.FC = () => {
                 selectedReport={selectedReportForMap}
                 categoryFilter={categoryFilter}
                 reportTimeFilter={reportTimeFilter}
-                activeLayers={["Verified Reports"]}
+                activeLayers={["Queue Reports"]}
               />
             </div>
             

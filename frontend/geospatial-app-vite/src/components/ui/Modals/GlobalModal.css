@@ -118,6 +118,12 @@
   color: #0f172a;
 }
 
+.required {
+  color: #e53935;
+  margin-left: 4px;
+  font-weight: 600;
+}
+
 .modal-header {
   text-align: center;
   margin-bottom: 2rem;

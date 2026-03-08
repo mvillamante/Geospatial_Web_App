@@ -331,7 +331,6 @@ export default function LeafletMap(props: LeafletMapProps) {
 
   // Initialize map
   useEffect(() => {
-    console.log("ACTIVE LAYERS:", activeLayers);
     if (!mapRef.current) {
       const map = L.map("map").setView([14.2349, 121.1211], 13);
       mapRef.current = map;
@@ -1487,7 +1486,9 @@ export default function LeafletMap(props: LeafletMapProps) {
         layerGroup.clearLayers();
         reportMarkersMap.current.clear();
 
-        const reports = data.results || [];
+        const reports = (data.results || []).filter(
+          (r: any) => r.status !== "rejected"
+        );
 
         const normalizedCategory = (val: string) =>
           val?.toLowerCase().replace(/\s+/g, "_").replace(/[\/\-]/g, "");

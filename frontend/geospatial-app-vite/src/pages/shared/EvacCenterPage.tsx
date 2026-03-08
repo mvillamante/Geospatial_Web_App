@@ -338,7 +338,7 @@ function EvacCenterPage() {
                 onPickCoordinates={() => setMapOpen(true)}
                 isSaving={isSaving}
               />
-            ) : userRole === "Citizen" && selectedEvacuationCenter ? (
+            ) : selectedEvacuationCenter ? (
               <EvacCenterEditor
                 center={selectedEvacuationCenter}
                 readOnly={true}
@@ -396,7 +396,7 @@ function EvacCenterPage() {
       <hr className="evac-hr-divider" />
 
       <div className="evac-header-wrapper">
-        <h2>List of Evacuation Centers</h2>
+        <h2 className='evac-list'>List of Evacuation Centers</h2>
 
         <div className="evac-search-add-container">
           <div className="evac-search-wrapper officer">
@@ -544,15 +544,14 @@ function EvacCenterPage() {
                     </>
                   )}
 
-                  {(userRole === "Citizen") && (
+
                     <button
                       className="evac-btn"
                       onClick={() => handleGetDirections(center.coordinates)}
                     >
                       <Navigation className="evac-btn-icon" />
                       Get Directions
-                    </button>
-                  )}  
+                    </button> 
                 </div>
               );
             })

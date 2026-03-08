@@ -682,6 +682,7 @@ class ResearcherRequestSerializer(serializers.ModelSerializer):
 class ResidentVerificationRequestSerializer(serializers.ModelSerializer):
     citizen_id = serializers.IntegerField(source='user.id', read_only=True)
     citizen_name = serializers.SerializerMethodField()
+    id_image = serializers.ImageField(write_only=True)
     
     class Meta:
         model = ResidentVerificationRequest
@@ -697,7 +698,7 @@ class ResidentVerificationRequestSerializer(serializers.ModelSerializer):
             "created_at",
             "reviewed_at"
         ]
-        read_only_fields = ["id", "citizen_id", 'barangay', 'address', "citizen_name", "created_at", "reviewed_at"]
+        read_only_fields = ["id", "citizen_id",  "citizen_name", "created_at", "reviewed_at"]
 
     def get_citizen_name(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}"

@@ -51,7 +51,7 @@ urlpatterns = [
     path('admin/users/<int:pk>/revoke-researcher/', RevokeResearcherView.as_view()),
     path('admin/users/create/', CreateStaffUserView.as_view(), name="create-staff-user"),
     path('admin/resident-verifications/', ResidentVerificationListView.as_view(), name="admin_resident_verifications",),
-    path('admin/resident-verifications/<int:pk>/', ApproveRejectResidentVerificationView.as_view(), name="admin_resident_verification_detail",),
+    path("admin/resident-verifications/<int:pk>/", ApproveRejectResidentVerificationView.as_view(),),
     path("admin/stats/", dashboard_stats,name="dashboard-stats"),
     path("admin/users/<int:user_id>/change-password/", change_user_password),
     path("admin/departments/", DepartmentListCreateView.as_view()),

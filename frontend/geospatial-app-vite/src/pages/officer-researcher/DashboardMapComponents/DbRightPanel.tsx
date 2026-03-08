@@ -73,6 +73,7 @@ interface RightPanelProps {
   modelHealthItems?: any[];
   onGeneratingChange?: (generating: boolean) => void;
   setYear?: (y: number) => void;
+  setSelectedLayer?: (layer: string) => void;
 }
 
 const DbRightPanel: React.FC<RightPanelProps> = ({
@@ -104,6 +105,7 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
   modelHealthItems,
   onGeneratingChange,
   setYear,
+  setSelectedLayer,
 
   ...props
 }) => {
@@ -349,17 +351,18 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
   // Generate report
   const generateReport = async (reportYear: number) => {
     try {
-      // Reset map to center on Cabuyao first so snapshot captures entire boundaries
+      // Force Hazard Index layer and report year so snapshot always shows hazard map for chosen year
+      if (setSelectedLayer) setSelectedLayer("hazard");
+      if (setYear) setYear(reportYear);
+      await new Promise(r => setTimeout(r, 1200));
+
+      // Reset map to center on Cabuyao so snapshot captures entire boundaries
       await resetMapToCabuyao();
 
       setIsGenerating(true);
       onGeneratingChange?.(true);
 
-      // Switch the map slider to the report year so the snapshot matches
-      if (setYear) {
-        setYear(reportYear);
-        await new Promise(r => setTimeout(r, 1800));
-      }
+      await new Promise(r => setTimeout(r, 800));
 
       const choroCapture = await captureChoroplethMap();
 

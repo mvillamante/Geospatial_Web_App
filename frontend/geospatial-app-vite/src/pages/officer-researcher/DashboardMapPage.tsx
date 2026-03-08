@@ -85,7 +85,6 @@ const DashboardMapPage: React.FC = () => {
   const initialYear = Math.min(maxYear, Math.max(minYear, currentYear));
   const [year, setYear] = useState(initialYear);
 
-  const [reportType, setReportType] = useState<"calamity" | "green" | "hazard" | "full">("full");
   const [reportYear, setReportYear] = useState(new Date().getFullYear());
   const [reportFormat, setReportFormat] = useState<"pdf" | "docx">("pdf");
   const [reportType, setReportType] = useState<"full" | "green" | "hazard" | "calamity">("full");
@@ -696,9 +695,6 @@ const DashboardMapPage: React.FC = () => {
           setReportYear={setReportYear}
           reportFormat={reportFormat}
           setReportFormat={setReportFormat}
-          reportType={reportType}
-          setReportType={setReportType}
-          setRecentDownloads={setRecentDownloads}
 
           universalGreenAvg={universalGreenAvg}
           universalHazardAvg={universalHazardAvg}
@@ -733,6 +729,7 @@ const DashboardMapPage: React.FC = () => {
           modelHealthItems={modelHealthItems}
           onGeneratingChange={setIsGeneratingReport}
           setYear={setYear}
+          setSelectedLayer={setSelectedLayer}
         />
       </div>
     </div>

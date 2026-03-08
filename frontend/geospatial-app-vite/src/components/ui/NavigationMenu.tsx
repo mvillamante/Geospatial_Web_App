@@ -25,6 +25,8 @@ const NavigationMenu: React.FC = () => {
   const location = useLocation();
   const { user } = useAuth();
 
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
   const [notificationCount, setNotificationCount] = useState(0);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -288,12 +290,45 @@ const NavigationMenu: React.FC = () => {
                 <span>Settings</span>
               </button>
 
-              <button className="dropdown-logout-btn" onClick={handleLogout}>
+              <button
+                className="dropdown-logout-btn"
+                onClick={() => {
+                  setIsDropdownOpen(false);
+                  setShowLogoutModal(true);
+                }}
+              >
                 <MdLogout className="dropdown-logout-icon" />
                 <span>Logout</span>
               </button>
             </div>
           )}
+        </div>
+      )}
+      {showLogoutModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3>Logout</h3>
+            <p>Are you sure you want to log out of your account?</p>
+
+            <div className="modal-actions">
+              <button
+                className="cancel-btn"
+                onClick={() => setShowLogoutModal(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="danger-confirm"
+                onClick={() => {
+                  setShowLogoutModal(false);
+                  handleLogout();
+                }}
+              >
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

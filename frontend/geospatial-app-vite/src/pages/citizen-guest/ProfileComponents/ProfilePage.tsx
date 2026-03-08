@@ -75,6 +75,8 @@ function toProgressStatus(raw: string | undefined | null): ProgressStatus {
   return "pending";
 }
 const ProfilePage: React.FC = () => {
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
   const location = useLocation();
   useEffect(() => {
     if (location.state?.openVerifyModal) {
@@ -720,10 +722,41 @@ const ProfilePage: React.FC = () => {
       {/* Logout */}
       <div className="logout-section">
         <span className="logout-label">Session</span>
-        <button className="logout-btn" onClick={logout} type="button">
+        <button
+          className="logout-btn"
+          onClick={() => setShowLogoutModal(true)}
+          type="button"
+        >
           Logout
         </button>
       </div>
+      {showLogoutModal && (
+        <div className="modal-overlay" role="dialog" aria-modal="true">
+          <div className="modal-card">
+            <h3>Logout</h3>
+            <p>Are you sure you want to log out of your account?</p>
+
+            <div className="modal-actions">
+              <button
+                className="cancel-btn"
+                onClick={() => setShowLogoutModal(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="danger-confirm"
+                onClick={() => {
+                  setShowLogoutModal(false);
+                  logout();
+                }}
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 };

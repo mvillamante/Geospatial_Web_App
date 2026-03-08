@@ -79,6 +79,7 @@ urlpatterns = [
 
     #Password_Reset_Views
     path("password-reset/request/", PasswordResetRequestOTP.as_view(), name="password-reset"),
+    path("password-reset/verify/", PasswordResetVerifyOTP.as_view(), name="password-verify"),
     path("password-reset/confirm/", PasswordResetConfirmOTP.as_view(), name="password-confirm"),
 
     # Geocoding_Views

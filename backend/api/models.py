@@ -38,6 +38,22 @@ class CustomUser(AbstractUser):
     staff_number = models.PositiveIntegerField(null=True, blank=True, unique=True)
     is_resident_verified = models.BooleanField(default=False)
 
+    receive_hazard_alerts = models.BooleanField(default=True)
+    receive_community_announcements = models.BooleanField(default=True)
+
+    ALERT_SEVERITY_CHOICES = [
+        ("low", "Low"),
+        ("moderate", "Moderate"),
+        ("high", "High"),
+        ("critical", "Critical"),
+    ]
+
+    alert_severity = models.CharField(
+        max_length=10,
+        choices=ALERT_SEVERITY_CHOICES,
+        default="low"
+    )
+
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='customuser_groups',
@@ -334,7 +350,7 @@ class PasswordResetOTP(models.Model):
     max_attempts = models.PositiveIntegerField(default=5)
     is_used = models.BooleanField(default=False)
 
-    def is_expired(self) -> bool:
+    def is_expired(self):
         return timezone.now() >= self.expires_at
     
     @staticmethod

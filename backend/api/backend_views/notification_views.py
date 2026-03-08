@@ -11,18 +11,39 @@ from api.models import IncidentReport
 from django.db.models import Q
 
 def get_visible_notifications(user):
-    verification = ResidentVerificationRequest.objects.filter(
-        user=user,
-        status="approved"
-    ).first()
 
-    user_barangay = verification.barangay if verification else None
-
-    return Notification.objects.filter(
+    qs = Notification.objects.filter(
         Q(target_user=user) |
-        Q(type__in=["official", "incident"], barangay=user_barangay) |
-        Q(type__in=["official", "incident"], barangay__isnull=True)
+        Q(type__in=["official", "incident"]),
+        created_at__gte=user.date_joined
     ).distinct()
+
+    # Community announcements toggle
+    if not user.receive_community_announcements:
+        qs = qs.exclude(type="official")
+
+    # Hazard alerts toggle
+    if not user.receive_hazard_alerts:
+        qs = qs.exclude(type="incident")
+
+    severity_rank = {
+        "low": 1,
+        "moderate": 2,
+        "high": 3,
+        "critical": 4,
+    }
+
+    if user.alert_severity:
+        min_rank = severity_rank.get(user.alert_severity, 1)
+
+        allowed = [s for s, r in severity_rank.items() if r >= min_rank]
+
+        qs = qs.filter(
+            Q(type="incident", severity__in=allowed) |
+            ~Q(type="incident")
+        )
+
+    return qs
 
 class NotificationList(APIView):
     permission_classes = [IsAuthenticated]

@@ -46,6 +46,30 @@
   text-align: center;
 }
 
+/* Report snapshot map labels (same as barangay-label but scoped) */
+.report-barangay-label {
+  background: #ffffff;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  color: #222;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
+  width: 100%;
+  height: 100%;
+  min-width: fit-content;
+}
+
+.report-barangay-label span {
+  text-align: center;
+}
+
 /* =============================================
    Risk Icon Markers
    ============================================= */

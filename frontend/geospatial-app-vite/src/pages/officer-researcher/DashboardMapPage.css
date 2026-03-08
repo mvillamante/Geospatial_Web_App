@@ -840,9 +840,11 @@ body.no-dashboard-body-scroll .main-content {
 .dashboardmap-container .choroplethview-map {
   position: relative;
   flex: 1;
-  /* Isolate map layout so double-click inside map doesn't cause left panel to shift */
-  contain: layout;
   min-width: 0;
+}
+
+.dashboardmap-container .dashboardview-map {
+  contain: layout;
 }
 
 .dashboardmap-container .dashboardview-map,
@@ -1321,6 +1323,11 @@ body.no-dashboard-body-scroll .main-content {
 
 .dbmright-panel .segmented-control.slide.two .slider.export {
   transform: translateX(100%);
+}
+
+.segmented-control.slide button.tab-locked {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .rowpanel-card {
@@ -3256,4 +3263,56 @@ body.no-dashboard-body-scroll .main-content {
   text-align: center;
   padding: 24px;
   color: #64748b;
+}
+
+/* ============================================================
+   Report Generating Overlay (on the choropleth map)
+   ============================================================ */
+.report-generating-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+  animation: reportOverlayFadeIn 0.2s ease;
+}
+
+@keyframes reportOverlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.report-generating-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 28px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+  letter-spacing: 0.2px;
+}
+
+.report-generating-spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: reportSpin 0.7s linear infinite;
+}
+
+@keyframes reportSpin {
+  to { transform: rotate(360deg); }
 }

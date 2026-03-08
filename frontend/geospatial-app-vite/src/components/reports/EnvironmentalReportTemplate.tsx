@@ -34,8 +34,12 @@ interface ReportProps {
     calamityRiskAvg?: number;
     calamityRiskTrend?: { year: number; value: number }[];
     calamityBarangays?: BarangayScore[];
-    // Section 7 — Map
+    // Section 7 — Choropleth Map Snapshot
     choroMapImageUrl?: string;
+    // Per-section AI insights (short bullets)
+    greenInsights?: string[];
+    hazardInsights?: string[];
+    calamityInsights?: string[];
     // Section 8 — Key Findings
     keyFindings?: string[];
     // Section 9 — Recommendations
@@ -91,6 +95,24 @@ const SAMPLE_RECOMMENDATIONS = [
     "Strengthen disaster preparedness programs in all barangays with Risk Score > 70.",
     "Enforce strict land use controls in flood-prone and landslide-susceptible zones.",
     "Institutionalize annual generation of this report as part of the city's climate action plan.",
+];
+
+const SAMPLE_GREEN_INSIGHTS = [
+    "Western barangays show stronger vegetation recovery.",
+    "Urban center areas have lower scores due to dense infrastructure.",
+    "Vegetation coverage is gradually improving citywide.",
+];
+
+const SAMPLE_HAZARD_INSIGHTS = [
+    "Flood-prone barangays along river corridors show the highest hazard scores.",
+    "Hillside areas demonstrate increased landslide susceptibility.",
+    "Earthquake and typhoon events can cause sharp spikes in hazard index.",
+];
+
+const SAMPLE_CALAMITY_INSIGHTS = [
+    "Risk clusters appear in western and river-adjacent barangays.",
+    "Risk is reduced in zones with higher vegetation coverage.",
+    "Calamity risk likelihood is trending upward in high-exposure areas.",
 ];
 
 /** Coloured top-border section card */
@@ -462,6 +484,9 @@ const EnvironmentalReportTemplate: React.FC<ReportProps> = ({
     calamityRiskTrend = SAMPLE_TREND.map((d) => ({ ...d, value: d.value * 0.9 })),
     calamityBarangays = SAMPLE_RISK_BRGYS,
     choroMapImageUrl,
+    greenInsights = SAMPLE_GREEN_INSIGHTS,
+    hazardInsights = SAMPLE_HAZARD_INSIGHTS,
+    calamityInsights = SAMPLE_CALAMITY_INSIGHTS,
     keyFindings = SAMPLE_FINDINGS,
     recommendations = SAMPLE_RECOMMENDATIONS,
 }) => {
@@ -681,10 +706,10 @@ const EnvironmentalReportTemplate: React.FC<ReportProps> = ({
                     ))}
 
                     <h3 style={{ fontSize: 13, color: "#2E7D32", margin: "16px 0 8px" }}>Insights</h3>
-                    {/* TODO: Replace with data-driven insights */}
                     <ul style={{ fontSize: 12, lineHeight: 1.7, paddingLeft: 18, color: "#444", margin: 0 }}>
-                        <li>Western barangays show stronger vegetation recovery.</li>
-                        <li>Urban center areas have lower scores due to dense infrastructure.</li>
+                        {greenInsights.map((insight, i) => (
+                            <li key={i}>{insight}</li>
+                        ))}
                     </ul>
                 </Section>
 
@@ -720,13 +745,10 @@ const EnvironmentalReportTemplate: React.FC<ReportProps> = ({
                     ))}
 
                     <h3 style={{ fontSize: 13, color: "#B71C1C", margin: "16px 0 8px" }}>Insights</h3>
-                    {/* TODO: Replace with data-driven insights */}
                     <ul style={{ fontSize: 12, lineHeight: 1.7, paddingLeft: 18, color: "#444", margin: 0 }}>
-                        <li>Flood-prone barangays along river corridors show the highest hazard scores.</li>
-                        <li>Hillside areas demonstrate increased landslide susceptibility.</li>
-                        <li style={{ color: "#9E9E9E", fontStyle: "italic" }}>
-                            — Add more insights from your analysis here —
-                        </li>
+                        {hazardInsights.map((insight, i) => (
+                            <li key={i}>{insight}</li>
+                        ))}
                     </ul>
                 </Section>
 
@@ -761,45 +783,42 @@ const EnvironmentalReportTemplate: React.FC<ReportProps> = ({
                     ))}
 
                     <h3 style={{ fontSize: 13, color: "#E65100", margin: "16px 0 8px" }}>Insights</h3>
-                    {/* TODO: Replace with data-driven insights */}
                     <ul style={{ fontSize: 12, lineHeight: 1.7, paddingLeft: 18, color: "#444", margin: 0 }}>
-                        <li>Risk clusters appear in western and river-adjacent barangays.</li>
-                        <li>Risk is reduced in zones with higher vegetation coverage (Green Index &gt; 65).</li>
-                        <li style={{ color: "#9E9E9E", fontStyle: "italic" }}>
-                            — Add more insights from your analysis here —
-                        </li>
+                        {calamityInsights.map((insight, i) => (
+                            <li key={i}>{insight}</li>
+                        ))}
                     </ul>
                 </Section>
 
                 {/* ── SECTION 7: CHOROPLETH MAP SNAPSHOT ───────────────────────────── */}
-                <Section id="choropleth-map" number="07" title="Choropleth Map Snapshot" accent="#37474F">
+                <Section id="choropleth-map" number="07" title="Hazard Index Map Snapshot" accent="#37474F" newPage>
                     <p style={{ fontSize: 12, lineHeight: 1.7, color: "#444", marginTop: 0 }}>
-                        The map below shows the spatial distribution of the Hazard Index across all barangays
-                        of {cityName} for {year}. Export this image directly from your Leaflet dashboard.
+                        The map below shows the spatial distribution of the <strong>Hazard Index</strong> across
+                        all barangays of {cityName} for {year}. Each barangay is color-coded based
+                        on its computed hazard score, with boundaries and labels shown for reference.
                     </p>
 
                     {choroMapImageUrl ? (
-                        /* Replace placeholder with real exported map image */
                         <img
                             src={choroMapImageUrl}
-                            alt={`Choropleth Map – Hazard Index ${year}`}
+                            alt={`Hazard Index Map – ${cityName} – ${year}`}
                             style={{ width: "100%", borderRadius: 8, border: "1px solid #E0E0E0" }}
                         />
                     ) : (
                         <Placeholder
                             height={280}
-                            label="Choropleth Map – Hazard Index"
-                            hint={`Export your Leaflet map as an image and pass it via the choroMapImageUrl prop, or embed your <MapContainer> component here.`}
+                            label="Hazard Index Map"
+                            hint="The hazard map snapshot will be generated automatically when the report is created."
                             accent="#37474F"
                         />
                     )}
                     <p style={{ fontSize: 11, color: "#9E9E9E", textAlign: "center", marginTop: 6 }}>
-                        Figure: Choropleth Map — Hazard Index by Barangay, {cityName}, {year}
+                        Figure: Hazard Index Choropleth Map by Barangay, {cityName}, {year}
                     </p>
                 </Section>
 
                 {/* ── SECTION 8: KEY FINDINGS ───────────────────────────────────────── */}
-                <Section id="key-findings" number="08" title="Key Findings" accent="#1565C0">
+                <Section id="key-findings" number="08" title="Key Findings" accent="#1565C0" newPage>
                     {/*
           TODO: Populate keyFindings from your dashboard's computed insights.
           Each string in the array renders as a bullet.
@@ -840,6 +859,17 @@ const EnvironmentalReportTemplate: React.FC<ReportProps> = ({
                             </li>
                         ))}
                     </ul>
+                    <p style={{
+                        fontSize: 11,
+                        color: "#9E9E9E",
+                        fontStyle: "italic",
+                        marginTop: 16,
+                        marginBottom: 0,
+                        paddingTop: 10,
+                        borderTop: "1px solid #EEEEEE",
+                    }}>
+                        * Automatically generated — please have an expert review for final assessment.
+                    </p>
                 </Section>
 
                 {/* ── SECTION 9: RECOMMENDATIONS ───────────────────────────────────── */}
@@ -863,6 +893,17 @@ const EnvironmentalReportTemplate: React.FC<ReportProps> = ({
                             </li>
                         ))}
                     </ol>
+                    <p style={{
+                        fontSize: 11,
+                        color: "#9E9E9E",
+                        fontStyle: "italic",
+                        marginTop: 16,
+                        marginBottom: 0,
+                        paddingTop: 10,
+                        borderTop: "1px solid #EEEEEE",
+                    }}>
+                        * Automatically generated — please have an expert review for final assessment.
+                    </p>
                 </Section>
 
                 {/* ── SECTION 10: METHODOLOGY ──────────────────────────────────────── */}

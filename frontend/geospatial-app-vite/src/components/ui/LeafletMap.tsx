@@ -336,6 +336,12 @@ export default function LeafletMap(props: LeafletMapProps) {
       const map = L.map("map").setView([14.2349, 121.1211], 13);
       mapRef.current = map;
 
+      // Expose map instance on the container so external code can access it for snapshots
+      const container = map.getContainer();
+      if (container) {
+        (container as any)._leafletMapInstance = map;
+      }
+
       // Add initial tile layer
       const config = tileLayerConfigs[mapType];
       tileLayerRef.current = L.tileLayer(config.url, {

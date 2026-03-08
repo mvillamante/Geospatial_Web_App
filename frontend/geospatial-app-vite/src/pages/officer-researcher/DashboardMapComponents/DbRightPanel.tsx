@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, type JSX } from "react";
+import L from "leaflet";
 import DbChartsSection from "./right/DbChartsSection";
 import DbAnalyticsSection from "./right/DbAnalyticsSection";
 import DbExportSection from "./right/DbExportSection";
@@ -8,6 +9,7 @@ import ChartExportPool from "./right/ChartExportPool";
 import "../DashboardMapPage.css";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 import EnvironmentalReportTemplate from "../../../components/reports/EnvironmentalReportTemplate";
 import { useGreenIndexData } from "../../../hooks/useGreenIndexData";
 import { useHazardData } from "../../../hooks/useHazardData";
@@ -69,6 +71,8 @@ interface RightPanelProps {
   statisticalSummaryItems?: any[];
   keyFindings?: any[];
   modelHealthItems?: any[];
+  onGeneratingChange?: (generating: boolean) => void;
+  setYear?: (y: number) => void;
 }
 
 const DbRightPanel: React.FC<RightPanelProps> = ({
@@ -98,6 +102,8 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
   statisticalSummaryItems,
   keyFindings,
   modelHealthItems,
+  onGeneratingChange,
+  setYear,
 
   ...props
 }) => {
@@ -125,6 +131,16 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
     hazard: null as string | null,
     risk: null as string | null
   });
+
+  const [choroMapImage, setChoroMapImage] = useState<string | null>(null);
+
+  const [aiInsights, setAiInsights] = useState<{
+    findings: string[];
+    recommendations: string[];
+    greenInsights: string[];
+    hazardInsights: string[];
+    calamityInsights: string[];
+  }>({ findings: [], recommendations: [], greenInsights: [], hazardInsights: [], calamityInsights: [] });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -163,22 +179,159 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
     if (!chartElement) return null;
 
     const canvas = await html2canvas(chartElement, {
-      scale: 2,
+      scale: 1.5,
       useCORS: true,
     });
 
-    return canvas.toDataURL("image/png");
+    return canvas.toDataURL("image/jpeg", 0.85);
   };
 
+
+  const fetchAllAiInsights = async (year: number): Promise<{
+    findings: string[];
+    recommendations: string[];
+    greenInsights: string[];
+    hazardInsights: string[];
+    calamityInsights: string[];
+  }> => {
+    try {
+      const [greenRes, hazardRes, calamityRes] = await Promise.allSettled([
+        fetch(`/api/hazard/green-index/ai-insight/?year=${year}`).then(r => r.json()),
+        fetch(`/api/hazard/hazard-index/ai-insight/?year=${year}`).then(r => r.json()),
+        fetch(`/api/hazard/calamity-risk/ai-insight/?year=${year}`).then(r => r.json()),
+      ]);
+
+      const greenData = greenRes.status === "fulfilled" ? greenRes.value : null;
+      const hazardData = hazardRes.status === "fulfilled" ? hazardRes.value : null;
+      const calamityData = calamityRes.status === "fulfilled" ? calamityRes.value : null;
+
+      const findings: string[] = [];
+      if (greenData?.summary) findings.push(greenData.summary);
+      if (greenData?.hotspots_insight) findings.push(greenData.hotspots_insight);
+      if (hazardData?.summary) findings.push(hazardData.summary);
+      if (hazardData?.hotspots_insight) findings.push(hazardData.hotspots_insight);
+      if (calamityData?.summary) findings.push(calamityData.summary);
+
+      const recs: string[] = [];
+      if (greenData?.areas_for_greening_insight) recs.push(greenData.areas_for_greening_insight);
+      if (hazardData?.lower_risk_insight) recs.push(hazardData.lower_risk_insight);
+      if (hazardData?.earthquake_typhoon_insight) recs.push(hazardData.earthquake_typhoon_insight);
+      if (calamityData?.risk_peak_insight) recs.push(calamityData.risk_peak_insight);
+      if (calamityData?.adaptation_insight) recs.push(calamityData.adaptation_insight);
+
+      // Per-section short insights for the index analysis sections
+      const greenInsights: string[] = [];
+      if (greenData?.summary) greenInsights.push(greenData.summary);
+      if (greenData?.hotspots_insight) greenInsights.push(greenData.hotspots_insight);
+      if (greenData?.areas_for_greening_insight) greenInsights.push(greenData.areas_for_greening_insight);
+
+      const hazardInsights: string[] = [];
+      if (hazardData?.summary) hazardInsights.push(hazardData.summary);
+      if (hazardData?.hotspots_insight) hazardInsights.push(hazardData.hotspots_insight);
+      if (hazardData?.lower_risk_insight) hazardInsights.push(hazardData.lower_risk_insight);
+      if (hazardData?.earthquake_typhoon_insight) hazardInsights.push(hazardData.earthquake_typhoon_insight);
+
+      const calamityInsights: string[] = [];
+      if (calamityData?.summary) calamityInsights.push(calamityData.summary);
+      if (calamityData?.risk_peak_insight) calamityInsights.push(calamityData.risk_peak_insight);
+      if (calamityData?.adaptation_insight) calamityInsights.push(calamityData.adaptation_insight);
+
+      return { findings, recommendations: recs, greenInsights, hazardInsights, calamityInsights };
+    } catch (error) {
+      console.error("Failed to fetch AI insights:", error);
+      return { findings: [], recommendations: [], greenInsights: [], hazardInsights: [], calamityInsights: [] };
+    }
+  };
+
+  const captureChoroplethMap = async (): Promise<string | null> => {
+    const mapContainer = document.querySelector(
+      ".choroplethview-map .leaflet-container"
+    ) as HTMLElement | null;
+    if (!mapContainer) return null;
+
+    const DEFAULT_CENTER: L.LatLngExpression = [14.2349, 121.1211];
+    const DEFAULT_ZOOM = 13;
+
+    const leafletMap: L.Map | null = (mapContainer as any)._leafletMapInstance ?? null;
+    let prevCenter: L.LatLng | null = null;
+    let prevZoom: number | null = null;
+
+    try {
+      if (leafletMap) {
+        prevCenter = leafletMap.getCenter();
+        prevZoom = leafletMap.getZoom();
+
+        // Fit to GeoJSON bounds so the entire barangay boundary is visible
+        let bounds: L.LatLngBounds | null = null;
+        leafletMap.eachLayer((layer: L.Layer) => {
+          if (layer instanceof L.GeoJSON) {
+            const layerBounds = layer.getBounds();
+            if (layerBounds.isValid()) {
+              bounds = bounds ? bounds.extend(layerBounds) : layerBounds;
+            }
+          }
+        });
+
+        if (bounds) {
+          leafletMap.fitBounds(bounds, { animate: false, padding: [20, 20] });
+        } else {
+          leafletMap.setView(DEFAULT_CENTER, DEFAULT_ZOOM, { animate: false });
+        }
+
+        // Wait for tiles to load and the map to settle
+        await new Promise<void>((resolve) => {
+          let resolved = false;
+          const done = () => { if (!resolved) { resolved = true; resolve(); } };
+          leafletMap!.once("moveend", () => setTimeout(done, 600));
+          setTimeout(done, 1500);
+        });
+      }
+
+      const dataUrl = await toPng(mapContainer, {
+        cacheBust: true,
+        pixelRatio: 1.5,
+        backgroundColor: "#f2f2f2",
+        filter: (node: HTMLElement) => {
+          if (node.classList && node.classList.contains("leaflet-control-container")) return false;
+          return true;
+        },
+      });
+      return dataUrl;
+    } catch (err) {
+      console.error("Map capture failed:", err);
+      return null;
+    } finally {
+      if (leafletMap && prevCenter && prevZoom != null) {
+        leafletMap.setView(prevCenter, prevZoom, { animate: false });
+      }
+    }
+  };
 
   // Generate report
   const generateReport = async (reportYear: number) => {
     try {
       setIsGenerating(true);
+      onGeneratingChange?.(true);
 
-      const riskChart = await captureChart("chart-risk-likelihood");
-      const greenChart = await captureChart("chart-green-index-projection");
-      const hazardChart = await captureChart("chart-hazard-index-trend");
+      // Switch the map slider to the report year so the snapshot matches
+      if (setYear) {
+        setYear(reportYear);
+        await new Promise(r => setTimeout(r, 1800));
+      }
+
+      const choroCapture = await captureChoroplethMap();
+
+      const [
+        riskChart,
+        greenChart,
+        hazardChart,
+        aiData,
+      ] = await Promise.all([
+        captureChart("chart-risk-likelihood"),
+        captureChart("chart-green-index-projection"),
+        captureChart("chart-hazard-index-trend"),
+        fetchAllAiInsights(reportYear),
+      ]);
 
       setChartImages({
         green: greenChart,
@@ -186,8 +339,12 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
         risk: riskChart
       });
 
-      // allow React to render the charts into the hidden report
-      await new Promise(r => setTimeout(r, 300));
+      setChoroMapImage(choroCapture);
+
+      setAiInsights(aiData);
+
+      // allow React to render charts, maps, and AI insights into the hidden report
+      await new Promise(r => setTimeout(r, 500));
 
       const element = document.getElementById("environmental-report");
 
@@ -198,28 +355,73 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
 
       const canvas = await html2canvas(element, {
         scale: 1.5,
-        useCORS: true
+        useCORS: true,
+        windowWidth: 794,
       });
 
-      const imgData = canvas.toDataURL("image/png");
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+      const marginX = 8;
+      const marginTop = 14;
+      const marginBottom = 10;
+      const contentW = pdfWidth - marginX * 2;
+      const contentH = pdfHeight - marginTop - marginBottom;
 
+      const totalImgHeight = (canvas.height * contentW) / canvas.width;
+      const mmToPx = canvas.width / contentW;
+
+      // Detect hard page-break positions from newPage spacer divs
+      const domToMm = totalImgHeight / element.offsetHeight;
+      const elementRect = element.getBoundingClientRect();
+      const breaks: number[] = [0];
+
+      const wrapper = element.querySelector(':scope > div') as HTMLElement;
+      if (wrapper) {
+        for (const child of Array.from(wrapper.children)) {
+          const el = child as HTMLElement;
+          if (el.style.pageBreakBefore === 'always' || el.style.breakBefore === 'page') {
+            breaks.push((el.getBoundingClientRect().bottom - elementRect.top) * domToMm);
+          }
+        }
+      }
+      breaks.push(totalImgHeight);
+
+      // For sections taller than a single page, add intermediate breaks
+      const finalBreaks: number[] = [];
+      for (let i = 0; i < breaks.length - 1; i++) {
+        finalBreaks.push(breaks[i]);
+        const span = breaks[i + 1] - breaks[i];
+        if (span > contentH) {
+          let pos = breaks[i] + contentH;
+          while (pos < breaks[i + 1]) {
+            finalBreaks.push(pos);
+            pos += contentH;
+          }
+        }
+      }
+      finalBreaks.push(totalImgHeight);
+      const uniqueBreaks = [...new Set(finalBreaks)].sort((a, b) => a - b);
+
+      // Generate PDF pages with margins, using JPEG compression
       const pdf = new jsPDF("p", "mm", "a4");
-
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      for (let i = 0; i < uniqueBreaks.length - 1; i++) {
+        if (i > 0) pdf.addPage();
+        const startMm = uniqueBreaks[i];
+        const endMm = uniqueBreaks[i + 1];
+        const sliceH = endMm - startMm;
+        const startPx = Math.round(startMm * mmToPx);
+        const heightPx = Math.round(sliceH * mmToPx);
+        if (heightPx <= 0) continue;
+        const slice = document.createElement('canvas');
+        slice.width = canvas.width;
+        slice.height = heightPx;
+        const ctx = slice.getContext('2d');
+        if (!ctx) continue;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, slice.width, slice.height);
+        ctx.drawImage(canvas, 0, startPx, canvas.width, heightPx, 0, 0, canvas.width, heightPx);
+        const yPos = i === 0 ? marginTop / 2 : marginTop;
+        pdf.addImage(slice.toDataURL("image/jpeg", 0.75), "JPEG", marginX, yPos, contentW, sliceH);
       }
 
       pdf.save(`Environmental_Report_${reportYear}.pdf`);
@@ -228,6 +430,7 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
       console.error("Report generation failed:", error);
     } finally {
       setIsGenerating(false);
+      onGeneratingChange?.(false);
     }
   };
 
@@ -266,15 +469,22 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
         <div className="segmented-control small slide three">
           <span className={`slider ${rightNav}`} />
 
-          {["analytics", "export", "import"].map((tab) => (
-            <button
-              key={tab}
-              className={rightNav === tab ? "active" : ""}
-              onClick={() => setRightNav(tab as "analytics" | "export" | "import")}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
+          {["analytics", "export", "import"].map((tab) => {
+            const isExportLocked = tab === "export" && (!props.selected || props.selected === "none");
+            return (
+              <button
+                key={tab}
+                className={`${rightNav === tab ? "active" : ""} ${isExportLocked ? "tab-locked" : ""}`}
+                onClick={() => {
+                  if (isExportLocked) return;
+                  setRightNav(tab as "analytics" | "export" | "import");
+                }}
+                title={isExportLocked ? "Select a data layer first" : undefined}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -319,7 +529,13 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
         )}
 
         {rightNav === "export" && (
-          <>
+          (!props.selected || props.selected === "none") ? (
+            <div className="right-panel-empty-state">
+              <p className="right-panel-empty-title">
+                Select a <strong>data layer</strong> on the Choropleth view before generating a report.
+              </p>
+            </div>
+          ) : <>
             <h4>Export Section</h4>
             <div className="report-generator">
 
@@ -381,7 +597,7 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
           zIndex: -1
         }}
       >
-        <div id="environmental-report">
+        <div>
           <EnvironmentalReportTemplate
             year={reportYear}
             greenIndexAvg={reportGreenAvg ?? 0}
@@ -395,6 +611,15 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
             greenChart={chartImages.green}
             hazardChart={chartImages.hazard}
             riskChart={chartImages.risk}
+
+            choroMapImageUrl={choroMapImage ?? undefined}
+
+            greenInsights={aiInsights.greenInsights.length > 0 ? aiInsights.greenInsights : undefined}
+            hazardInsights={aiInsights.hazardInsights.length > 0 ? aiInsights.hazardInsights : undefined}
+            calamityInsights={aiInsights.calamityInsights.length > 0 ? aiInsights.calamityInsights : undefined}
+
+            keyFindings={aiInsights.findings.length > 0 ? aiInsights.findings : undefined}
+            recommendations={aiInsights.recommendations.length > 0 ? aiInsights.recommendations : undefined}
           />
         </div>
       </div>

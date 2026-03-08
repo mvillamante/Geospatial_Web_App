@@ -87,6 +87,7 @@ const DashboardMapPage: React.FC = () => {
 
   const [reportYear, setReportYear] = useState(new Date().getFullYear());
   const [reportFormat, setReportFormat] = useState<"pdf" | "docx">("pdf");
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   // const [selected, setSelected] = useState("");
   const [ndviOpacity, setNdviOpacity] = useState(0.8);
   const [ndviMonth, setNdviMonth] = useState<number>(1);
@@ -100,9 +101,11 @@ const DashboardMapPage: React.FC = () => {
 
   // Lock outer scroll only when Choropleth view is active.
   // This hides the long right scrollbar, but keeps page scroll in Interactive view.
+  // Also clear interactive map-layer sliders when entering choropleth view.
   useEffect(() => {
     if (mapView === "choropleth") {
       document.body.classList.add("no-dashboard-body-scroll");
+      setActiveLayers([]);
     } else {
       document.body.classList.remove("no-dashboard-body-scroll");
     }
@@ -661,6 +664,15 @@ const DashboardMapPage: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {isGeneratingReport && (
+              <div className="report-generating-overlay">
+                <div className="report-generating-card">
+                  <div className="report-generating-spinner" />
+                  <span>Generating Report...</span>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -712,6 +724,8 @@ const DashboardMapPage: React.FC = () => {
           statisticalSummaryItems={statisticalSummaryItems}
           keyFindings={keyFindings}
           modelHealthItems={modelHealthItems}
+          onGeneratingChange={setIsGeneratingReport}
+          setYear={setYear}
         />
       </div>
     </div>

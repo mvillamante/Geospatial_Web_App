@@ -30,10 +30,11 @@ interface Citizen {
 }
 
 interface Props {
-  pageSize?: number
+  pageSize?: number;
+  onPendingCountChange: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5 }) => {
+const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
   const [citizens, setCitizens] = useState<Citizen[]>([])
   const [loading, setLoading] = useState(true)
@@ -98,6 +99,11 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5 }) => {
       }
 
       setCitizens(mapped);
+      const pendingCount = mapped.filter(
+        (c) => c.verification?.status === "pending"
+      ).length;
+
+      onPendingCountChange(pendingCount);
     } catch (err) {
       console.error("Error fetching citizens:", err);
     } finally {
@@ -275,7 +281,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5 }) => {
                   <td className="center muted">
                     {format(new Date(c.date_joined), "MMMM d, yyyy")}
                   </td>
-                  
+
                   <td className="center muted">{c.lastlogin || "Never"}</td>
 
                   {/* Verification */}
@@ -330,7 +336,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5 }) => {
                                 setOpenMenu(null)
                               }}
                             >
-                              <FiEye size={14}/> View
+                              <FiEye size={14} /> View
                             </button>
                           )}
 
@@ -338,7 +344,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5 }) => {
                             className="kebab-item"
                             onClick={() => toggleCitizenStatus(c.citizen_id)}
                           >
-                            {c.is_active ? <PowerOff size={14}/> : <Power size={14}/>}
+                            {c.is_active ? <PowerOff size={14} /> : <Power size={14} />}
                             {c.is_active ? "Deactivate" : "Activate"}
                           </button>
 
@@ -401,7 +407,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5 }) => {
             ) : (
               <p className="muted">No ID image available.</p>
             )}
-            
+
             {isImageModalOpen && modalCitizen.verification.id_image && (
               <div
                 className="image-modal-backdrop"
@@ -442,14 +448,14 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5 }) => {
                     updateStatus(modalCitizen.verification!.id, "approve")
                   }
                 >
-                  <CheckCircle size={16}/> Approve
+                  <CheckCircle size={16} /> Approve
                 </button>
 
                 <button
                   className="reject-btn"
                   onClick={() => setShowRejectBox(true)}
                 >
-                  <XCircle size={16}/> Reject
+                  <XCircle size={16} /> Reject
                 </button>
 
               </div>
@@ -494,7 +500,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ pageSize = 5 }) => {
               className="close-modal"
               onClick={() => setModalCitizen(null)}
             >
-              <FiX size={20}/>
+              <FiX size={20} />
             </button>
 
           </div>

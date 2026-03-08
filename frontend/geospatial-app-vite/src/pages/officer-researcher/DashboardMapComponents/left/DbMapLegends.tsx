@@ -22,16 +22,18 @@ const MapLegends: React.FC<MapLegendsProps> = ({ activeLayers }) => {
       {/* Flood Zone Legend */}
       {activeLayers.includes("Flood Zones") && (
         <div className="flood-zone-legend">
-          <h4
+          <div
+            className="legend-header"
             onClick={(e) => {
               e.stopPropagation();
               setFloodVisible(prev => !prev);
             }}
-            style={{ cursor: "pointer" }}
           >
-            <img src={floodZoneIcon} alt="Flood Zone" className="flood-legend-icon" /> 
-            Flood Hazard Map (LiPAD)
-          </h4>
+            <h4>
+              <img src={floodZoneIcon} alt="Flood Zone" className="flood-legend-icon" /> 
+              Flood Hazard Map (LiPAD)
+            </h4>
+          </div>
           {floodVisible && (
             <>
               <div className="flood-legend-subtitle">
@@ -71,20 +73,23 @@ const MapLegends: React.FC<MapLegendsProps> = ({ activeLayers }) => {
       {/* Landslide Risk Legend */}
       {activeLayers.includes("Landslide Risk") && (
         <div className="landslide-risk-legend">
-          <h4
+          <div
+            className="legend-header"
             onClick={(e) => {
               e.stopPropagation();
               setLandslideVisible(prev => !prev);
             }}
-            style={{ cursor: "pointer" }}
           >
-            <img
+            <h4>
+              <img
               src={landslideIcon}
               alt="Landslide"
               className="landslide-legend-icon"
-            />{" "}
-            Earthquake‑Induced Landslide Hazard
-          </h4>
+              />
+              {" "}Earthquake‑Induced Landslide Hazard
+            </h4>
+          </div>
+
           {landslideVisible && (
             <>
               <div className="landslide-legend-subtitle">
@@ -116,13 +121,15 @@ const MapLegends: React.FC<MapLegendsProps> = ({ activeLayers }) => {
       {/* Evacuation Centers Legend */}
       {activeLayers.includes("Evacuation Centers") && (
         <div className="evac-centers-legend">
-          <h4
+          <div
+            className="legend-header"
             onClick={(e) => {
               e.stopPropagation();
               setEvacVisible(prev => !prev);
             }}
-            style={{ cursor: "pointer" }}
-          >🆘 Evacuation Centers</h4>
+          >
+            <h4>🆘 Evacuation Centers</h4>
+          </div>
 
           {evacVisible&& (
             <>
@@ -155,15 +162,15 @@ const MapLegends: React.FC<MapLegendsProps> = ({ activeLayers }) => {
       {/* Hazard Locations Legend */}
       {activeLayers.includes("Verified Reports") && (
         <div className="flood-zone-legend">
-          <h4
+          <div
+            className="legend-header"
             onClick={(e) => {
               e.stopPropagation();
               setReportsVisible(prev => !prev);
             }}
-            style={{ cursor: "pointer" }}
           >
-            ⚠️ Hazard Locations Legend
-          </h4>
+            <h4>⚠️ Hazard Locations Legend</h4>
+          </div>
 
           {reportsVisible && (
             <>

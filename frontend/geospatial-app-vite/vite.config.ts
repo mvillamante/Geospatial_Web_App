@@ -12,35 +12,28 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-
-      workbox: {
-        maximumFileSizeToCacheInBytes: 5000000
-      },
-
       devOptions: {
-        enabled: true
+        enabled: false, 
+      },
+      workbox: {
+        maximumFileSizeToCacheInBytes: 5000000,
+        // Only use globDirectory & patterns in production
+        globDirectory: process.env.NODE_ENV === 'production' ? 'dist' : undefined,
+        globPatterns: process.env.NODE_ENV === 'production' ? ['**/*.{js,css,html,wasm}'] : undefined,
+        globIgnores: ['**/node_modules/**/*', 'sw.js', 'workbox-*.js'],
       },
       manifest: {
-        name: 'Geospatial Web App',
+        name: 'HazSpot',
         short_name: 'HazSpot',
-        description: 'Geospatial Mapping System',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
+        start_url: '/hazspot',
         display: 'standalone',
-        start_url: '/',
+        background_color: '#0b0f17',
+        theme_color: '#ff6a00',
         icons: [
-          {
-            src: '/pwa/pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: '/pwa/pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          }
-        ]
-      }
-    })
-  ]
+          { src: '/pwa/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/pwa/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+        ],
+      },
+    }),
+  ],
 })

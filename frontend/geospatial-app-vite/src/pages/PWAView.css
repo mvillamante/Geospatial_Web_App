@@ -1,0 +1,589 @@
+.landing-page {
+    --brand-navy: #0b1220;
+    --brand-orange: #CB542D;
+    --brand-red: #ef4444;
+    --brand-blue: #2563eb;
+
+    --text: #0f172a;
+    --muted: #64748b;
+
+    --bg: #ffffff;
+    --bg-soft: #f8fafc;
+    --surface: #ffffff;
+
+    --border: #e2e8f0;
+
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.10);
+    --shadow-lg: 0 20px 60px rgba(15, 23, 42, 0.12);
+
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 16px;
+
+    background: var(--bg);
+    color: var(--text);
+}
+
+
+.pwa-view {
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background:
+        radial-gradient(1000px 480px at 20% 0%,
+            rgba(239, 68, 68, 0.08),
+            rgba(255, 255, 255, 0)),
+        radial-gradient(1000px 480px at 80% 0%,
+            rgba(203, 84, 45, 0.09),
+            rgba(255, 255, 255, 0));
+}
+
+.pwa-slide-wrapper {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    padding: 40px 20px;
+}
+
+.pwa-view .logo-area img {
+    height: 90px;
+    object-fit: contain;
+}
+
+.slide-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    text-align: center;
+}
+
+.icon-circle {
+    width: 92px;
+    height: 92px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(
+        135deg,
+        var(--brand-red),
+        var(--brand-orange)
+    );
+    color: white;
+    box-shadow: 
+        0 10px 22px rgba(249, 115, 22, 0.25),
+        0 4px 10px rgba(249, 115, 22, 0.15);
+}
+
+.slide-title {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--brand-navy);
+    letter-spacing: -0.02em;
+}
+
+.slide-desc {
+    color: var(--muted);
+    font-size: 0.98rem;
+    line-height: 1.7;
+    max-width: 300px;
+}
+
+.pwa-view .dots {
+    display: flex;
+    gap: 8px;
+}
+
+.pwa-view .dots div {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #cbd5e1;
+    transition: all 0.25s ease;
+}
+
+.pwa-view .dots div.active {
+    width: 22px;
+    background: linear-gradient(
+        135deg,
+        var(--brand-red),
+        var(--brand-orange)
+    );
+}
+
+.pwa-view .actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btnPrimary {
+    background: linear-gradient(
+        135deg,
+        var(--brand-red),
+        var(--brand-orange)
+    );
+    color: white;
+
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+
+    transition: transform 0.15s ease,
+                box-shadow 0.15s ease;
+}
+
+.btnPrimary:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 16px rgba(249,115,22,0.25),
+        0 4px 8px rgba(249,115,22,0.15);
+}
+
+.btnSkip {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+/* Auth */
+.pwa-view .auth-wrapper {
+    width: 100%;
+    max-width: 420px;
+
+    padding: 36px 26px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 22px;
+}
+
+.pwa-view .auth-card {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 30px 24px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.pwa-view .auth-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--brand-navy);
+    text-align: center;
+}
+
+.pwa-view .auth-subtitle {
+    font-size: 0.95rem;
+    color: var(--muted);
+    text-align: center;
+}
+
+.pwa-view .btnOutline {
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.8);
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pwa-view .btnOutline:hover {
+    background: var(--bg-soft);
+}
+
+.pwa-view .btnGhost {
+    border: none;
+    background: transparent;
+    color: var(--brand-orange);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.pwa-view .footer-links {
+    display: flex;
+    gap: 14px;
+}
+/* ===============================
+   ROOT
+================================= */
+
+.landing-page {
+    --brand-navy: #0b1220;
+    --brand-orange: #CB542D;
+    --brand-red: #ef4444;
+    --brand-blue: #2563eb;
+
+    --text: #0f172a;
+    --muted: #64748b;
+
+    --bg: #ffffff;
+    --bg-soft: #f8fafc;
+    --surface: #ffffff;
+
+    --border: #e2e8f0;
+
+    --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.05);
+    --shadow-md: 0 12px 30px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 25px 60px rgba(15, 23, 42, 0.12);
+
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 18px;
+
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* ===============================
+   PWA BACKGROUND
+================================= */
+
+.pwa-view {
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background:
+        radial-gradient(1000px 500px at 20% -10%,
+            rgba(239,68,68,0.10),
+            rgba(255,255,255,0)),
+        radial-gradient(1000px 500px at 80% -10%,
+            rgba(203,84,45,0.10),
+            rgba(255,255,255,0));
+
+    padding: 20px;
+}
+
+/* ===============================
+   ONBOARDING CARD
+================================= */
+
+.pwa-slide-wrapper {
+    width: 100%;
+    max-width: 420px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+
+    padding: 36px 26px;
+
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(12px);
+
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(226,232,240,0.8);
+
+    box-shadow: var(--shadow-lg);
+
+    animation: fadeUp 0.45s ease;
+}
+
+/* ===============================
+   LOGO
+================================= */
+
+.pwa-view .logo-area img {
+    height: 90px;
+    object-fit: contain;
+}
+
+/* ===============================
+   SLIDE CONTENT
+================================= */
+
+.slide-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    text-align: center;
+}
+
+/* Icon */
+
+.icon-circle {
+    width: 92px;
+    height: 92px;
+
+    border-radius: 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: linear-gradient(
+        135deg,
+        var(--brand-red),
+        var(--brand-orange)
+    );
+
+    color: white;
+
+    box-shadow:
+        0 14px 26px rgba(249,115,22,0.25),
+        0 6px 12px rgba(249,115,22,0.15);
+
+    transition: transform 0.2s ease;
+}
+
+.icon-circle:hover {
+    transform: translateY(-3px);
+}
+
+/* Title */
+
+.slide-title {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--brand-navy);
+    letter-spacing: -0.02em;
+}
+
+/* Description */
+
+.slide-desc {
+    color: var(--muted);
+    font-size: 0.98rem;
+    line-height: 1.7;
+    max-width: 300px;
+}
+
+/* ===============================
+   DOT INDICATORS
+================================= */
+
+.pwa-view .dots {
+    display: flex;
+    gap: 8px;
+}
+
+.pwa-view .dots div {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+
+    background: #cbd5e1;
+
+    transition: all 0.25s ease;
+}
+
+.pwa-view .dots div.active {
+    width: 22px;
+
+    background: linear-gradient(
+        135deg,
+        var(--brand-red),
+        var(--brand-orange)
+    );
+}
+
+/* ===============================
+   BUTTONS
+================================= */
+
+.pwa-view .actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btnPrimary {
+    background: linear-gradient(
+        135deg,
+        var(--brand-red),
+        var(--brand-orange)
+    );
+
+    color: white;
+
+    border: none;
+    padding: 14px;
+
+    border-radius: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.btnPrimary:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 10px 18px rgba(249,115,22,0.28),
+        0 5px 10px rgba(249,115,22,0.18);
+}
+
+.btnPrimary:active {
+    transform: scale(0.98);
+}
+
+.btnSkip {
+    border: none;
+    background: transparent;
+
+    color: var(--muted);
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    margin-top: 4px;
+
+    transition: color 0.2s ease;
+}
+
+.btnSkip:hover {
+    color: var(--brand-blue);
+}
+
+/* ===============================
+   AUTH SCREEN
+================================= */
+
+.pwa-view .auth-wrapper {
+    width: 100%;
+    max-width: 420px;
+
+    padding: 36px 26px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 22px;
+
+    animation: fadeUp 0.45s ease;
+}
+
+.pwa-view .auth-card {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pwa-view .auth-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--brand-navy);
+    text-align: center;
+}
+
+.pwa-view .auth-subtitle {
+    font-size: 0.95rem;
+    color: var(--muted);
+    text-align: center;
+}
+
+/* Secondary button */
+
+.pwa-view .btnOutline {
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.9);
+
+    padding: 14px;
+    border-radius: 12px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: background 0.2s ease;
+}
+
+.pwa-view .btnOutline:hover {
+    background: var(--bg-soft);
+}
+
+/* Ghost button */
+
+.pwa-view .btnGhost {
+    border: none;
+    background: transparent;
+
+    color: var(--brand-orange);
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+/* ===============================
+   FOOTER
+================================= */
+
+.pwa-view .footer-links {
+    display: flex;
+    gap: 14px;
+}
+
+.pwa-view .footer-btn {
+    border: none;
+    background: transparent;
+
+    color: var(--muted);
+
+    cursor: pointer;
+    font-size: 0.85rem;
+
+    transition: color 0.2s ease;
+}
+
+.footer-btn:hover {
+    color: var(--brand-blue);
+}
+
+/* ===============================
+   ANIMATION
+================================= */
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.pwa-view .footer-btn {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.footer-btn:hover {
+    color: var(--brand-blue);
+}

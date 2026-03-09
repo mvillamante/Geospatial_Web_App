@@ -10,6 +10,7 @@ import TermsModal from "../components/ui/Modals/TermsModal";
 import PrivacyModal from "../components/ui/Modals/PrivacyModal";
 import AuthModal, { type AuthModalType } from "../components/ui/Modals/AuthModal";
 import Spinner from "../components/ui/Spinner";
+import PWAView from "./PWAView"
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -30,11 +31,24 @@ interface BeforeInstallPromptEvent extends Event {
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { refreshUser } = useAuth(); // Get current user from context
+  const { refreshUser } = useAuth();
 
   const [isMobile, setIsMobile] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
+
+  const [isPWA, setIsPWA] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const devForcePWA = params.get("pwa") === "true";
+
+    const standalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (navigator as any).standalone === true;
+
+    setIsPWA(standalone || devForcePWA);
+  }, []);
 
   const isOpen = false;
   const [loading, setLoading] = useState(true);
@@ -45,7 +59,6 @@ const LandingPage: React.FC = () => {
   const switchModal = (type: AuthModalType) => setModalType(type);
 
   const [stats, setStats] = useState<LandingStats | null>(null);
-
 
   useEffect(() => {
     const checkMobile = () => {
@@ -155,10 +168,18 @@ const LandingPage: React.FC = () => {
     setIsInstallable(false);
   };
 
+  if (loading) return <Spinner />;
 
-  // ===== Get user role and display name from localStorage =====
-  // const { userRole, userRole2 } = getUserRoleAndDisplayName();
-
+  if (isPWA) {
+    return (
+      <PWAView
+        setModalType={setModalType}
+        modalType={modalType}
+        closeModal={closeModal}
+        switchModal={switchModal}
+      />
+    )
+  }
   return (
     <div
       id="home"

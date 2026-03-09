@@ -27,8 +27,8 @@ export default defineConfig({
         short_name: 'HazSpot',
         start_url: '/hazspot',
         display: 'standalone',
-        background_color: '#0b0f17',
-        theme_color: '#ff6a00',
+        background_color: '#ffffff',
+        theme_color: '#0b1220',
         icons: [
           { src: '/pwa/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: '/pwa/pwa-512x512.png', sizes: '512x512', type: 'image/png' },

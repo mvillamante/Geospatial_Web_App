@@ -40,14 +40,9 @@ const LandingPage: React.FC = () => {
   const [isPWA, setIsPWA] = useState(false);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const devForcePWA = params.get("pwa") === "true";
-
-    const standalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (navigator as any).standalone === true;
-
-    setIsPWA(standalone || devForcePWA);
+    const standalone = window.matchMedia('(display-mode: standalone)').matches
+      || (navigator as any).standalone === true;
+    setIsPWA(standalone);
   }, []);
 
   const isOpen = false;

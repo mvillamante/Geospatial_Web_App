@@ -83,6 +83,7 @@ const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
+          <Route path="admin/settings" element={<SettingsPage />} />
 
           {/* LGU Officer Routes - Protected */}
           <Route path="officer" element={<Navigate to="officer/home" replace />} />
@@ -104,15 +105,6 @@ const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
-          {/* Testing lang ito
-          <Route 
-            path="officer/dashboardmap-test" 
-            element={
-              <ProtectedRoute allowedRoles={["Officer"]}>
-                <DashboardMapPage />
-              </ProtectedRoute>
-            } 
-          />*/}
           <Route
             path="officer/report-verify"
             element={
@@ -130,6 +122,7 @@ const App: React.FC = () => {
             }
           />
           <Route path="officer/profile" element={<ProfilePage />} />
+          <Route path="officer/settings" element={<SettingsPage />} />
 
           {/* Researcher Routes - Protected */}
           <Route path="researcher" element={<Navigate to="researcher/home" replace />} />
@@ -151,6 +144,7 @@ const App: React.FC = () => {
             }
           />
           <Route path="researcher/profile" element={<ProfilePage />} />
+          <Route path="researcher/settings" element={<SettingsPage />} />
 
           {/* Citizen Routes */}
           <Route path="citizen" element={<Navigate to="citizen/community-feed" replace />} />

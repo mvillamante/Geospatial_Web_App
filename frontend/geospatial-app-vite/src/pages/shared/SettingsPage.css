@@ -154,6 +154,46 @@
   }
 }
 
+
+.settings-page .modal-card p.remove-margin {
+  margin: 0;
+}
+
+.delete-input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.delete-input:focus {
+  border-color: #d11a2a; /* red focus */
+  box-shadow: 0 0 0 2px rgba(209, 26, 42, 0.2);
+}
+
+.delete-hint {
+  font-size: 12px;
+  color: #555;
+  background-color: #fff4f4;
+  border: 1px solid #ffcaca;
+  padding: 10px 12px;
+  border-radius: 6px;
+  line-height: 1.4;
+}
+
+.delete-hint strong {
+  color: #d11a2a;
+  font-weight: 600;
+  background: #ffe5e7;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
 .password-input {
   position: relative;
   display: flex;

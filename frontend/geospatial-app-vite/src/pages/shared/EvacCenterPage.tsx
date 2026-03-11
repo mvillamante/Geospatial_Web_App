@@ -544,7 +544,7 @@ function EvacCenterPage() {
                     </>
                   )}
 
-
+                  {userRole !== "Officer" && (
                     <button
                       className="evac-btn"
                       onClick={() => handleGetDirections(center.coordinates)}
@@ -552,6 +552,7 @@ function EvacCenterPage() {
                       <Navigation className="evac-btn-icon" />
                       Get Directions
                     </button> 
+                  )}
                 </div>
               );
             })

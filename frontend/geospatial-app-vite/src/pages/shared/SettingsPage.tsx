@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import "./SettingsPage.css";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
+import { getUserRoleAndDisplayName } from '../../libr/auth';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 function SettingsPage() {
     const [saving, setSaving] = useState(false);
+    const [confirmStep, setConfirmStep] = useState(false);
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -40,6 +42,8 @@ function SettingsPage() {
     const updatePreference = async (key: string, value: any) => {
         await updateProfile({ [key]: value });
     };
+
+    const { userRole, isResidentVerified, userName } = getUserRoleAndDisplayName();
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -183,6 +187,7 @@ function SettingsPage() {
         setEditSection(null);
     };
 
+    const deleteConfirmText = `DELETE/${userName}`;
     return (
         <div className="settings-page">
 
@@ -210,19 +215,46 @@ function SettingsPage() {
 
                         <div className="form-actions">
                             <button
-                                disabled={saving || email === originalEmail}
-                                onClick={async () => {
+                            disabled={saving}
+                            onClick={async () => {
 
-                                    if (!isValidEmail(email)) {
-                                        toast.error("Please enter a valid email");
-                                        return;
+                                if (!isValidEmail(email)) {
+                                    toast.error("Please enter a valid email");
+                                    return;
+                                }
+
+                                if (email === originalEmail) {
+                                    toast.info("No changes detected");
+                                    return;
+                                }
+
+                                toast.warning("Save changes to your email?", {
+                                action: {
+                                    label: "Save",
+                                    onClick: async () => {
+                                    try {
+                                        await updateProfile({ email });
+
+                                        setOriginalEmail(email);
+                                        setEditSection(null);
+
+                                        toast.success("Email updated successfully");
+
+                                    } catch (err: any) {
+                                        console.error(err);
+                                        toast.error(err?.message || "Failed to update email");
                                     }
-                                    await updateProfile({ email });
-                                    setOriginalEmail(email);
-                                    setEditSection(null);
-                                }}
+                                    }
+                                },
+                                cancel: {
+                                    label: "Cancel",
+                                    onClick: () => {}
+                                }
+                                });
+
+                            }}
                             >
-                                Save
+                            {saving ? "Saving..." : "Save"}
                             </button>
 
                             <button className="cancel" onClick={cancelEdit}>
@@ -254,11 +286,16 @@ function SettingsPage() {
 
                         <div className="form-actions">
                             <button
-                                disabled={saving || phone === originalPhone}
+                                disabled={saving}
                                 onClick={async () => {
 
                                     if (!/^[0-9]{10,13}$/.test(phone)) {
                                         toast.error("Invalid phone number");
+                                        return;
+                                    }
+
+                                    if (phone === originalPhone) {
+                                        toast.info("No changes detected");
                                         return;
                                     }
 
@@ -267,7 +304,7 @@ function SettingsPage() {
                                     setEditSection(null);
                                 }}
                             >
-                                Save
+                                {saving ? "Saving..." : "Save"}
                             </button>
 
                             <button className="cancel" onClick={cancelEdit}>
@@ -340,8 +377,11 @@ function SettingsPage() {
                         </div>
 
                         <div className="form-actions">
-                            <button onClick={handlePasswordChange}>
-                                Update Password
+                            <button
+                            onClick={handlePasswordChange}
+                            disabled={saving}
+                            >
+                                {saving ? "Updating..." : "Update Password"}
                             </button>
                             <button className="cancel" onClick={cancelEdit}>
                                 Cancel
@@ -359,67 +399,72 @@ function SettingsPage() {
             </div>
 
             {/* NOTIFICATIONS */}
-            <div className="settings-card">
-                <h2>Notification Preferences</h2>
+            { (userRole === "Citizen" && isResidentVerified) && (
+                <div className="settings-card">
+                    <h2>Notification Preferences</h2>
 
-                <div className="settings-row">
-                    <span>Receive Hazard Alerts</span>
-                    <label className="toggle">
-                        <input
-                            type="checkbox"
-                            checked={hazardAlerts}
+                    <div className="settings-row">
+                        <span>Receive Hazard Alerts</span>
+                        <label className="toggle">
+                            <input
+                                type="checkbox"
+                                checked={hazardAlerts}
+                                onChange={(e) => {
+                                    const v = e.target.checked;
+                                    setHazardAlerts(v);
+                                    updatePreference("receive_hazard_alerts", v);
+                                }}
+                            />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+
+                    <div className="settings-row">
+                        <span>Receive Community Announcements</span>
+                        <label className="toggle">
+                            <input
+                                type="checkbox"
+                                checked={communityAnnouncements}
+                                onChange={(e) => {
+                                    const v = e.target.checked;
+                                    setCommunityAnnouncements(v);
+                                    updateProfile({ receive_community_announcements: v });
+                                }}
+                            />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+
+                    <div className="settings-row">
+                        <span>Minimum Alert Severity</span>
+                        <select
+                            value={severity}
                             onChange={(e) => {
-                                const v = e.target.checked;
-                                setHazardAlerts(v);
-                                updatePreference("receive_hazard_alerts", v);
+                                setSeverity(e.target.value);
+                                updateProfile({ alert_severity: e.target.value });
                             }}
-                        />
-                        <span className="slider"></span>
-                    </label>
+                        >
+                            <option value="low">All Alerts</option>
+                            <option value="moderate">Moderate & Above</option>
+                            <option value="high">High & Above</option>
+                            <option value="critical">Critical Only</option>
+                        </select>
+                    </div>
                 </div>
-
-                <div className="settings-row">
-                    <span>Receive Community Announcements</span>
-                    <label className="toggle">
-                        <input
-                            type="checkbox"
-                            checked={communityAnnouncements}
-                            onChange={(e) => {
-                                const v = e.target.checked;
-                                setCommunityAnnouncements(v);
-                                updateProfile({ receive_community_announcements: v });
-                            }}
-                        />
-                        <span className="slider"></span>
-                    </label>
-                </div>
-
-                <div className="settings-row">
-                    <span>Minimum Alert Severity</span>
-                    <select
-                        value={severity}
-                        onChange={(e) => {
-                            setSeverity(e.target.value);
-                            updateProfile({ alert_severity: e.target.value });
-                        }}
-                    >
-                        <option value="low">All Alerts</option>
-                        <option value="moderate">Moderate & Above</option>
-                        <option value="high">High & Above</option>
-                        <option value="critical">Critical Only</option>
-                    </select>
-                </div>
-            </div>
+            )}
             {showDeleteModal && (
                 <div className="modal-overlay">
                     <div className="modal-card">
                         <h3>Delete Account</h3>
-                        <p>
+                        <p className="remove-margin">
                             This action is permanent and cannot be undone.
                             All your reports and data will be permanently deleted.
                         </p>
 
                         <div className="modal-actions">
+
+                        {!confirmStep && (
+                            <>
                             <button
                                 className="cancel-btn"
                                 onClick={() => setShowDeleteModal(false)}
@@ -429,26 +474,51 @@ function SettingsPage() {
                             </button>
 
                             <button
-
                                 className="danger-confirm"
-                                onClick={handleDeleteAccount}
+                                onClick={() => setConfirmStep(true)}
                                 disabled={deleteLoading}
                             >
-                                {deleteLoading ? "Deleting..." : "Delete Permanently"}
+                                Delete Permanently
                             </button>
-                            <input
-                                placeholder="Type DELETE to confirm"
-                                value={confirmDelete}
-                                onChange={(e) => setConfirmDelete(e.target.value)}
-                            />
+                            </>
+                        )}
 
-                            <button
-                                className="danger-confirm"
-                                onClick={handleDeleteAccount}
-                                disabled={deleteLoading || confirmDelete !== "DELETE"}
-                            >
-                                {deleteLoading ? "Deleting..." : "Delete Permanently"}
-                            </button>
+                        {confirmStep && (
+                            <>
+                                <span className="delete-hint">
+                                Please type <strong>{deleteConfirmText}</strong> to confirm account deletion.
+                                </span>
+
+                                <input
+                                    className="delete-input"
+                                    placeholder={`Type ${deleteConfirmText} to confirm`}
+                                    value={confirmDelete}
+                                    onChange={(e) => setConfirmDelete(e.target.value)}
+                                />
+
+                                <div className="modal-actions">
+                                    <button
+                                        className="cancel-btn"
+                                        onClick={() => {
+                                            setShowDeleteModal(false);
+                                            setConfirmStep(false);
+                                        }}
+                                        disabled={deleteLoading}
+                                    >
+                                        Cancel
+                                    </button>
+
+                                    <button
+                                        className="danger-confirm"
+                                        onClick={handleDeleteAccount}
+                                        disabled={deleteLoading || confirmDelete !== deleteConfirmText}
+                                    >
+                                        {deleteLoading ? "Deleting..." : "Confirm Delete"}
+                                    </button>
+                                </div>
+                            </>
+                        )}
+
                         </div>
                     </div>
                 </div>

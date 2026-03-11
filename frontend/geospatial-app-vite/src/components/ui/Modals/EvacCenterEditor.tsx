@@ -90,7 +90,7 @@ export default function EvacCenterEditor({
               </div>
             </div>
 
-            <div className="form-row two">
+            <div className="form-row">
               <div className="view-card small">
                 <div className="card-header">
                   <span className="icon">📞</span>

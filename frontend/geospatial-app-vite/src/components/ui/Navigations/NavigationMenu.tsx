@@ -1,12 +1,13 @@
 import "./NavigationMenu.css";
 import { useState, useRef, useEffect } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext";
 import { useNavigate, NavLink, useLocation } from "react-router-dom";
-import { getUserRoleAndDisplayName, clearUserSession } from "../../libr/auth";
+import { getUserRoleAndDisplayName, clearUserSession } from "../../../libr/auth";
 import { MdArrowBack } from "react-icons/md";
 import type { IconType } from "react-icons";
 import { FaHome, FaCog, FaUser, FaMapMarkedAlt, FaBullhorn, FaMapMarked, FaBell } from "react-icons/fa";
-import { MdReport, MdPlace, MdLogout, MdOutlineDashboard, MdKeyboardArrowUp } from "react-icons/md";
+import { FaHouseUser } from "react-icons/fa6";
+import { MdReport, MdLogout, MdOutlineDashboard, MdKeyboardArrowUp } from "react-icons/md";
 import { PiUsersBold } from "react-icons/pi";
 import { TbFileReport } from "react-icons/tb";
 import { FiEdit } from "react-icons/fi";
@@ -145,7 +146,7 @@ const NavigationMenu: React.FC = () => {
           to={`/main/${basePath}/evac-center`}
           className={({ isActive }) => `pwa-nav-item ${isActive ? "active" : ""}`}
         >
-          <MdPlace size={22} />
+          <FaHouseUser size={22} />
           <span>Centers</span>
         </NavLink>
 
@@ -167,14 +168,13 @@ const NavigationMenu: React.FC = () => {
       { label: "Dashboard", path: "admin/dashboard", icon: MdOutlineDashboard },
       { label: "User Management", path: "admin/manage-user", icon: PiUsersBold },
       { label: "Reports Management", path: "admin/manage-reports", icon: TbFileReport },
-      // { label: "System Monitoring", path: "admin/system-monitoring", icon: MdOutlineMonitorHeart },
       { label: "Content Management System", path: "admin/cms", icon: FiEdit },
     ],
     Officer: [
       { label: "Home", path: "officer/home", icon: FaHome },
       { label: "Dashboard & Map", path: "officer/dashboard-map", icon: FaMapMarkedAlt },
       { label: "Report Verification", path: "officer/report-verify", icon: MdReport },
-      { label: "Evacuation Center", path: "officer/evac-center", icon: MdPlace },
+      { label: "Evacuation Center", path: "officer/evac-center", icon: FaHouseUser },
     ],
     Researcher: [
       { label: "Home", path: "researcher/home", icon: FaHome },
@@ -183,12 +183,12 @@ const NavigationMenu: React.FC = () => {
       { label: "Community Feed", path: "citizen/community-feed", icon: FaBullhorn },
       { label: "Reports & Map", path: "citizen/alerts-map", icon: FaMapMarkedAlt },
       { label: "Notifications", path: "citizen/notifications", icon: FaBell },
-      { label: "Evacuation Center", path: "citizen/evac-center", icon: MdPlace },
+      { label: "Evacuation Center", path: "citizen/evac-center", icon: FaHouseUser },
     ],
     Guest: [
       { label: "Community Feed", path: "guest/community-feed", icon: FaBullhorn },
       { label: "Reports & Map", path: "guest/alerts-map", icon: FaMapMarkedAlt },
-      { label: "Evacuation Center", path: "guest/evac-center", icon: MdPlace },
+      { label: "Evacuation Center", path: "guest/evac-center", icon: FaHouseUser },
     ],
   };
 
@@ -203,16 +203,15 @@ const NavigationMenu: React.FC = () => {
 
   return (
     <div className={`navigation ${effectiveRole === "Admin" ? "admin-nav" : ""}`}>
-      {/* <div
+      {/*<div
         className={`nav-logo ${effectiveRole === "Admin" ? "admin-logo" : ""}`}
         onClick={() => navigate("/main/" + (effectiveRole === "Admin" ? "admin/dashboard" : "citizen/community-feed"))}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => e.key === "Enter" && navigate("/main/" + (effectiveRole === "Admin" ? "admin/dashboard" : "citizen/community-feed"))}
       >
-        <img src="/test-hazspot.png" alt="HazSpot logo" className="nav-logo-img" /> 
-        <span className="nav-logo-text">H<span>S</span></span>
-      </div> */}
+        <img src="/hazspot-logo(2).png" alt="HazSpot logo" className="nav-logo-img" />
+      </div>*/}
       {isGuest && (
         <div className="nav-item">
           <div className="guest-back-btn" onClick={() => navigate('/')}>

@@ -472,6 +472,7 @@
   border-radius: 15px;
   box-shadow: 0 6px 16px rgba(163, 169, 182, 0.18);
   padding: 8px;
+  height: 68vh;
 }
 
 .evac-side-content-filtermap {

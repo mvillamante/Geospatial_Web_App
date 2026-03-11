@@ -68,6 +68,8 @@ export const getUserRoleAndDisplayName = () => {
     currentUser.username ||
     (userRole || "Guest");
 
+  const userName = currentUser.username;
+
   const profilePath = `/main/${userRole.toLowerCase()}/profile`;
   const settingsPath = `/main/${userRole.toLowerCase()}/settings`;
 
@@ -77,6 +79,7 @@ export const getUserRoleAndDisplayName = () => {
     currentUserId, 
     userRole, 
     userRole2, 
+    userName,
     displayName, 
     profilePath, 
     settingsPath,

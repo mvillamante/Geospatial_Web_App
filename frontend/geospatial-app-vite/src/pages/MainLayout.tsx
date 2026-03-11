@@ -6,7 +6,7 @@ import { NavigationMenu } from "../components";
 // import { getUserRoleAndDisplayName } from "../libr/auth";
 import "./MainLayout.css";
 
-import NavHeader from "../components/ui/NavHeader";
+import NavHeader from "../components/ui/Navigations/NavHeader";
 
 type AppNotifType = "post" | "verified_incident" | "my_report" | "evac_center";
 

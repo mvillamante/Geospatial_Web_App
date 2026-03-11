@@ -105,7 +105,8 @@ td.text-wrap {
   border: 1px solid var(--light-gray-border);
   border-radius: 10px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  overflow-y: hidden;
+  /*overflow-y: hidden;*/
+  overflow: visible;
   margin-top: 1.2rem;
   margin-bottom: 1.7rem;
   height: 62.2vh;
@@ -253,6 +254,11 @@ td.text-wrap {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
   padding: 6px;
   z-index: 50;
+}
+
+tr:nth-last-child(-n+2) .kebab-dropdown {
+  top: auto;
+  bottom: calc(100% + 8px);
 }
 
 .reportsmgmt-page .dropdown-menu,

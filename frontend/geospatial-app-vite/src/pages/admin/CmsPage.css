@@ -116,6 +116,17 @@
   color: var(--text-white);
 }
 
+.btn-secondary.restore {
+  background-color: #4caf50;
+  color: var(--text-white);
+}
+
+.btn-secondary.restore:hover {
+  background-color: #43a047;
+  color: var(--text-white);
+}
+
+
 .add-phone-btn {
   margin-top: 10px;
   border-style: dashed;
@@ -175,11 +186,11 @@
 }
 
 .phone-card {
-  background: #ffffff;
+  background: #f8f9fa;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 5px;
 }
 
 .phone-row-top {
@@ -348,6 +359,11 @@
 }
 
 /* Rich  Text Editor */
+.editor-wrapper {
+  display: block;
+  width: 100%;
+}
+
 .editor-input {
     min-height: 150px;
     border: 1px solid #d1d5db;
@@ -419,4 +435,64 @@
     margin-right: 8px;
     margin-top: 8px;
     border: 1px solid #e5e7eb;
+}
+
+/*template content*/
+.template-row {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 12px;
+  border-radius: 10px;
+  border-left: 6px solid #007bff;
+  align-items: flex-start;
+  background-color: #f5f8fa;
+  scroll-behavior: smooth;
+}
+
+.template-row::-webkit-scrollbar {
+  height: 6px;
+}
+
+.template-row::-webkit-scrollbar-thumb {
+  background-color: #bbb;
+  border-radius: 3px;
+}
+
+.template-row::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.template-card {
+  min-width: 200px;
+  padding: 14px 16px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.template-card:hover {
+  background-color: #e6f0ff;
+  border-color: #007bff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.template-card strong {
+  display: block;
+  font-size: 12px;
+  color: #007bff;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.template-card p {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.4;
 }

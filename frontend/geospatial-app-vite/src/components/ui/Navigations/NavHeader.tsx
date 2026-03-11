@@ -81,13 +81,25 @@ const NavHeader: React.FC = () => {
       title: "Profile",
       subtitle: "Manage your account information",
     },
+    "/main/admin/settings": {
+      title: "Settings",
+      subtitle: "Manage your account preferences, notifications, and privacy settings",
+    },
     "/main/officer/profile": {
       title: "Profile",
       subtitle: "Manage your account information",
     },
+    "/main/officer/settings": {
+      title: "Settings",
+      subtitle: "Manage your account preferences, notifications, and privacy settings",
+    },
     "/main/researcher/profile": {
       title: "Profile",
       subtitle: "Manage your account information",
+    },
+    "/main/researcher/settings": {
+      title: "Settings",
+      subtitle: "Manage your account preferences, notifications, and privacy settings",
     },
     "/main/citizen/profile": {
       title: "Profile",

@@ -1,10 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
 import { Plus, Edit, Eye, Trash2, Send, ArchiveRestore, Archive } from 'lucide-react';
 import { FiCheckCircle, FiSearch } from "react-icons/fi";
+import { MdPublish, MdUnpublished } from "react-icons/md";
 import { LuEllipsis } from "react-icons/lu";
 import './CmsPage.css';
 import RichTextEditor from './TextEditor/RichTextEditor';
 import Pagination from "../../components/ui/Pagination";
+import { toast } from "sonner";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -89,6 +91,7 @@ const CmsPage: React.FC = () => {
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [guideToPublish, setGuideToPublish] = useState<Guide | null>(null);
   const [contact, setContact] = useState<QuickContact | null>(null);
+  const [originalContact, setOriginalContact] = useState<Contact | null>(null);
   const [showContactModal, setShowContactModal] = useState(false);
   const formatDateTime = (iso: string) => {
     const d = new Date(iso);
@@ -117,9 +120,21 @@ const CmsPage: React.FC = () => {
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isArchiving, setIsArchiving] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [guideToRestore, setGuideToRestore] = useState<Guide | null>(null);
+
+
   const [publishingStatus, setPublishingStatus] = useState<"idle" | "draft" | "publish">("idle");
   const [showViewModal, setShowViewModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [editorKey, setEditorKey] = useState(0);
 
   const fetchGuides = async () => {
     setIsLoading(true);
@@ -633,14 +648,12 @@ const CmsPage: React.FC = () => {
                                     setOpenMenuId(null);
                                   }}
                                 >
-                                  <Eye size={16} /> View Full Details
+                                  <Eye size={16} style={{ marginRight: 4 }} /> View Full Details
                                 </button>
                                 <button
                                   className="dropdown-item"
-                                  disabled={guide.status === "Published"}
-                                  title={guide.status === "Published" ? "Unpublish to edit" : "Edit"}
+                                  title="Edit"
                                   onClick={() => {
-                                    if (guide.status === "Published") return;
                                     setEditingGuide({ ...guide });
                                     setOriginalAttachments(guide.attachments || []);
                                     setTempEditImages([]);
@@ -649,9 +662,10 @@ const CmsPage: React.FC = () => {
                                     setOpenMenuId(null);
                                   }}
                                 >
-                                  <Edit size={16} /> Edit
+                                  <Edit size={16} style={{ marginRight: 4 }} /> Edit
                                 </button>
 
+                                { guide.status === "Published" && (
                                 <button
                                   className="dropdown-item"
                                   onClick={() => {
@@ -660,18 +674,28 @@ const CmsPage: React.FC = () => {
                                     setOpenMenuId(null);
                                   }}
                                 >
-                                  <Eye size={16} /> {guide.status === "Published" ? "Unpublish" : "Publish"}
+                                  {/*guide.status === "Published" ? (
+                                    <MdUnpublished size={16} style={{ marginRight: 4 }} />
+                                  ) : (
+                                    <MdPublish size={16} style={{ marginRight: 4 }} />
+                                  )}
+                                  {guide.status === "Published" ? "Unpublish" : "Publish"*/}
+                                  <MdPublish size={16} style={{ marginRight: 4 }} />
+                                  Publish 
                                 </button>
+                                )}
                               </>
                             ) : (
                               <button
                                 className="dropdown-item"
                                 onClick={() => {
-                                  restoreGuide(guide.postId);
+                                  setGuideToRestore(guide);
+                                  setShowRestoreModal(true);
                                   setOpenMenuId(null);
                                 }}
                               >
-                                <ArchiveRestore size={16} /> Restore
+                                <ArchiveRestore size={16} style={{ marginRight: 4 }} />
+                                Restore
                               </button>
                             )}
 
@@ -685,11 +709,11 @@ const CmsPage: React.FC = () => {
                             >
                               {viewArchived ? (
                                 <>
-                                  <Trash2 size={16} /> Delete
+                                  <Trash2 size={16} style={{ marginRight: 4 }} /> Delete
                                 </>
                               ) : (
                                 <>
-                                  <Archive size={16} /> Archive
+                                  <Archive size={16} style={{ marginRight: 4 }} /> Archive
                                 </>
                               )}
                             </button>
@@ -743,9 +767,10 @@ const CmsPage: React.FC = () => {
       {/* Create Modal */}
       {showCreateModal && (
         <div className="modal-overlay">
-          <div className="modal">
+          <div className="modal large">
             <h2>Create New Guide</h2>
 
+            {/* Type Selector */}
             <label>Type</label>
             <select
               value={newGuide.postType}
@@ -756,18 +781,24 @@ const CmsPage: React.FC = () => {
               <option value="guide">Guide</option>
             </select>
 
+            {/* Title Input */}
             <label>Title</label>
             <input
+              placeholder={`Enter ${newGuide.postType} title`}
               value={newGuide.postTitle}
               onChange={e => setNewGuide({ ...newGuide, postTitle: e.target.value })}
             />
 
-
+            {/* Body Editor */}
             <label>Body</label>
-            <RichTextEditor
-              initialHtml={newGuide.postBody}
-              onChange={(html) => setNewGuide({ ...newGuide, postBody: html })}
-            />
+            <div className="editor-wrapper" key={editorKey}>
+              <RichTextEditor
+                initialHtml={newGuide.postBody || "<p>Start typing the content here...</p>"}
+                onChange={(html) => setNewGuide({ ...newGuide, postBody: html })}
+              />
+            </div>
+
+            {/* Attach Image */}
             <label>Attach Image</label>
             <input
               type="file"
@@ -776,6 +807,15 @@ const CmsPage: React.FC = () => {
                 const file = e.target.files?.[0];
                 if (!file) return;
 
+                if (!file.type.startsWith("image/")) {
+                  toast.error("File must be an image");
+                  return;
+                }
+                if (file.size > 2 * 1024 * 1024) {
+                  toast.error("File size must be less than 2MB");
+                  return;
+                }
+
                 setNewGuide(prev => ({ ...prev, imageFile: file }));
                 setImagePreview(URL.createObjectURL(file));
               }}
@@ -783,7 +823,6 @@ const CmsPage: React.FC = () => {
             {imagePreview && (
               <div className="image-preview-wrapper">
                 <img src={imagePreview} alt="Preview" />
-
                 <button
                   className="remove-image-btn"
                   onClick={() => {
@@ -796,30 +835,99 @@ const CmsPage: React.FC = () => {
                 </button>
               </div>
             )}
+
+            {/* Template Section */}
+            {/*<div className="template-row">
+              <h4>Choose a Template:</h4>
+              {[
+                { type: "advisory", title: "Advisory Template", body: "<p>Please follow these steps carefully...</p>" },
+                { type: "announcement", title: "Announcement Template", body: "<p>We are excited to announce...</p>" },
+                { type: "guide", title: "Guide Template", body: "<p>This guide will walk you through...</p>" },
+              ].map(template => (
+                <div
+                  key={template.type}
+                  className="template-card"
+                  onClick={() => {
+                    setNewGuide({
+                      ...newGuide,
+                      postType: template.type,
+                      postTitle: template.title,
+                      postBody: template.body
+                    });
+
+                    setEditorKey(prev => prev + 1);
+                  }}
+                  
+                >
+                  <strong>{template.type.toUpperCase()}</strong>
+                  <p>{template.title}</p>
+                </div>
+              ))}
+            </div>*/}
+
+            {/* Actions */}
             <div className="modal-actions space-between">
+              {/* Cancel */}
               <button
                 className="btn-secondary"
                 onClick={() => {
-                  setShowCreateModal(false);
+                  setNewGuide({
+                    postType: "advisory",
+                    postTitle: "",
+                    postBody: "",
+                    imageFile: undefined,
+                  });
                   setImagePreview(null);
+                  setShowCreateModal(false);
+                  toast.info("Creation cancelled, changes not saved");
                 }}
               >
                 Cancel
               </button>
 
               <div style={{ display: "flex", gap: "8px" }}>
+                {/* Save Draft */}
                 <button
                   className="btn-tertiary"
                   disabled={publishingStatus !== "idle"}
-                  onClick={() => createGuide(false)}
+                  onClick={async () => {
+                    if (!newGuide.postTitle.trim()) return toast.error("Title cannot be empty");
+                    if (!newGuide.postBody?.trim()) return toast.error("Body cannot be empty");
+
+                    setPublishingStatus("draft");
+                    try {
+                      await createGuide(false);
+                      toast.success("Draft saved successfully!");
+                    } catch (err) {
+                      console.error(err);
+                      toast.error("Failed to save draft");
+                    } finally {
+                      setPublishingStatus("idle");
+                    }
+                  }}
                 >
                   {publishingStatus === "draft" ? "Saving..." : "Save Draft"}
                 </button>
 
+                {/* Publish */}
                 <button
                   className="btn-primary"
                   disabled={publishingStatus !== "idle"}
-                  onClick={() => createGuide(true)}
+                  onClick={async () => {
+                    if (!newGuide.postTitle.trim()) return toast.error("Title cannot be empty");
+                    if (!newGuide.postBody?.trim()) return toast.error("Body cannot be empty");
+
+                    setPublishingStatus("publish");
+                    try {
+                      await createGuide(true);
+                      toast.success("Content published successfully!");
+                    } catch (err) {
+                      console.error(err);
+                      toast.error("Failed to publish content");
+                    } finally {
+                      setPublishingStatus("idle");
+                    }
+                  }}
                 >
                   {publishingStatus === "publish" ? "Publishing..." : "Publish Content"}
                 </button>
@@ -895,12 +1003,14 @@ const CmsPage: React.FC = () => {
               <option value="guide">Guide</option>
             </select>
 
-
             <label>Body</label>
-            <RichTextEditor
-              initialHtml={editingGuide.postBody || ""}
-              onChange={(html) => setEditingGuide({ ...editingGuide, postBody: html })}
-            />
+            <div className="editor-wrapper">
+              <RichTextEditor
+                initialHtml={editingGuide.postBody || ""}
+                onChange={(html) => setEditingGuide({ ...editingGuide, postBody: html })}
+              />
+            </div>
+
             <label>Attach Image</label>
             <input
               type="file"
@@ -919,21 +1029,19 @@ const CmsPage: React.FC = () => {
               <div className="attachment-preview">
                 {[...(editingGuide.attachments || []), ...tempEditImages].map(img => (
                   <div key={img.id} className="attachment-wrapper">
-                    <img src={img.file_url} alt="attachment" style={{ width: "120px", borderRadius: "8px", marginRight: "8px", marginTop: "8px" }} />
-
+                    <img
+                      src={img.file_url}
+                      alt="attachment"
+                      style={{ width: "120px", borderRadius: "8px", marginRight: "8px", marginTop: "8px" }}
+                    />
                     <button
                       className="remove-image-btn"
                       onClick={() => {
-                        // Remove from tempEditImages first
                         setTempEditImages(prev => prev.filter(a => a.id !== img.id));
-
-                        // If it's from existing attachments, mark for deletion
                         if (editingGuide.attachments?.some(a => a.id === img.id)) {
                           setDeletedAttachments(prev => [...prev, img.id]);
                           setEditingGuide(prev =>
-                            prev
-                              ? { ...prev, attachments: prev.attachments?.filter(a => a.id !== img.id) }
-                              : prev
+                            prev ? { ...prev, attachments: prev.attachments?.filter(a => a.id !== img.id) } : prev
                           );
                         }
                       }}
@@ -946,19 +1054,44 @@ const CmsPage: React.FC = () => {
             )}
 
             <div className="modal-actions">
-              <button className="btn-secondary" onClick={() => {
-                setEditingGuide(prev =>
-                  prev ? { ...prev, attachments: originalAttachments } : null
-                );
-                setTempEditImages([]);
-                setDeletedAttachments([]);
-                setShowEditModal(false);
-              }
-              }>
+              <button
+                className="btn-secondary"
+                onClick={() => {
+                  setEditingGuide(prev =>
+                    prev ? { ...prev, attachments: originalAttachments } : null
+                  );
+                  setTempEditImages([]);
+                  setDeletedAttachments([]);
+                  setShowEditModal(false);
+                }}
+                disabled={isUpdating}
+              >
                 Cancel
               </button>
-              <button className="btn-primary" onClick={updateGuide}>
-                Update
+
+              <button
+                className="btn-primary"
+                onClick={async () => {
+                  if (!editingGuide) return;
+                  setIsUpdating(true);
+
+                  try {
+                    await updateGuide(editingGuide, tempEditImages, deletedAttachments);
+                    toast.success(`"${editingGuide.postTitle}" has been updated!`);
+                  } catch (err) {
+                    console.error("Update error:", err);
+                    toast.error(`Failed to update "${editingGuide.postTitle}".`);
+                  } finally {
+                    setIsUpdating(false);
+                    setShowEditModal(false);
+                    setEditingGuide(null);
+                    setTempEditImages([]);
+                    setDeletedAttachments([]);
+                  }
+                }}
+                disabled={isUpdating}
+              >
+                {isUpdating ? "Updating..." : "Update"}
               </button>
             </div>
           </div>
@@ -984,6 +1117,7 @@ const CmsPage: React.FC = () => {
                   setShowDeleteModal(false);
                   setGuideToDelete(null);
                 }}
+                disabled={isArchiving}
               >
                 Cancel
               </button>
@@ -991,28 +1125,101 @@ const CmsPage: React.FC = () => {
               {!viewArchived && (
                 <button
                   className="btn-secondary archive"
-                  onClick={() => {
-                    archiveGuide(guideToDelete.postId);
-                    setShowDeleteModal(false);
-                    setGuideToDelete(null);
+                  disabled={isArchiving}
+                  onClick={async () => {
+                    setIsArchiving(true);
+                    try {
+                      await archiveGuide(guideToDelete.postId);
+                      toast.success(`"${guideToDelete.postTitle}" has been archived!`);
+                    } catch (err) {
+                      console.error("Archive error:", err);
+                      toast.error(`Failed to archive "${guideToDelete.postTitle}".`);
+                    } finally {
+                      setIsArchiving(false);
+                      setShowDeleteModal(false);
+                      setGuideToDelete(null);
+                    }
                   }}
                 >
-                  Archive
+                  {isArchiving ? "Archiving..." : "Archive"}
                 </button>
               )}
 
               {viewArchived && (
                 <button
                   className="btn-secondary danger"
-                  onClick={() => {
-                    permanentDeleteGuide(guideToDelete.postId);
-                    setShowDeleteModal(false);
-                    setGuideToDelete(null);
+                  disabled={isArchiving}
+                  onClick={async () => {
+                    setIsArchiving(true);
+                    try {
+                      await permanentDeleteGuide(guideToDelete.postId);
+                      toast.success(
+                        `"${guideToDelete.postTitle}" has been permanently deleted!`
+                      );
+                    } catch (err) {
+                      console.error("Delete error:", err);
+                      toast.error(
+                        `Failed to delete "${guideToDelete.postTitle}".`
+                      );
+                    } finally {
+                      setIsArchiving(false);
+                      setShowDeleteModal(false);
+                      setGuideToDelete(null);
+                    }
                   }}
                 >
-                  Permanent Delete
+                  {isArchiving ? "Deleting..." : "Permanent Delete"}
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Restore Modal */}
+      {showRestoreModal && guideToRestore && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Restore Guide</h2>
+            <p>
+              Are you sure you want to restore{" "}
+              <strong>"{guideToRestore.postTitle}"</strong>?
+            </p>
+
+            <div className="modal-actions">
+              <button
+                className="btn-secondary"
+                disabled={isRestoring}
+                onClick={() => {
+                  setShowRestoreModal(false);
+                  setGuideToRestore(null);
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="btn-secondary restore"
+                disabled={isRestoring}
+                onClick={async () => {
+                  if (!guideToRestore) return;
+                  setIsRestoring(true);
+
+                  try {
+                    await restoreGuide(guideToRestore.postId);
+                    toast.success(`"${guideToRestore.postTitle}" has been restored!`);
+                  } catch (err) {
+                    console.error("Restore error:", err);
+                    toast.error(`Failed to restore "${guideToRestore.postTitle}".`);
+                  } finally {
+                    setIsRestoring(false);
+                    setShowRestoreModal(false);
+                    setGuideToRestore(null);
+                  }
+                }}
+              >
+                {isRestoring ? "Restoring..." : "Restore"}
+              </button>
             </div>
           </div>
         </div>
@@ -1051,13 +1258,39 @@ const CmsPage: React.FC = () => {
 
               <button
                 className="btn-secondary danger"
+                disabled={isPublishing}
                 onClick={async () => {
-                  await togglePublish(guideToPublish.postId);
-                  setShowPublishModal(false);
-                  setGuideToPublish(null);
+                  if (!guideToPublish) return;
+
+                  setIsPublishing(true);
+
+                  try {
+                    await togglePublish(guideToPublish.postId);
+
+                    const newStatus =
+                      guideToPublish.status === "Published" ? "Draft" : "Published";
+
+                    if (newStatus === "Published") {
+                      toast.success(`"${guideToPublish.postTitle}" has been published!`);
+                    } else if (newStatus === "Draft") {
+                      toast.success(`"${guideToPublish.postTitle}" saved as draft.`);
+                    }
+
+                  } catch (err) {
+                    console.error("Publish error:", err);
+                    toast.error(`Failed to update "${guideToPublish.postTitle}".`);
+                  } finally {
+                    setIsPublishing(false);
+                    setShowPublishModal(false);
+                    setGuideToPublish(null);
+                  }
                 }}
               >
-                {guideToPublish.status === "Published"
+                {isPublishing
+                  ? guideToPublish?.status === "Published"
+                    ? "Unpublishing..."
+                    : "Publishing..."
+                  : guideToPublish?.status === "Published"
                   ? "Unpublish"
                   : "Publish"}
               </button>
@@ -1067,7 +1300,7 @@ const CmsPage: React.FC = () => {
       )}
 
       {/* Quick Contact Modal */}
-      {showContactModal && contact && (
+      {showContactModal && contact && originalContact && (
         <div className="modal-overlay">
           <div className="modal large">
             <h2>Edit Quick Contact</h2>
@@ -1133,8 +1366,8 @@ const CmsPage: React.FC = () => {
             <h3>Contact Numbers</h3>
 
             {contact.phones.map((p, idx) => (
-              <div className="phone-card">
-                <div key={p.id || idx} className="phone-row-top">
+              <div key={p.id || idx} className="phone-card">
+                <div className="phone-row-top">
                   <select
                     value={p.type}
                     onChange={e => {
@@ -1171,9 +1404,31 @@ const CmsPage: React.FC = () => {
                   <button
                     className="icon-btn danger"
                     onClick={() => {
-                      setContact({
-                        ...contact,
-                        phones: contact.phones.filter((_, i) => i !== idx),
+                      if (!contact) return;
+
+                      const removedPhone = contact.phones[idx];
+                      const newPhones = contact.phones.filter((_, i) => i !== idx);
+                      setContact({ ...contact, phones: newPhones });
+
+                      toast(`Phone "${removedPhone.label || removedPhone.number}" removed`, {
+                        action: {
+                          label: "Undo",
+                          onClick: () => {
+                            setContact(prev =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    phones: [
+                                      ...prev.phones.slice(0, idx),
+                                      removedPhone,
+                                      ...prev.phones.slice(idx),
+                                    ],
+                                  }
+                                : prev
+                            );
+                          },
+                        },
+                        duration: 5000,
                       });
                     }}
                   >
@@ -1196,33 +1451,84 @@ const CmsPage: React.FC = () => {
             </button>
 
             <div className="modal-actions">
-              <button className="btn-secondary" onClick={() => setShowContactModal(false)}>
+              <button
+                className="btn-secondary"
+                onClick={() => {
+                  setContact(originalContact);
+                  toast.info("Edits discarded");
+                  setShowContactModal(false);
+                }}
+                disabled={isSaving}
+              >
                 Cancel
               </button>
 
               <button
                 className="btn-primary"
                 onClick={async () => {
-                  const res = await fetch(`${API_URL}/api/cms/quick-contacts/${contact.id}/`, {
-                    method: "PUT",
-                    headers: {
-                      "Content-Type": "application/json",
-                      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-                    },
-                    body: JSON.stringify(contact),
-                  });
+                  if (!contact) return;
 
-                  if (!res.ok) {
-                    alert("Failed to save contact");
+                  // Validation
+                  if (!contact.name.trim()) {
+                    toast.error("Name cannot be empty");
                     return;
                   }
 
-                  const updatedContact = await res.json();
-                  setContact(updatedContact);
-                  setShowContactModal(false);
+                  if (!contact.email?.trim()) {
+                    toast.error("Email cannot be empty");
+                    return;
+                  }
+
+                  if (contact.phones.length === 0) {
+                    toast.error("At least one phone number is required");
+                    return;
+                  }
+
+                  for (const phone of contact.phones) {
+                    if (!phone.label.trim()) {
+                      toast.error("Phone label cannot be empty");
+                      return;
+                    }
+
+                    const phoneRegex = /^[0-9+\-\(\) ]+$/;
+                    if (!phone.number.trim() || !phoneRegex.test(phone.number.trim())) {
+                      toast.error(`Phone number "${phone.number}" is invalid`);
+                      return;
+                    }
+                  }
+
+                  setIsSaving(true);
+
+                  try {
+                    const res = await fetch(
+                      `${API_URL}/api/cms/quick-contacts/${contact.id}/`,
+                      {
+                        method: "PUT",
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+                        },
+                        body: JSON.stringify(contact),
+                      }
+                    );
+
+                    if (!res.ok) throw new Error("Failed to save contact");
+
+                    const updatedContact = await res.json();
+                    setContact(updatedContact);
+                    setOriginalContact(updatedContact);
+                    toast.success("Quick contact updated successfully!");
+                    setShowContactModal(false);
+                  } catch (err) {
+                    console.error(err);
+                    toast.error("Failed to update contact");
+                  } finally {
+                    setIsSaving(false);
+                  }
                 }}
+                disabled={isSaving}
               >
-                Save Changes
+                {isSaving ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>

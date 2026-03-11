@@ -277,7 +277,7 @@ class ResidentVerificationRequestView(APIView):
         serializer = ResidentVerificationRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        uploaded_file = request.FILES.get("id_image")
+        uploaded_file = serializer.validated_data.get("id_image")
 
         file_path = None
         if uploaded_file:

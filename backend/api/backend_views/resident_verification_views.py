@@ -41,10 +41,8 @@ class ResidentVerificationListView(APIView):
 
         if search:
             search_parts = search.split()
-            # Only match if there are exactly 2 parts (first and last)
             if len(search_parts) == 2:
                 first, last = search_parts
-                # Exact match on first_name AND last_name (case-insensitive)
                 citizens = citizens.filter(
                     first_name__iexact=first,
                     last_name__iexact=last
@@ -52,12 +50,23 @@ class ResidentVerificationListView(APIView):
             else:
                 citizens = citizens.none()
 
+        # 🔹 Get latest verification requests
+        requests = (
+            ResidentVerificationRequest.objects
+            .select_related("user")
+            .order_by("-created_at")
+        )
+
+        request_map = {}
+
+        for r in requests:
+            if r.user_id not in request_map:
+                request_map[r.user_id] = r
+
         results = []
 
         for c in citizens:
-            latest_request = ResidentVerificationRequest.objects.filter(
-                user=c
-            ).order_by("-created_at").first()
+            latest_request = request_map.get(c.id)
 
             results.append({
                 "citizen_id": c.id,

@@ -34,7 +34,7 @@ interface BarangayData {
   risk: "High" | "Medium" | "Low";
 }
 
-type MapReport = {
+export type MapReport = {
   id: number;
   category: string;
   other_category?: string;

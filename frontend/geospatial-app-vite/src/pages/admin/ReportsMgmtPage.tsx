@@ -10,6 +10,7 @@ import "./ReportsMgmtPage.css";
 import LeafletMap from "../../components/ui/LeafletMap";
 import { getIncidentCategories, getIncidentLabel, type IncidentCategories } from "../../constants"
 import Pagination from "../../components/ui/Pagination";
+import type { MapReport } from "../../components/ui/LeafletMap";
 
 type CriticalLevel = "low" | "moderate" | "high" | "critical";
 
@@ -34,14 +35,6 @@ type Officer = {
   label: string;
   department_id: number;
 }
-
-type MapReport = {
-  id: number;
-  incident_type: string;
-  latitude?: number;
-  longitude?: number;
-  verified_critical_level: CriticalLevel;
-};
 
 
 interface AdminReport {
@@ -166,17 +159,12 @@ const ReportsMgmtPage: React.FC = () => {
   const selectedReportForMap = useMemo<MapReport | null>(() => {
     if (!selectedReportMap) return null;
 
-    const incident_type =
-      selectedReportMap.category === "others" &&
-        selectedReportMap.other_category?.trim()
-        ? selectedReportMap.other_category
-        : selectedReportMap.category;
-
     return {
       id: selectedReportMap.id,
-      incident_type,
-      latitude: selectedReportMap.lat,
-      longitude: selectedReportMap.lng,
+      category: selectedReportMap.category,
+      other_category: selectedReportMap.other_category ?? undefined,
+      lat: selectedReportMap.lat,
+      lng: selectedReportMap.lng,
       verified_critical_level:
         selectedReportMap.verified_critical_level ?? "low",
     };
@@ -608,7 +596,7 @@ const ReportsMgmtPage: React.FC = () => {
           <div className="map-stats-wrapper">
             <div className="map-container">
               <LeafletMap
-                selectedReport={selectedReportForMap}
+                selectedReport={selectedReportForMap ?? undefined}
                 categoryFilter={categoryFilter}
                 reportTimeFilter={reportTimeFilter}
                 activeLayers={["Queue Reports"]}

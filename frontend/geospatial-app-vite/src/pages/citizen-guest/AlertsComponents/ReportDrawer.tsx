@@ -27,51 +27,55 @@ type ReverseGeocodeResponse = {
 
 function formatStreetBarangayCity(data: ReverseGeocodeResponse): string {
   const parts: string[] = [];
+  const address = data.address as any;
 
   // Street
-  if (typeof data.street === "string" && data.street.trim()) {
-    parts.push(data.street.trim());
-  } else {
-    const address = data.address as any;
-    const road =
-      address?.road ||
-      address?.street ||
-      address?.pedestrian ||
-      address?.path ||
-      address?.footway;
-    const houseNumber = address?.house_number;
+  const road =
+    data.street ||
+    address?.road ||
+    address?.street ||
+    address?.pedestrian ||
+    address?.path ||
+    address?.footway;
 
-    if (typeof road === "string" && road.trim()) {
-      const street =
-        typeof houseNumber === "string" && houseNumber.trim()
-          ? `${houseNumber.trim()} ${road.trim()}`
-          : road.trim();
-      parts.push(street);
-    }
+  const houseNumber = address?.house_number;
+
+  if (road) {
+    parts.push(
+      houseNumber ? `${houseNumber} ${road}` : road
+    );
   }
 
   // Barangay
-  const barangayRaw =
-    typeof data.barangay === "string" && data.barangay.trim()
-      ? data.barangay.trim()
-      : "";
-  if (barangayRaw) {
-    const barangayLower = barangayRaw.toLowerCase();
+  const barangay =
+    data.barangay ||
+    address?.neighbourhood ||
+    address?.quarter ||
+    address?.residential ||
+    address?.suburb ||
+    address?.village ||
+    address?.hamlet;
+
+  if (barangay) {
+    const lower = barangay.toLowerCase();
     parts.push(
-      barangayLower.includes("barangay") || barangayLower.includes("brgy")
-        ? barangayRaw
-        : `Barangay ${barangayRaw}`
+      lower.includes("barangay") || lower.includes("brgy")
+        ? barangay
+        : `Barangay ${barangay}`
     );
   }
 
   // City
-  const cityRaw =
-    typeof data.city === "string" && data.city.trim() ? data.city.trim() : "";
-  if (cityRaw) parts.push(cityRaw);
+  const city =
+    data.city ||
+    address?.city ||
+    address?.town ||
+    address?.municipality;
 
-  // Backward compatible fallback
-  if (parts.length === 0 && typeof data.location === "string" && data.location.trim()) {
-    return data.location.trim();
+  if (city) parts.push(city);
+
+  if (parts.length === 0 && data.location) {
+    return data.location;
   }
 
   return parts.join(", ");
@@ -326,7 +330,7 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
       if (photoFile) form.append("photo", photoFile);
 
       if (!navigator.onLine) {
-        const { dbPromise }= await import("../../../libr/offlineDB");
+        const { dbPromise } = await import("../../../libr/offlineDB");
         const db = await dbPromise;
 
         const data: any = {

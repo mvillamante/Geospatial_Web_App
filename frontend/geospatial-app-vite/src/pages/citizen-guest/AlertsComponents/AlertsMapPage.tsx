@@ -203,20 +203,22 @@ const AlertsMapPage: React.FC = () => {
               : {}
           }
         >
-          <button
-            type="button"
-            className="sheet-handle-btn"
-            onClick={(e) => {
-              e.stopPropagation();
+          {isMobile && (
+            <button
+              type="button"
+              className="sheet-handle-btn"
+              onClick={(e) => {
+                e.stopPropagation();
 
-              const nextIndex = (snapIndex + 1) % snapPoints.length;
-              setSnapIndex(nextIndex);
-              setCurrentHeight(snapPoints[nextIndex]);
-            }}
-            aria-label="Adjust reports panel height"
-          >
-            <div className="sheet-handle" />
-          </button>
+                const nextIndex = (snapIndex + 1) % snapPoints.length;
+                setSnapIndex(nextIndex);
+                setCurrentHeight(snapPoints[nextIndex]);
+              }}
+              aria-label="Adjust reports panel height"
+            >
+              <div className="sheet-handle" />
+            </button>
+          )}
 
 
           {/* Alerts Panel */}

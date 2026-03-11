@@ -502,12 +502,13 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
 
             {!photoPreview ? (
               <label htmlFor="photoInput" className="photo-placeholder">
-                <span>Take or Upload Photo</span>
+                <span>📷 Take or Upload Photo</span>
                 <small>Helps responders verify the incident</small>
               </label>
             ) : (
               <div className="photo-preview">
                 <img src={photoPreview} alt="Incident preview" />
+
                 <button
                   type="button"
                   className="remove-photo"
@@ -522,64 +523,65 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
               </div>
             )}
           </div>
-        </div>
 
-        <div className="drawer-actions">
-          <button
-            className="submit-btn"
-            onClick={() => {
-              if (validateReport()) {
-                setShowSubmitModal(true);
-              }
-            }}
-            disabled={submitting}
-          >
-            {submitting ? "Submitting..." : "Submit Report"}
-          </button>
-          <button className="close-btn" onClick={onClose} disabled={submitting}>
-            Cancel
-          </button>
-        </div>
-      </div>
-      {showSubmitModal && (
-        <div
-          className="modal-overlay"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div
-            className="modal-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3>Submit Report</h3>
 
-            <p>
-              Please confirm that the information you provided is accurate.
-              Submitting false reports may result in account restrictions.
-            </p>
-
-            <div className="modal-actions">
-              <button
-                className="cancel-btn"
-                onClick={() => setShowSubmitModal(false)}
-                disabled={submitting}
-              >
-                Cancel
-              </button>
-
-              <button
-                className="save-btn"
-                onClick={() => {
-                  setShowSubmitModal(false);
-                  handleSubmit();
-                }}
-                disabled={submitting}
-              >
-                Confirm & Submit
-              </button>
-            </div>
+          <div className="drawer-actions">
+            <button
+              className="submit-btn"
+              onClick={() => {
+                if (validateReport()) {
+                  setShowSubmitModal(true);
+                }
+              }}
+              disabled={submitting}
+            >
+              {submitting ? "Submitting..." : "Submit Report"}
+            </button>
+            <button className="close-btn" onClick={onClose} disabled={submitting}>
+              Cancel
+            </button>
           </div>
         </div>
-      )}
+        {showSubmitModal && (
+          <div
+            className="modal-overlay"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              className="modal-card"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3>Submit Report</h3>
+
+              <p>
+                Please confirm that the information you provided is accurate.
+                Submitting false reports may result in account restrictions.
+              </p>
+
+              <div className="modal-actions">
+                <button
+                  className="cancel-btn"
+                  onClick={() => setShowSubmitModal(false)}
+                  disabled={submitting}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="save-btn"
+                  onClick={() => {
+                    setShowSubmitModal(false);
+                    handleSubmit();
+                  }}
+                  disabled={submitting}
+                >
+                  Confirm & Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

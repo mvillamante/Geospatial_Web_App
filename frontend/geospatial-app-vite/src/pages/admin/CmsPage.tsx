@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Plus, Edit, Eye, Trash2, Send, ArchiveRestore, Archive } from 'lucide-react';
 import { FiCheckCircle, FiSearch } from "react-icons/fi";
-import { MdPublish, MdUnpublished } from "react-icons/md";
+import { MdPublish } from "react-icons/md";
 import { LuEllipsis } from "react-icons/lu";
 import './CmsPage.css';
 import RichTextEditor from './TextEditor/RichTextEditor';
@@ -91,7 +91,7 @@ const CmsPage: React.FC = () => {
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [guideToPublish, setGuideToPublish] = useState<Guide | null>(null);
   const [contact, setContact] = useState<QuickContact | null>(null);
-  const [originalContact, setOriginalContact] = useState<Contact | null>(null);
+  const [originalContact, setOriginalContact] = useState<QuickContact | null>(null);
   const [showContactModal, setShowContactModal] = useState(false);
   const formatDateTime = (iso: string) => {
     const d = new Date(iso);
@@ -134,7 +134,7 @@ const CmsPage: React.FC = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [editorKey, setEditorKey] = useState(0);
+  const [editorKey] = useState(0);
 
   const fetchGuides = async () => {
     setIsLoading(true);
@@ -1076,7 +1076,7 @@ const CmsPage: React.FC = () => {
                   setIsUpdating(true);
 
                   try {
-                    await updateGuide(editingGuide, tempEditImages, deletedAttachments);
+                    await updateGuide();
                     toast.success(`"${editingGuide.postTitle}" has been updated!`);
                   } catch (err) {
                     console.error("Update error:", err);

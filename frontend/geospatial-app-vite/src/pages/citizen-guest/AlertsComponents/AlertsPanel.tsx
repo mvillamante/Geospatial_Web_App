@@ -4,14 +4,23 @@ import { Search } from 'lucide-react';
 
 export interface Report {
     id: number;
-    incident_type: string;
+
+    category: string;
+    category_display?: string;
+    other_category?: string;
+
     verified_critical_level: "low" | "moderate" | "high" | "critical";
-    barangay: string;
+
+    location_display: string;
+
     created_at: string;
+
     latitude: number;
     longitude: number;
+
     status?: string;
     assigned_officer_id?: number | null;
+
     lgu_post?: {
         what_happened?: string;
         action_taken?: string;
@@ -31,10 +40,10 @@ interface AlertsPanelProps {
     reportTimeFilter: "today" | "7days" | "last30days" | "last12months" | "all";
     setReportTimeFilter: React.Dispatch<React.SetStateAction<"today" | "7days" | "last30days" | "last12months" | "all">>;
     onCollapsePanel?: () => void;
+    reports: Report[];
+    isLoadingReports?: boolean;
+    onRefreshReports?: () => void;
 }
-
-
-
 
 export default function AlertsPanel({
     onReport,
@@ -45,12 +54,14 @@ export default function AlertsPanel({
     isVerificationLoading,
     reportTimeFilter,
     setReportTimeFilter,
-    onCollapsePanel
+    onCollapsePanel,
+    reports,
+    isLoadingReports,
+    onRefreshReports
 }: AlertsPanelProps) {
 
     const hasAutoOpenedRef = useRef(false);
     const [filtersOpen, setFiltersOpen] = useState(true);
-    const [isLoading, setIsLoading] = useState(false);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
     const [highlightedId, setHighlightedId] = useState<number | null>(null);
@@ -65,118 +76,13 @@ export default function AlertsPanel({
     const [barangayFilter, setBarangayFilter] = useState<"all" | "my">("all");
     const [searchBarangay, setSearchBarangay] = useState("");
     const [sortNewest, setSortNewest] = useState<boolean>(true);
-    const [reports, setReports] = useState<Report[]>([]);
-
-    const normalizeIncident = (v: any): Report["incident_type"] => {
-        const s = String(v ?? "").toLowerCase();
-
-        if (s.includes("fire")) return "fire";
-        if (s.includes("flood")) return "flood";
-        if (s.includes("landslide")) return "landslide";
-        if (s.includes("chemical") || s.includes("gas")) return "chemical / gas leak";
-        if (s.includes("typhoon") || s.includes("storm")) return "typhoon";
-        if (s.includes("earthquake")) return "earthquake";
-        if (s.includes("fallen tree") || s.includes("tree")) return "fallen tree";
-        if (s.includes("infrastructure") || s.includes("damage")) return "infrastructure damage";
-        if (s.includes("vehicular") || s.includes("accident")) return "vehicular accident";
-
-        return "others";
-    };
-
-
-
-    // const severityPriority: Record<Report["verified_critical_level"], number> = {
-    //     critical: 4,
-    //     high: 3,
-    //     moderate: 2,
-    //     low: 1,
-    // };
-
-    const fetchReports = async () => {
-        const token = localStorage.getItem("access_token");
-        const API_URL = import.meta.env.VITE_API_URL;
-        // if (!token) return;
-
-        setIsLoading(true);
-        try {
-            const headers: HeadersInit = {
-                "Content-Type": "application/json",
-            };
-
-            let url = `${API_URL}/api/incident-reports/verified/`
-
-            if (reportTimeFilter !== "all") {
-                url += `?time_filter=${encodeURIComponent(reportTimeFilter)}`;
-            }
-
-
-            // Only attach Authorization if token exists
-            if (token) {
-                headers["Authorization"] = `Bearer ${token}`;
-            }
-
-            const res = await fetch(url, {
-                headers,
-            });
-
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                throw new Error(errData.detail || `HTTP error ${res.status}`);
-            }
-
-            const data = await res.json();
-
-            const mappedReports: Report[] = (data.results || []).map((r: any) => {
-                let lat = r.lat ?? r.latitude;
-                let lng = r.lng ?? r.longitude;
-
-                const extractBarangay = (locationDisplay?: string): string => {
-                    const s = String(locationDisplay ?? "").trim();
-                    if (!s) return "";
-
-                    const m = s.match(/\b(?:barangay|brgy\.?)\s+([^,]+)/i);
-                    if (m?.[1]) return m[1].trim();
-
-                    return s.split(",")[0].trim();
-                };
-
-                return {
-                    id: r.id,
-                    incident_type: r.category === "others"
-                        ? r.other_category || "others"
-                        : normalizeIncident(r.category_display ?? r.category),
-                    verified_critical_level: r.verified_critical_level ?? "low",
-                    barangay: extractBarangay(r.location_display),
-                    created_at: r.created_at,
-                    latitude: lat ?? 0,
-                    longitude: lng ?? 0,
-
-                    assigned_officer_id: r.assigned_officer_id ?? r.assignedOfficerId ?? null,
-
-                    // to check
-                    status: normalizeUiStatus(r.status),
-
-                    lgu_post: r.lgu_post ?? null,
-
-
-                    lastUpdatedAt: r.lastUpdatedAt ?? r.createdAt,
-                };
-            });
-
-            setReports(mappedReports);
-            setLastUpdated(new Date());
-        } catch (err: any) {
-            console.error("Failed to fetch verified reports:", err.message);
-            setReports([]);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
 
     useEffect(() => {
-        fetchReports();
-    }, [reportTimeFilter]);
+        if (reports.length) {
+            setLastUpdated(new Date())
+        }
+    }, [reports])
+
 
     useEffect(() => {
         if (searchBarangay.trim() !== "") {
@@ -194,25 +100,6 @@ export default function AlertsPanel({
         return () => window.removeEventListener("resize", onResize);
     }, []);
 
-    // const handleBarangaySearch = (value: string) => {
-    //     setSelectedBarangay(value);
-    //     if (onBarangaySearch) {
-    //         const matchingReports = reports.filter(r =>
-    //             r.barangay.toLowerCase().includes(value.toLowerCase())
-    //         );
-
-    //         let highestSeverity: string | null = null;
-    //         if (matchingReports.length > 0) {
-    //             const sorted = matchingReports.sort((a, b) =>
-    //                 severityPriority[b.verified_critical_level] - severityPriority[a.verified_critical_level]
-    //             );
-    //             highestSeverity = sorted[0].verified_critical_level;
-    //         }
-
-    //         onBarangaySearch(value, highestSeverity);
-    //     }
-    // };
-
     const normalize = (s: string) =>
         s
             .toLowerCase()
@@ -222,25 +109,51 @@ export default function AlertsPanel({
             .replace(/\s+/g, " ")
             .trim();
 
-    const filteredReports = reports
-        .filter(r => r.status !== "rejected")
-        .filter(r => (r.assigned_officer_id != null) || (r.status === "resolved"))
-        .filter(r => selectedCategory === "all" || r.incident_type.toLowerCase() === selectedCategory)
-        .filter(r => selectedSeverity === "all" || r.verified_critical_level === selectedSeverity)
-        .filter(r => selectedStatus === "all" || (r.status ?? "in_progress") === selectedStatus)
-        .filter(r => {
-            const normalizedReport = normalize(r.barangay);
+    const normalizedSearch = useMemo(
+        () => normalize(searchBarangay),
+        [searchBarangay]
+    )
 
-            if (searchBarangay.trim() !== "") {
-                return normalizedReport.includes(normalize(searchBarangay));
-            }
+    const normalizedUserBarangay = useMemo(
+        () => normalize(userBarangay),
+        [userBarangay]
+    )
 
-            if (barangayFilter === "my" && userBarangay) {
-                return normalizedReport === normalize(userBarangay);
-            }
+    const filteredReports = useMemo(() => {
+        return reports.filter(r => {
 
-            return true;
-        });
+            if (r.status === "rejected") return false
+
+            if (!(r.assigned_officer_id != null || r.status === "resolved")) return false
+
+            if (selectedCategory !== "all" && r.category.toLowerCase() !== selectedCategory)
+                return false
+
+            if (selectedSeverity !== "all" && r.verified_critical_level !== selectedSeverity)
+                return false
+
+            if (selectedStatus !== "all" && (r.status ?? "in_progress") !== selectedStatus)
+                return false
+
+            const normalizedReport = normalize(r.location_display)
+
+            if (normalizedSearch !== "")
+                return normalizedReport.includes(normalizedSearch)
+
+            if (barangayFilter === "my" && normalizedUserBarangay)
+                return normalizedReport === normalizedUserBarangay
+
+            return true
+        })
+    }, [
+        reports,
+        selectedCategory,
+        selectedSeverity,
+        selectedStatus,
+        barangayFilter,
+        normalizedSearch,
+        normalizedUserBarangay
+    ])
 
     const sortedReports = useMemo(() => {
         return [...filteredReports].sort((a, b) => {
@@ -262,10 +175,6 @@ export default function AlertsPanel({
         if (!reports.length) return;
         if (!initialOpenIncidentId) return;
         if (hasAutoOpenedRef.current) return;
-
-        console.log("reports contains:", reports.some(r => r.id === initialOpenIncidentId));
-        console.log("sortedReports contains:", sortedReports.some(r => r.id === initialOpenIncidentId));
-
 
         setSelectedCategory("all");
         setSelectedSeverity("all");
@@ -301,7 +210,6 @@ export default function AlertsPanel({
     }, [sortedReports, reports, initialOpenIncidentId]);
 
 
-
     const timeAgo = (iso: string) => {
         const diffMs = Date.now() - new Date(iso).getTime();
         const mins = Math.floor(diffMs / 60000);
@@ -311,50 +219,7 @@ export default function AlertsPanel({
         if (hrs < 24) return `${hrs}h ago`;
         const days = Math.floor(hrs / 24);
         return `${days}d ago`;
-    };
-
-    const normalizeUiStatus = (
-        rawStatus: any
-    ): "in_progress" | "resolved" | "rejected" => {
-        const s = String(rawStatus ?? "").toLowerCase();
-
-        if (s === "resolved") return "resolved";
-        if (s === "rejected") return "rejected";
-
-        return "in_progress";
-    };
-    // function renderLguPost(note: string) {
-    //     const lines = note.split("\n");
-    //     const blocks: { title?: string; body: string[] }[] = [];
-    //     let current: { title?: string; body: string[] } = { title: undefined, body: [] };
-
-    //     const isHeader = (l: string) =>
-    //         /^(status|what happened|action taken|advisory to citizens|advisory)\s*:/i.test(l.trim());
-
-    //     for (const raw of lines) {
-    //         const line = raw.replace(/\r/g, "");
-
-    //         if (isHeader(line)) {
-    //             // push previous
-    //             if (current.title || current.body.length) blocks.push(current);
-    //             current = { title: line.replace(/:$/, "").trim(), body: [] };
-    //         } else {
-    //             current.body.push(line);
-    //         }
-    //     }
-    //     if (current.title || current.body.length) blocks.push(current);
-
-    //     return (
-    //         <div className="lgu-post">
-    //             {blocks.map((b, idx) => (
-    //                 <div className="lgu-post-block" key={idx}>
-    //                     {b.title && <div className="lgu-post-title">{b.title}</div>}
-    //                     <div className="lgu-post-body">{b.body.join("\n").trim()}</div>
-    //                 </div>
-    //             ))}
-    //         </div>
-    //     );
-    // }
+    }
 
 
     return (
@@ -384,12 +249,12 @@ export default function AlertsPanel({
 
                         <button
                             className="alerts-refresh-btn"
-                            onClick={fetchReports}
-                            disabled={isLoading}
+                            onClick={onRefreshReports}
+                            disabled={isLoadingReports}
                             aria-label="Refresh"
                             title="refresh"
                         >
-                            {isLoading ? "..." : "↻"}
+                            {isLoadingReports ? "..." : "↻"}
                         </button>
                     </div>
                 </div>
@@ -546,9 +411,24 @@ export default function AlertsPanel({
                 </button>
             </div>
 
+            {isLoadingReports && (
+                <div className="alerts-loading-overlay">
+                    <span className="spinner"></span>
+                    Updating reports…
+                </div>
+            )}
+
             <div className="alerts-list-area">
-                {isLoading && reports.length === 0 ? (
-                    <div className="empty-state">Loading reports...</div>
+                {isLoadingReports ? (
+                    <ul className="report-list">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <li key={i} className="report-card-skeleton">
+                                <div className="skeleton-line title"></div>
+                                <div className="skeleton-line location"></div>
+                                <div className="skeleton-line meta"></div>
+                            </li>
+                        ))}
+                    </ul>
                 ) : sortedReports.length === 0 ? (
                     <div className="empty-state">
                         <p>No reports found matching your filters.</p>
@@ -574,15 +454,19 @@ export default function AlertsPanel({
                             >
                                 <div className="report-header">
                                     <span className="report-title">
-                                        {report.incident_type.toUpperCase()}
+                                        {(
+                                            report.category === "others"
+                                                ? report.other_category || "others"
+                                                : report.category_display || report.category
+                                        ).toUpperCase()}
                                     </span>
                                     <span className={`risk-badge ${report.verified_critical_level}`}>
-                                        {report.verified_critical_level.toUpperCase()}
+                                        {(report.verified_critical_level ?? "low").toUpperCase()}
                                     </span>
                                 </div>
 
                                 <span className="report-location">
-                                    Barangay {report.barangay}
+                                    {report.location_display}
                                 </span>
 
                                 <div className="report-meta">

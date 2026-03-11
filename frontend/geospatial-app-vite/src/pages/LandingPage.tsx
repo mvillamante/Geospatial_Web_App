@@ -56,6 +56,14 @@ const LandingPage: React.FC = () => {
   const [stats, setStats] = useState<LandingStats | null>(null);
 
   useEffect(() => {
+    const token = localStorage.getItem("access_token");
+
+    if (token) {
+      navigate("/main/citizen/community-feed", { replace: true });
+    }
+  }, [navigate]);
+
+  useEffect(() => {
     const checkMobile = () => {
       const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       setIsMobile(mobile);

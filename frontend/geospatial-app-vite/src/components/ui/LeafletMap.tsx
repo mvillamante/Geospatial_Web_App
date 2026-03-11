@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./LeafletMap.css";
@@ -36,9 +36,10 @@ interface BarangayData {
 
 type MapReport = {
   id: number;
-  incident_type: string;
-  latitude?: number;
-  longitude?: number;
+  category: string;
+  other_category?: string;
+  lat?: number;
+  lng?: number;
   verified_critical_level: "low" | "moderate" | "high" | "critical";
 };
 
@@ -150,6 +151,8 @@ interface LeafletMapProps {
   reportTimeFilter?: string;
   activeLayers?: string[];
 
+  reports?: MapReport[];
+
   height?: string;
   width?: string;
 
@@ -186,7 +189,7 @@ interface LeafletMapProps {
 const API_URL = import.meta.env.VITE_API_URL;
 
 
-export default function LeafletMap(props: LeafletMapProps) {
+function LeafletMap(props: LeafletMapProps) {
   const {
     height = "100%",
     width = "100%",
@@ -200,8 +203,8 @@ export default function LeafletMap(props: LeafletMapProps) {
     selectedReport = null,
     reportClickTimestamp: _reportClickTimestamp = null, // kept for API compatibility
     locationFilter = "all",
-    reportTimeFilter = "",
     categoryFilter = "",
+    reports = [],
     activeLayers = [],
     ndviOpacity = 0.8,
     ndviYear,
@@ -1526,6 +1529,15 @@ export default function LeafletMap(props: LeafletMapProps) {
 
   // Handle Verified Reports layer 
   const reportMarkersMap = useRef<Map<number, L.Marker>>(new Map());
+
+  const formatCategoryLabel = (val?: string) => {
+    if (!val) return "";
+
+    return val
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -1533,12 +1545,9 @@ export default function LeafletMap(props: LeafletMapProps) {
     const showVerifiedReports = activeLayers.includes("Verified Reports");
 
     if (!showVerifiedReports) {
-      if (verifiedReportsLayerRef.current) {
-        verifiedReportsLayerRef.current.clearLayers();
-      }
+      verifiedReportsLayerRef.current?.clearLayers();
       return;
     }
-
 
     if (!verifiedReportsLayerRef.current) {
       verifiedReportsLayerRef.current = L.layerGroup().addTo(map);
@@ -1546,89 +1555,83 @@ export default function LeafletMap(props: LeafletMapProps) {
 
     const layerGroup = verifiedReportsLayerRef.current;
 
-    let url = `${API_URL}/api/incident-reports/verified/`
-    if (reportTimeFilter !== "all") {
-      url += `?time_filter=${encodeURIComponent(reportTimeFilter)}`;
-    }
+    layerGroup.clearLayers();
+    reportMarkersMap.current.clear();
 
-    fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then(res => res.json())
-      .then(data => {
-        layerGroup.clearLayers();
-        reportMarkersMap.current.clear();
+    const normalizedCategory = (val: string) =>
+      val?.toLowerCase().replace(/\s+/g, "_").replace(/[\/\-]/g, "");
 
-        const reports = (data.results || []).filter(
-          (r: any) => r.status !== "rejected"
+    const filteredReports =
+      !categoryFilter || categoryFilter === "all"
+        ? reports
+        : reports.filter(
+          r =>
+            normalizedCategory(
+              r.category === "others" ? r.other_category || "others" : r.category
+            ) === normalizedCategory(categoryFilter)
         );
 
-        const normalizedCategory = (val: string) =>
-          val?.toLowerCase().replace(/\s+/g, "_").replace(/[\/\-]/g, "");
+    filteredReports.forEach((r) => {
+      const lat = parseFloat(r.lat as any);
+      const lng = parseFloat(r.lng as any);
 
-        const filteredReports =
-          !categoryFilter || categoryFilter === "all"
-            ? reports
-            : reports.filter((r: any) =>
-              normalizedCategory(r.category) ===
-              normalizedCategory(categoryFilter)
-            );
+      if (Number.isNaN(lat) || Number.isNaN(lng)) return;
 
-        filteredReports.forEach((r: any) => {
+      // already exists → skip
+      if (reportMarkersMap.current.has(r.id)) return;
 
-          // Wag parseFloat kasi nageerror sa iba :)
-          const lat = r.lat;
-          const lng = r.lng;
+      const iconEmoji = getIncidentIcon(
+        r.category === "others" ? r.other_category || "others" : r.category
+      );
 
-          if (lat == null || lng == null) return;
+      const colors = getSeverityColors(r);
 
-          const iconEmoji = getIncidentIcon(r.category);
-
-          const colors = getSeverityColors(r);
-
-          const reportIcon = L.divIcon({
-            html: `
-            <div class="verified-report-marker">
-              <div class="pulse" style="background:${colors.secondary}40;"></div>
-              <div class="pin"
-                style="
-                  background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
-                  border: 3px solid ${colors.border};
-                ">
-                <span class="verified-report-icon">${iconEmoji}</span>
-              </div>
-            </div>
-            `,
-            className: "",
-            iconSize: [44, 44],
-            iconAnchor: [22, 44],
-          });
-
-
-          const marker = L.marker([lat, lng], { icon: reportIcon })
-            .addTo(layerGroup)
-            .bindPopup(`
-              <div class="verified-popup">
-                <div class="popup-icon">${iconEmoji}</div>
-                <h3>${r.category_display || "Incident"}</h3>
-                <p>${r.location_display || "Cabuyao, Laguna"}</p>
-                <span class="popup-pill" style="background:${colors.primary}">
-                  ${colors.text} RISK
-                </span>
-              </div>
-            `);
-
-          reportMarkersMap.current.set(r.id, marker);
-        });
-
-      })
-      .catch(err => {
-        console.error("Failed to load verified reports:", err);
+      const reportIcon = L.divIcon({
+        html: `
+      <div class="verified-report-marker">
+        <div class="pulse" style="background:${colors.secondary}40;"></div>
+        <div class="pin"
+          style="
+            background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
+            border: 3px solid ${colors.border};
+          ">
+          <span class="verified-report-icon">${iconEmoji}</span>
+        </div>
+      </div>
+    `,
+        className: "",
+        iconSize: [44, 44],
+        iconAnchor: [22, 44],
       });
 
-  }, [activeLayers, reportTimeFilter, categoryFilter]);
+      const marker = L.marker([lat, lng], { icon: reportIcon })
+        .addTo(layerGroup)
+        .bindPopup(`
+    <div class="verified-popup">
+      <div class="popup-icon">${iconEmoji}</div>
+      <h3>${formatCategoryLabel(r.category)}</h3>
+      <p>Cabuyao, Laguna</p>
+      <span class="popup-pill" style="background:${colors.primary}">
+        ${colors.text} RISK
+      </span>
+    </div>
+  `, {
+          minWidth: 230
+        });
+
+      reportMarkersMap.current.set(r.id, marker);
+    });
+
+    reportMarkersMap.current.forEach((marker, id) => {
+      const stillExists = filteredReports.some(r => r.id === id);
+
+      if (!stillExists) {
+        layerGroup.removeLayer(marker);
+        reportMarkersMap.current.delete(id);
+      }
+    });
+
+  }, [reports, activeLayers, categoryFilter]);
 
   /* Selected Report */
   useEffect(() => {
@@ -1734,4 +1737,7 @@ export default function LeafletMap(props: LeafletMapProps) {
       <div id="map" style={{ height: "100%", width: "100%" }}></div>
     </div>
   );
+
 }
+
+export default React.memo(LeafletMap);

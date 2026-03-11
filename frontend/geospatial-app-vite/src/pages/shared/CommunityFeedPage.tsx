@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { FaFacebook, FaEnvelope, FaSyncAlt } from "react-icons/fa";
 
 import {
@@ -177,17 +177,27 @@ export default function CommunityFeedPage() {
 
 
 
-    const filtered = useMemo(() => {
+    const { pinned, normal } = useMemo(() => {
         const q = query.trim().toLowerCase();
-        return posts
-            .filter((p) => (filter === "all" ? true : p.type === filter))
-            .filter((p) => !q || p.title.toLowerCase().includes(q) || p.body.toLowerCase().includes(q))
+
+        const filteredPosts = posts
+            .filter(p => filter === "all" || p.type === filter)
+            .filter(p =>
+                !q ||
+                p.title.toLowerCase().includes(q) ||
+                p.body.toLowerCase().includes(q)
+            )
             .sort((a, b) => b.created_at.localeCompare(a.created_at));
+
+        return {
+            pinned: filteredPosts.filter(p => p.pinned),
+            normal: filteredPosts.filter(p => !p.pinned)
+        };
     }, [posts, query, filter]);
 
-    const pinned = filtered.filter(p => p.pinned).sort((a, b) => b.created_at.localeCompare(a.created_at));
-    const normal = filtered.filter(p => !p.pinned).sort((a, b) => b.created_at.localeCompare(a.created_at));
-
+    const openPost = useCallback((post: FeedPost) => {
+        setSelected(post);
+    }, []);
 
     return (
         <div className="feed-page">
@@ -252,7 +262,7 @@ export default function CommunityFeedPage() {
                             </div>
                             <div className="feed-list">
                                 {pinned.map((p) => (
-                                    <PostRow key={p.id} post={p} onOpen={() => setSelected(p)} />
+                                    <PostRow key={p.id} post={p} onOpen={openPost} />
                                 ))}
                             </div>
                         </section>
@@ -279,7 +289,7 @@ export default function CommunityFeedPage() {
                             <div className="empty-state">No updates yet.</div>
                         ) : (
                             <>
-                                {normal.map((p) => <PostRow key={p.id} post={p} onOpen={() => setSelected(p)} />)}
+                                {normal.map((p) => <PostRow key={p.id} post={p} onOpen={openPost} />)}
                             </>
                         )}
                     </section>
@@ -417,9 +427,15 @@ export default function CommunityFeedPage() {
     );
 }
 
-function PostRow({ post, onOpen }: { post: FeedPost; onOpen: () => void }) {
+const PostRow = React.memo(function PostRow({
+    post,
+    onOpen,
+}: {
+    post: FeedPost;
+    onOpen: (post: FeedPost) => void;
+}) {
     return (
-        <button className="post-row" onClick={onOpen} type="button">
+        <button className="post-row" onClick={() => onOpen(post)} type="button">
             <div className="avatar" aria-hidden="true">
                 {"CC"}
             </div>
@@ -471,13 +487,20 @@ function PostRow({ post, onOpen }: { post: FeedPost; onOpen: () => void }) {
 
                 {post.attachments?.map((url, i) => (
                     <div className="post-photo-wrap" key={i}>
-                        <img className="post-photo" src={url} alt={`Post attachment ${i + 1}`} />
+                        <img
+                            className="post-photo"
+                            src={url}
+                            loading="lazy"
+                            alt={`Post attachment ${i + 1}`}
+                        />
                     </div>
                 ))}
 
             </div>
         </button>
     );
+
 }
+);
 
 

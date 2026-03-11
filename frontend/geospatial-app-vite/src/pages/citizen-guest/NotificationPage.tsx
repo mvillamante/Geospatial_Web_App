@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 // import { FaBullhorn, FaExclamationTriangle } from "react-icons/fa";
 // import { MdReport, MdInfo } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
@@ -47,7 +47,7 @@ export interface NotificationItem {
 
     cmsGuideId?: number;
     cmsPostId?: string;
-    createdAt?: string;
+    createdAt?: number;
 };
 
 // const statusLabel: Record<ReportStatus, string> = {
@@ -70,6 +70,13 @@ const timeAgo = (iso: string) => {
     return `${days}d ago`;
 };
 
+const severityRank = {
+    low: 1,
+    moderate: 2,
+    high: 3,
+    critical: 4
+};
+
 const NotificationPage: React.FC = () => {
     const API_URL = import.meta.env.VITE_API_URL;
 
@@ -83,6 +90,7 @@ const NotificationPage: React.FC = () => {
     const [timeFilter, setTimeFilter] = useState<TimeFilter>("7days");
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const navigate = useNavigate();
+
 
     // Load preferences from settings
     useEffect(() => {
@@ -129,13 +137,12 @@ const NotificationPage: React.FC = () => {
                 // });
 
 
-                setNotifications(data.map((n: any) => ({
+                const mapped = data.map((n: any) => ({
                     id: String(n.id),
                     type: n.type,
                     title: n.title,
                     body: n.body,
-                    createdAt: n.created_at,
-                    timestamp: n.created_at ? timeAgo(n.created_at) : "",
+                    createdAt: n.created_at ? new Date(n.created_at).getTime() : 0,
                     isUnread: !!n.is_unread,
 
                     reportId: n.report_id,
@@ -157,8 +164,11 @@ const NotificationPage: React.FC = () => {
                     barangay: n.barangay,
                     severityFrom: n.severity_from,
                     severityTo: n.severity_to,
+                }));
 
-                })));
+                mapped.sort((a: NotificationItem, b: NotificationItem) => b.createdAt! - a.createdAt!);
+
+                setNotifications(mapped);
             } finally {
                 setLoading(false);
             }
@@ -166,16 +176,9 @@ const NotificationPage: React.FC = () => {
     }, []);
 
 
-    const counts = useMemo(() => {
+    const filteredNotifications = useMemo(() => {
 
-        const severityRank = {
-            low: 1,
-            moderate: 2,
-            high: 3,
-            critical: 4
-        };
-
-        const filtered = notifications.filter(n => {
+        return notifications.filter(n => {
 
             if (!receiveHazardAlerts && n.type === "incident") return false;
 
@@ -187,7 +190,18 @@ const NotificationPage: React.FC = () => {
             }
 
             return true;
+
         });
+
+    }, [
+        notifications,
+        receiveHazardAlerts,
+        receiveAnnouncements,
+        alertSeverity
+    ]);
+
+    const counts = useMemo(() => {
+        const filtered = filteredNotifications;
 
         const unreadAll = filtered.filter(n => n.isUnread).length;
         const unreadOfficial = filtered.filter(n => n.type === "official" && n.isUnread).length;
@@ -196,12 +210,47 @@ const NotificationPage: React.FC = () => {
 
         return { unreadAll, unreadOfficial, unreadIncident, unreadReport };
 
-    }, [
-        notifications,
-        receiveHazardAlerts,
-        receiveAnnouncements,
-        alertSeverity
-    ]);
+    }, [filteredNotifications]);
+
+    const listForPage = useMemo(() => {
+
+        let base =
+            activeTab === "all"
+                ? filteredNotifications
+                : filteredNotifications.filter(n => n.type === activeTab);
+
+        const now = Date.now();
+
+        base = base.filter(n => {
+
+            if (!n.createdAt) return false;
+
+            if (timeFilter === "all") return true;
+
+            const diffDays = (now - n.createdAt) / (1000 * 60 * 60 * 24);
+
+            if (timeFilter === "today") {
+                const created = new Date(n.createdAt);
+                const today = new Date();
+
+                return (
+                    created.getFullYear() === today.getFullYear() &&
+                    created.getMonth() === today.getMonth() &&
+                    created.getDate() === today.getDate()
+                );
+            }
+
+            if (timeFilter === "7days") {
+                return diffDays <= 7;
+            }
+
+            return true;
+
+        });
+
+        return base;
+
+    }, [activeTab, filteredNotifications, timeFilter]);
 
     // const grouped = useMemo(() => {
     //     const official = notifications.filter(n => n.type === "official");
@@ -231,78 +280,27 @@ const NotificationPage: React.FC = () => {
     //         return current === "high" || current === "critical";
     //     });
 
-    const listForPage = useMemo(() => {
-        let base =
-            activeTab === "all"
-                ? notifications
-                : notifications.filter(n => n.type === activeTab);
+    const markOneAsRead = async (notificationId: string) => {
+        setNotifications((prev) =>
+            prev.map((x) => (x.id === notificationId ? { ...x, isUnread: false } : x))
+        );
 
-        base = base.filter(n => {
+        try {
+            await fetch(`${API_URL}/api/notifications/read/`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ notification_id: notificationId }),
+            });
 
-            // Hazard alerts OFF → hide incidents
-            if (!receiveHazardAlerts && n.type === "incident") return false;
+            window.dispatchEvent(new Event("notificationsUpdated"));
 
-            // Community announcements OFF → hide official posts
-            if (!receiveAnnouncements && n.type === "official") return false;
+        } catch { }
+    };
 
-            // Severity filter
-            if (n.type === "incident") {
-                const sev = n.severityTo ?? n.severity ?? "low";
-
-                const severityRank = {
-                    low: 1,
-                    moderate: 2,
-                    high: 3,
-                    critical: 4
-                };
-
-                return severityRank[sev] >= severityRank[alertSeverity];
-            }
-
-            return true;
-        });
-
-        const now = new Date();
-
-        base = base.filter(n => {
-            if (!n.createdAt) return false;
-            const created = new Date(n.createdAt);
-
-            if (timeFilter === "all") return true;
-
-            const diffMs = now.getTime() - created.getTime();
-            const diffDays = diffMs / (1000 * 60 * 60 * 24);
-
-            if (timeFilter === "today") {
-                return (
-                    created.getFullYear() === now.getFullYear() &&
-                    created.getMonth() === now.getMonth() &&
-                    created.getDate() === now.getDate()
-                );
-            };
-
-            if (timeFilter === "7days") {
-                return diffDays <= 7;
-            }
-
-            return true;
-        });
-
-        return base.sort((a, b) => {
-            const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-            const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-            return bTime - aTime;
-        });
-    }, [
-        activeTab,
-        notifications,
-        timeFilter,
-        receiveHazardAlerts,
-        receiveAnnouncements,
-        alertSeverity
-    ]);;
-
-    const openNotification = async (n: NotificationItem) => {
+    const openNotification = useCallback(async (n: NotificationItem) => {
         if (n.isUnread) {
             await markOneAsRead(n.id);
         }
@@ -323,11 +321,25 @@ const NotificationPage: React.FC = () => {
             });
             return;
         }
-    };
+        try {
+            await fetch(`${API_URL}/api/notifications/read/all/`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+                    "Content-Type": "application/json",
+                },
+            });
+
+            window.dispatchEvent(new Event("notificationsUpdated"));
+
+        } catch { }
+    }, [navigate]);
 
 
     const markAllAsRead = async () => {
-        setNotifications((prev) => prev.map((x) => ({ ...x, isUnread: false })));
+        setNotifications(prev =>
+            prev.map(n => ({ ...n, isUnread: false }))
+        );
 
         try {
             await fetch(`${API_URL}/api/notifications/read/all/`, {
@@ -343,25 +355,6 @@ const NotificationPage: React.FC = () => {
         } catch { }
     };
 
-    const markOneAsRead = async (notificationId: string) => {
-        setNotifications((prev) =>
-            prev.map((x) => (x.id === notificationId ? { ...x, isUnread: false } : x))
-        );
-
-        try {
-            await fetch(`${API_URL}/api/notifications/read/`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ notification_id: notificationId }),
-            });
-
-            window.dispatchEvent(new Event("notificationsUpdated"));
-
-        } catch { }
-    };
 
     // const isToday = (iso?: string) => {
     //     if (!iso) return false;
@@ -685,7 +678,9 @@ function NotificationCard({ n, onOpen }: { n: NotificationItem; onOpen?: () => v
                 <div className="notif-card-main">
                     {metaLine}
                     {detailLine && <div className="detail">{detailLine}</div>}
-                    <div className="time">{n.timestamp}</div>
+                    <div className="time">
+                        {n.createdAt ? timeAgo(new Date(n.createdAt).toISOString()) : ""}
+                    </div>
                 </div>
             </div>
 

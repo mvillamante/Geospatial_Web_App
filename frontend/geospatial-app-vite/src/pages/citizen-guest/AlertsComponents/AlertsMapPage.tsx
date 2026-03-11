@@ -54,6 +54,38 @@ const AlertsMapPage: React.FC = () => {
 
   const [reportTimeFilter, setReportTimeFilter] = useState<"all" | "today" | "7days" | "last30days" | "last12months">("7days");
 
+  const [reports, setReports] = useState<Report[]>([]);
+  const [isLoadingReports, setIsLoadingReports] = useState(false);
+
+  const fetchReports = async () => {
+    setIsLoadingReports(true);
+
+    try {
+      let url = `${API_URL}/api/incident-reports/verified/`;
+
+      if (reportTimeFilter !== "all") {
+        url += `?time_filter=${encodeURIComponent(reportTimeFilter)}`;
+      }
+
+      const res = await fetch(url);
+
+      if (!res.ok) throw new Error("Failed to fetch reports");
+
+      const data = await res.json();
+      console.log("API reports:", data);
+
+      setReports(data.results || []);
+    } catch (err) {
+      console.error("Failed to fetch reports", err);
+    } finally {
+      setIsLoadingReports(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, [reportTimeFilter]);
+
   const handleBarangaySearch = (barangay: string, severity: string | null) => {
     setSearchedBarangay(barangay);
     setSearchedSeverity(severity);
@@ -150,16 +182,27 @@ const AlertsMapPage: React.FC = () => {
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
+  const selectedReport = useMemo(
+    () => selectedReportData?.report || null,
+    [selectedReportData]
+  )
+
+  const reportTimestamp = useMemo(
+    () => selectedReportData?.clickedAt || null,
+    [selectedReportData]
+  )
+
   return (
     <div className="main-layout-map">
       <div className="dashboard-container">
 
         <div className="alerts-map">
           <LeafletMap
+            reports={reports}
             searchedBarangay={searchedBarangay}
             searchedSeverity={searchedSeverity}
-            selectedReport={selectedReportData?.report || null}
-            reportClickTimestamp={selectedReportData?.clickedAt || null}
+            selectedReport={selectedReport}
+            reportClickTimestamp={reportTimestamp}
             activeLayers={activeLayers}
             reportTimeFilter={reportTimeFilter}
           />
@@ -223,6 +266,8 @@ const AlertsMapPage: React.FC = () => {
 
           {/* Alerts Panel */}
           <AlertsPanel
+            reports={reports}
+            isLoadingReports={isLoadingReports}
             onReport={() => {
               if (isVerified === null) return;
 

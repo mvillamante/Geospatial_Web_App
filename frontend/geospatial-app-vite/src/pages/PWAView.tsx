@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import AuthModal, { type AuthModalType } from "../components/ui/Modals/AuthModal";
 import TermsModal from "../components/ui/Modals/TermsModal";
 import PrivacyModal from "../components/ui/Modals/PrivacyModal";
@@ -18,7 +19,6 @@ interface PWAViewProps {
 /* ---------------------------
    Onboarding Slides
 ---------------------------- */
-
 const onboardingSlides = [
   {
     icon: <FaMapMarkerAlt size={48} />,
@@ -43,32 +43,41 @@ const onboardingSlides = [
   },
 ];
 
-/* ---------------------------
-   Component
----------------------------- */
-
 const PWAView: React.FC<PWAViewProps> = ({
   setModalType,
   modalType,
   closeModal,
   switchModal,
 }) => {
+  const navigate = useNavigate();
   const [slideIndex, setSlideIndex] = useState(0);
-  const [showAuth, setShowAuth] = useState(false);
+  const [showAuth, setShowAuth] = useState(() => {
+    const done = localStorage.getItem("onboardingDone");
+    return done === "true";
+  })
 
   const slide = onboardingSlides[slideIndex];
 
-  /* Next slide */
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+
+    if (token) {
+      // wait lang
+      navigate("/main/citizen/community-feed", { replace: true });
+    }
+  }, [navigate]);
+
   const handleNext = () => {
     if (slideIndex < onboardingSlides.length - 1) {
       setSlideIndex((prev) => prev + 1);
     } else {
+      localStorage.setItem("onboardingDone", "true");
       setShowAuth(true);
     }
   };
 
-  /* Skip onboarding */
   const handleSkip = () => {
+    localStorage.setItem("onboardingDone", "true");
     setShowAuth(true);
   };
 
@@ -97,10 +106,6 @@ const PWAView: React.FC<PWAViewProps> = ({
           />
         )}
 
-      {/* ---------------------------
-         ONBOARDING
-      ---------------------------- */}
-
       {!showAuth ? (
         <div className="pwa-slide-wrapper">
           {/* Logo */}
@@ -108,7 +113,6 @@ const PWAView: React.FC<PWAViewProps> = ({
             <img src="/hazspot-logo(2).png" alt="HazSpot" />
           </div>
 
-          {/* Slide Content */}
           <div className="slide-content">
             <div
               className="icon-circle"
@@ -121,7 +125,6 @@ const PWAView: React.FC<PWAViewProps> = ({
             <p className="slide-desc">{slide.description}</p>
           </div>
 
-          {/* Slide Indicators */}
           <div className="dots">
             {onboardingSlides.map((_, i) => (
               <div
@@ -131,8 +134,6 @@ const PWAView: React.FC<PWAViewProps> = ({
               />
             ))}
           </div>
-
-          {/* Actions */}
           <div className="actions">
             <button className="btnPrimary" onClick={handleNext}>
               {slideIndex < onboardingSlides.length - 1

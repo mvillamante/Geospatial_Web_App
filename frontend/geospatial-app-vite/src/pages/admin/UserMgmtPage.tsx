@@ -9,6 +9,7 @@ import { LuEllipsis } from "react-icons/lu";
 import { FiSearch, FiPlus, FiUser, FiCheckCircle } from "react-icons/fi";
 import { HiChevronUpDown, HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
+import { toast } from "sonner";
 
 import ResearcherRequestsTab, { type ResearcherRequest } from "../../components/ui/ResearcherRequestsTab";
 // import VerificationRequestsTab, { type VerificationRequest } from "../../components/ui/VerificationRequestsTab";
@@ -267,7 +268,7 @@ const UserMgmtPage: React.FC = () => {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       });
-      if (!res.ok) return alert("Failed to toggle status");
+      if (!res.ok) return toast.error("Failed to toggle status");
 
       setUsers(prev => prev.map(u => u.id === id ? { ...u, status: u.status === 'Active' ? 'Inactive' : 'Active' } : u));
     } catch (err) { console.error(err); }
@@ -281,7 +282,7 @@ const UserMgmtPage: React.FC = () => {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ role: newRole.toLowerCase() }),
       });
-      if (!res.ok) return alert("Failed to update role");
+      if (!res.ok) return toast.error("Failed to update role");
 
       const updatedUser = await res.json();
       setUsers(prev => prev.map(u => u.id === id ? updatedUser : u));
@@ -498,6 +499,7 @@ const UserMgmtPage: React.FC = () => {
                                     if (!window.confirm(`Are you sure you want to ${action} this user?`)) return;
 
                                     toggleStatus(user.id);
+                                    toast.success(`Successfully ${action}d user.`);
                                     setOpenMenu(null);
                                   }}
                                 >

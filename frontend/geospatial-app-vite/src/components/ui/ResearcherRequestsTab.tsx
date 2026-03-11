@@ -4,6 +4,7 @@ import { LuEllipsis } from "react-icons/lu";
 import React, { useState, useEffect } from "react";
 import { CheckCircle, XCircle, Power, PowerOff } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
+import { toast } from "sonner";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -174,11 +175,13 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
 
       await fetchRequests(currentPage);
 
+      toast.success(`Successfully ${action}d the researcher.`);
+
       setOpenMenu(null);
 
     } catch (err) {
       console.error(err);
-      alert("Failed to update researcher status.");
+      toast.error("Failed to update researcher status.");
     }
   };
   // const generateTempPassword = () => {
@@ -225,11 +228,11 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
         prev.map(r => r.id === id ? { ...r, status: "approved" } : r)
       );
 
-      alert(`The request from ${req.fullName} has been approved.\nAn email has been sent to ${req.email} with login credentials.`);
+      toast.success(`The request from ${req.fullName} has been approved.\nAn email has been sent to ${req.email} with login credentials.`);
 
     } catch (err) {
       console.error(err);
-      alert("Failed to approve request.");
+      toast.error("Failed to approve request.");
     }
   };
 
@@ -255,14 +258,14 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
 
       setRequests(prev => prev.map(r => r.id === id ? { ...r, status: updated.status } : r));
 
-      alert(`Request rejected.\nReason: ${reason}`);
+      toast.success(`Request rejected.\nReason: ${reason}`);
 
       setRejectingId(null);
       setRejectReason("");
 
     } catch (err) {
       console.error(err);
-      alert("Failed to reject request.");
+      toast.error("Failed to reject request.");
     }
   };
 

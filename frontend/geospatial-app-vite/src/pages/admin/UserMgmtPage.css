@@ -770,3 +770,17 @@ td.actions .reject-box .reject-actions .confirm-btn:disabled {
 .confirm-btn:hover:not(:disabled) {
   background-color: #c53030;
 }
+
+.user-page .kebab-item{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}

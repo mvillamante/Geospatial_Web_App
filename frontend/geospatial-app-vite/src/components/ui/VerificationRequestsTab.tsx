@@ -4,6 +4,7 @@ import { CheckCircle, XCircle, Power, PowerOff } from "lucide-react"
 import { FiEye, FiX, FiSearch } from "react-icons/fi"
 import { LuEllipsis } from "react-icons/lu"
 import { format, formatDistanceToNow } from "date-fns"
+import {toast} from "sonner";
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -157,12 +158,13 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
       })
 
       fetchCitizens()
+      toast.success(action === "approve" ? "Citizen verification approved successfully." : "Citizen verification rejected successfully.")
       setModalCitizen(null)
 
     } catch (err) {
 
       console.error(err)
-
+      toast.error("Failed to update verification.")
     }
 
   }
@@ -171,13 +173,15 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
       ACTIVATE / DEACTIVATE
   =============================== */
 
-  const toggleCitizenStatus = async (id: number) => {
+  const toggleCitizenStatus = async (id: number, currentStatus: boolean) => {
+
+    const action = currentStatus ? "deactivated" : "activated";
 
     try {
 
       const token = localStorage.getItem("access_token")
 
-      await fetch(`${API_URL}/api/admin/users/${id}/toggle-status/`, {
+      const  res = await fetch(`${API_URL}/api/admin/users/${id}/toggle-status/`, {
 
         method: "PATCH",
         headers: {
@@ -185,13 +189,14 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
         }
 
       })
-
+      if (!res.ok) throw new Error("Failed to update status")
       fetchCitizens()
+      toast.success(`Citizen ${action} successfully.`)
 
     } catch (err) {
 
       console.error(err)
-
+      toast.error("Failed to update citizen status.")
     }
 
   }
@@ -342,7 +347,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
                           <button
                             className="kebab-item"
-                            onClick={() => toggleCitizenStatus(c.citizen_id)}
+                            onClick={() => toggleCitizenStatus(c.citizen_id, c.is_active)}
                           >
                             {c.is_active ? <PowerOff size={14} /> : <Power size={14} />}
                             {c.is_active ? "Deactivate" : "Activate"}

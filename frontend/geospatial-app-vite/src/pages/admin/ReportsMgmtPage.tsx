@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { X, MapPin, Users, CheckCircle2 } from "lucide-react";
+import { X, MapPin, Users, CheckCircle2, Archive, Eye, TriangleAlert } from "lucide-react";
 import { FiUser, FiCheckCircle, FiSearch } from "react-icons/fi";
 import { HiChevronUpDown, HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { HiOutlineTable, HiOutlineMap } from "react-icons/hi";
@@ -254,38 +254,38 @@ const ReportsMgmtPage: React.FC = () => {
     setCurrentPage(1);
   }, [searchQuery, categoryFilter, statusFilter, sortOrder, viewArchived]);
 
+  const fetchReports = async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      toast.error("Not logged in. Please sign in again.");
+      setLoadingReports(false);
+      return;
+    }
+
+    try {
+      setLoadingReports(true);
+      const res = await fetch(`${API_URL}/api/reports/list/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`HTTP ${res.status}: ${text}`);
+      }
+
+      const data = await res.json();
+      setReports(Array.isArray(data) ? data : []);
+      setCurrentPage(1);
+    } catch (err) {
+      toast.error("Unable to load reports");
+      console.error(err);
+      setReports([]);
+    } finally {
+      setLoadingReports(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchReports = async () => {
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        toast.error("Not logged in. Please sign in again.");
-        setLoadingReports(false);
-        return;
-      }
-
-      try {
-        setLoadingReports(true);
-        const res = await fetch(`${API_URL}/api/reports/list/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(`HTTP ${res.status}: ${text}`);
-        }
-
-        const data = await res.json();
-        setReports(Array.isArray(data) ? data : []);
-        setCurrentPage(1);
-      } catch (err) {
-        toast.error("Unable to load reports");
-        console.error(err);
-        setReports([]);
-      } finally {
-        setLoadingReports(false);
-      }
-    };
-
     fetchReports();
   }, []);
 
@@ -324,7 +324,13 @@ const ReportsMgmtPage: React.FC = () => {
         updated.assigned_officer_id ? String(updated.assigned_officer_id) : ""
       );
 
-      toast.success(updated.assigned_officer_label ? `Assigned to ${updated.assigned_officer_label}` : "Assigned");
+      setSelectedReport(null);
+      setSelectedOfficer("");
+      setOpenMenuId(null);
+      toast.success(updated.assigned_officer_label ? `Assigned to ${updated.assigned_officer_label}` : "Officer assigned successfully.");
+      await fetchReports();
+
+
     } catch (err: any) {
       console.error(err);
       toast.error(err?.message || "Failed to assign officer");
@@ -702,7 +708,7 @@ const ReportsMgmtPage: React.FC = () => {
 
 
                                   }}
-                                >View Full Details
+                                ><Eye size={16} /> View Full Details
                                 </button>
 
                                 {/*<button
@@ -740,7 +746,7 @@ const ReportsMgmtPage: React.FC = () => {
                                   }}
                                   disabled={isArchived}
                                 >
-                                  Archive
+                                  <Archive size={16} /> Archive
                                 </button>
 
 
@@ -862,7 +868,7 @@ const ReportsMgmtPage: React.FC = () => {
 
 
                                   }}
-                                >View Full Details
+                                ><Eye size={16} /> View Full Details
                                 </button>
 
                                 <button
@@ -907,7 +913,7 @@ const ReportsMgmtPage: React.FC = () => {
                                     });
                                   }}
                                 >
-                                  Escalate
+                                  <TriangleAlert size={16}/>Escalate
                                 </button>
 
                                 <button
@@ -918,7 +924,7 @@ const ReportsMgmtPage: React.FC = () => {
                                   }}
                                   disabled={isArchived}
                                 >
-                                  Archive
+                                  <Archive size={16} />  Archive
                                 </button>
 
 

@@ -132,15 +132,10 @@ const selectedReportForMap = useMemo(() => {
 
   return {
     id: selected.id,
-    incident_type: selected.category,
+    category: selected.category,
+    lat: selected.lat,
+    lng: selected.lng,
     verified_critical_level: selected.verifiedRisk ?? selected.citizenRisk,
-    barangay: selected.barangay,
-    created_at: selected.createdAt,
-    latitude: selected.lat,
-    longitude: selected.lng,
-    status: selected.status,
-    assigned_officer_id: selected.assignedOfficerId ?? null,
-    lgu_post: selected.lgu_post ?? null,
   };
 }, [selected]);
 

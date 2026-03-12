@@ -3,42 +3,15 @@ from django.conf.urls.static import static
 from django.conf import settings
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from .backend_views.admin_views import *
-from .backend_views.auth_views import *
-from .backend_views.cms_views import *
-from .backend_views.geocoding_views import *
-from .backend_views.incident_views import *
-from .backend_views.misc_views import *
-from .backend_views.researcher_views import *
-from .backend_views.resident_verification_views import *
-from .backend_views.satellite import *
-from .backend_views.hazard_views import (
-    calamity_risk,
-    calamity_risk_forecast,
-    calamity_risk_ai_insight,
-    calamity_risk_import_ai_insight,
-    green_index,
-    green_index_ai_insight,
-    green_index_import_ai_insight,
-    hazard_index,
-    hazard_index_ai_insight,
-    hazard_index_import_ai_insight,
-    barangay_geojson,
-    model_info,
-    eda_summary,
-    earthquake_freq,
-    typhoon_freq,
-    green_artifacts_zip,
-    hazard_artifacts_zip,
-    calamity_risk_artifacts_zip,
-    lstm_bundle_zip,
-    download_dataset,
-)
-from .backend_views.password_reset_views import *
-from .backend_views.tomtom_views import tomtom_roads_tile, tomtom_traffic_tile
-from .backend_views.community_feed_views import *
-from .backend_views.public_views import *
-from .backend_views.notification_views import *
+from .backend_views.Admin import *
+from .backend_views.Authentication import *
+from .backend_views.Community import *
+from .backend_views.Geospatial import *
+from .backend_views.Indices import *
+from .backend_views.Public import *
+from .backend_views.Reports import *
+from .backend_views.Services import *
+from .backend_views.Utils import *
 
 urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),

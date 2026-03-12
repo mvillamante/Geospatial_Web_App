@@ -1,7 +1,7 @@
 from django.utils import timezone
 from datetime import timedelta
 from api.models import *
-from api.supabase_storage import upload_private_photo, upload_reply_photo, create_signed_url, upload_cms_photo
+from api.supa_storage import upload_private_photo, upload_reply_photo, create_signed_url, upload_cms_photo
 from django.utils.timesince import timesince
 from django.utils.crypto import get_random_string
 from django.contrib.auth.password_validation import validate_password

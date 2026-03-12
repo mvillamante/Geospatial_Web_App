@@ -7,11 +7,11 @@ from rest_framework.decorators import api_view, permission_classes
 from api.models import ResidentVerificationRequest, CustomUser, Notification
 from api.serializer import ResidentVerificationRequestSerializer
 from api.admin_permissions import IsAdminRole
-from api.supabase_storage import upload_private_photo
+from api.supa_storage import upload_private_photo
 from django.conf import settings
 from django.db.models import Q, Value
 from django.db.models.functions import Concat
-from api.supabase_storage import create_signed_url
+from api.supa_storage import create_signed_url
 from django.utils import timezone
 from rest_framework.parsers import MultiPartParser, FormParser
 
@@ -242,7 +242,7 @@ class ApproveRejectResidentVerificationView(APIView):
             
             # Delete the ID image if it exists
             if verification.id_image:
-                from api.supabase_storage import delete_private_photo
+                from api.supa_storage import delete_private_photo
                 deleted = delete_private_photo(verification.id_image, bucket="resident-attachments")
                 if deleted:
                     verification.id_image = None  

@@ -5,7 +5,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.conf import settings
 from django.utils.timezone import now
-from api.supabase_storage import delete_cms_photo
+from api.supa_storage import delete_cms_photo
 
 from django.utils.html import strip_tags
 from django.conf import settings

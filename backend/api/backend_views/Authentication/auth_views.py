@@ -109,7 +109,8 @@ def login_user(request):
                     "last_name": user.last_name,
                     "email": user.email,
                     "role": user.role,
-                    "extra_roles": user.extra_roles or [],        
+                    "extra_roles": user.extra_roles or [],
+                    "is_resident_verified": user.is_resident_verified,
                 }
             }, status=200)
         else:

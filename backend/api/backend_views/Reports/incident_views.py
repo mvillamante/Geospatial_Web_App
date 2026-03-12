@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404
 
 from api.serializer import *
 
-from api.supabase_storage import create_signed_url
+from api.supa_storage import create_signed_url
 from api.models import IncidentReport
 
 from django.db import transaction

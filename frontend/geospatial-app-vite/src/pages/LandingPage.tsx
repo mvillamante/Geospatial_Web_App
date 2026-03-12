@@ -55,13 +55,13 @@ const LandingPage: React.FC = () => {
 
   const [stats, setStats] = useState<LandingStats | null>(null);
 
-  useEffect(() => {
+  {/*useEffect(() => {
     const token = localStorage.getItem("access_token");
 
     if (token) {
       navigate("/main/citizen/community-feed", { replace: true });
     }
-  }, [navigate]);
+  }, [navigate]);*/}
 
   useEffect(() => {
     const checkMobile = () => {

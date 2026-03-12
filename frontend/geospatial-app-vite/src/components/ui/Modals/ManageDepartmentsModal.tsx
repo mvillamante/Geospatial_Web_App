@@ -22,13 +22,20 @@ const ManageDepartmentsModal: React.FC<Props> = ({ onClose, onDepartmentChanged 
   const [loading, setLoading] = useState(false);
   const [savingDeptId, setSavingDeptId] = useState<number | null>(null);
 
+  // confirmation modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    show: boolean;
+    deptId: number | null;
+    message: string;
+    action: "delete" | "add" | null;
+  }>({ show: false, deptId: null, message: "", action: null });
+
   const fetchDepartments = async () => {
     try {
       const token = localStorage.getItem("access_token");
       const res = await fetch(`${API_URL}/api/admin/departments/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       const data = await res.json();
       setDepartments(data.results || []);
     } catch (err) {
@@ -40,8 +47,19 @@ const ManageDepartmentsModal: React.FC<Props> = ({ onClose, onDepartmentChanged 
     fetchDepartments();
   }, []);
 
-  const handleAdd = async () => {
+  /* Add Department */
+  const handleAdd = () => {
     if (!newDept.trim()) return;
+    setConfirmModal({
+      show: true,
+      deptId: null,
+      message: `Are you sure you want to add the department "${newDept.trim()}"?`,
+      action: "add",
+    });
+  };
+
+  const confirmAdd = async () => {
+    setConfirmModal({ ...confirmModal, show: false });
     setLoading(true);
     try {
       const token = localStorage.getItem("access_token");
@@ -69,13 +87,24 @@ const ManageDepartmentsModal: React.FC<Props> = ({ onClose, onDepartmentChanged 
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this department?")) return;
+  /* Delete Department */
+  const handleDelete = (id: number) => {
+    setConfirmModal({
+      show: true,
+      deptId: id,
+      message: "Are you sure you want to delete this department?",
+      action: "delete",
+    });
+  };
 
+  const confirmDelete = async () => {
+    if (confirmModal.deptId === null) return;
+    setConfirmModal({ ...confirmModal, show: false });
     setLoading(true);
+
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`${API_URL}/api/admin/departments/${id}/`, {
+      const res = await fetch(`${API_URL}/api/admin/departments/${confirmModal.deptId}/`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -94,6 +123,7 @@ const ManageDepartmentsModal: React.FC<Props> = ({ onClose, onDepartmentChanged 
     }
   };
 
+  /* Edit Department */
   const handleEdit = (dept: Department) => {
     setEditingDeptId(dept.id);
     setEditingDeptName(dept.name);
@@ -175,8 +205,6 @@ const ManageDepartmentsModal: React.FC<Props> = ({ onClose, onDepartmentChanged 
               ) : (
                 <>
                   <span>{dept.name}</span>
-
-                  {/* 👇 Wrap buttons */}
                   <div className="dept-actions">
                     <button
                       onClick={() => handleEdit(dept)}
@@ -197,6 +225,33 @@ const ManageDepartmentsModal: React.FC<Props> = ({ onClose, onDepartmentChanged 
             </div>
           ))}
         </div>
+
+        {/* Confirmation Modal */}
+        {confirmModal.show && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h3>Confirm Action</h3>
+              <p>{confirmModal.message}</p>
+              <div className="modal-actions">
+                <button
+                  className="btn-secondary"
+                  onClick={() => setConfirmModal({ show: false, deptId: null, message: "", action: null })}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn-secondary danger"
+                  onClick={confirmModal.action === "add" ? confirmAdd : confirmDelete}
+                  disabled={loading}
+                >
+                  {loading
+                    ? confirmModal.action === "add" ? "Adding..." : "Deleting..."
+                    : confirmModal.action === "add" ? "Add" : "Delete"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

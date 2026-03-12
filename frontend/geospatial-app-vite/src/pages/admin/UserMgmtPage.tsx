@@ -98,6 +98,14 @@ const UserMgmtPage: React.FC = () => {
   const [showDeptModal, setShowDeptModal] = useState(false);
   const [departmentRefreshKey, setDepartmentRefreshKey] = useState(0);
 
+  const [showToggleModal, setShowToggleModal] = useState(false);
+  const [userToToggle, setUserToToggle] = useState<User | null>(null);
+  const [isToggling, setIsToggling] = useState(false);
+  const [showChangeRoleModal, setShowChangeRoleModal] = useState(false);
+  const [userToChangeRole, setUserToChangeRole] = useState<User | null>(null);
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+  
   /* FETCH USERS */
   const fetchUsers = useCallback(async (page = 1, showLoading = true) => {
     if (showLoading) setLoading(true);
@@ -495,11 +503,8 @@ const UserMgmtPage: React.FC = () => {
                                 <button
                                   className="kebab-item"
                                   onClick={() => {
-                                    const action = user.status === 'Active' ? 'deactivate' : 'activate';
-                                    if (!window.confirm(`Are you sure you want to ${action} this user?`)) return;
-
-                                    toggleStatus(user.id);
-                                    toast.success(`Successfully ${action}d user.`);
+                                    setUserToToggle(user);
+                                    setShowToggleModal(true);
                                     setOpenMenu(null);
                                   }}
                                 >
@@ -586,7 +591,76 @@ const UserMgmtPage: React.FC = () => {
           onPasswordChanged={() => fetchUsers(currentPage)}
         />
       )}
+      
+      {/* Toggle User Status Modal */}
+      {showToggleModal && userToToggle && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>
+              {userToToggle.status === "Active"
+                ? "Deactivate User"
+                : "Activate User"}
+            </h2>
 
+            <p>
+              Are you sure you want to{" "}
+              <strong>
+                {userToToggle.status === "Active"
+                  ? "deactivate"
+                  : "activate"}
+              </strong>{" "}
+              <strong>"{userToToggle.name}"</strong>?
+            </p>
+
+            <div className="modal-actions">
+              <button
+                className="btn-secondary"
+                disabled={isToggling}
+                onClick={() => {
+                  setShowToggleModal(false);
+                  setUserToToggle(null);
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="btn-secondary danger"
+                disabled={isToggling}
+                onClick={async () => {
+                  if (!userToToggle) return;
+
+                  setIsToggling(true);
+
+                  try {
+                    await toggleStatus(userToToggle.id);
+
+                    const action =
+                      userToToggle.status === "Active"
+                        ? "deactivated"
+                        : "activated";
+
+                    toast.success(`"${userToToggle.name}" ${action} successfully.`);
+                  } catch (err) {
+                    console.error(err);
+                    toast.error("Failed to update user status");
+                  } finally {
+                    setIsToggling(false);
+                    setShowToggleModal(false);
+                    setUserToToggle(null);
+                  }
+                }}
+              >
+                {isToggling
+                  ? "Processing..."
+                  : userToToggle.status === "Active"
+                  ? "Deactivate"
+                  : "Activate"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

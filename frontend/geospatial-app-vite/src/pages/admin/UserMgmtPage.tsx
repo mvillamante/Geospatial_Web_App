@@ -101,10 +101,6 @@ const UserMgmtPage: React.FC = () => {
   const [showToggleModal, setShowToggleModal] = useState(false);
   const [userToToggle, setUserToToggle] = useState<User | null>(null);
   const [isToggling, setIsToggling] = useState(false);
-  const [showChangeRoleModal, setShowChangeRoleModal] = useState(false);
-  const [userToChangeRole, setUserToChangeRole] = useState<User | null>(null);
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
-  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
   
   /* FETCH USERS */
   const fetchUsers = useCallback(async (page = 1, showLoading = true) => {

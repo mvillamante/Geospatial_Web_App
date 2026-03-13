@@ -60,7 +60,6 @@ interface RightPanelProps {
   colors?: string[];
   insightIcons?: JSX.Element[];
   userRole?: string;
-  userRole2?: string[];
   setShowEdaModal?: (val: boolean) => void;
   showEdaModal?: boolean;
   // Props for EDA modal
@@ -80,6 +79,7 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
   isOpen,
   toggle,
   rightNav,
+  userRole,
   setRightNav,
   exportSections,
   recentDownloads,
@@ -94,7 +94,6 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
   keyInsights,
   colors,
   insightIcons,
-  userRole2,
 
   showEdaModal,
   setShowEdaModal,
@@ -515,16 +514,11 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
           <span className={`slider ${rightNav}`} />
 
           {["analytics", "export", "import"].map((tab) => {
-            const isExportLocked = tab === "export" && (!props.selected || props.selected === "none");
             return (
               <button
                 key={tab}
-                className={`${rightNav === tab ? "active" : ""} ${isExportLocked ? "tab-locked" : ""}`}
-                onClick={() => {
-                  if (isExportLocked) return;
-                  setRightNav(tab as "analytics" | "export" | "import");
-                }}
-                title={isExportLocked ? "Select a data layer first" : undefined}
+                className={`${rightNav === tab ? "active" : ""}`}
+                onClick={() => setRightNav(tab as "analytics" | "export" | "import")}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
@@ -553,10 +547,10 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
               <>
                 <DbChartsSection {...props} />
                 <DbAnalyticsSection
+                  userRole={userRole}
                   keyInsights={keyInsights}
                   colors={colors}
                   insightIcons={insightIcons}
-                  userRole2={userRole2}
                   mapView={props.mapView}
                   selected={props.selected}
                   year={props.year}
@@ -574,11 +568,13 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
         )}
 
         {rightNav === "export" && (
-          (!props.selected || props.selected === "none") ? (
+          props.mapView !== "choropleth" ? (
             <div className="right-panel-empty-state">
-              <p className="right-panel-empty-title">
-                Select a <strong>data layer</strong> on the Choropleth view before generating a report.
-              </p>
+              <div className="right-panel-empty-state">
+                <p className="right-panel-empty-title">
+                  Switch to the <strong>Choropleth</strong> map to generate a report.
+                </p>
+              </div>
             </div>
           ) : <>
             <h4>Export Section</h4>

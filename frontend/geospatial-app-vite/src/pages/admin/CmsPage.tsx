@@ -257,7 +257,7 @@ const CmsPage: React.FC = () => {
     try {
       setPublishingStatus(publishImmediately ? "publish" : "draft");
 
-      const res = await fetch("/api/cms/guides/create/", {
+      const res = await fetch(`${API_URL}/api/cms/guides/create/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -517,7 +517,7 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
     let cancelled = false;
     setAiInsightLoading(true);
     setAiInsightError(null);
-    fetch("/api/hazard/green-index/import-ai-insight/", {
+    fetch("https://geospatial-web-app-1.onrender.com/api/hazard/green-index/import-ai-insight/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -592,7 +592,7 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
     let cancelled = false;
     setAiInsightHazardLoading(true);
     setAiInsightHazardError(null);
-    fetch("/api/hazard/hazard-index/import-ai-insight/", {
+    fetch("https://geospatial-web-app-1.onrender.com/api/hazard/hazard-index/import-ai-insight/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -665,7 +665,7 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
     let cancelled = false;
     setAiInsightCalamityLoading(true);
     setAiInsightCalamityError(null);
-    fetch("/api/hazard/calamity-risk/import-ai-insight/", {
+    fetch("https://geospatial-web-app-1.onrender.com/api/hazard/calamity-risk/import-ai-insight//", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

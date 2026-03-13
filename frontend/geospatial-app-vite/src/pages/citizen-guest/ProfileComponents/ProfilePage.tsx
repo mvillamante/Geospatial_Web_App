@@ -105,16 +105,14 @@ const ProfilePage: React.FC = () => {
   const [verifyLoading, setVerifyLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { displayName, userRole, userRole2 } = getUserRoleAndDisplayName();
+  const { displayName, userRole} = getUserRoleAndDisplayName();
 
   const normalizedRole = (userRole || "").toLowerCase();
-  const normalizedRole2 = (userRole2?.[0] || "").toLowerCase();
 
   const isStaff =
     normalizedRole === "admin" ||
-    normalizedRole === "officer" ||
-    normalizedRole2 === "admin" ||
-    normalizedRole2 === "officer";
+    normalizedRole === "officer" || 
+    normalizedRole === "researcher";
 
   // const [isRequested, setIsRequested] = useState(false);
 
@@ -418,7 +416,6 @@ const ProfilePage: React.FC = () => {
 
             <p className="role-tag">
               {userRole}
-              {userRole2?.[0] ? ` & ${userRole2[0]}` : ""}
             </p>
 
             <div className="profile-mobile-actions">
@@ -564,7 +561,7 @@ const ProfilePage: React.FC = () => {
         </>
       )}
 
-      {!isStaff && (
+      {!isStaff && userRole !== "Guest" && (
         <>
           <div className="section-header">
             <h3 className="section-title">Report History</h3>

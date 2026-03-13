@@ -14,7 +14,7 @@ interface Props {
   keyInsights?: any[];
   colors?: string[];
   insightIcons?: JSX.Element[];
-  userRole2?: string[];
+  userRole?: string;
 
   showEdaModal?: boolean;
   setShowEdaModal?: (val: boolean) => void;
@@ -34,7 +34,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
   keyInsights = [],
   colors = [],
   insightIcons = [],
-  userRole2,
+  userRole,
   showEdaModal = false,
   setShowEdaModal,
   edaSect = "edastats",
@@ -46,6 +46,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
   selected,
   year,
 }) => {
+
   // AI-generated Green Index insights (only fetched when on Green layer — saves tokens)
   const [greenAiInsight, setGreenAiInsight] = useState<string | null>(null);
   const [greenHotspotsInsight, setGreenHotspotsInsight] = useState<string | null>(null);
@@ -511,7 +512,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
             <p className="insight-disclaimer">* Automatically generated — please have an expert review for final assessment.</p>
         </div>
 
-        {userRole2?.[0] === "Researcher" && (
+        {userRole === "Researcher" && (
             <div
             className="panel-card researcher"
             onClick={async () => {

@@ -35,9 +35,9 @@ const NavigationMenu: React.FC = () => {
 
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
 
-  const { userRole, userRole2, displayName, profilePath, settingsPath } = getUserRoleAndDisplayName();
+  const { userRole, displayName, profilePath, settingsPath } = getUserRoleAndDisplayName();
 
-  const effectiveRole = (userRole2.includes("Researcher") ? "Researcher" : "") || userRole;
+  const effectiveRole = (userRole.includes("Researcher") ? "Researcher" : "") || userRole;
 
 
 
@@ -259,9 +259,7 @@ const NavigationMenu: React.FC = () => {
                 <div className="dropdown-user-details">
                   <span className="dropdown-username">{user?.username || displayName}</span>
                   <span className="dropdown-role">
-                    {userRole2?.length
-                      ? userRole2.join(" & ")
-                      : userRole}
+                    {effectiveRole}
                   </span>
                 </div>
               </div>

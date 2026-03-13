@@ -30,8 +30,6 @@ export const getEnvironmentalRecommendation = (
   const greenTrend = getTrend(greenChangeFromLastYear);
   const hazardTrend = getTrend(hazardChangeFromLastYear);
 
-  console.log("Green Trend:", greenTrend, "Hazard Trend:", hazardTrend);
-
   if (greenTrend === "neutral" && hazardTrend === "neutral") {
     return {
       title: "Stable Environmental-Hazard Balance",

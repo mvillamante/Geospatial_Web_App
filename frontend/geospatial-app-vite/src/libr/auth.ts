@@ -1,7 +1,7 @@
 import { supabase } from "./supabaseClient";
 import type { Session, AuthError } from "@supabase/supabase-js";
 import type { User } from "./fetchCurrentUser";
-import { normalizePrimaryRole, normalizeSecondaryRole } from "../utils/roles";
+import { normalizePrimaryRole } from "../utils/roles";
 
 // ===== LOGIN ======
 export const login = async (
@@ -55,8 +55,7 @@ export const getUserRoleAndDisplayName = () => {
 
   const currentUserId = currentUser.id || null;
 
-  const userRole = storedRoles.primaryRole?.trim() ? storedRoles.primaryRole : "Guest";
-  const userRole2 = storedRoles.secondaryRoles ?? [];
+  const userRole = storedRoles.role || "Guest";
 
   const first = (currentUser.first_name || currentUser.firstName || "").trim();
   const last = (currentUser.last_name || currentUser.lastName || "").trim();
@@ -71,27 +70,22 @@ export const getUserRoleAndDisplayName = () => {
   const userName = currentUser.username;
 
   // Determine the correct role for paths
-  const effectiveRole =
-    userRole2.includes("Researcher") // check secondaryRoles first
-      ? "Researcher"
-      : userRole?.trim() // fallback to primaryRole
-      ? userRole
-      : "Guest";
+  const effectiveRole = userRole;
 
   const profilePath = `/main/${effectiveRole.toLowerCase()}/profile`;
   const settingsPath = `/main/${effectiveRole.toLowerCase()}/settings`;
 
   const isResidentVerified = currentUser.is_resident_verified;
 
-  return { 
-    currentUserId, 
-    userRole, 
-    userRole2, 
+  return {
+    currentUserId,
+    userRole,
     userName,
-    displayName, 
-    profilePath, 
+    displayName,
+    profilePath,
     settingsPath,
-    isResidentVerified };
+    isResidentVerified
+  };
 };
 
 
@@ -111,12 +105,11 @@ export const onAuthChange = (
 export const saveUserSession = (user: User, accessToken: string) => {
   if (!user || !accessToken) return;
 
-  const primaryRole = normalizePrimaryRole(user.role);
-  const secondaryRoles = [normalizeSecondaryRole(primaryRole, user.extra_roles?.[0])];
+  const role = normalizePrimaryRole(user.role, user.extra_roles);
 
   localStorage.setItem(
     "user_roles",
-    JSON.stringify({ primaryRole, secondaryRoles })
+    JSON.stringify({ role })
   );
 
   localStorage.setItem("access_token", accessToken);

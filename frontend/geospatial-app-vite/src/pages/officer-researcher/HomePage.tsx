@@ -210,9 +210,11 @@ const HomePage: React.FC = () => {
             title="Green Index"
             description="Evaluates environmental sustainability and vegetation health using satellite-derived land-use indicators."
             points={[
-              "NDVI (Normalized Difference Vegetation Index)",
-              "Green Area Ratio (GAR)",
+              "NDVI – Vegetation density indicator",
+              "GAR – Green Area Ratio",
+              "w – indicator weight",
             ]}
+            formula="GI = w1 × NDVI_norm + w2 × GAR_norm"
             variant="green"
           />
 
@@ -220,11 +222,16 @@ const HomePage: React.FC = () => {
             title="Hazard Index"
             description="Represents exposure to environmental threats using multi-factor disaster indicators."
             points={[
-              "Earthquake Frequency",
-              "Flood Susceptibility",
-              "Typhoon Intensity",
-              "Population Density",
+              "E – Earthquake Frequency",
+              "L – Landslide Frequency",
+              "F – Flood Susceptibility",
+              "Fa – Faultline Proximity",
+              "T – Typhoon Frequency and Intensity",
+              "P – Population Density",
+              "I – Infrastructure Exposure",
+              "w – factor weight",
             ]}
+            formula="HI = w1E + w2L + w3F + w4Fa + w5T + w6P + w7I"
             variant="orange"
           />
 
@@ -232,9 +239,9 @@ const HomePage: React.FC = () => {
             title="Calamity Risk Likelihood"
             description="Computed from interaction between Hazard Exposure and Environmental Resilience."
             points={[
-              "Green Index",
-              "Hazard Index",
-              "Exposure",
+              "H_norm – Normalized Hazard Index",
+              "E_norm – Exposure indicator",
+              "GI_norm – Normalized Green Index",
             ]}
             formula="CRL = H_norm × E_norm × (1 − GI_norm)"
             variant="red"

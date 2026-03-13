@@ -4,12 +4,16 @@ from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 
-from api.models import ResidentVerificationRequest, CustomUser
+from api.models import ResidentVerificationRequest, CustomUser, Notification
 from api.serializer import ResidentVerificationRequestSerializer
 from api.admin_permissions import IsAdminRole
+from api.supa_storage import upload_private_photo
+from django.conf import settings
 from django.db.models import Q, Value
 from django.db.models.functions import Concat
-from api.supabase_storage import create_signed_url
+from api.supa_storage import create_signed_url
+from django.utils import timezone
+from rest_framework.parsers import MultiPartParser, FormParser
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated, IsAdminRole])
@@ -33,78 +37,68 @@ class ResidentVerificationListView(APIView):
     def get(self, request):
         search = request.GET.get("search", "").strip()
 
-        # DEFAULT: only pending requests
-        if not search:
-            requests_qs = ResidentVerificationRequest.objects.select_related("user")\
-                .filter(status__iexact="pending")
+        citizens = CustomUser.objects.filter(role="citizen")
 
-        # SEARCH: show all statuses
-        else:
-            requests_qs = ResidentVerificationRequest.objects.select_related("user")\
-                .annotate(
-                    full_name=Concat(
-                        "user__first_name",
-                        Value(" "),
-                        "user__last_name"
-                    )
-                ).filter(
-                    Q(full_name__iexact=search) |
-                    Q(user__email__iexact=search)
-                )
-
-        request_data = [
-            {
-                "id": r.id,
-                "type": "verification_request",
-                "first_name": r.user.first_name,
-                "last_name": r.user.last_name,
-                "barangay": r.barangay,
-                "address": r.address,
-                "email": r.user.email,
-                "status": r.status.lower(),
-                "created_at": r.created_at,
-                "reviewed_at": r.reviewed_at,
-            }
-            for r in requests_qs
-        ]
-
-        citizen_data = []
-
-        # SEARCH: include citizens
         if search:
-            citizen_qs = CustomUser.objects.filter(
-                role__iexact="citizen"
-            ).annotate(
-                full_name=Concat(
-                    "first_name",
-                    Value(" "),
-                    "last_name"
+            search_parts = search.split()
+            if len(search_parts) == 2:
+                first, last = search_parts
+                citizens = citizens.filter(
+                    first_name__iexact=first,
+                    last_name__iexact=last
                 )
-            ).filter(
-                Q(full_name__iexact=search) |
-                Q(email__iexact=search)
-            )
+            else:
+                citizens = citizens.none()
 
-            citizen_data = [
-                {
-                    "id": c.id,
-                    "type": "citizen",
-                    "first_name": c.first_name,
-                    "last_name": c.last_name,
-                    "barangay": c.barangay,
-                    "email": c.email,
-                    "status": "active" if c.is_active else "inactive",
-                    "created_at": c.date_joined,
-                    "last_login": c.last_login,
+        # 🔹 Get latest verification requests
+        requests = (
+            ResidentVerificationRequest.objects
+            .select_related("user")
+            .order_by("-created_at")
+        )
+
+        request_map = {}
+
+        for r in requests:
+            if r.user_id not in request_map:
+                request_map[r.user_id] = r
+
+        results = []
+
+        for c in citizens:
+            latest_request = request_map.get(c.id)
+
+            results.append({
+                "citizen_id": c.id,
+                "first_name": c.first_name,
+                "last_name": c.last_name,
+                "barangay": c.barangay,
+                "email": c.email,
+
+                "date_joined": c.date_joined,
+                "last_login": c.last_login,
+                "is_active": c.is_active,
+                "is_resident_verified": c.is_resident_verified,
+
+                "verification": None if not latest_request else {
+                    "id": latest_request.id,
+                    "status": latest_request.status,
+                    "barangay": latest_request.barangay,
+                    "address": latest_request.address,
+                    "id_image": create_signed_url(
+                        latest_request.id_image,
+                        bucket="resident-attachments",
+                        expires_in_seconds=3600
+                    ) if latest_request.id_image else None,
+                    "rejection_reason": latest_request.rejection_reason,
+                    "created_at": latest_request.created_at,
+                    "reviewed_at": latest_request.reviewed_at
                 }
-                for c in citizen_qs
-            ]
-
-        combined = request_data + citizen_data
+            })
 
         return Response({
-            "count": len(combined),
-            "results": combined
+            "count": len(results),
+            "results": results
         })
 
 class CitizenOverviewView(APIView):
@@ -214,21 +208,16 @@ class CitizenStatusUpdateView(APIView):
 
         return queryset
     
-class ApproveRejectResidentVerificationView(generics.UpdateAPIView):
-    queryset = ResidentVerificationRequest.objects.all()
-    serializer_class = ResidentVerificationRequestSerializer
+class ApproveRejectResidentVerificationView(APIView):
     permission_classes = [IsAuthenticated, IsAdminRole]
 
-    def patch(self, request, *args, **kwargs):
-        verification = self.get_object()
+    def patch(self, request, pk):
+        try:
+            verification = ResidentVerificationRequest.objects.select_related("user").get(pk=pk)
+        except ResidentVerificationRequest.DoesNotExist:
+            return Response({"detail": "Verification request not found."}, status=404)
+
         action = request.data.get("action")
-
-        if action not in ["approve", "reject"]:
-            return Response(
-                {"detail": "Invalid action."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         user = verification.user
 
         if action == "approve":
@@ -242,15 +231,24 @@ class ApproveRejectResidentVerificationView(generics.UpdateAPIView):
             user.save()
 
             Notification.objects.create(
-                user=user,
+                target_user=user,
                 type="verification",
                 title="Resident Verification Approved",
                 body="Your resident verification request has been approved."
             )
 
-        else:
+        elif action == "reject":
+            reason = request.data.get("reason", "")
+            
+            # Delete the ID image if it exists
+            if verification.id_image:
+                from api.supa_storage import delete_private_photo
+                deleted = delete_private_photo(verification.id_image, bucket="resident-attachments")
+                if deleted:
+                    verification.id_image = None  
+
             verification.status = "rejected"
-            verification.rejection_reason = request.data.get("reason", "")
+            verification.rejection_reason = reason
             verification.reviewed_by = request.user
             verification.reviewed_at = timezone.now()
             verification.save()
@@ -259,37 +257,67 @@ class ApproveRejectResidentVerificationView(generics.UpdateAPIView):
             user.save()
 
             Notification.objects.create(
-                user=user,
+                target_user=user,
                 type="verification",
                 title="Resident Verification Rejected",
-                body=f"Your verification was rejected. Reason: {verification.rejection_reason}"
+                body=f"Your verification was rejected. Reason: {reason}"
             )
 
-        serializer = self.get_serializer(verification)
-        return Response(serializer.data)
+        else:
+            return Response({"detail": "Invalid action."}, status=400)
+
+        return Response({
+            "id": verification.id,
+            "status": verification.status,
+            "reviewed_at": verification.reviewed_at
+        })
 
 class ResidentVerificationRequestView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
-        existing = ResidentVerificationRequest.objects.filter(user=request.user, status="pending").first()
+
+        existing = ResidentVerificationRequest.objects.filter(
+            user=request.user,
+            status="pending"
+        ).first()
 
         serializer = ResidentVerificationRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        uploaded_file = serializer.validated_data.get("id_image")
+
+        file_path = None
+        if uploaded_file:
+            file_path = upload_private_photo(
+                uploaded_file,
+                bucket="resident-attachments"
+            )
+
         if existing:
             existing.barangay = serializer.validated_data["barangay"]
             existing.address = serializer.validated_data["address"]
-            existing.id_image = serializer.validated_data["id_image"]
+
+            if file_path:
+                existing.id_image = file_path
+
             existing.save()
 
-            return Response({"detail": "Updated pending request."}, status=status.HTTP_200_OK)
-        
+            return Response(
+                {"detail": "Updated pending request."},
+                status=status.HTTP_200_OK
+            )
+
         ResidentVerificationRequest.objects.create(
             user=request.user,
             barangay=serializer.validated_data["barangay"],
             address=serializer.validated_data["address"],
-            id_image=serializer.validated_data["id_image"],
+            id_image=file_path,
             status="pending",
         )
-        return Response({"detail": "Verification request submitted."}, status=status.HTTP_201_CREATED)
+
+        return Response(
+            {"detail": "Verification request submitted."},
+            status=status.HTTP_201_CREATED
+        )

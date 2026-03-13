@@ -7,7 +7,7 @@ from rest_framework import status
 
 from api.models import CmsGuide, CmsGuideAttachment, QuickContact, QuickContactPhone
 from api.serializer import CmsGuideSerializer, CmsGuideAttachmentSerializer, CmsGuideAttachmentCreateSerializer,QuickContactSerializer, QuickContactPhoneSerializer
-from api.supabase_storage import upload_cms_photo
+from api.supa_storage import upload_cms_photo
 
 def admin_only(user):
     return user.role == "admin"
@@ -190,7 +190,7 @@ def delete_guide_attachment(request, attachment_id):
         return Response({"error": "Attachment not found"}, status=404)
 
    
-    from api.supabase_storage import delete_cms_photo
+    from api.supa_storage import delete_cms_photo
 
     delete_cms_photo(attachment.file_url) 
 

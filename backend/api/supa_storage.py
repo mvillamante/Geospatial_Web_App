@@ -1,4 +1,4 @@
-# api/supabase_storage.py
+# api/supa_storage.py
 import os
 import uuid
 from django.conf import settings
@@ -20,18 +20,43 @@ def upload_private_photo(file_obj, bucket: str) -> str:
 
     return path
 
+def delete_private_photo(path: str, bucket: str) -> bool:
+    """
+    Delete a file from Supabase Storage.
+    Returns True if deleted, False otherwise.
+    """
+    if not path:
+        return False
+    try:
+        res = supabase.storage.from_(bucket).remove([path])
+        if res.get("error"):
+            print("Supabase delete error:", res["error"])
+            return False
+        return True
+    except Exception as e:
+        print("Exception deleting from Supabase:", e)
+        return False
+        
 def create_signed_url(path: str, bucket: str, expires_in_seconds: int = 3600) -> str:
     if not path:
-        return None 
-        
-    res = supabase.storage.from_(bucket).create_signed_url(
-        path,
-        expires_in_seconds,
-    )
-    signed = res.get("signedURL") or res.get("signedUrl") or res.get("signed_url")
-    if not signed:
-        raise RuntimeError("Failed to create signed URL")
-    return signed
+        return None
+
+    try:
+        res = supabase.storage.from_(bucket).create_signed_url(
+            path,
+            expires_in_seconds,
+        )
+
+        signed = res.get("signedURL") or res.get("signedUrl") or res.get("signed_url")
+
+        if not signed:
+            return None
+
+        return signed
+
+    except Exception as e:
+        print("Signed URL error:", e)
+        return None
 
 def upload_cms_photo(file, bucket="cms-photos"):
     ext = file.name.split(".")[-1]

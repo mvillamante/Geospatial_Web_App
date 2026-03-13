@@ -10,7 +10,7 @@ from django.conf import settings
 import random, string
 from rest_framework.views import APIView
 from django.db.models import Q
-from api.supabase_storage import upload_private_photo, create_signed_url
+from api.supa_storage import upload_private_photo, create_signed_url
 
 # Public Researcher Request Submission
 class CreateResearcherRequestView(generics.CreateAPIView):

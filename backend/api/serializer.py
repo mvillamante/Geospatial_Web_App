@@ -1,7 +1,7 @@
 from django.utils import timezone
 from datetime import timedelta
 from api.models import *
-from api.supabase_storage import upload_private_photo, upload_reply_photo, create_signed_url, upload_cms_photo
+from api.supa_storage import upload_private_photo, upload_reply_photo, create_signed_url, upload_cms_photo
 from django.utils.timesince import timesince
 from django.utils.crypto import get_random_string
 from django.contrib.auth.password_validation import validate_password
@@ -682,6 +682,7 @@ class ResearcherRequestSerializer(serializers.ModelSerializer):
 class ResidentVerificationRequestSerializer(serializers.ModelSerializer):
     citizen_id = serializers.IntegerField(source='user.id', read_only=True)
     citizen_name = serializers.SerializerMethodField()
+    id_image = serializers.ImageField(write_only=True)
     
     class Meta:
         model = ResidentVerificationRequest
@@ -697,7 +698,7 @@ class ResidentVerificationRequestSerializer(serializers.ModelSerializer):
             "created_at",
             "reviewed_at"
         ]
-        read_only_fields = ["id", "citizen_id", 'barangay', 'address', "citizen_name", "created_at", "reviewed_at"]
+        read_only_fields = ["id", "citizen_id",  "citizen_name", "created_at", "reviewed_at"]
 
     def get_citizen_name(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}"

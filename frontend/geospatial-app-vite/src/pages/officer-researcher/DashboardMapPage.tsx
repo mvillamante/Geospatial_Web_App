@@ -37,25 +37,11 @@ const getHazardIndexColor = (hi: number): string => {
 };
 
 const getGreenIndexColor = (gi: number): string => {
-  gi = Math.max(0, Math.min(100, gi));
-  let r: number, g: number, b: number;
-  if (gi >= 70) {
-    const t = (gi - 70) / 30;
-    r = Math.round(60 - t * 60);
-    g = Math.round(139 + t * (100 - 39));
-    b = Math.round(60 - t * 60);
-  } else if (gi >= 40) {
-    const t = (gi - 40) / 30;
-    r = Math.round(180 - t * 120);
-    g = Math.round(180 - t * 41);
-    b = Math.round(0 + t * 60);
-  } else {
-    const t = gi / 40;
-    r = Math.round(92 + t * 88);
-    g = Math.round(64 + t * 116);
-    b = Math.round(51 - t * 51);
-  }
-  return `rgb(${r},${g},${b})`;
+  if (gi >= 80) return "#006400";   // Very dense forest
+  if (gi >= 60) return "#228B22";   // Dense vegetation
+  if (gi >= 11) return "#7CCD7C";   // Sparse vegetation
+  if (gi >= 1) return "#CDCD00";    // Rocks / sand
+  return "#8B6914";                 // Water / barren
 };
 
 const getCalamityRiskColor = (cr: number): string => {
@@ -68,7 +54,7 @@ const getCalamityRiskColor = (cr: number): string => {
 };
 
 const DashboardMapPage: React.FC = () => {
-  const { userRole, userRole2 } = getUserRoleAndDisplayName();
+  const { userRole } = getUserRoleAndDisplayName();
 
   // Mark body so we can reserve scrollbar space and prevent layout shift on double-click
   useEffect(() => {
@@ -84,6 +70,8 @@ const DashboardMapPage: React.FC = () => {
   // const greenMaxYear = 2030;
   const initialYear = Math.min(maxYear, Math.max(minYear, currentYear));
   const [year, setYear] = useState(initialYear);
+
+  const [reports, setReports] = useState<any[]>([]);
 
   const [reportYear, setReportYear] = useState(new Date().getFullYear());
   const [reportFormat, setReportFormat] = useState<"pdf" | "docx">("pdf");
@@ -114,6 +102,17 @@ const DashboardMapPage: React.FC = () => {
       document.body.classList.remove("no-dashboard-body-scroll");
     };
   }, [mapView]);
+
+  useEffect(() => {
+    const API_URL = import.meta.env.VITE_API_URL;
+
+    fetch(`${API_URL}/api/incident-reports/verified/`)
+      .then((res) => res.json())
+      .then((data) => {
+        setReports(data.results || data);
+      })
+      .catch((err) => console.error("Failed to load reports:", err));
+  }, []);
 
   // ---------- Data Hooks ----------
   const { cityAverage: hazardAvg } =
@@ -343,17 +342,19 @@ const DashboardMapPage: React.FC = () => {
     },
   ];
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   /*---------- Placeholder Recent Download Section (Right Panel)----------*/
   const [recentDownloads, setRecentDownloads] = useState<DownloadItem[]>([]);
 
-  const MODEL_ARTIFACT_ENDPOINTS: Record<string, string> = {
-    "Green Index Model (ZIP)": "/api/hazard/models/green/artifacts.zip",
-    "Hazard Index Model (ZIP)": "/api/hazard/models/hazard/artifacts.zip",
-    "Calamity Risk Model (ZIP)": "/api/hazard/models/calamity_risk/artifacts.zip",
-    "LSTM Forecasting Bundle (ZIP)": "/api/hazard/models/lstm/all_artifacts.zip",
-  };
+const MODEL_ARTIFACT_ENDPOINTS: Record<string, string> = {
+  "Green Index Model (ZIP)": `${API_URL}/api/hazard/models/green/artifacts.zip`,
+  "Hazard Index Model (ZIP)": `${API_URL}/api/hazard/models/hazard/artifacts.zip`,
+  "Calamity Risk Model (ZIP)": `${API_URL}/api/hazard/models/calamity_risk/artifacts.zip`,
+  "LSTM Forecasting Bundle (ZIP)": `${API_URL}/api/hazard/models/lstm/all_artifacts.zip`,
+};
 
-  const DATASET_ENDPOINT = "/api/hazard/datasets/download";
+const DATASET_ENDPOINT = `${API_URL}/api/hazard/datasets/download`;
 
   const handleDownload = async (
     item: ExportItem,
@@ -595,6 +596,7 @@ const DashboardMapPage: React.FC = () => {
         {mapView === "interactive" ? (
           <div className="dashboardview-map">
             <LeafletMap
+              reports={reports}
               mapView="interactive"
               mapType={mapType}
               activeLayers={activeLayers}
@@ -719,7 +721,6 @@ const DashboardMapPage: React.FC = () => {
           insightIcons={insightIcons}
 
           userRole={userRole}
-          userRole2={userRole2}
           showEdaModal={showEdaModal}
           setShowEdaModal={setShowEdaModal}
           edaSect={edaSect}

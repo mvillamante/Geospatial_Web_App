@@ -3,7 +3,7 @@ import { AiOutlineClose, AiOutlineEye, AiOutlineEyeInvisible } from "react-icons
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { saveUserSession } from "../../../libr/auth";
-import { normalizePrimaryRole, normalizeSecondaryRole, roleToBasePath } from "../../../utils/roles";
+import { normalizePrimaryRole, roleToBasePath } from "../../../utils/roles";
 import "./GlobalModal.css";
 import type { User } from "../../../libr/fetchCurrentUser";
 import { toast } from "sonner";
@@ -115,12 +115,8 @@ const AuthModal: React.FC<AuthModalProps> = ({
     };
 
     const handleNavigation = (user: User) => {
-        const primaryRole = normalizePrimaryRole(user.role);
-        const secondaryRole = normalizeSecondaryRole(
-            primaryRole,
-            user.extra_roles?.[0]
-        );
-        const roleForNavigation = primaryRole || secondaryRole;
+        const primaryRole = normalizePrimaryRole(user.role, user.extra_roles);
+        const roleForNavigation = primaryRole;
         navigate(roleToBasePath(roleForNavigation), { replace: true });
     };
 

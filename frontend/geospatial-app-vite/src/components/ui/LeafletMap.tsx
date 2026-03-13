@@ -304,27 +304,13 @@ function LeafletMap(props: LeafletMapProps) {
   };
 
   // Green Index color function (from green_index_server.py interpolateColor)
-  const getGreenIndexColor = (gi: number): string => {
-    gi = Math.max(0, Math.min(100, gi));
-    let r: number, g: number, b: number;
-    if (gi >= 70) {
-      const t = (gi - 70) / 30;
-      r = Math.round(60 - t * 60);
-      g = Math.round(139 + t * (100 - 39));
-      b = Math.round(60 - t * 60);
-    } else if (gi >= 40) {
-      const t = (gi - 40) / 30;
-      r = Math.round(180 - t * 120);
-      g = Math.round(180 - t * 41);
-      b = Math.round(0 + t * 60);
-    } else {
-      const t = gi / 40;
-      r = Math.round(92 + t * 88);
-      g = Math.round(64 + t * 116);
-      b = Math.round(51 - t * 51);
-    }
-    return `rgb(${r},${g},${b})`;
-  };
+const getGreenIndexColor = (gi: number): string => {
+  if (gi >= 80) return "#006400";   // Very dense forest
+  if (gi >= 60) return "#228B22";   // Dense vegetation
+  if (gi >= 11) return "#7CCD7C";   // Sparse vegetation
+  if (gi >= 1) return "#CDCD00";    // Rocks / sand
+  return "#8B6914";                 // Water / barren
+};
 
   // Calamity Risk color scale (warm red tones matching screenshot)
   const getCalamityRiskColor = (cr: number): string => {
@@ -1541,6 +1527,7 @@ function LeafletMap(props: LeafletMapProps) {
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
+    
 
     const showVerifiedReports = activeLayers.includes("Verified Reports");
 

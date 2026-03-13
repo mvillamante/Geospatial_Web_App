@@ -1,6 +1,19 @@
-export type Role = "Admin" | "Officer" | "Citizen" | "" | "Guest";
+export type Role =
+  | "Admin"
+  | "Officer"
+  | "Citizen"
+  | "Researcher"
+  | "Guest";
 
-export const normalizePrimaryRole = (role?: string): Role => {
+export const normalizePrimaryRole = (
+  role?: string,
+  extraRoles?: string[]
+): Role | "Researcher" => {
+
+  if (extraRoles?.some(r => r.toLowerCase() === "researcher")) {
+    return "Researcher";
+  }
+
   const r = role?.trim().toLowerCase() || "";
 
   switch (r) {
@@ -10,25 +23,15 @@ export const normalizePrimaryRole = (role?: string): Role => {
       return "Officer";
     case "admin":
       return "Admin";
-    case "":
-      return ""; // leave empty if no role
+    case "researcher":
+      return "Researcher";
+    case "guest":
+      return "Guest";
     default:
       return "Guest";
   }
 };
 
-export const normalizeSecondaryRole = (
-  _primaryRole: Role,
-  extraRole?: string
-): "" | "Researcher" => {
-  const r = extraRole?.trim().toLowerCase() || "";
-
-  if (r === "researcher") {
-    return "Researcher";
-  }
-
-  return "";
-};
 
 export const roleToBasePath = (role: Role | string) => {
   switch (role) {

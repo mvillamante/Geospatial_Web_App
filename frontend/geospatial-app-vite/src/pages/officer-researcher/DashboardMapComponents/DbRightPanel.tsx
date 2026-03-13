@@ -125,7 +125,24 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
     useCalamityRiskData(reportYear, true);
 
   const toggleRightPanel = () => {
-    setIsRightPanelOpen((prev) => !prev);
+    setIsRightPanelOpen((prev) => {
+      const newState = !prev;
+
+      setTimeout(() => {
+        const mapContainer = document.querySelector(
+          ".leaflet-container"
+        ) as HTMLElement | null;
+
+        const leafletMap: L.Map | null =
+          mapContainer ? (mapContainer as any)._leafletMapInstance ?? null : null;
+
+        if (leafletMap) {
+          leafletMap.invalidateSize();
+        }
+      }, 300);
+
+      return newState;
+    });
   };
 
   const [chartImages, setChartImages] = useState({
@@ -515,7 +532,7 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
           <span className={`slider ${rightNav}`} />
 
           {["analytics", "export", "import"].map((tab) => {
-            const isExportLocked = tab === "export" && (!props.selected || props.selected === "none");
+            const isExportLocked = false;
             return (
               <button
                 key={tab}
@@ -537,16 +554,16 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
       <div className="right-panel-content">
         {rightNav === "analytics" && (
           <div>
-            {shouldBlurAnalytics ? (
-              <div className="right-panel-empty-state">
-                <p className="right-panel-empty-title">
-                  Choose a layer to view this section.
-                </p>
-              </div>
-            ) : props.mapView === "interactive" ? (
+            {props.mapView === "interactive" ? (
               <div className="right-panel-empty-state">
                 <p className="right-panel-empty-title">
                   Click the <strong>Choropleth</strong> map to view this section.
+                </p>
+              </div>
+            ) : (!props.selected || props.selected === "none") ? (
+              <div className="right-panel-empty-state">
+                <p className="right-panel-empty-title">
+                  Select a <strong>data layer</strong> on the Choropleth view before viewing analytics tab.
                 </p>
               </div>
             ) : (
@@ -574,7 +591,13 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
         )}
 
         {rightNav === "export" && (
-          (!props.selected || props.selected === "none") ? (
+          props.mapView === "interactive" ? (
+            <div className="right-panel-empty-state">
+              <p className="right-panel-empty-title">
+                Click the <strong>Choropleth</strong> map to view this section.
+              </p>
+            </div>
+          ) : (!props.selected || props.selected === "none") ? (
             <div className="right-panel-empty-state">
               <p className="right-panel-empty-title">
                 Select a <strong>data layer</strong> on the Choropleth view before generating a report.

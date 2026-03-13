@@ -131,7 +131,7 @@ const DbChartsSection: React.FC<Props> = ({
         {showKpis && activeSummary && (
           <div className={`index-kpi-grid ${kpiThemeClass}`}>
             <div className="index-kpi-card">
-              <div className="index-kpi-label">Most {indexLabel} Barangay</div>
+              <div className="index-kpi-label">Highest {indexLabel} Barangay</div>
               <div className="index-kpi-value">
                 {activeSummary.mostName || "—"}
               </div>

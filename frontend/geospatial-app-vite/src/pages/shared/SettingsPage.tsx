@@ -44,7 +44,6 @@ function SettingsPage() {
     };
 
     const { userRole, isResidentVerified, userName } = getUserRoleAndDisplayName();
-    console.log("berry ba", isResidentVerified)
 
     useEffect(() => {
         const fetchProfile = async () => {

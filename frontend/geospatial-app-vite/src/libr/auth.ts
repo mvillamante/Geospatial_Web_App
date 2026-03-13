@@ -70,8 +70,16 @@ export const getUserRoleAndDisplayName = () => {
 
   const userName = currentUser.username;
 
-  const profilePath = `/main/${userRole.toLowerCase()}/profile`;
-  const settingsPath = `/main/${userRole.toLowerCase()}/settings`;
+  // Determine the correct role for paths
+  const effectiveRole =
+    userRole2.includes("Researcher") // check secondaryRoles first
+      ? "Researcher"
+      : userRole?.trim() // fallback to primaryRole
+      ? userRole
+      : "Guest";
+
+  const profilePath = `/main/${effectiveRole.toLowerCase()}/profile`;
+  const settingsPath = `/main/${effectiveRole.toLowerCase()}/settings`;
 
   const isResidentVerified = currentUser.is_resident_verified;
 

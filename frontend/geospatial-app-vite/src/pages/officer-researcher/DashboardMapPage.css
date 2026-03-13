@@ -3042,6 +3042,14 @@ body.no-dashboard-body-scroll .main-content {
   text-decoration: underline;
 }
 
+.import-download-sample-link {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  margin-bottom: 8px;
+}
+
 .import-upload-group {
   margin-bottom: 14px;
 }
@@ -3257,6 +3265,109 @@ body.no-dashboard-body-scroll .main-content {
 
 .import-chart-card {
   margin-top: 12px;
+}
+
+/* ---- Actual 2026 data styles ---- */
+.import-actual-2026-group {
+  border-top: 1px dashed #cbd5e1;
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.import-actual-2026-stats {
+  margin: 10px 0;
+}
+
+.import-actual-stat-row {
+  display: flex;
+  gap: 10px;
+}
+
+.import-actual-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-left: 3px solid #2e7d32;
+  background: #f0fdf4;
+}
+
+.import-actual-stat.import-actual-stat-hazard {
+  border-left-color: #b45309;
+  background: #fff7ed;
+}
+
+.import-actual-stat.import-actual-stat-calamity {
+  border-left-color: #b91c1c;
+  background: #fef2f2;
+}
+
+.import-actual-stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #64748b;
+}
+
+.import-actual-stat-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.import-actual-stat-number {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.import-actual-stat-hazard .import-actual-stat-number {
+  color: #b45309;
+}
+
+.import-actual-stat-calamity .import-actual-stat-number {
+  color: #b91c1c;
+}
+
+.import-actual-2026-summary {
+  border-left-color: #059669;
+  background: #ecfdf5;
+}
+
+.import-actual-2026-summary .import-projection-label {
+  color: #065f46;
+}
+
+.import-actual-2026-summary .import-projection-value {
+  color: #047857;
+}
+
+.import-projection-hazard.import-actual-2026-summary {
+  border-left-color: #b45309;
+  background: #fff7ed;
+}
+
+.import-projection-hazard.import-actual-2026-summary .import-projection-label {
+  color: #78350f;
+}
+
+.import-projection-hazard.import-actual-2026-summary .import-projection-value {
+  color: #b45309;
+}
+
+.import-projection-calamity.import-actual-2026-summary {
+  border-left-color: #b91c1c;
+  background: #fef2f2;
+}
+
+.import-projection-calamity.import-actual-2026-summary .import-projection-label {
+  color: #7f1d1d;
+}
+
+.import-projection-calamity.import-actual-2026-summary .import-projection-value {
+  color: #b91c1c;
 }
 
 .import-coming-soon {

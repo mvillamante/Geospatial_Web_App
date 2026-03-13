@@ -1,0 +1,17 @@
+year,barangay,green_index,mean_ndvi,gar,predicted
+2026,Baclaran,44.1,0.174,0.35,False
+2026,Banay-Banay,61.8,0.256,0.68,False
+2026,Banlic,57.3,0.238,0.62,False
+2026,Bigaa,55.6,0.228,0.57,False
+2026,Butong,42.5,0.178,0.30,False
+2026,Casile,74.9,0.324,0.92,False
+2026,Diezmo,74.6,0.294,0.91,False
+2026,Gulod,61.2,0.256,0.66,False
+2026,Mamatid,69.1,0.288,0.84,False
+2026,Marinig,66.8,0.274,0.78,False
+2026,Niugan,50.5,0.211,0.46,False
+2026,Pittland,65.9,0.268,0.77,False
+2026,Poblacion,66.2,0.266,0.78,False
+2026,Pulo,64.5,0.264,0.74,False
+2026,Sala,56.8,0.232,0.59,False
+2026,San Isidro,60.9,0.252,0.67,False

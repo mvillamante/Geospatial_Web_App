@@ -733,6 +733,8 @@ def green_index_import_ai_insight(request):
     selected_year = body.get("selectedYear")
     year_avg = body.get("yearAvg")
     val_2026 = body.get("val2026")
+    val_2027 = body.get("val2027")
+    has_actual_2026 = body.get("hasActual2026", False)
     data_quality = body.get("dataQuality") or {}
     has_negative = data_quality.get("hasNegative", False)
     has_over_100 = data_quality.get("hasOver100", False)
@@ -740,6 +742,9 @@ def green_index_import_ai_insight(request):
     max_gi = data_quality.get("maxGreenIndex")
     bad_data = has_negative or has_over_100
     has_2026 = any(d.get("year") == "2026" for d in chart_data) if chart_data else False
+    has_2027 = any(d.get("year") == "2027" for d in chart_data) if chart_data else False
+    proj_year = 2027 if has_actual_2026 else 2026
+    val_proj = val_2027 if has_actual_2026 else val_2026
     prev_2026_val: Optional[float] = None
     prev_year_num: Optional[int] = None
     prev_year_val: Optional[float] = None
@@ -781,14 +786,14 @@ def green_index_import_ai_insight(request):
                     break
                 prev_2026_val = v
 
-        if has_2026 and isinstance(val_2026, (int, float)):
+        if isinstance(val_proj, (int, float)):
             bad_projection = (
-                val_2026 < 0
-                or val_2026 > 100
+                val_proj < 0
+                or val_proj > 100
                 or (
                     prev_2026_val is not None
-                    and val_2026 >= prev_2026_val + 20
-                    and val_2026 >= prev_2026_val * 1.3
+                    and val_proj >= prev_2026_val + 20
+                    and val_proj >= prev_2026_val * 1.3
                 )
             )
         bad_warning = ""
@@ -799,8 +804,25 @@ def green_index_import_ai_insight(request):
                 + "You MUST warn the user their dataset appears invalid. "
                 "Say: check your CSV for negative values or values over 100. Suggest re-uploading valid data."
             )
-        prev_year_num = int(numeric_points[-2][0]) if len(numeric_points) >= 2 and numeric_points[-1][0] == 2026 else None
+        prev_year_num = int(numeric_points[-2][0]) if len(numeric_points) >= 2 and numeric_points[-1][0] == proj_year else None
         prev_year_val = numeric_points[-2][1] if prev_year_num is not None else prev_2026_val
+        if has_actual_2026:
+            proj_para = (
+                f"Paragraph 2 ({proj_year} projection): ONE sentence. The user uploaded actual 2026 data ({val_2026}%). "
+                f"Compare the {proj_year} projection to 2026 actual. "
+                + (f"{proj_year}: {val_proj}%, 2026 actual: {val_2026}%. " if val_proj is not None and val_2026 is not None else f"{proj_year}: {val_proj}%. " if val_proj is not None else f"No {proj_year} data. ")
+                + "Say clearly if the projection is good (up/improving) or bad (down/declining) compared to 2026 actual. "
+                + ("If projection is outside 0–100 or unrealistic, warn the user to check their CSV. " if bad_projection else "")
+                + "Under 35 words. No filler.\n\n"
+            )
+        else:
+            proj_para = (
+                "Paragraph 2 (2026 projection): ONE sentence. Compare 2026 to the last year before it. "
+                + (f"2026: {val_2026}%, last year ({prev_year_num}): {prev_year_val}%. " if has_2026 and val_2026 is not None and prev_year_val is not None and prev_year_num is not None else f"2026: {val_2026}%. " if has_2026 and val_2026 is not None else "No 2026 data. ")
+                + "Say clearly if the projection is good (up/improving) or bad (down/declining) compared to last year. "
+                + ("If 2026 is outside 0–100 or unrealistic, warn the user to check their CSV. " if bad_projection else "")
+                + "Under 35 words. No filler.\n\n"
+            )
         prompt = (
             "Analyst for Cabuyao Green Index. Reply with EXACTLY 2 short paragraphs separated by a line with only: ---\n\n"
             + bad_warning
@@ -808,12 +830,8 @@ def green_index_import_ai_insight(request):
             + "Paragraph 1 (City average): 1–2 sentences on the historical city average. "
             + ("If bad data: warn user first, then brief trend. " if bad_data else "")
             + f"Selected year: {selected_year}, value: {year_avg}%. Years {min_year}–{max_year}. Trend: {trend}. Under 50 words.\n\n"
-            + "Paragraph 2 (2026 projection): ONE sentence. Compare 2026 to the last year before it. "
-            + (f"2026: {val_2026}%, last year ({prev_year_num}): {prev_year_val}%. " if has_2026 and val_2026 is not None and prev_year_val is not None and prev_year_num is not None else f"2026: {val_2026}%. " if has_2026 and val_2026 is not None else "No 2026 data. ")
-            + "Say clearly if the projection is good (up/improving) or bad (down/declining) compared to last year. "
-            + ("If 2026 is outside 0–100 or unrealistic, warn the user to check their CSV. " if bad_projection else "")
-            + "Under 35 words. No filler.\n\n"
-            "No intro. No bullets. Output only the 2 paragraphs."
+            + proj_para
+            + "No intro. No bullets. Output only the 2 paragraphs."
         )
 
     url = "https://api.groq.com/openai/v1/chat/completions"
@@ -981,6 +999,8 @@ def hazard_index_import_ai_insight(request):
     selected_year = body.get("selectedYear")
     year_avg = body.get("yearAvg")
     val_2026 = body.get("val2026")
+    val_2027 = body.get("val2027")
+    has_actual_2026 = body.get("hasActual2026", False)
     data_quality = body.get("dataQuality") or {}
     has_negative = data_quality.get("hasNegative", False)
     has_over_100 = data_quality.get("hasOver100", False)
@@ -988,6 +1008,9 @@ def hazard_index_import_ai_insight(request):
     max_hi = data_quality.get("maxHazardIndex")
     bad_data = has_negative or has_over_100
     has_2026 = any(d.get("year") == "2026" for d in chart_data) if chart_data else False
+    has_2027 = any(d.get("year") == "2027" for d in chart_data) if chart_data else False
+    proj_year = 2027 if has_actual_2026 else 2026
+    val_proj = val_2027 if has_actual_2026 else val_2026
     prev_2026_val: Optional[float] = None
     prev_year_num: Optional[int] = None
     prev_year_val: Optional[float] = None
@@ -1029,14 +1052,14 @@ def hazard_index_import_ai_insight(request):
                     break
                 prev_2026_val = v
 
-        if has_2026 and isinstance(val_2026, (int, float)):
+        if isinstance(val_proj, (int, float)):
             bad_projection = (
-                val_2026 < 0
-                or val_2026 > 100
+                val_proj < 0
+                or val_proj > 100
                 or (
                     prev_2026_val is not None
-                    and val_2026 >= prev_2026_val + 25
-                    and val_2026 >= prev_2026_val * 1.4
+                    and val_proj >= prev_2026_val + 25
+                    and val_proj >= prev_2026_val * 1.4
                 )
             )
         bad_warning = ""
@@ -1047,8 +1070,25 @@ def hazard_index_import_ai_insight(request):
                 + "You MUST warn the user their dataset appears invalid. "
                 "Say: check your CSV for negative values or values over 100. Suggest re-uploading valid data."
             )
-        prev_year_num = int(numeric_points[-2][0]) if len(numeric_points) >= 2 and numeric_points[-1][0] == 2026 else None
+        prev_year_num = int(numeric_points[-2][0]) if len(numeric_points) >= 2 and numeric_points[-1][0] == proj_year else None
         prev_year_val = numeric_points[-2][1] if prev_year_num is not None else prev_2026_val
+        if has_actual_2026:
+            proj_para = (
+                f"Paragraph 2 ({proj_year} projection): ONE sentence. The user uploaded actual 2026 data ({val_2026}%). "
+                f"Compare the {proj_year} projection to 2026 actual. "
+                + (f"{proj_year}: {val_proj}%, 2026 actual: {val_2026}%. " if val_proj is not None and val_2026 is not None else f"{proj_year}: {val_proj}%. " if val_proj is not None else f"No {proj_year} data. ")
+                + "Say clearly if rising hazard (concerning) or falling hazard (improving) compared to 2026 actual. "
+                + ("If projection is outside 0–100 or unrealistic, warn the user to check their CSV. " if bad_projection else "")
+                + "Under 35 words. No filler.\n\n"
+            )
+        else:
+            proj_para = (
+                "Paragraph 2 (2026 projection): ONE sentence. Compare 2026 to the last year before it. "
+                + (f"2026: {val_2026}%, last year ({prev_year_num}): {prev_year_val}%. " if has_2026 and val_2026 is not None and prev_year_val is not None and prev_year_num is not None else f"2026: {val_2026}%. " if has_2026 and val_2026 is not None else "No 2026 data. ")
+                + "Say clearly if rising hazard (concerning) or falling hazard (improving) compared to last year. "
+                + ("If 2026 is outside 0–100 or unrealistic, warn the user to check their CSV. " if bad_projection else "")
+                + "Under 35 words. No filler.\n\n"
+            )
         prompt = (
             "Analyst for Cabuyao Hazard Index (higher = more risk, 0–100). Reply with EXACTLY 2 short paragraphs separated by a line with only: ---\n\n"
             + bad_warning
@@ -1056,12 +1096,8 @@ def hazard_index_import_ai_insight(request):
             + "Paragraph 1 (Hazard average): 1–2 sentences on the historical city average hazard. "
             + ("If bad data: warn user first, then brief trend. " if bad_data else "")
             + f"Selected year: {selected_year}, value: {year_avg}%. Years {min_year}–{max_year}. Trend: {trend}. Note: higher hazard = more risk. Under 50 words.\n\n"
-            + "Paragraph 2 (2026 projection): ONE sentence. Compare 2026 to the last year before it. "
-            + (f"2026: {val_2026}%, last year ({prev_year_num}): {prev_year_val}%. " if has_2026 and val_2026 is not None and prev_year_val is not None and prev_year_num is not None else f"2026: {val_2026}%. " if has_2026 and val_2026 is not None else "No 2026 data. ")
-            + "Say clearly if rising hazard (concerning) or falling hazard (improving) compared to last year. "
-            + ("If 2026 is outside 0–100 or unrealistic, warn the user to check their CSV. " if bad_projection else "")
-            + "Under 35 words. No filler.\n\n"
-            "No intro. No bullets. Output only the 2 paragraphs."
+            + proj_para
+            + "No intro. No bullets. Output only the 2 paragraphs."
         )
 
     url = "https://api.groq.com/openai/v1/chat/completions"
@@ -1223,6 +1259,8 @@ def calamity_risk_import_ai_insight(request):
     selected_year = body.get("selectedYear")
     year_avg = body.get("yearAvg")
     val_2026 = body.get("val2026")
+    val_2027 = body.get("val2027")
+    has_actual_2026 = body.get("hasActual2026", False)
     data_quality = body.get("dataQuality") or {}
     has_negative = data_quality.get("hasNegative", False)
     has_over_100 = data_quality.get("hasOver100", False)
@@ -1230,6 +1268,9 @@ def calamity_risk_import_ai_insight(request):
     max_cr = data_quality.get("maxCalamityRisk")
     bad_data = has_negative or has_over_100
     has_2026 = any(d.get("year") == "2026" for d in chart_data) if chart_data else False
+    has_2027 = any(d.get("year") == "2027" for d in chart_data) if chart_data else False
+    proj_year = 2027 if has_actual_2026 else 2026
+    val_proj = val_2027 if has_actual_2026 else val_2026
     prev_2026_val: Optional[float] = None
     prev_year_num: Optional[int] = None
     prev_year_val: Optional[float] = None
@@ -1271,14 +1312,14 @@ def calamity_risk_import_ai_insight(request):
                     break
                 prev_2026_val = v
 
-        if has_2026 and isinstance(val_2026, (int, float)):
+        if isinstance(val_proj, (int, float)):
             bad_projection = (
-                val_2026 < 0
-                or val_2026 > 100
+                val_proj < 0
+                or val_proj > 100
                 or (
                     prev_2026_val is not None
-                    and val_2026 >= prev_2026_val + 25
-                    and val_2026 >= prev_2026_val * 1.4
+                    and val_proj >= prev_2026_val + 25
+                    and val_proj >= prev_2026_val * 1.4
                 )
             )
         bad_warning = ""
@@ -1289,8 +1330,25 @@ def calamity_risk_import_ai_insight(request):
                 + "You MUST warn the user their dataset appears invalid. "
                 "Say: check your CSV for negative values or values over 100. Suggest re-uploading valid data."
             )
-        prev_year_num = int(numeric_points[-2][0]) if len(numeric_points) >= 2 and numeric_points[-1][0] == 2026 else None
+        prev_year_num = int(numeric_points[-2][0]) if len(numeric_points) >= 2 and numeric_points[-1][0] == proj_year else None
         prev_year_val = numeric_points[-2][1] if prev_year_num is not None else prev_2026_val
+        if has_actual_2026:
+            proj_para = (
+                f"Paragraph 2 ({proj_year} projection): ONE sentence. The user uploaded actual 2026 data ({val_2026}%). "
+                f"Compare the {proj_year} projection to 2026 actual. "
+                + (f"{proj_year}: {val_proj}%, 2026 actual: {val_2026}%. " if val_proj is not None and val_2026 is not None else f"{proj_year}: {val_proj}%. " if val_proj is not None else f"No {proj_year} data. ")
+                + "Say clearly if rising calamity risk (concerning) or falling risk (improving) compared to 2026 actual. "
+                + ("If projection is outside 0–100 or unrealistic, warn the user to check their CSV. " if bad_projection else "")
+                + "Under 35 words. No filler.\n\n"
+            )
+        else:
+            proj_para = (
+                "Paragraph 2 (2026 projection): ONE sentence. Compare 2026 to the last year before it. "
+                + (f"2026: {val_2026}%, last year ({prev_year_num}): {prev_year_val}%. " if has_2026 and val_2026 is not None and prev_year_val is not None and prev_year_num is not None else f"2026: {val_2026}%. " if has_2026 and val_2026 is not None else "No 2026 data. ")
+                + "Say clearly if rising calamity risk (concerning) or falling risk (improving) compared to last year. "
+                + ("If 2026 is outside 0–100 or unrealistic, warn the user to check their CSV. " if bad_projection else "")
+                + "Under 35 words. No filler.\n\n"
+            )
         prompt = (
             "Analyst for Cabuyao Calamity Risk Likelihood (higher = more risk, 0–100). Reply with EXACTLY 2 short paragraphs separated by a line with only: ---\n\n"
             + bad_warning
@@ -1298,12 +1356,8 @@ def calamity_risk_import_ai_insight(request):
             + "Paragraph 1 (Calamity risk average): 1–2 sentences on the historical city average calamity risk. "
             + ("If bad data: warn user first, then brief trend. " if bad_data else "")
             + f"Selected year: {selected_year}, value: {year_avg}%. Years {min_year}–{max_year}. Trend: {trend}. Note: higher calamity risk = more risk. Under 50 words.\n\n"
-            + "Paragraph 2 (2026 projection): ONE sentence. Compare 2026 to the last year before it. "
-            + (f"2026: {val_2026}%, last year ({prev_year_num}): {prev_year_val}%. " if has_2026 and val_2026 is not None and prev_year_val is not None and prev_year_num is not None else f"2026: {val_2026}%. " if has_2026 and val_2026 is not None else "No 2026 data. ")
-            + "Say clearly if rising calamity risk (concerning) or falling risk (improving) compared to last year. "
-            + ("If 2026 is outside 0–100 or unrealistic, warn the user to check their CSV. " if bad_projection else "")
-            + "Under 35 words. No filler.\n\n"
-            "No intro. No bullets. Output only the 2 paragraphs."
+            + proj_para
+            + "No intro. No bullets. Output only the 2 paragraphs."
         )
 
     url = "https://api.groq.com/openai/v1/chat/completions"

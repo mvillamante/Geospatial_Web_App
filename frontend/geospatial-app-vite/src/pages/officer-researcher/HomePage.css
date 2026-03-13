@@ -11,6 +11,7 @@
   font-family: 'Inter', -apple-system, sans-serif;
 }
 
+
 /* --- HEADER SECTION --- */
 .home-header {
   display: flex;
@@ -40,14 +41,13 @@
 }
 
 
-/* Background Icons for Cards */
 .background-icon {
   position: absolute;
   right: -10px;
   bottom: -10px;
-  font-size: 6rem;
-  opacity: 0.5;
-  transform: rotate(-15deg);
+  font-size: 5rem;
+  opacity: 0.15;
+  transform: rotate(-12deg);
   z-index: 1;
 }
 
@@ -80,10 +80,11 @@
 }
 
 .section-title {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 800;
   margin-bottom: 1.5rem;
   color: #334155;
+  letter-spacing: 0.02em;
 }
 
 /* --- INDICES GRID --- */
@@ -105,7 +106,8 @@
 
 .index-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 18px rgba(0,0,0,0.08);
+  border-color: #cbd5f5;
 }
 
 .index-content {
@@ -193,6 +195,18 @@
   border: 1px solid #e2e8f0;
 }
 
+.info-box.green {
+  border-top: 4px solid #22c55e;
+}
+
+.info-box.orange {
+  border-top: 4px solid #f97316;
+}
+
+.info-box.red {
+  border-top: 4px solid #ef4444;
+}
+
 .info-box h4 {
   margin: 0 0 0.75rem 0;
   font-weight: 700;
@@ -235,13 +249,22 @@
 
 .formula {
   margin-top: 1rem;
-  padding: 0.75rem;
-  background: #1e293b;
+  padding: 0.75rem 1rem;
+  background: #0f172a;
   color: #f8fafc;
   border-radius: 8px;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "JetBrains Mono", monospace;
   font-size: 0.85rem;
   text-align: center;
+  letter-spacing: 0.03em;
+}
+
+.formula.green {
+  border-left: 4px solid #166534;
+}
+
+.formula.orange {
+  border-left: 4px solid #e05e33;
 }
 
 .formula.red {
@@ -263,10 +286,9 @@
 }
 
 .sources-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 2rem;
-  align-items: center;
 }
 
 .source {
@@ -294,6 +316,18 @@
   font-size: 0.75rem;
   font-weight: 600;
   color: #475569;
+}
+
+.sdg-box {
+  border-left: 6px solid transparent;
+}
+
+.sdg-11 {
+  border-left-color: var(--sdg-11);
+}
+
+.sdg-13 {
+  border-left-color: var(--sdg-13);
 }
 
 /* --- RESPONSIVE --- */

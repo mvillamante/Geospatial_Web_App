@@ -918,7 +918,7 @@ body.no-dashboard-body-scroll .main-content {
 .calamity-map-barangay-details {
   position: absolute;
   bottom: -36px;
-  z-index: 1000;
+  z-index: 10;
   width: 280px;
   max-height: calc(100vh - 100px);
   overflow-y: auto;
@@ -1259,6 +1259,13 @@ body.no-dashboard-body-scroll .main-content {
   color: #6b7280;
   margin-bottom: 10px;
   font-style: italic;
+}
+
+.analytics-blur-wrapper {
+  filter: blur(4px);
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.6;
 }
 
 .right-panel-empty-state {

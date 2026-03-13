@@ -60,7 +60,6 @@ interface RightPanelProps {
   colors?: string[];
   insightIcons?: JSX.Element[];
   userRole?: string;
-  userRole2?: string[];
   setShowEdaModal?: (val: boolean) => void;
   showEdaModal?: boolean;
   // Props for EDA modal
@@ -80,6 +79,7 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
   isOpen,
   toggle,
   rightNav,
+  userRole,
   setRightNav,
   exportSections,
   recentDownloads,
@@ -94,7 +94,6 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
   keyInsights,
   colors,
   insightIcons,
-  userRole2,
 
   showEdaModal,
   setShowEdaModal,
@@ -125,24 +124,7 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
     useCalamityRiskData(reportYear, true);
 
   const toggleRightPanel = () => {
-    setIsRightPanelOpen((prev) => {
-      const newState = !prev;
-
-      setTimeout(() => {
-        const mapContainer = document.querySelector(
-          ".leaflet-container"
-        ) as HTMLElement | null;
-
-        const leafletMap: L.Map | null =
-          mapContainer ? (mapContainer as any)._leafletMapInstance ?? null : null;
-
-        if (leafletMap) {
-          leafletMap.invalidateSize();
-        }
-      }, 300);
-
-      return newState;
-    });
+    setIsRightPanelOpen((prev) => !prev);
   };
 
   const [chartImages, setChartImages] = useState({
@@ -532,16 +514,11 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
           <span className={`slider ${rightNav}`} />
 
           {["analytics", "export", "import"].map((tab) => {
-            const isExportLocked = false;
             return (
               <button
                 key={tab}
-                className={`${rightNav === tab ? "active" : ""} ${isExportLocked ? "tab-locked" : ""}`}
-                onClick={() => {
-                  if (isExportLocked) return;
-                  setRightNav(tab as "analytics" | "export" | "import");
-                }}
-                title={isExportLocked ? "Select a data layer first" : undefined}
+                className={`${rightNav === tab ? "active" : ""}`}
+                onClick={() => setRightNav(tab as "analytics" | "export" | "import")}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
@@ -554,26 +531,26 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
       <div className="right-panel-content">
         {rightNav === "analytics" && (
           <div>
-            {props.mapView === "interactive" ? (
+            {shouldBlurAnalytics ? (
+              <div className="right-panel-empty-state">
+                <p className="right-panel-empty-title">
+                  Choose a layer to view this section.
+                </p>
+              </div>
+            ) : props.mapView === "interactive" ? (
               <div className="right-panel-empty-state">
                 <p className="right-panel-empty-title">
                   Click the <strong>Choropleth</strong> map to view this section.
-                </p>
-              </div>
-            ) : (!props.selected || props.selected === "none") ? (
-              <div className="right-panel-empty-state">
-                <p className="right-panel-empty-title">
-                  Select a <strong>data layer</strong> on the Choropleth view before viewing analytics tab.
                 </p>
               </div>
             ) : (
               <>
                 <DbChartsSection {...props} />
                 <DbAnalyticsSection
+                  userRole={userRole}
                   keyInsights={keyInsights}
                   colors={colors}
                   insightIcons={insightIcons}
-                  userRole2={userRole2}
                   mapView={props.mapView}
                   selected={props.selected}
                   year={props.year}
@@ -591,17 +568,13 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
         )}
 
         {rightNav === "export" && (
-          props.mapView === "interactive" ? (
+          props.mapView !== "choropleth" ? (
             <div className="right-panel-empty-state">
-              <p className="right-panel-empty-title">
-                Click the <strong>Choropleth</strong> map to view this section.
-              </p>
-            </div>
-          ) : (!props.selected || props.selected === "none") ? (
-            <div className="right-panel-empty-state">
-              <p className="right-panel-empty-title">
-                Select a <strong>data layer</strong> on the Choropleth view before generating a report.
-              </p>
+              <div className="right-panel-empty-state">
+                <p className="right-panel-empty-title">
+                  Switch to the <strong>Choropleth</strong> map to generate a report.
+                </p>
+              </div>
             </div>
           ) : <>
             <h4>Export Section</h4>

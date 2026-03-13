@@ -12,9 +12,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children, 
   allowedRoles 
 }) => {
-  const { userRole, userRole2 } = getUserRoleAndDisplayName();
+  const { userRole } = getUserRoleAndDisplayName();
 
-  const hasAccess = allowedRoles.includes(userRole) || userRole2.some((role: string) => allowedRoles.includes(role));
+  const hasAccess = allowedRoles.includes(userRole);
   
   // Check if user's role is in allowed roles
   if (!hasAccess) {

@@ -814,35 +814,11 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
           <p className="import-format-hint">
             Expected CSV format: <code>year,barangay,green_index,mean_ndvi,gar,predicted</code>
             {" "}
-            <a href="/green_index_import_sample.csv" download className="import-download-link">
-              Download sample (2020–2025)
-            </a>
             {" · "}
             <a href="/green_index_2026_actual_sample.csv" download className="import-download-link">
               Download 2026 sample
             </a>
           </p>
-
-          {/* Historical upload */}
-          <div className="import-upload-group">
-            <label className="import-upload-label">
-              <FaUpload /> Historical data (2020–2025)
-              <span className="help-wrap">
-                <button
-                  type="button"
-                  className="help-icon small"
-                  aria-label="Info about historical data"
-                  onMouseEnter={(e) => { uploadTooltipTriggerRef.current = e.currentTarget; setUploadTooltip("historical"); }}
-                  onMouseLeave={() => setUploadTooltip(null)}
-                  onClick={(e) => { e.stopPropagation(); uploadTooltipTriggerRef.current = e.currentTarget; setUploadTooltip(uploadTooltip === "historical" ? null : "historical"); }}
-                >?</button>
-              </span>
-            </label>
-            <div className="import-file-row">
-              <input type="file" accept=".csv" onChange={(e) => handleFileUpload(e, "historical")} className="import-file-input" id="import-historical-file" />
-              {historicalFileName && <span className="import-file-name" title={historicalFileName}>{historicalFileName}</span>}
-            </div>
-          </div>
 
           {/* 2026 actual data upload */}
           <div className="import-upload-group import-actual-2026-group">
@@ -1005,31 +981,11 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
           <p className="import-format-hint">
             Expected CSV format: <code>year,barangay,hazard_index,predicted</code>
             {" "}
-            <a href="/hazard_index_import_sample.csv" download className="import-download-link hazard">
-              Download sample (2020–2025)
-            </a>
             {" · "}
             <a href="/hazard_index_2026_actual_sample.csv" download className="import-download-link hazard">
               Download 2026 sample
             </a>
           </p>
-
-          <div className="import-upload-group">
-            <label className="import-upload-label">
-              <FaUpload /> Historical data (2020–2025)
-              <span className="help-wrap">
-                <button type="button" className="help-icon small" aria-label="Info about historical hazard data"
-                  onMouseEnter={(e) => { uploadTooltipTriggerRef.current = e.currentTarget; setUploadTooltip("historical"); }}
-                  onMouseLeave={() => setUploadTooltip(null)}
-                  onClick={(e) => { e.stopPropagation(); uploadTooltipTriggerRef.current = e.currentTarget; setUploadTooltip(uploadTooltip === "historical" ? null : "historical"); }}
-                >?</button>
-              </span>
-            </label>
-            <div className="import-file-row">
-              <input type="file" accept=".csv" onChange={(e) => handleHazardFileUpload(e, "historical")} className="import-file-input" id="import-hazard-historical-file" />
-              {historicalHazardFileName && <span className="import-file-name import-file-name-hazard" title={historicalHazardFileName}>{historicalHazardFileName}</span>}
-            </div>
-          </div>
 
           {/* 2026 actual data */}
           <div className="import-upload-group import-actual-2026-group">
@@ -1106,7 +1062,7 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
 
           {chartDataHazard.length > 0 && (
             <div className="panel-card import-chart-card import-chart-hazard">
-              <span className="panel-card-title">Hazard Index trends and projection</span>
+              <span className="panel-card-title">Hazard Index Trends and Projection</span>
               <ResponsiveContainer width="100%" height={240}>
                 <LineChart data={chartDataHazard} margin={{ top: 8, right: 16, left: 8, bottom: 24 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
@@ -1178,31 +1134,12 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
           <p className="import-format-hint">
             Expected CSV format: <code>year,barangay,calamity_risk,predicted</code>
             {" "}
-            <a href="/calamity_risk_import_sample.csv" download className="import-download-link calamity">
-              Download sample (2020–2025)
-            </a>
             {" · "}
             <a href="/calamity_risk_2026_actual_sample.csv" download className="import-download-link calamity">
               Download 2026 sample
             </a>
           </p>
 
-          <div className="import-upload-group">
-            <label className="import-upload-label">
-              <FaUpload /> Historical data (2020–2025)
-              <span className="help-wrap">
-                <button type="button" className="help-icon small" aria-label="Info about historical calamity risk data"
-                  onMouseEnter={(e) => { uploadTooltipTriggerRef.current = e.currentTarget; setUploadTooltip("historical"); }}
-                  onMouseLeave={() => setUploadTooltip(null)}
-                  onClick={(e) => { e.stopPropagation(); uploadTooltipTriggerRef.current = e.currentTarget; setUploadTooltip(uploadTooltip === "historical" ? null : "historical"); }}
-                >?</button>
-              </span>
-            </label>
-            <div className="import-file-row">
-              <input type="file" accept=".csv" onChange={(e) => handleCalamityFileUpload(e, "historical")} className="import-file-input" id="import-calamity-historical-file" />
-              {historicalCalamityFileName && <span className="import-file-name import-file-name-calamity" title={historicalCalamityFileName}>{historicalCalamityFileName}</span>}
-            </div>
-          </div>
 
           {/* 2026 actual data */}
           <div className="import-upload-group import-actual-2026-group">

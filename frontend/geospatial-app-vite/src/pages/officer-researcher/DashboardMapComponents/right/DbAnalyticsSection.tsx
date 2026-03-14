@@ -46,6 +46,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
   selected,
   year,
 }) => {
+  console.log("User Role:", userRole);
 
   // AI-generated Green Index insights (only fetched when on Green layer — saves tokens)
   const [greenAiInsight, setGreenAiInsight] = useState<string | null>(null);
@@ -511,6 +512,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
             </div>
             <p className="insight-disclaimer">* Automatically generated — please have an expert review for final assessment.</p>
         </div>
+
 
         {userRole === "Researcher" && (
             <div

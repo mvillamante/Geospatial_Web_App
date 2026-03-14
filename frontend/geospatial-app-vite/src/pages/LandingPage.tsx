@@ -29,6 +29,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const LandingPage: React.FC = () => {
+  const [reports, setReports] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
   const { refreshUser } = useAuth();
@@ -62,6 +63,24 @@ const LandingPage: React.FC = () => {
       navigate("/main/citizen/community-feed", { replace: true });
     }
   }, [navigate]);*/}
+
+  useEffect(() => {
+  const fetchReports = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/incident-reports/verified/`);
+
+      if (!res.ok) throw new Error("Failed to fetch reports");
+
+      const data = await res.json();
+
+      setReports(data.results || data);
+    } catch (err) {
+      console.error("Reports fetch error:", err);
+    }
+  };
+
+  fetchReports();
+}, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -286,6 +305,7 @@ const LandingPage: React.FC = () => {
                   <LeafletMap
                     activeLayers={["Verified Reports"]}
                     reportTimeFilter="7days"
+                    reports={reports}
                   />
                 </div>
 

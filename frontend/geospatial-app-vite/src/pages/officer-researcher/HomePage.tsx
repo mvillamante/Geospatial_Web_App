@@ -243,7 +243,7 @@ const HomePage: React.FC = () => {
               "E_norm – Exposure indicator",
               "GI_norm – Normalized Green Index",
             ]}
-            formula="CRL = H_norm × E_norm × (1 − GI_norm)"
+            formula="CRL(i,t) = (H_norm(i,t) × E_norm(i,t)) * (1 - GI_norm(i,t))"
             variant="red"
           />
         </div>

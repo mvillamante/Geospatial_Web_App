@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from "react";
-import L from "leaflet";
+import L, { geoJSON } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./LeafletMap.css";
+import * as turf from "@turf/turf";
 // import type { Report } from "../../pages/citizen-guest/AlertsComponents/AlertsPanel";
 import type { EvacuationCenterData } from "../ui/mapLayers/evacuationCenters/evacuationCentersTypes";
 import { type IncidentCategories } from "../../constants";
@@ -36,6 +37,7 @@ interface BarangayData {
 
 export type MapReport = {
   id: number;
+  status: string;
   category: string;
   other_category?: string;
   lat?: number;
@@ -190,6 +192,27 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 
 function LeafletMap(props: LeafletMapProps) {
+  const barangayGeoJsonRef = useRef<any>(null);
+
+  function getBarangayFromCoords(lat: number, lng: number): string | null {
+    if (!barangayGeoJsonRef.current) return null;
+
+    const point = turf.point([lng, lat]);
+
+    for (const feature of barangayGeoJsonRef.current.features) {
+      if (turf.booleanPointInPolygon(point, feature)) {
+        return (
+          feature.properties?.brgy_name ||
+          feature.properties?.name ||
+          "Unknown Barangay"
+        );
+      }
+    }
+
+    return null;
+  }
+
+
   const {
     height = "100%",
     width = "100%",
@@ -304,13 +327,13 @@ function LeafletMap(props: LeafletMapProps) {
   };
 
   // Green Index color function (from green_index_server.py interpolateColor)
-const getGreenIndexColor = (gi: number): string => {
-  if (gi >= 80) return "#006400";   // Very dense forest
-  if (gi >= 60) return "#228B22";   // Dense vegetation
-  if (gi >= 11) return "#7CCD7C";   // Sparse vegetation
-  if (gi >= 1) return "#CDCD00";    // Rocks / sand
-  return "#8B6914";                 // Water / barren
-};
+  const getGreenIndexColor = (gi: number): string => {
+    if (gi >= 80) return "#006400";   // Very dense forest
+    if (gi >= 60) return "#228B22";   // Dense vegetation
+    if (gi >= 11) return "#7CCD7C";   // Sparse vegetation
+    if (gi >= 1) return "#CDCD00";    // Rocks / sand
+    return "#8B6914";                 // Water / barren
+  };
 
   // Calamity Risk color scale (warm red tones matching screenshot)
   const getCalamityRiskColor = (cr: number): string => {
@@ -321,6 +344,23 @@ const getGreenIndexColor = (gi: number): string => {
     if (v >= 0.2) return '#ffab91';
     return '#fce4ec';
   };
+
+  useEffect(() => {
+    const loadBarangays = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/hazard/barangays/`);
+        const geoJson = await res.json();
+
+        barangayGeoJsonRef.current = geoJson;
+
+        console.log("Barangay polygons loaded");
+      } catch (err) {
+        console.error("Failed to load barangays:", err);
+      }
+    };
+
+    loadBarangays();
+  }, []);
 
   // Keep latest hazardYear available inside Leaflet event handlers
   useEffect(() => {
@@ -493,7 +533,6 @@ const getGreenIndexColor = (gi: number): string => {
   useEffect(() => {
 
     if (!enablePreview || !selectedReportView) return;
-    console.log("dont beat urself up", selectedReportView)
 
     const lat = Number(selectedReportView.lat);
     const lng = Number(selectedReportView.lng);
@@ -616,9 +655,11 @@ const getGreenIndexColor = (gi: number): string => {
 
         // Fetch barangay boundaries GeoJSON
         const geoRes = await fetch(`${API_URL}/api/hazard/barangays/`);
-        if (!geoRes.ok) throw new Error(`Failed to load barangay GeoJSON: ${geoRes.status}`);
         const geoJson = await geoRes.json();
 
+        barangayGeoJsonRef.current = geoJson;
+
+        if (!geoRes.ok) throw new Error(`Failed to load barangay GeoJSON: ${geoRes.status}`);
         if (cancelled) return;
 
         const years = hazardYearsRef.current;
@@ -1312,6 +1353,8 @@ const getGreenIndexColor = (gi: number): string => {
       const severity = (searchedSeverity || "low") as keyof typeof severityColors;
       const colors = severityColors[severity] || severityColors.low;
 
+      const barangay = getBarangayFromCoords(lat, lng) || "Cabuyao";
+
       // Create a highlighted search marker with severity-based colors
       const searchIcon = L.divIcon({
         html: `
@@ -1336,7 +1379,7 @@ const getGreenIndexColor = (gi: number): string => {
                 ${colors.text} RISK
               </span>
             </p>
-            <p style="margin: 8px 0 0 0; font-size: 12px; color: #666;">Cabuyao, Laguna</p>
+                  <p style="margin: 8px 0 5px 0; font-size: 12px; color: #666;">Barangay ${barangay}, Cabuyao</p>
           </div>
         `)
         .openPopup();
@@ -1527,7 +1570,7 @@ const getGreenIndexColor = (gi: number): string => {
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    
+
 
     const showVerifiedReports = activeLayers.includes("Verified Reports");
 
@@ -1548,19 +1591,23 @@ const getGreenIndexColor = (gi: number): string => {
     const normalizedCategory = (val: string) =>
       val?.toLowerCase().replace(/\s+/g, "_").replace(/[\/\-]/g, "");
 
-    const filteredReports =
-      !categoryFilter || categoryFilter === "all"
-        ? reports
-        : reports.filter(
-          r =>
-            normalizedCategory(
-              r.category === "others" ? r.other_category || "others" : r.category
-            ) === normalizedCategory(categoryFilter)
-        );
+    const filteredReports = reports
+      .filter(r => r.status !== "archived" && r.status !== "rejected")
+      .filter(r =>
+        !categoryFilter || categoryFilter === "all"
+          ? true
+          : normalizedCategory(
+            r.category === "others"
+              ? r.other_category || "others"
+              : r.category
+          ) === normalizedCategory(categoryFilter)
+      );
 
     filteredReports.forEach((r) => {
       const lat = parseFloat(r.lat as any);
       const lng = parseFloat(r.lng as any);
+      const barangay = getBarangayFromCoords(lat, lng) || "Cabuyao";
+
 
       if (Number.isNaN(lat) || Number.isNaN(lng)) return;
 
@@ -1597,7 +1644,7 @@ const getGreenIndexColor = (gi: number): string => {
     <div class="verified-popup">
       <div class="popup-icon">${iconEmoji}</div>
       <h3>${formatCategoryLabel(r.category)}</h3>
-      <p>Cabuyao, Laguna</p>
+      <p style="margin: 8px 0 5px 0; font-size: 12px; color: #666;">Barangay ${barangay}, Cabuyao</p>
       <span class="popup-pill" style="background:${colors.primary}">
         ${colors.text} RISK
       </span>
@@ -1651,7 +1698,6 @@ const getGreenIndexColor = (gi: number): string => {
       .then((data) => {
 
         const reports = data.results || data;
-        console.log("QUEUE REPORTS:", reports);
 
         layerGroup.clearLayers();
 
@@ -1690,13 +1736,15 @@ const getGreenIndexColor = (gi: number): string => {
             iconAnchor: [22, 44],
           });
 
+          const barangay = getBarangayFromCoords(lat, lng);
+
           const marker = L.marker([lat, lng], { icon: reportIcon })
             .addTo(layerGroup)
             .bindPopup(`
               <div class="verified-popup">
                 <div class="popup-icon">${iconEmoji}</div>
                 <h3>${r.category}</h3>
-                <p>${r.barangay || "Cabuyao, Laguna"}</p>
+                <p style="margin: 8px 0 5px 0; font-size: 12px; color: #666;">Barangay ${barangay}, Cabuyao</p>
                 <span class="popup-pill" style="background:${colors.primary}">
                   ${colors.text} RISK
                 </span>

@@ -122,7 +122,7 @@ export default function AlertsPanel({
     const filteredReports = useMemo(() => {
         return reports.filter(r => {
 
-            if (r.status === "rejected") return false
+            if (r.status === "rejected" || r.status === "archived") return false
 
             if (!(r.assigned_officer_id != null || r.status === "resolved")) return false
 

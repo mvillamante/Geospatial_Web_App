@@ -18,6 +18,7 @@
     "@lexical/selection": "^0.39.0",
     "@supabase/supabase-js": "^2.90.0",
     "@tanstack/react-query": "^5.90.21",
+    "@turf/turf": "^7.3.4",
     "date-fns": "^4.1.0",
     "filipino-badwords-list": "^1.1.2",
     "html-to-image": "^1.11.13",

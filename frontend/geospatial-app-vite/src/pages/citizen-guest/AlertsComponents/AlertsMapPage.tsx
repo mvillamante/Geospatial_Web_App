@@ -187,6 +187,32 @@ const AlertsMapPage: React.FC = () => {
     [selectedReportData]
   )
 
+  const reportsForMap = useMemo(() => {
+    return reports.map((r) => ({
+      id: r.id,
+      category: r.category,
+      other_category: r.other_category ?? undefined,
+      lat: r.latitude ?? 0,
+      lng: r.longitude ?? 0,
+      status: r.status ?? "verified",
+      verified_critical_level: r.verified_critical_level ?? "low",
+    }));
+  }, [reports]);
+
+  const selectedReportForMap = useMemo(() => {
+    if (!selectedReport) return null;
+
+    return {
+      id: selectedReport.id,
+      category: selectedReport.category,
+      other_category: selectedReport.other_category ?? undefined,
+      lat: selectedReport.latitude ?? 0,
+      lng: selectedReport.longitude ?? 0,
+      status: selectedReport.status ?? "in_progress",
+      verified_critical_level: selectedReport.verified_critical_level ?? "low",
+    };
+  }, [selectedReport]);
+
   const reportTimestamp = useMemo(
     () => selectedReportData?.clickedAt || null,
     [selectedReportData]
@@ -198,10 +224,10 @@ const AlertsMapPage: React.FC = () => {
 
         <div className="alerts-map">
           <LeafletMap
-            reports={reports}
+            reports={reportsForMap}
             searchedBarangay={searchedBarangay}
             searchedSeverity={searchedSeverity}
-            selectedReport={selectedReport}
+            selectedReport={selectedReportForMap}
             reportClickTimestamp={reportTimestamp}
             activeLayers={activeLayers}
             reportTimeFilter={reportTimeFilter}

@@ -165,6 +165,7 @@ const ReportsMgmtPage: React.FC = () => {
       other_category: selectedReportMap.other_category ?? undefined,
       lat: selectedReportMap.lat,
       lng: selectedReportMap.lng,
+      status: selectedReportMap.status,
       verified_critical_level:
         selectedReportMap.verified_critical_level ?? "low",
     };

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import L, { geoJSON } from "leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./LeafletMap.css";
 import * as turf from "@turf/turf";
@@ -1353,7 +1353,7 @@ function LeafletMap(props: LeafletMapProps) {
       const severity = (searchedSeverity || "low") as keyof typeof severityColors;
       const colors = severityColors[severity] || severityColors.low;
 
-      const barangay = getBarangayFromCoords(lat, lng) || "Cabuyao";
+      const barangay = getBarangayFromCoords(lat, lon) || "Cabuyao";
 
       // Create a highlighted search marker with severity-based colors
       const searchIcon = L.divIcon({

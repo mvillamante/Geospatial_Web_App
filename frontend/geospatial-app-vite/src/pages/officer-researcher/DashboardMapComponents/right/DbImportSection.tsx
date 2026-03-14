@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
-import { FaUpload, FaFileCsv } from "react-icons/fa";
+import { FaFileCsv } from "react-icons/fa";
 import { toast } from "sonner";
 import "../../DashboardMapPage.css";
 import PortalTooltip from "../left/PortalTooltip";
@@ -83,8 +83,8 @@ function parseGreenIndexCsv(text: string): ParsedGreenRow[] {
         : undefined,
       predicted:
         header.includes("predicted") &&
-        (parts[header.indexOf("predicted")]?.toLowerCase() === "true" ||
-          parts[header.indexOf("predicted")] === "1")
+          (parts[header.indexOf("predicted")]?.toLowerCase() === "true" ||
+            parts[header.indexOf("predicted")] === "1")
           ? true
           : undefined,
     });
@@ -123,8 +123,8 @@ function parseHazardIndexCsv(text: string): ParsedHazardRow[] {
       hazard_index,
       predicted:
         header.includes("predicted") &&
-        (parts[header.indexOf("predicted")]?.toLowerCase() === "true" ||
-          parts[header.indexOf("predicted")] === "1")
+          (parts[header.indexOf("predicted")]?.toLowerCase() === "true" ||
+            parts[header.indexOf("predicted")] === "1")
           ? true
           : undefined,
     });
@@ -163,8 +163,8 @@ function parseCalamityIndexCsv(text: string): ParsedCalamityRow[] {
       calamity_risk,
       predicted:
         header.includes("predicted") &&
-        (parts[header.indexOf("predicted")]?.toLowerCase() === "true" ||
-          parts[header.indexOf("predicted")] === "1")
+          (parts[header.indexOf("predicted")]?.toLowerCase() === "true" ||
+            parts[header.indexOf("predicted")] === "1")
           ? true
           : undefined,
     });
@@ -271,11 +271,9 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
   const [aiInsight2026, setAiInsight2026] = useState<string | null>(null);
   const [aiInsightLoading, setAiInsightLoading] = useState(false);
   const [aiInsightError, setAiInsightError] = useState<string | null>(null);
-  const [historicalFileName, setHistoricalFileName] = useState<string | null>(null);
   const [actual2026FileName, setActual2026FileName] = useState<string | null>(null);
 
   // Hazard Index state
-  const [historicalHazardRows, setHistoricalHazardRows] = useState<ParsedHazardRow[]>([]);
   const [projectionHazardRows, setProjectionHazardRows] = useState<ParsedHazardRow[]>([]);
   const [actual2026HazardRows, setActual2026HazardRows] = useState<ParsedHazardRow[]>([]);
   const [parseErrorHazard, setParseErrorHazard] = useState<string | null>(null);
@@ -283,11 +281,9 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
   const [aiInsightHazard2026, setAiInsightHazard2026] = useState<string | null>(null);
   const [aiInsightHazardLoading, setAiInsightHazardLoading] = useState(false);
   const [aiInsightHazardError, setAiInsightHazardError] = useState<string | null>(null);
-  const [historicalHazardFileName, setHistoricalHazardFileName] = useState<string | null>(null);
   const [actual2026HazardFileName, setActual2026HazardFileName] = useState<string | null>(null);
 
   // Calamity Risk state
-  const [historicalCalamityRows, setHistoricalCalamityRows] = useState<ParsedCalamityRow[]>([]);
   const [projectionCalamityRows, setProjectionCalamityRows] = useState<ParsedCalamityRow[]>([]);
   const [actual2026CalamityRows, setActual2026CalamityRows] = useState<ParsedCalamityRow[]>([]);
   const [parseErrorCalamity, setParseErrorCalamity] = useState<string | null>(null);
@@ -295,7 +291,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
   const [aiInsightCalamity2026, setAiInsightCalamity2026] = useState<string | null>(null);
   const [aiInsightCalamityLoading, setAiInsightCalamityLoading] = useState(false);
   const [aiInsightCalamityError, setAiInsightCalamityError] = useState<string | null>(null);
-  const [historicalCalamityFileName, setHistoricalCalamityFileName] = useState<string | null>(null);
   const [actual2026CalamityFileName, setActual2026CalamityFileName] = useState<string | null>(null);
 
   const [uploadTooltip, setUploadTooltip] = useState<"historical" | "actual2026" | null>(null);
@@ -315,17 +310,17 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
 
   const allHazardRows = useMemo(() => {
     if (hasActual2026Hazard) {
-      return [...historicalHazardRows, ...actual2026HazardRows, ...projectionHazardRows];
+      return [...actual2026HazardRows, ...projectionHazardRows];
     }
-    return [...historicalHazardRows, ...projectionHazardRows];
-  }, [historicalHazardRows, projectionHazardRows, actual2026HazardRows, hasActual2026Hazard]);
+    return [...projectionHazardRows];
+  }, [projectionHazardRows, actual2026HazardRows, hasActual2026Hazard]);
 
   const allCalamityRows = useMemo(() => {
     if (hasActual2026Calamity) {
-      return [...historicalCalamityRows, ...actual2026CalamityRows, ...projectionCalamityRows];
+      return [...actual2026CalamityRows, ...projectionCalamityRows];
     }
-    return [...historicalCalamityRows, ...projectionCalamityRows];
-  }, [historicalCalamityRows, projectionCalamityRows, actual2026CalamityRows, hasActual2026Calamity]);
+    return [...projectionCalamityRows];
+  }, [projectionCalamityRows, actual2026CalamityRows, hasActual2026Calamity]);
 
   // Chart data: shift projection start to 2027 when actual 2026 data exists
   const chartData = computeCityAverageByYear(allRows, hasActual2026Green ? 2027 : 2026);
@@ -358,14 +353,8 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
           const text = String(reader.result);
           const rows = parseGreenIndexCsv(text);
           if (rows.length === 0) {
-            setParseError("No valid rows found. Ensure years are 2020–2027.");
-            if (target === "historical") setHistoricalFileName(null);
-            else setActual2026FileName(null);
+            setParseError("No valid rows found. Ensure years are 2020–2027.");;
             return;
-          }
-          if (target === "historical") {
-            setHistoricalRows(rows.filter((r) => r.year <= 2025));
-            setHistoricalFileName(file.name);
           } else {
             const actual = rows.filter((r) => r.year === 2026);
             if (actual.length === 0) {
@@ -383,8 +372,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
         } catch (err: any) {
           setParseError(err?.message || "Failed to parse CSV");
           toast.error("Invalid CSV format");
-          if (target === "historical") setHistoricalFileName(null);
-          else setActual2026FileName(null);
         }
       };
       reader.readAsText(file);
@@ -406,13 +393,7 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
           const rows = parseHazardIndexCsv(text);
           if (rows.length === 0) {
             setParseErrorHazard("No valid rows found. Ensure years are 2020–2027.");
-            if (target === "historical") setHistoricalHazardFileName(null);
-            else setActual2026HazardFileName(null);
             return;
-          }
-          if (target === "historical") {
-            setHistoricalHazardRows(rows.filter((r) => r.year <= 2025));
-            setHistoricalHazardFileName(file.name);
           } else {
             const actual = rows.filter((r) => r.year === 2026);
             if (actual.length === 0) {
@@ -430,8 +411,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
         } catch (err: any) {
           setParseErrorHazard(err?.message || "Failed to parse CSV");
           toast.error("Invalid CSV format");
-          if (target === "historical") setHistoricalHazardFileName(null);
-          else setActual2026HazardFileName(null);
         }
       };
       reader.readAsText(file);
@@ -441,7 +420,7 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
   );
 
   const handleCalamityFileUpload = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>, target: "historical" | "actual2026") => {
+    (e: React.ChangeEvent<HTMLInputElement>, target:  "actual2026") => {
       const file = e.target.files?.[0];
       if (!file) return;
       setParseErrorCalamity(null);
@@ -453,13 +432,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
           const rows = parseCalamityIndexCsv(text);
           if (rows.length === 0) {
             setParseErrorCalamity("No valid rows found. Ensure years are 2020–2027.");
-            if (target === "historical") setHistoricalCalamityFileName(null);
-            else setActual2026CalamityFileName(null);
-            return;
-          }
-          if (target === "historical") {
-            setHistoricalCalamityRows(rows.filter((r) => r.year <= 2025));
-            setHistoricalCalamityFileName(file.name);
           } else {
             const actual = rows.filter((r) => r.year === 2026);
             if (actual.length === 0) {
@@ -477,8 +449,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
         } catch (err: any) {
           setParseErrorCalamity(err?.message || "Failed to parse CSV");
           toast.error("Invalid CSV format");
-          if (target === "historical") setHistoricalCalamityFileName(null);
-          else setActual2026CalamityFileName(null);
         }
       };
       reader.readAsText(file);
@@ -716,28 +686,28 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
   const yearAvg =
     allRows.length > 0 && selectedYear
       ? (() => {
-          const yr = allRows.filter((r) => r.year === selectedYear);
-          if (yr.length === 0) return null;
-          return Math.round((yr.reduce((a, b) => a + b.green_index, 0) / yr.length) * 10) / 10;
-        })()
+        const yr = allRows.filter((r) => r.year === selectedYear);
+        if (yr.length === 0) return null;
+        return Math.round((yr.reduce((a, b) => a + b.green_index, 0) / yr.length) * 10) / 10;
+      })()
       : null;
 
   const yearAvgHazard =
     allHazardRows.length > 0 && selectedYear
       ? (() => {
-          const yr = allHazardRows.filter((r) => r.year === selectedYear);
-          if (yr.length === 0) return null;
-          return Math.round((yr.reduce((a, b) => a + b.hazard_index, 0) / yr.length) * 10) / 10;
-        })()
+        const yr = allHazardRows.filter((r) => r.year === selectedYear);
+        if (yr.length === 0) return null;
+        return Math.round((yr.reduce((a, b) => a + b.hazard_index, 0) / yr.length) * 10) / 10;
+      })()
       : null;
 
   const yearAvgCalamity =
     allCalamityRows.length > 0 && selectedYear
       ? (() => {
-          const yr = allCalamityRows.filter((r) => r.year === selectedYear);
-          if (yr.length === 0) return null;
-          return Math.round((yr.reduce((a, b) => a + b.calamity_risk, 0) / yr.length) * 10) / 10;
-        })()
+        const yr = allCalamityRows.filter((r) => r.year === selectedYear);
+        if (yr.length === 0) return null;
+        return Math.round((yr.reduce((a, b) => a + b.calamity_risk, 0) / yr.length) * 10) / 10;
+      })()
       : null;
 
   // Custom tick renderer for chart X-axis to show "(actual)" and "(predicted)" labels
@@ -1028,17 +998,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
             </div>
           )}
 
-          {historicalHazardRows.length > 0 && (
-            <div className="import-year-select">
-              <label>View Hazard Index city avg. for year:</label>
-              <select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}>
-                {[2020, 2021, 2022, 2023, 2024, 2025].map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
-            </div>
-          )}
-
           {yearAvgHazard != null && (
             <div className="panel-card import-projection-summary import-projection-hazard" style={getHazardIndexColor ? { borderLeftColor: getHazardIndexColor(yearAvgHazard) } : undefined}>
               <span className="import-projection-label">Hazard Index city average — {selectedYear}</span>
@@ -1179,17 +1138,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
                   <span className="import-actual-stat-number">{calamityHighLow.lowest.value}%</span>
                 </div>
               </div>
-            </div>
-          )}
-
-          {historicalCalamityRows.length > 0 && (
-            <div className="import-year-select">
-              <label>View Calamity Risk city avg. for year:</label>
-              <select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}>
-                {[2020, 2021, 2022, 2023, 2024, 2025].map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
             </div>
           )}
 

@@ -173,10 +173,11 @@ def sign_up(request):
         return JsonResponse({"error": "Email or phone already exists"}, status=400)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-    
+
 class MeView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = MeSerializer
 
     def get_object(self):
         return self.request.user
+    

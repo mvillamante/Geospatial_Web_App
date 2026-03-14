@@ -263,6 +263,7 @@ class VerifiedIncidentReportsView(generics.ListAPIView):
                 Q(assigned_officer__isnull=False) |
                 Q(status__iexact="resolved")
             )
+            .exclude(status="archived") 
             .order_by("-created_at")
         )
     

@@ -127,17 +127,18 @@ const ReportVerifyPage: React.FC = () => {
 
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
-const selectedReportForMap = useMemo(() => {
-  if (!selected) return null;
+  const selectedReportForMap = useMemo(() => {
+    if (!selected) return null;
 
-  return {
-    id: selected.id,
-    category: selected.category,
-    lat: selected.lat,
-    lng: selected.lng,
-    verified_critical_level: selected.verifiedRisk ?? selected.citizenRisk,
-  };
-}, [selected]);
+    return {
+      id: selected.id,
+      category: selected.category,
+      lat: selected.lat,
+      lng: selected.lng,
+      status: selected.status,
+      verified_critical_level: selected.verifiedRisk ?? selected.citizenRisk,
+    };
+  }, [selected]);
 
 
   const isAssignedToMe =

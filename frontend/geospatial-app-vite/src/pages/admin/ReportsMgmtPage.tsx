@@ -159,13 +159,17 @@ const ReportsMgmtPage: React.FC = () => {
   const selectedReportForMap = useMemo<MapReport | null>(() => {
     if (!selectedReportMap) return null;
 
+    if (selectedReportMap.lat == null || selectedReportMap.lng == null) {
+      return null;
+    }
+
     return {
       id: selectedReportMap.id,
       category: selectedReportMap.category,
       other_category: selectedReportMap.other_category ?? undefined,
       lat: selectedReportMap.lat,
       lng: selectedReportMap.lng,
-      status: selectedReportMap.status,
+      status: selectedReportMap.status ?? "Pending",
       verified_critical_level:
         selectedReportMap.verified_critical_level ?? "low",
     };
@@ -914,7 +918,7 @@ const ReportsMgmtPage: React.FC = () => {
                                     });
                                   }}
                                 >
-                                  <TriangleAlert size={16}/>Escalate
+                                  <TriangleAlert size={16} />Escalate
                                 </button>
 
                                 <button

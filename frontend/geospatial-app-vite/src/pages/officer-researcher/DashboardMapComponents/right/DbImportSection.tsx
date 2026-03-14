@@ -261,7 +261,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
   const [importIndex, setImportIndex] = useState<"green" | "hazard" | "calamity">("green");
 
   // Green Index state
-  const [historicalRows, setHistoricalRows] = useState<ParsedGreenRow[]>([]);
   const [projectionRows, setProjectionRows] = useState<ParsedGreenRow[]>([]);
   const [actual2026Rows, setActual2026Rows] = useState<ParsedGreenRow[]>([]);
   const [selectedYear, setSelectedYear] = useState<number>(2024);
@@ -303,10 +302,10 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
 
   const allRows = useMemo(() => {
     if (hasActual2026Green) {
-      return [...historicalRows, ...actual2026Rows, ...projectionRows];
+      return [...actual2026Rows, ...projectionRows];
     }
-    return [...historicalRows, ...projectionRows];
-  }, [historicalRows, projectionRows, actual2026Rows, hasActual2026Green]);
+    return [...projectionRows];
+  }, [projectionRows, actual2026Rows, hasActual2026Green]);
 
   const allHazardRows = useMemo(() => {
     if (hasActual2026Hazard) {
@@ -342,7 +341,7 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
   // --- Upload handlers ---
 
   const handleFileUpload = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>, target: "historical" | "actual2026") => {
+    (e: React.ChangeEvent<HTMLInputElement>, _target: "historical" | "actual2026") => {
       const file = e.target.files?.[0];
       if (!file) return;
       setParseError(null);
@@ -381,7 +380,7 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
   );
 
   const handleHazardFileUpload = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>, target: "historical" | "actual2026") => {
+    (e: React.ChangeEvent<HTMLInputElement>, _target: "historical" | "actual2026") => {
       const file = e.target.files?.[0];
       if (!file) return;
       setParseErrorHazard(null);
@@ -420,7 +419,7 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
   );
 
   const handleCalamityFileUpload = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>, target:  "actual2026") => {
+    (e: React.ChangeEvent<HTMLInputElement>, _target: "actual2026") => {
       const file = e.target.files?.[0];
       if (!file) return;
       setParseErrorCalamity(null);

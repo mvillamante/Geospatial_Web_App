@@ -631,7 +631,14 @@ function NotificationCard({ n, onOpen }: { n: NotificationItem; onOpen?: () => v
             s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
         const category = capitalize(n.reportCategory ?? "Report");
         const barangay = n.reportBarangay ? ` • ${n.reportBarangay}` : "";
+        const status = n.statusTo ?? "pending";
 
+        if (status === "pending") {
+            return {
+                header: `${category}${barangay}`,
+                sub: "Your report has been submitted and is waiting for LGU verification."
+            };
+        }
 
         if (n.statusTo === "in_progress") {
             return {

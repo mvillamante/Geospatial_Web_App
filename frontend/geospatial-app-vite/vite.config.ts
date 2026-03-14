@@ -25,7 +25,7 @@ export default defineConfig({
       manifest: {
         name: 'HazSpot',
         short_name: 'HazSpot',
-        start_url: '/hazspot',
+        start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
         theme_color: '#0b1220',

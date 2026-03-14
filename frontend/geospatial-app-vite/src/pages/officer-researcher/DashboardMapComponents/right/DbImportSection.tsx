@@ -254,16 +254,12 @@ function findHighLow<T extends { barangay: string }>(
 }
 
 const DbImportSection: React.FC<DbImportSectionProps> = ({
-  getGreenIndexColor,
-  getHazardIndexColor,
-  getCalamityRiskColor,
 }) => {
   const [importIndex, setImportIndex] = useState<"green" | "hazard" | "calamity">("green");
 
   // Green Index state
   const [projectionRows, setProjectionRows] = useState<ParsedGreenRow[]>([]);
   const [actual2026Rows, setActual2026Rows] = useState<ParsedGreenRow[]>([]);
-  const [selectedYear, setSelectedYear] = useState<number>(2024);
   const [parseError, setParseError] = useState<string | null>(null);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [aiInsightAvg, setAiInsightAvg] = useState<string | null>(null);
@@ -467,8 +463,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
       setAiInsightError(null);
       return;
     }
-    const yr = allRows.filter((r) => r.year === selectedYear);
-    const yearAvgVal = yr.length ? Math.round((yr.reduce((a, b) => a + b.green_index, 0) / yr.length) * 10) / 10 : null;
     const projYear = hasActual2026Green ? "2027" : "2026";
     const valProj = chartData.find((d) => d.year === projYear)?.value ?? null;
     const val2026Actual = hasActual2026Green ? (chartData.find((d) => d.year === "2026")?.value ?? null) : null;
@@ -494,8 +488,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
         rowCount: allRows.length,
         hasError: !!parseError,
         parseError: parseError || null,
-        selectedYear,
-        yearAvg: yearAvgVal,
         val2026: hasActual2026Green ? val2026Actual : valProj,
         val2027: hasActual2026Green ? valProj : null,
         hasActual2026: hasActual2026Green,
@@ -532,7 +524,7 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
         if (!cancelled) setAiInsightLoading(false);
       });
     return () => { cancelled = true; };
-  }, [JSON.stringify(chartData), allRows.length, parseError, selectedYear, hasActual2026Green]);
+  }, [JSON.stringify(chartData), allRows.length, parseError, hasActual2026Green]);
 
   useEffect(() => {
     const hasDataOrError = chartDataHazard.length > 0 || !!parseErrorHazard;
@@ -542,8 +534,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
       setAiInsightHazardError(null);
       return;
     }
-    const yr = allHazardRows.filter((r) => r.year === selectedYear);
-    const yearAvgVal = yr.length ? Math.round((yr.reduce((a, b) => a + b.hazard_index, 0) / yr.length) * 10) / 10 : null;
     const projYear = hasActual2026Hazard ? "2027" : "2026";
     const valProj = chartDataHazard.find((d) => d.year === projYear)?.value ?? null;
     const val2026Actual = hasActual2026Hazard ? (chartDataHazard.find((d) => d.year === "2026")?.value ?? null) : null;
@@ -569,8 +559,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
         rowCount: allHazardRows.length,
         hasError: !!parseErrorHazard,
         parseError: parseErrorHazard || null,
-        selectedYear,
-        yearAvg: yearAvgVal,
         val2026: hasActual2026Hazard ? val2026Actual : valProj,
         val2027: hasActual2026Hazard ? valProj : null,
         hasActual2026: hasActual2026Hazard,
@@ -605,7 +593,7 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
         if (!cancelled) setAiInsightHazardLoading(false);
       });
     return () => { cancelled = true; };
-  }, [JSON.stringify(chartDataHazard), allHazardRows.length, parseErrorHazard, selectedYear, hasActual2026Hazard]);
+  }, [JSON.stringify(chartDataHazard), allHazardRows.length, parseErrorHazard, hasActual2026Hazard]);
 
   useEffect(() => {
     const hasDataOrError = chartDataCalamity.length > 0 || !!parseErrorCalamity;
@@ -615,8 +603,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
       setAiInsightCalamityError(null);
       return;
     }
-    const yr = allCalamityRows.filter((r) => r.year === selectedYear);
-    const yearAvgVal = yr.length ? Math.round((yr.reduce((a, b) => a + b.calamity_risk, 0) / yr.length) * 10) / 10 : null;
     const projYear = hasActual2026Calamity ? "2027" : "2026";
     const valProj = chartDataCalamity.find((d) => d.year === projYear)?.value ?? null;
     const val2026Actual = hasActual2026Calamity ? (chartDataCalamity.find((d) => d.year === "2026")?.value ?? null) : null;
@@ -642,8 +628,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
         rowCount: allCalamityRows.length,
         hasError: !!parseErrorCalamity,
         parseError: parseErrorCalamity || null,
-        selectedYear,
-        yearAvg: yearAvgVal,
         val2026: hasActual2026Calamity ? val2026Actual : valProj,
         val2027: hasActual2026Calamity ? valProj : null,
         hasActual2026: hasActual2026Calamity,
@@ -678,36 +662,11 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
         if (!cancelled) setAiInsightCalamityLoading(false);
       });
     return () => { cancelled = true; };
-  }, [JSON.stringify(chartDataCalamity), allCalamityRows.length, parseErrorCalamity, selectedYear, hasActual2026Calamity]);
+  }, [JSON.stringify(chartDataCalamity), allCalamityRows.length, parseErrorCalamity,  hasActual2026Calamity]);
 
   // --- Computed averages ---
 
-  const yearAvg =
-    allRows.length > 0 && selectedYear
-      ? (() => {
-        const yr = allRows.filter((r) => r.year === selectedYear);
-        if (yr.length === 0) return null;
-        return Math.round((yr.reduce((a, b) => a + b.green_index, 0) / yr.length) * 10) / 10;
-      })()
-      : null;
 
-  const yearAvgHazard =
-    allHazardRows.length > 0 && selectedYear
-      ? (() => {
-        const yr = allHazardRows.filter((r) => r.year === selectedYear);
-        if (yr.length === 0) return null;
-        return Math.round((yr.reduce((a, b) => a + b.hazard_index, 0) / yr.length) * 10) / 10;
-      })()
-      : null;
-
-  const yearAvgCalamity =
-    allCalamityRows.length > 0 && selectedYear
-      ? (() => {
-        const yr = allCalamityRows.filter((r) => r.year === selectedYear);
-        if (yr.length === 0) return null;
-        return Math.round((yr.reduce((a, b) => a + b.calamity_risk, 0) / yr.length) * 10) / 10;
-      })()
-      : null;
 
   // Custom tick renderer for chart X-axis to show "(actual)" and "(predicted)" labels
   const renderXAxisTick = (hasActual: boolean, has2027Data: boolean, color: string) =>
@@ -831,14 +790,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
                   <span className="import-actual-stat-number">{greenHighLow.lowest.value}%</span>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Summary cards */}
-          {yearAvg != null && (
-            <div className="panel-card import-projection-summary" style={getGreenIndexColor ? { borderLeftColor: getGreenIndexColor(yearAvg) } : undefined}>
-              <span className="import-projection-label">Green Index city average — {selectedYear}</span>
-              <span className="import-projection-value">{yearAvg}%</span>
             </div>
           )}
 
@@ -985,13 +936,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
             </div>
           )}
 
-          {yearAvgHazard != null && (
-            <div className="panel-card import-projection-summary import-projection-hazard" style={getHazardIndexColor ? { borderLeftColor: getHazardIndexColor(yearAvgHazard) } : undefined}>
-              <span className="import-projection-label">Hazard Index city average — {selectedYear}</span>
-              <span className="import-projection-value">{yearAvgHazard}%</span>
-            </div>
-          )}
-
           {hasActual2026Hazard && has2026Hazard && (
             <div className="panel-card import-projection-summary import-actual-2026-summary import-projection-hazard">
               <span className="import-projection-label">Actual 2026 City Average</span>
@@ -1128,12 +1072,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
             </div>
           )}
 
-          {yearAvgCalamity != null && (
-            <div className="panel-card import-projection-summary import-projection-calamity" style={getCalamityRiskColor ? { borderLeftColor: getCalamityRiskColor(yearAvgCalamity) } : undefined}>
-              <span className="import-projection-label">Calamity Risk city average — {selectedYear}</span>
-              <span className="import-projection-value">{yearAvgCalamity}%</span>
-            </div>
-          )}
 
           {hasActual2026Calamity && has2026Calamity && (
             <div className="panel-card import-projection-summary import-actual-2026-summary import-projection-calamity">

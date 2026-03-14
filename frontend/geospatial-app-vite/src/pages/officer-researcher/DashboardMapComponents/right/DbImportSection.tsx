@@ -834,18 +834,6 @@ const DbImportSection: React.FC<DbImportSectionProps> = ({
             </div>
           )}
 
-          {/* Year selector */}
-          {historicalRows.length > 0 && (
-            <div className="import-year-select">
-              <label>View Green Index city avg. for year:</label>
-              <select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}>
-                {[2020, 2021, 2022, 2023, 2024, 2025].map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
-            </div>
-          )}
-
           {/* Summary cards */}
           {yearAvg != null && (
             <div className="panel-card import-projection-summary" style={getGreenIndexColor ? { borderLeftColor: getGreenIndexColor(yearAvg) } : undefined}>

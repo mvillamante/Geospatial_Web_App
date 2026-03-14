@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404
 
 from api.serializer import *
 
-from api.supabase_storage import create_signed_url
+from api.supa_storage import create_signed_url
 from api.models import IncidentReport
 
 from django.db import transaction
@@ -263,6 +263,7 @@ class VerifiedIncidentReportsView(generics.ListAPIView):
                 Q(assigned_officer__isnull=False) |
                 Q(status__iexact="resolved")
             )
+            .exclude(status="archived") 
             .order_by("-created_at")
         )
     

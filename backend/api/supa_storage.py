@@ -1,4 +1,4 @@
-# api/supabase_storage.py
+# api/supa_storage.py
 import os
 import uuid
 from django.conf import settings

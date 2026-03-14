@@ -15,7 +15,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 
-from .pagination import AdminUserPagination
+from ..Services.pagination import AdminUserPagination
 
 class DepartmentListCreateView(generics.ListCreateAPIView):
     queryset = Department.objects.all()

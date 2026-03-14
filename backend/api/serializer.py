@@ -1,7 +1,7 @@
 from django.utils import timezone
 from datetime import timedelta
 from api.models import *
-from api.supabase_storage import upload_private_photo, upload_reply_photo, create_signed_url, upload_cms_photo
+from api.supa_storage import upload_private_photo, upload_reply_photo, create_signed_url, upload_cms_photo
 from django.utils.timesince import timesince
 from django.utils.crypto import get_random_string
 from django.contrib.auth.password_validation import validate_password
@@ -29,7 +29,6 @@ class MeSerializer(serializers.ModelSerializer):
     verification_status = serializers.SerializerMethodField()
     verification_rejection_reason = serializers.SerializerMethodField()
 
-
     class Meta:
         model = CustomUser
         fields = (
@@ -40,7 +39,6 @@ class MeSerializer(serializers.ModelSerializer):
             "email",
             "phone",
             "role",
-            "extra_roles",
             "staff_id",
             "barangay",
             "is_resident_verified",
@@ -48,19 +46,19 @@ class MeSerializer(serializers.ModelSerializer):
             "receive_hazard_alerts",
             "receive_community_announcements",
             "alert_severity",
-            
+
             "verification_status",
             "verification_rejection_reason",
         )
-        read_only_fields = ("id", 
-                            "username", 
-                            "role", 
-                            "extra_roles", 
-                            "staff_id",
-                            "barangay",
-                            "verification_status",
-                            "verification_rejection_reason",
-                            )
+        read_only_fields = ("id", "username", "role")
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        if instance.extra_roles and "Researcher" in instance.extra_roles:
+            data["role"] = "Researcher"
+
+        return data
 
     def validate_email(self, value):
         value = (value or "").strip()

@@ -445,6 +445,7 @@ tr:nth-last-child(-n+2) .kebab-dropdown {
 }
 
 
+.form-group input[disabled],
 .form-group input[readonly]{
   background: #f1f5f9;
   color: #6b7280;

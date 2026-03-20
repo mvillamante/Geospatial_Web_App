@@ -32,7 +32,14 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated, departmentRefres
   const [confirming, setConfirming] = useState(false);
 
   const generatedUsername =
-    firstName && lastName ? `${firstName.trim()}.${lastName.trim()}` : "";
+    firstName && lastName
+      ? `${firstName
+          .trim()
+          .split(" ")
+          .map(name => name[0])
+          .join("")
+          .toLowerCase()}${lastName.replace(/\s+/g, "").toLowerCase()}`
+      : "";
   const finalUsername = username || generatedUsername;
 
   // Fetch departments
@@ -199,17 +206,17 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated, departmentRefres
           <div className="form-row">
             <div className="form-group">
               <label>First Name <span className="required-star">*</span></label>
-              <input value={firstName} onChange={e => setFirstName(e.target.value)} />
+              <input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Enter first name" />
             </div>
             <div className="form-group">
               <label>Last Name <span className="required-star">*</span></label>
-              <input value={lastName} onChange={e => setLastName(e.target.value)} />
+              <input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Enter last name"/>
             </div>
           </div>
 
           <div className="form-group">
             <label>Username</label>
-            <input value={finalUsername} disabled onChange={e => setUsername(e.target.value)} />
+            <input value={finalUsername} onChange={e => setUsername(e.target.value)} placeholder="Enter username"/>
           </div>
 
           <div className="form-row">
@@ -241,12 +248,12 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated, departmentRefres
           <div className="form-row">
             <div className="form-group">
               <label>Email <span className="required-star">*</span></label>
-              <input value={email} onChange={e => handleEmailChange(e.target.value)} />
+              <input value={email} onChange={e => handleEmailChange(e.target.value)} placeholder="Enter email address"/>
               {emailError && <span className="input-error">{emailError}</span>}
             </div>
             <div className="form-group">
               <label>Phone <span className="required-star">*</span></label>
-              <input value={phone} onChange={e => handlePhoneChange(e.target.value)} />
+              <input value={phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="Enter phone number"/>
               {phoneError && <span className="input-error">{phoneError}</span>}
             </div>
           </div>

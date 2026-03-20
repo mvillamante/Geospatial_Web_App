@@ -431,6 +431,7 @@ const CmsPage: React.FC = () => {
   const [indicatorWidth, setIndicatorWidth] = useState(0);
   const [indicatorOffset, setIndicatorOffset] = useState(0);
 
+
   useEffect(() => {
     const activeKey = viewArchived ? "archived" : "active";
     const el = tabRefs.current[activeKey];
@@ -540,7 +541,15 @@ const CmsPage: React.FC = () => {
           <div className="cms-actions">
             <button
               className="btn secondary icon-btn"
-              onClick={() => setShowContactModal(true)}
+              onClick={() => {
+                if (!contact) return;
+
+                const editableCopy = JSON.parse(JSON.stringify(contact));
+
+                setContact(editableCopy);
+                setOriginalContact(JSON.parse(JSON.stringify(editableCopy)));
+                setShowContactModal(true);
+              }}
             >
               <Edit size={19} />
               <span className="btn-text">Manage Quick Contacts</span>
@@ -1300,7 +1309,7 @@ const CmsPage: React.FC = () => {
       )}
 
       {/* Quick Contact Modal */}
-      {showContactModal && contact && originalContact && (
+      {showContactModal && contact && (
         <div className="modal-overlay">
           <div className="modal large">
             <h2>Edit Quick Contact</h2>
@@ -1454,11 +1463,16 @@ const CmsPage: React.FC = () => {
               <button
                 className="btn-secondary"
                 onClick={() => {
-                  setContact(originalContact);
-                  toast.info("Edits discarded");
+                  if (originalContact) {
+                    const changed = JSON.stringify(contact) !== JSON.stringify(originalContact);
+                    if (changed) toast.info("Edits discarded");
+
+                    setContact(JSON.parse(JSON.stringify(originalContact)));
+                  }
+
                   setShowContactModal(false);
+                  setOriginalContact(null);
                 }}
-                disabled={isSaving}
               >
                 Cancel
               </button>
@@ -1516,7 +1530,6 @@ const CmsPage: React.FC = () => {
 
                     const updatedContact = await res.json();
                     setContact(updatedContact);
-                    setOriginalContact(updatedContact);
                     toast.success("Quick contact updated successfully!");
                     setShowContactModal(false);
                   } catch (err) {

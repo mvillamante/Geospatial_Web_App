@@ -37,6 +37,11 @@
     font-size: 0.875rem;
 }
 
+.reports-card .reports-table-wrapper {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
 .reports-card thead {
     background: #f9fafb;
 }

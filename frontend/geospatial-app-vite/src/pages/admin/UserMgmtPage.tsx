@@ -341,7 +341,6 @@ const UserMgmtPage: React.FC = () => {
                   className="role-select"
                 >
                   <option value="All">All Roles</option>
-                  <option value="Researcher">Researcher</option>
                   <option value="Officer">Officer</option>
                   <option value="Admin">Admin</option>
                 </select>

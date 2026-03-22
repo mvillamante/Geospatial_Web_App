@@ -18,15 +18,7 @@ import {
   createNDVILayer,
 } from "./mapLayers";
 
-import { getIncidentIcon } from "../../constants"
-
-// Severity colors matching the alerts panel
-const severityColors: Record<"critical" | "high" | "moderate" | "low", { primary: string; secondary: string; border: string; text: string }> = {
-  critical: { primary: "#991b1b", secondary: "#dc2626", border: "#9c1515", text: "CRITICAL" },
-  high: { primary: "#ef4444", secondary: "#f87171", border: "#df3838", text: "HIGH" },
-  moderate: { primary: "#f59e0b", secondary: "#fbbf24", border: "#e78c23", text: "MODERATE" },
-  low: { primary: "#10b981", secondary: "#34d399", border: "#0ba876", text: "LOW" },
-};
+import { getIncidentIcon, severityColors } from "../../constants"
 
 interface BarangayData {
   name: string;
@@ -530,51 +522,63 @@ function LeafletMap(props: LeafletMapProps) {
   }, [selectedReport?.id]);
 
   // Static Preview Map (for Specific Report) 
-  useEffect(() => {
+  const previewMapRef = useRef<L.Map | null>(null);
 
+  useEffect(() => {
     if (!enablePreview || !selectedReportView) return;
 
     const lat = Number(selectedReportView.lat);
     const lng = Number(selectedReportView.lng);
-
     if (!lat || !lng) return;
 
-    const map = mapRef.current;
-    if (!map) return;
+    let map = previewMapRef.current;
 
-    map.setView([lat, lng], 15);
-    if (map && map.zoomControl) {
+    // ✅ CREATE MAP ONLY ONCE
+    if (!map) {
+      map = L.map("preview-map").setView([lat, lng], 15);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+      }).addTo(map);
+
       map.zoomControl.remove();
+
+      previewMapRef.current = map;
+    } else {
+      // ✅ reuse existing map
+      map.setView([lat, lng], 15);
     }
 
+    // remove old marker
     previewMarkerRef.current?.remove();
 
-    const iconEmoji = getIncidentIcon(
-      selectedReportView.category || ""
-    );
-
+    const iconEmoji = getIncidentIcon(selectedReportView.category || "");
     const colors = getSeverityColors(selectedReportView);
 
     const reportIcon = L.divIcon({
       html: `
-      <div class="verified-report-marker">
-        <div class="pulse" style="background:${colors.secondary}40;"></div>
-        <div class="pin"
-          style="
-            background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
-            border: 3px solid ${colors.border};
-          ">
-          <span class="verified-report-icon">${iconEmoji}</span>
+        <div class="verified-report-marker">
+          <div class="pulse" style="background:${colors.secondary}40;"></div>
+          <div class="pin"
+            style="
+              background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
+              border: 3px solid ${colors.border};
+            ">
+            <span class="verified-report-icon">${iconEmoji}</span>
+          </div>
         </div>
-      </div>
       `,
       className: "",
       iconSize: [44, 44],
       iconAnchor: [22, 44],
     });
 
-    previewMarkerRef.current =
-      L.marker([lat, lng], { icon: reportIcon }).addTo(map);
+    previewMarkerRef.current = L.marker([lat, lng], { icon: reportIcon }).addTo(map);
+
+    // 🔥 fix rendering in modal
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
 
   }, [selectedReportView, enablePreview]);
 

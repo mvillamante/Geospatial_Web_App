@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import LeafletMap from "../../components/ui/LeafletMap";
 import "./ReportVerifyPage.css";
 import {
@@ -126,6 +126,9 @@ const ReportVerifyPage: React.FC = () => {
   );
 
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
+  const searchTimeout = useRef<number | null>(null);
+
+  const MemoizedLeafletMap = React.memo(LeafletMap);
 
   const selectedReportForMap = useMemo(() => {
     if (!selected) return null;
@@ -140,6 +143,12 @@ const ReportVerifyPage: React.FC = () => {
     };
   }, [selected]);
 
+  const handleQueryChange = (value: string) => {
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = window.setTimeout(() => {
+      setQuery(value);
+    }, 250);
+  };
 
   const isAssignedToMe =
     !!selected &&
@@ -171,72 +180,80 @@ const ReportVerifyPage: React.FC = () => {
     return { total, pending, inProgress, resolved };
   }, [reports]);
 
-  const filtered = useMemo(() => {
+  const filteredByQuery = useMemo(() => {
     const q = query.trim().toLowerCase();
+    if (!q) return reports;
+    return reports.filter(r =>
+      r.title.toLowerCase().includes(q) ||
+      r.location.toLowerCase().includes(q) ||
+      r.barangay.toLowerCase().includes(q) ||
+      r.reporterName.toLowerCase().includes(q)
+    );
+  }, [reports, query]);
 
+  const filteredByStatus = useMemo(() => {
+    if (statusFilter === "all") return filteredByQuery;
+    return filteredByQuery.filter(r => r.status === statusFilter);
+  }, [filteredByQuery, statusFilter]);
+
+  const filteredByCategory = useMemo(() => {
+    if (categoryFilter === "all") return filteredByStatus;
+    const normalizeCategory = (val: string) => val.toLowerCase().replace(/\s+/g, "_").replace(/[\/\-]/g, "");
+    return filteredByStatus.filter(r => normalizeCategory(r.category) === normalizeCategory(categoryFilter));
+  }, [filteredByStatus, categoryFilter]);
+
+  const filteredByScopeAndTime = useMemo(() => {
     const now = new Date();
-    const matchesTimeFilter = (dateString: string) => {
-      if (reportTimeFilter === "all") return true;
-
-      const reportDate = new Date(dateString);
-      const diffMs = now.getTime() - reportDate.getTime();
-      const diffDays = diffMs / (1000 * 60 * 60 * 24);
-
-      switch (reportTimeFilter) {
-        case "today":
-          return reportDate.toDateString() === now.toDateString();
-        case "7days":
-          return diffDays <= 7;
-        case "last30days":
-          return diffDays <= 30;
-        case "last12months":
-          return diffDays <= 365;
-        default:
-          return true;
-      }
-    };
-
-    let list = reports.filter((r) => {
-      const matchesTime = matchesTimeFilter(r.createdAt);
-      const matchesQ =
-        q === "" ||
-        r.title.toLowerCase().includes(q) ||
-        r.location.toLowerCase().includes(q) ||
-        r.barangay.toLowerCase().includes(q) ||
-        r.reporterName.toLowerCase().includes(q);
-
-      const matchesStatus = statusFilter === "all" || r.status === statusFilter;
-      const normalizeCategory = (val: string) => val.toLowerCase().replace(/\s+/g, "_").replace(/[\/\-]/g, "");
-
-      const matchesCategory = categoryFilter === "all" || normalizeCategory(r.category) === normalizeCategory(categoryFilter);
-
-      const matchesScope =
+    return filteredByCategory.filter(r => {
+      // scope
+      const scope =
         scopeFilter === "all"
           ? true
           : scopeFilter === "mine"
-            ? myOfficerId != null && r.assignedOfficerId != null && Number(r.assignedOfficerId) === Number(myOfficerId)
-            : r.assignedOfficerId == null;
+          ? myOfficerId != null && r.assignedOfficerId === myOfficerId
+          : r.assignedOfficerId == null;
 
-      return matchesQ && matchesStatus && matchesCategory && matchesScope && matchesTime;
-    });
+      // time
+      const reportDate = new Date(r.createdAt);
+      if (isNaN(reportDate.getTime())) return false;
 
-    list = [...list].sort((a, b) => {
-      if (sortMode === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-
-      if (sortMode === "citizenRisk") {
-        const diff = riskOrder[b.citizenRisk] - riskOrder[a.citizenRisk];
-        if (diff !== 0) return diff;
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      const diffDays = Math.floor((now.getTime() - reportDate.getTime()) / (1000 * 60 * 60 * 24));
+      let time = true;
+      switch (reportTimeFilter) {
+        case "today":
+          time = reportDate.toISOString().slice(0, 10) === now.toISOString().slice(0, 10);
+          break;
+        case "7days":
+          time = diffDays <= 7;
+          break;
+        case "last30days":
+          time = diffDays <= 30;
+          break;
+        case "last12months":
+          time = diffDays <= 365;
+          break;
+        case "all":
+          time = true;
+          break;
+        default:
+          time = true;
       }
 
-      // effectiveRisk
-      const diff = riskOrder[effectiveRisk(b)] - riskOrder[effectiveRisk(a)];
-      if (diff !== 0) return diff;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return scope && time;
     });
+  }, [filteredByCategory, scopeFilter, myOfficerId, reportTimeFilter]);
 
-    return list;
-  }, [reports, query, statusFilter, categoryFilter, sortMode, scopeFilter, myOfficerId, reportTimeFilter]);
+  const filtered = useMemo(() => {
+    return [...filteredByScopeAndTime].sort((a, b) => {
+      if (sortMode === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      if (sortMode === "citizenRisk") {
+        const diff = riskOrder[b.citizenRisk] - riskOrder[a.citizenRisk];
+        return diff || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+      const diff = riskOrder[effectiveRisk(b)] - riskOrder[effectiveRisk(a)];
+      return diff || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [filteredByScopeAndTime, sortMode]);
 
   const updateReport = (id: number, patch: Partial<CitizenReport>) => {
     setReports((prev) =>
@@ -287,7 +304,7 @@ const ReportVerifyPage: React.FC = () => {
         if (!token) throw new Error("No access token found. Please login again.");
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(`${API_URL}/api/reports/queue/`, {
-          method: "GET",
+          method: "GET", 
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -307,27 +324,19 @@ const ReportVerifyPage: React.FC = () => {
 
         const data: CitizenReport[] = raw.map((r: any) => ({
           ...r,
-
           assignedOfficerId: r.assignedOfficerId ?? null,
           assignedTo: r.assignedTo ?? null,
-
           citizenRisk: normalizeRisk(r.citizenRisk),
-
-          verifiedRisk: r.verifiedRisk
-            ? normalizeRisk(r.verifiedRisk)
-            : undefined,
-
+          verifiedRisk: r.verifiedRisk ? normalizeRisk(r.verifiedRisk) : undefined,
           lat: r.latitude ?? r.lat ?? 0,
           lng: r.longitude ?? r.lng ?? 0,
-
           barangay: r.barangay ?? r.location_display ?? "",
-
           createdAt: r.createdAt ?? r.created_at,
           lastUpdatedAt: r.lastUpdatedAt ?? r.last_updated_at ?? r.createdAt,
-
           photo_url: r.photo_url ?? r.photo ?? null,
           reply_message: r.reply_message ?? null,
           reply_image_url: r.reply_image_url ?? null,
+          effectiveRisk: r.verifiedRisk ? normalizeRisk(r.verifiedRisk) : normalizeRisk(r.citizenRisk),
         }));
 
 
@@ -591,6 +600,29 @@ const ReportVerifyPage: React.FC = () => {
     setReportTimeFilter("all");
   };
 
+  const QueueItem = React.memo(({ r, active, onClick }: { r: CitizenReport; active: boolean; onClick: () => void }) => {
+    const eff = effectiveRisk(r);
+    return (
+      <li
+        key={r.id}
+        className={`queue-item ${active ? "active" : ""} risk-${eff}`}
+        onClick={onClick}
+      >
+        <div className="queue-item-top">
+          <div className="queue-title">{r.title}</div>
+          <div className={`queue-risk-pill ${normalizeRisk(eff)}`}>{normalizeRisk(eff).toUpperCase()}</div>
+        </div>
+        <div className="queue-sub"><span className="queue-location">{r.barangay}</span></div>
+        <div className="queue-meta">
+          <div className={`queue-status ${r.status}`}>
+            {statusIcon(r.status)}<span>{statusLabel[r.status]}</span>
+          </div>
+          <span className="queue-time">{formatTime(r.createdAt)}</span>
+        </div>
+      </li>
+    );
+  });
+
   return (
     <div className="reportverify-page">
       {/* Header */}
@@ -644,7 +676,7 @@ const ReportVerifyPage: React.FC = () => {
             <div className="queue-search">
               <input
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => handleQueryChange(e.target.value)}
                 placeholder="Search barangay..."
               />
               <Search className="queue-search-icon" />
@@ -739,43 +771,20 @@ const ReportVerifyPage: React.FC = () => {
                 No reports found.
               </div>
             ) : (
-              filtered.map((r) => {
-                const active = r.id === selectedId;
-                const eff = effectiveRisk(r);
-
-                return (
-                  <li
-                    key={r.id}
-                    className={`queue-item ${active ? "active" : ""} risk-${eff}`}
-                    onClick={() => setSelectedId(r.id)}
-                  >
-                    <div className="queue-item-top">
-                      <div className="queue-title">{r.title}</div>
-                      <div className={`queue-risk-pill ${normalizeRisk(eff)}`}>
-                        {normalizeRisk(eff).toUpperCase()}
-                      </div>
-                    </div>
-
-                    <div className="queue-sub">
-                      <span className="queue-location">{r.barangay}</span>
-                    </div>
-
-                    <div className="queue-meta">
-                      <div className={`queue-status ${r.status}`}>
-                        {statusIcon(r.status)}
-                        <span>{statusLabel[r.status]}</span>
-                      </div>
-                      <span className="queue-time">{formatTime(r.createdAt)}</span>
-                    </div>
-                  </li>
-                );
-              })
+              filtered.map((r) => (
+                <QueueItem
+                  key={r.id}
+                  r={r}
+                  active={r.id === selectedId}
+                  onClick={() => setSelectedId(r.id)}
+                />
+              ))
             )}
           </ul>
         </section>
 
         <section className="verify-map">
-          <LeafletMap
+          <MemoizedLeafletMap
             selectedReport={selectedReportForMap}
             activeLayers={["Queue Reports"]}
             categoryFilter={categoryFilter}
@@ -786,9 +795,9 @@ const ReportVerifyPage: React.FC = () => {
         {/* Right: Detail / Workflow */}
         <aside className="verify-detail">
           {loading ? (
-            <div className="panel-loading">Loading report…</div>
+            <div className="queue-loading">Loading reports…</div>
           ) : error ? (
-            <div className="panel-error">Error: {error}</div>
+            <div className="queue-error">Loading reports failed. Please try again later.</div>
           ) : selected ? (
             <>
               <div className="detail-head">
@@ -963,11 +972,12 @@ const ReportVerifyPage: React.FC = () => {
                       !isAssignedToMe ||
                       !isVerifiedSet ||
                       selected.status === "in_progress" ||
-                      selected.status === "resolved" ||
-                      loadingAction === "in_progress"
+                      selected.status === "resolved"
                     }
                   >
-                    {loadingAction === "in_progress" ? "Updating..." : "Mark In Progress"}
+                    {loadingAction === "in_progress" && selected.status !== "in_progress"
+                      ? "Updating..."
+                      : "Mark In Progress"}
                   </button>
 
                   <button

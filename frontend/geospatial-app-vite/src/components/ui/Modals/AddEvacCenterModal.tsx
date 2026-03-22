@@ -141,14 +141,14 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = (
             {/* Name */}
             <div className="form-group small">
               <label>Name<span className="required">*</span></label>
-              <input name="name" value={formState.name} onChange={handleChange} required />
+              <input name="name" value={formState.name} onChange={handleChange} placeholder="Enter Evacuation Center Name" required />
             </div>
 
             {/* Contact and Coordinates */}
             <div className="form-row two">
               <div className="form-group ">
                 <label>Contact<span className="required">*</span></label>
-                <input name="contact" value={formState.contact} onChange={handleChange} required />
+                <input name="contact" value={formState.contact} onChange={handleChange} placeholder="e.g. 09123456789" pattern="^09\d{9}$" required />
               </div>
 
               <div className="form-group">

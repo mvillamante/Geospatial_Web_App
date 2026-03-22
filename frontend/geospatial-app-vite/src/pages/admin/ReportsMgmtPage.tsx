@@ -12,6 +12,8 @@ import { getIncidentCategories, getIncidentLabel, type IncidentCategories } from
 import Pagination from "../../components/ui/Pagination";
 import type { MapReport } from "../../components/ui/LeafletMap";
 
+import ReportPreviewMap from "../../components/ui/Modals/SpecificReportPreviewModal";
+
 type CriticalLevel = "low" | "moderate" | "high" | "critical";
 
 type ReportStatus =
@@ -456,8 +458,6 @@ const ReportsMgmtPage: React.FC = () => {
   /* Loading */
   const [loadingReports, setLoadingReports] = useState(true);
   const [viewMode, setViewMode] = useState("table");
-
-  console.log("defying gravity", selectedReport)
 
   return (
     <div className="reportsmgmt-page">
@@ -1014,12 +1014,11 @@ const ReportsMgmtPage: React.FC = () => {
               <div className="modal-top-grid">
                 <div className="modal-info">
                   <>
-                    <div className="report-map-preview">
-                      <LeafletMap
-                        selectedReportView={selectedReport}
-                        enablePreview={!!selectedReport}
-                      />
-                    </div>
+                    { viewMode === "table" && (
+                      <div className="report-map-preview">
+                        <ReportPreviewMap report={selectedReport} height={300} />
+                      </div>
+                    )}
                     <div className="detail-item">
                       <div className="label">Location</div>
                       <div className="value">{selectedReport.location_display || "-"}</div>

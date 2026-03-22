@@ -101,7 +101,8 @@ const MapPickerModal: React.FC<MapPickerModalProps> = ({ open, initial, onClose,
         <p className='map-hint'>Click on the map to set the coordinates.</p>
 
         <div className="map-wrap">
-          <MapContainer center={center} zoom={13} className='leaflet-map'>
+          <MapContainer center={center} zoom={13} 
+            className='leaflet-map' style={{ height: 350, width: "100%", borderRadius: 10 }}>
             <TileLayer
               attribution='&copy; OpenStreetMap contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

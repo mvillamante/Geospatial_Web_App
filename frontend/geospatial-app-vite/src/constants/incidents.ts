@@ -32,6 +32,16 @@ export const INCIDENT_CATEGORY_METADATA: readonly IncidentCategoryMeta[] = [
   { value: "others", label: "Others", icon: "⚠️" }
 ];
 
+export const severityColors: Record<
+  "critical" | "high" | "moderate" | "low",
+  { primary: string; secondary: string; border: string; text: string }
+> = {
+  critical: { primary: "#991b1b", secondary: "#dc2626", border: "#9c1515", text: "CRITICAL" },
+  high: { primary: "#ef4444", secondary: "#f87171", border: "#df3838", text: "HIGH" },
+  moderate: { primary: "#f59e0b", secondary: "#fbbf24", border: "#e78c23", text: "MODERATE" },
+  low: { primary: "#10b981", secondary: "#34d399", border: "#0ba876", text: "LOW" },
+};
+
 export function getIncidentIcon(category: string): string {
   const normalized = category
     .toLowerCase()

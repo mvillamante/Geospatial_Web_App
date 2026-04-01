@@ -461,7 +461,7 @@
 
 .evac-side-content {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
   align-items: stretch;
   min-width: 0;
@@ -472,13 +472,20 @@
   border-radius: 15px;
   box-shadow: 0 6px 16px rgba(163, 169, 182, 0.18);
   padding: 8px;
-  height: 80vh;
+}
+
+.evac-side-content.officer-view {
+  height: 78vh;
+}
+
+.evac-side-content.citizen-view {
+  height: 75vh;
 }
 
 .evac-side-content-filtermap {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 1px;
 }
 
 .evac-side-content-filtermap .role-select {
@@ -559,7 +566,7 @@
 
 @media (max-height: 800px) {
   .evac-side-content-map {
-    height: 66vh;
+    height: 75vh;
   }
 }
 
@@ -842,24 +849,6 @@
   flex: 1;
 }
 
-.pick-map-btn {
-  border: 1px solid #dbe3f3;
-  background: #eef2ff;
-  color: #1f2937;
-  font-weight: 600;
-  border-radius: 12px;
-  padding: 0.75rem 1rem;
-  cursor: pointer;
-  transition: 0.25s ease;
-  white-space: nowrap;
-}
-
-.pick-map-btn:hover {
-  transform: translateY(-2px);
-  background: #dbeafe;
-  border-color: #93c5fd;
-}
-
 /* Facilities input */
 .form-group input[name="facilities"] {
   font-style: italic;
@@ -963,18 +952,6 @@
 
 .coord-row.inline {
   flex: 1;
-}
-
-.pick-map-btn {
-  border: 1px solid #dbe3f3;
-  background: #f8fafc;
-  color: #1f2937;
-  font-weight: 600;
-  border-radius: 12px;
-  padding: 0.7rem 0.9rem;
-  cursor: pointer;
-  transition: 0.25s ease;
-  white-space: nowrap;
 }
 
 .pick-map-btn:hover {

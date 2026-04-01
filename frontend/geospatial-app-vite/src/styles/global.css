@@ -462,6 +462,10 @@ tr:nth-last-child(-n+2) .kebab-dropdown {
   grid-template-columns: 1fr 1fr;
 }
 
+.form-row.two-expanded {
+  grid-template-columns: 0.5fr 1.2fr;
+}
+
 .form-row.three {
   grid-template-columns: 1fr 1fr 1fr;
 }
@@ -761,4 +765,29 @@ tr:nth-last-child(-n+2) .kebab-dropdown {
 .report-stat-primary,
 .report-stat-secondary {
   border-color: #dbe3f3;
+}
+
+/* =====================
+   PICK UP MAP BUTTON
+===================== */
+
+.evac-page  .pick-map-btn {
+  background: #eef2ff;
+  border: 1px solid #dbeafe;
+  color: #1e40af;
+  font-weight: 600;
+  height: 42px;
+  border-radius: 10px;
+  padding: 0 14px;
+  gap: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.evac-page .pick-map-btn:hover {
+  background: #dbeafe;
+  transform: translateY(-2px);
 }

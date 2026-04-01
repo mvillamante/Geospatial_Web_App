@@ -2,6 +2,7 @@ import "./AddEvacCenterModal.css";
 import React, { useState } from "react";
 import MapPickerModal from "./MapPickerModal";
 import { toast } from "sonner";
+import { FaMapMarkerAlt } from "react-icons/fa";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -155,7 +156,9 @@ const AddEvacCenterModal: React.FC<AddEvacCenterModalProps> = (
                 <label>Coordinates <span className="required">*</span></label>
                 <div className="coord-row">
                   <input name="coordinates" disabled value={formState.coordinates} placeholder="Lat, Long" required />
-                  <button type="button" className="pick-map-btn" onClick={() => setMapOpen(true)}>Pick on Map</button>
+                  <button type="button" className="pick-map-btn" onClick={() => setMapOpen(true)}>
+                    <FaMapMarkerAlt /> Pick on Map
+                  </button>
                 </div>
               </div>
             </div>

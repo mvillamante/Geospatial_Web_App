@@ -141,22 +141,6 @@
   flex: 1;
 }
 
-.pick-map-btn{
-  background: #0ea5a4;
-  color: white;
-  border: none;
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  height: 40px;
-  transition: 0.2s ease;
-}
-
-.pick-map-btn:hover{
-  background: #05989a;
-}
-
 /* Facilities */
 .facilities-card{
   margin-top: 6px;

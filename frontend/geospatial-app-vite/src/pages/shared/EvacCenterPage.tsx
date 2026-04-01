@@ -280,10 +280,12 @@ function EvacCenterPage() {
     }
   };
 
+  console.log("eto ang role", userRole, isResidentVerified);
+
   return (
     <div className="evac-page">
       <div className="evac-map-wrapper">
-        <div className="evac-side-content">
+        <div className={`evac-side-content ${userRole === 'Officer' ? 'officer-view' : 'citizen-view'}`}>
           <div className="evac-side-content-filtermap">
             {/* Filter-Row */}
             { (userRole === "Citizen" && isResidentVerified) && (

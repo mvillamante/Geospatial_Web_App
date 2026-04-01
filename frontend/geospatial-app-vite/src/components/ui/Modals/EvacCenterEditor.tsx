@@ -2,6 +2,7 @@
 import { getCabuyaoBarangays } from "../../../constants";
 import "./EvacCenterEditor.css";
 import { Navigation } from "lucide-react";
+import { FaMapMarkerAlt } from "react-icons/fa";
 
 export interface EvacuationCenter {
   id: number;
@@ -56,6 +57,11 @@ export default function EvacCenterEditor({
           <span className="icon">🏫</span>
           <span className="label">{center.name}</span>
           {readOnly && <span className="role-badge">View Only</span>}
+          {!readOnly && (
+            <span className="role-badge">
+              {isSaving ? "Saving Changes..." : "Edit Mode"}
+            </span>
+          )}
         </div>
 
         {readOnly ? (
@@ -184,7 +190,7 @@ export default function EvacCenterEditor({
               />
             </div>
 
-            <div className="form-row two">
+            <div className="form-row two-expanded">
               <div className="form-group">
                 <label>Contact</label>
                 <input
@@ -199,7 +205,7 @@ export default function EvacCenterEditor({
                   <input value={center.coordinates || ""} readOnly />
                   {showCoordinatesPicker && onPickCoordinates && (
                     <button className="pick-map-btn" onClick={onPickCoordinates}>
-                      Pick on Map
+                      <FaMapMarkerAlt /> Pick on Map
                     </button>
                   )}
                 </div>
@@ -268,20 +274,18 @@ export default function EvacCenterEditor({
         {/* Save / Cancel buttons */}
         {!readOnly && onSave && onCancel && (
           <div className="modal-actions">
-            <button className="btn-save" type="button" onClick={onSave}>
-              Save
+            <button
+              className="btn-save"
+              type="submit"
+              onClick={onSave}
+              disabled={isSaving} // disable while saving
+            >
+              {isSaving ? "Saving..." : "Save"}
             </button>
 
-            <button className="btn-cancel" type="button" onClick={onCancel}>
+            <button className="btn-cancel" type="button" onClick={onCancel} disabled={isSaving}>
               Cancel
             </button>
-
-          </div>
-        )}
-
-        {isSaving && (
-          <div className="saving-overlay">
-            <p>Saving...</p>
           </div>
         )}
       </div>

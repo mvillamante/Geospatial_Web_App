@@ -96,6 +96,39 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
     }
   }
 
+  function ReportImage({ src, alt }: { src?: string | null; alt: string }) {
+    const [status, setStatus] = useState<"loading" | "loaded" | "error">(
+      src ? "loading" : "error"
+    );
+
+    if (!src) {
+      // No image provided
+      return (
+        <div className="image-placeholder">
+          No Image Provided
+        </div>
+      );
+    }
+
+    return (
+      <>
+        {status === "loading" && (
+          <div className="image-placeholder">Loading image...</div>
+        )}
+        <img
+          src={src}
+          alt={alt}
+          className={`report-photo ${status === "loaded" ? "visible" : "hidden"}`}
+          onLoad={() => setStatus("loaded")}
+          onError={() => setStatus("error")}
+        />
+        {status === "error" && (
+          <div className="image-placeholder">Failed to Load Image</div>
+        )}
+      </>
+    );
+  }
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -116,7 +149,7 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
 
         <p className="modal-desc">{report.description}</p>
 
-        {report.photo && <img src={report.photo} alt="report" className="report-photo" />}
+        <ReportImage src={report.photo} alt="Report Photo" />
 
         {/* Officer Note for Rejected */}
         {localReport.status?.toLowerCase() === "rejected" && (
@@ -223,9 +256,7 @@ export default function ReportModal({ report, onClose, onUpdate }: ReportModalPr
                     className="readonly-textarea"
                   />
                 )}
-                {report.reply_image_url && (
-                  <img src={report.reply_image_url} alt="Reply" className="reply-image" />
-                )}
+                <ReportImage src={report.reply_image_url} alt="Reply Image" />
               </div>
             )}
           </div>

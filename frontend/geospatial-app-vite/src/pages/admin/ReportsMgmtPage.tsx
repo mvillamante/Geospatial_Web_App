@@ -42,6 +42,7 @@ type Officer = {
 interface AdminReport {
   id: number;
   user_label: string;
+  user_full_name: string;
   category: string;
   other_category?: string | null;
   location_display: string;
@@ -395,7 +396,7 @@ const ReportsMgmtPage: React.FC = () => {
 
       return (
         includes(r.id, q) ||
-        includes(r.user_label, q) ||
+        includes(r.user_full_name, q) ||
         includes(r.category, q) ||
         includes(r.location_display, q) ||
         includes(r.description, q) ||
@@ -682,7 +683,7 @@ const ReportsMgmtPage: React.FC = () => {
                     return (
                       <tr key={report.id} onClick={() => setSelectedReportMap(report)} title="Click to navigate to pin">
                         <td className="center">#R-0{report.id}</td>
-                        <td className="center">{report.user_label}</td>
+                        <td className="center">{report.user_full_name}</td>
                         <td className="muted text-wrap">{getIncidentLabel(report.category as IncidentCategories)}</td>
 
                         <td className="center">
@@ -820,7 +821,7 @@ const ReportsMgmtPage: React.FC = () => {
                     return (
                       <tr key={report.id}>
                         <td className="table-id center">#R-0{report.id}</td>
-                        <td className="center">{report.user_label}</td>
+                        <td className="center">{report.user_full_name}</td>
                         <td className="table-category center muted">{getIncidentLabel(report.category as IncidentCategories)}</td>
                         <td className="location-cell center" title={report.location_display}>
                           {report.location_display || "-"}
@@ -1000,7 +1001,7 @@ const ReportsMgmtPage: React.FC = () => {
                   Report #{selectedReport.id} • {getIncidentLabel(selectedReport.category as IncidentCategories)}
                 </div>
                 <div className="modal-sub">
-                  {selectedReport.user_label} •{" "}
+                  {selectedReport.user_full_name} •{" "}
                   {(selectedReport.status ?? "Pending") as ReportStatus}
                 </div>
               </div>

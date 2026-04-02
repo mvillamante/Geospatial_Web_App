@@ -305,6 +305,27 @@
   padding: 0 15px 15px;
 }
 
+.image-placeholder {
+  width: 100%;
+  max-height: 200px;
+  background: #eee;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-style: italic;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.report-photo.visible {
+  display: block;
+}
+
+.report-photo.hidden {
+  display: none;
+}
+
 /* Assign box pinned to bottom */
 .reportsmgmt-page .assign-box {
   margin-top: auto; 

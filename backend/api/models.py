@@ -33,7 +33,7 @@ class CustomUser(AbstractUser):
     # Custom fields
     barangay = models.CharField(max_length=100, null=True, blank=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=True, null=True)
-    extra_roles = models.JSONField(default=list, blank=True)
+    extra_roles = models.JSONField(default=list, blank=True) #remove!
     phone = models.CharField(max_length=20, unique=True, null=True, blank=True)
     staff_number = models.PositiveIntegerField(null=True, blank=True, unique=True)
     is_resident_verified = models.BooleanField(default=False)

@@ -184,18 +184,18 @@ class CreateStaffUserView(generics.CreateAPIView):
 
         subject = "Your Temporary Login Credentials"
         message = f"""
-Hello {user.first_name},
+            Hello {user.first_name},
 
-Your account has been created.
+            Your account has been created.
 
-Username: {user.username}
-Temporary Password: {temp_password}
+            Username: {user.username}
+            Temporary Password: {temp_password}
 
-Please login and change your password immediately.
+            Please login and change your password immediately.
 
-Regards,
-Admin
-"""
+            Regards,
+            Admin
+            """
 
         try:
             send_mail(

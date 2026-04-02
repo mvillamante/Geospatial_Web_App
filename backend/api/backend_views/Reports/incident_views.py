@@ -1,3 +1,5 @@
+import time
+
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
@@ -14,9 +16,11 @@ from api.serializer import *
 from api.supa_storage import create_signed_url
 from api.models import IncidentReport
 
-from django.db import transaction
+from django.db import connection, transaction
 from django.db.models import Q
 from django.db.models.functions import Lower
+
+from ..Services.pagination import AdminUserPagination
 
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
@@ -106,15 +110,26 @@ class IncidentReportListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        qs = IncidentReport.objects.all().order_by("-created_at");
-    
+        start = time.time()
+
+        qs = (
+            IncidentReport.objects
+            .select_related("assigned_officer")
+            .order_by("-created_at")
+        )
+
         if request.user.role == "citizen":
             qs = qs.filter(user=request.user)
-        
         elif request.user.role == "lgu":
             qs = qs.filter(assigned_officer=request.user)
 
         serializer = IncidentReportListSerializer(qs, many=True)
+
+        end = time.time()
+        print("Reports count:", qs.count())
+        print("Total time:", end - start)
+        print("Queries executed:", len(connection.queries))
+
         return Response(serializer.data)
     
 class MyIncidentReportsView(generics.ListAPIView):
@@ -122,7 +137,7 @@ class MyIncidentReportsView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return IncidentReport.objects.filter(user=self.request.user).order_by("-created_at")
+        return IncidentReport.objects.select_related("assigned_officer").order_by("-created_at")
 
 class PublicVerifiedReportsView(APIView):
     permission_classes = [AllowAny]

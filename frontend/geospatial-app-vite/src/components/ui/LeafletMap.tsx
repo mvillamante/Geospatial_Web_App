@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./LeafletMap.css";
@@ -19,6 +19,7 @@ import {
 } from "./mapLayers";
 
 import { getIncidentIcon, severityColors } from "../../constants"
+import { toast } from "sonner";
 
 interface BarangayData {
   name: string;
@@ -140,6 +141,7 @@ function getCalamityDataForBarangay(
 }
 
 interface LeafletMapProps {
+  showUserLocation: boolean;
   selectedReport?: MapReport | null;
   categoryFilter?: IncidentCategories | "all";
   reportTimeFilter?: string;
@@ -182,7 +184,6 @@ interface LeafletMapProps {
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-
 function LeafletMap(props: LeafletMapProps) {
   const barangayGeoJsonRef = useRef<any>(null);
 
@@ -210,6 +211,7 @@ function LeafletMap(props: LeafletMapProps) {
     width = "100%",
     selectedReportView,
     enablePreview = false,
+    showUserLocation = false,
     mapView = "interactive",
     mapType = "basic",
     dataLayer,
@@ -219,6 +221,7 @@ function LeafletMap(props: LeafletMapProps) {
     reportClickTimestamp: _reportClickTimestamp = null, // kept for API compatibility
     locationFilter = "all",
     categoryFilter = "",
+    reportTimeFilter = "",
     reports = [],
     activeLayers = [],
     ndviOpacity = 0.8,
@@ -432,39 +435,58 @@ function LeafletMap(props: LeafletMapProps) {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || mapView !== "interactive") return;
+    console.log("Initializing geolocation watch");
+
+    console.log("showUserLocation:", showUserLocation);
+    if (!showUserLocation) {
+      console.log("No User Location display");
+      if (markerRef.current) {
+        map.removeLayer(markerRef.current);
+        markerRef.current = null;
+      }
+      if (circleRef.current) {
+        map.removeLayer(circleRef.current);
+        circleRef.current = null;
+      }
+      return;
+    }
 
     const watcher = navigator.geolocation.watchPosition(
-      (pos) => {
-        const { latitude, longitude, accuracy } = pos.coords;
-        const latlng: [number, number] = [latitude, longitude];
+    (pos) => {
+      const { latitude, longitude, accuracy } = pos.coords;
+      const latlng: [number, number] = [latitude, longitude];
 
-        if (!markerRef.current) {
-          markerRef.current = L.marker(latlng, { title: "Your Location" }).addTo(map);
-        } else {
-          markerRef.current.setLatLng(latlng);
-        }
-
-        const circleRadius = accuracy * 0.001;
-        if (!circleRef.current) {
-          circleRef.current = L.circle(latlng, { radius: circleRadius }).addTo(map);
-        } else {
-          circleRef.current.setLatLng(latlng).setRadius(circleRadius);
-        }
-
-        // Only center on user location once during initial load
-        //if (!hasInitialCenteredRef.current) {
-        //  map.setView(latlng);
-        //  hasInitialCenteredRef.current = true;
-        //}
-      },
-      (err) => {
-        if (err.code === 1) alert("Please allow geolocation access");
-        else alert("Cannot get current location");
+      if (!markerRef.current) {
+        markerRef.current = L.marker(latlng, { title: "Your Location", zIndexOffset: 1000 }).addTo(map);
+      } else {
+        markerRef.current.setLatLng(latlng);
       }
+
+      const circleRadius = accuracy * 0.001;
+      if (!circleRef.current) {
+        circleRef.current = L.circle(latlng, { radius: circleRadius }).addTo(map);
+      } else {
+        circleRef.current.setLatLng(latlng).setRadius(circleRadius);
+      }
+    },
+    (err) => {
+      if (err.code === 1) alert("Please allow geolocation access");
+      else alert("Cannot get current location");
+    }
     );
 
-    return () => navigator.geolocation.clearWatch(watcher);
-  }, [mapView]);
+    return () => {
+      navigator.geolocation.clearWatch(watcher);
+      if (markerRef.current) {
+        map.removeLayer(markerRef.current);
+        markerRef.current = null;
+      }
+      if (circleRef.current) {
+        map.removeLayer(circleRef.current);
+        circleRef.current = null;
+      }
+    };
+  }, [mapView, showUserLocation]);
 
   // General Map (includes NAVIGATE to selected report, to Cabuyao)
   useEffect(() => {
@@ -473,6 +495,11 @@ function LeafletMap(props: LeafletMapProps) {
     if (!selectedReport) return;
 
     const marker = reportMarkersMap.current.get(selectedReport.id);
+
+    if (!marker && selectedReport?.status === "rejected") {
+      toast.warning("Report not found on the map. It may have been rejected or removed.");
+      return;
+    }
 
     if (marker) {
       const latLng = marker.getLatLng();
@@ -1575,7 +1602,6 @@ function LeafletMap(props: LeafletMapProps) {
     const map = mapRef.current;
     if (!map) return;
 
-
     const showVerifiedReports = activeLayers.includes("Verified Reports");
 
     if (!showVerifiedReports) {
@@ -1595,28 +1621,56 @@ function LeafletMap(props: LeafletMapProps) {
     const normalizedCategory = (val: string) =>
       val?.toLowerCase().replace(/\s+/g, "_").replace(/[\/\-]/g, "");
 
+    const now = new Date();
+    
+
+    const isWithinTimeFilter = (dateStr: string) => {
+
+      const reportDate = new Date(dateStr);
+
+      if (reportTimeFilter === "all") return true;
+
+      if (reportTimeFilter === "today") {
+        return reportDate.toDateString() === now.toDateString();
+      }
+
+      if (reportTimeFilter === "7days") {
+        return now.getTime() - reportDate.getTime() <= 7 * 24 * 60 * 60 * 1000;
+      }
+
+      if (reportTimeFilter === "last30days") {
+        return now.getTime() - reportDate.getTime() <= 30 * 24 * 60 * 60 * 1000;
+      }
+
+      if (reportTimeFilter === "last12months") {
+        return now.getTime() - reportDate.getTime() <= 365 * 24 * 60 * 60 * 1000;
+      }
+
+      return true;
+    };
+
     const filteredReports = reports
-      .filter(r => r.status !== "archived" && r.status !== "rejected")
-      .filter(r =>
+      .filter((r) => r.status !== "archived" && r.status !== "rejected")
+      .filter((r) => isWithinTimeFilter(r.created_at)) // CHANGE created_at if your date field is different
+      .filter((r) =>
         !categoryFilter || categoryFilter === "all"
           ? true
           : normalizedCategory(
-            r.category === "others"
-              ? r.other_category || "others"
-              : r.category
-          ) === normalizedCategory(categoryFilter)
+              r.category === "others"
+                ? r.other_category || "others"
+                : r.category
+            ) === normalizedCategory(categoryFilter)
       );
 
     filteredReports.forEach((r) => {
       const lat = parseFloat(r.lat as any);
       const lng = parseFloat(r.lng as any);
-      const barangay = getBarangayFromCoords(lat, lng) || "Cabuyao";
-
 
       if (Number.isNaN(lat) || Number.isNaN(lng)) return;
 
-      // already exists → skip
       if (reportMarkersMap.current.has(r.id)) return;
+
+      const barangay = getBarangayFromCoords(lat, lng) || "Cabuyao";
 
       const iconEmoji = getIncidentIcon(
         r.category === "others" ? r.other_category || "others" : r.category
@@ -1626,17 +1680,17 @@ function LeafletMap(props: LeafletMapProps) {
 
       const reportIcon = L.divIcon({
         html: `
-      <div class="verified-report-marker">
-        <div class="pulse" style="background:${colors.secondary}40;"></div>
-        <div class="pin"
-          style="
-            background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
-            border: 3px solid ${colors.border};
-          ">
-          <span class="verified-report-icon">${iconEmoji}</span>
-        </div>
-      </div>
-    `,
+          <div class="verified-report-marker">
+            <div class="pulse" style="background:${colors.secondary}40;"></div>
+            <div class="pin"
+              style="
+                background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
+                border: 3px solid ${colors.border};
+              ">
+              <span class="verified-report-icon">${iconEmoji}</span>
+            </div>
+          </div>
+        `,
         className: "",
         iconSize: [44, 44],
         iconAnchor: [22, 44],
@@ -1644,34 +1698,37 @@ function LeafletMap(props: LeafletMapProps) {
 
       const marker = L.marker([lat, lng], { icon: reportIcon })
         .addTo(layerGroup)
-        .bindPopup(`
-    <div class="verified-popup">
-      <div class="popup-icon">${iconEmoji}</div>
-      <h3>${formatCategoryLabel(r.category)}</h3>
-      <p style="margin: 8px 0 5px 0; font-size: 12px; color: #666;">Barangay ${barangay}, Cabuyao</p>
-      <span class="popup-pill" style="background:${colors.primary}">
-        ${colors.text} RISK
-      </span>
-    </div>
-  `, {
-          minWidth: 230
-        });
+        .bindPopup(
+          `
+          <div class="verified-popup">
+            <div class="popup-icon">${iconEmoji}</div>
+            <h3>${formatCategoryLabel(r.category)}</h3>
+            <p style="margin: 8px 0 5px 0; font-size: 12px; color: #666;">
+              Barangay ${barangay}, Cabuyao
+            </p>
+            <span class="popup-pill" style="background:${colors.primary}">
+              ${colors.text} RISK
+            </span>
+          </div>
+          `,
+          { minWidth: 230 }
+        );
 
       reportMarkersMap.current.set(r.id, marker);
     });
 
     reportMarkersMap.current.forEach((marker, id) => {
-      const stillExists = filteredReports.some(r => r.id === id);
+      const stillExists = filteredReports.some((r) => r.id === id);
 
       if (!stillExists) {
         layerGroup.removeLayer(marker);
         reportMarkersMap.current.delete(id);
       }
     });
+  }, [reports, activeLayers, categoryFilter, reportTimeFilter]);
 
-  }, [reports, activeLayers, categoryFilter]);
 
-  /* Selected Report */
+  /* Selected Report (I FORGOT PARA SAN TO-----------------)*/
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;

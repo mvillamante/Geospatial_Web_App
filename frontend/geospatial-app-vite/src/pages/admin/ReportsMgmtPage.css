@@ -187,6 +187,21 @@
   overflow: hidden;
 }
 
+.reportsmgmt-page .show-on-map-btn {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.reportsmgmt-page .show-on-map-btn:hover {
+  background-color: #4338ca;
+}
+
 .reportmodal-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -398,6 +413,11 @@
   flex: 1;
 }
 
+.reportsmgmt-page .filters-left .category-select,
+.reportsmgmt-page .filters-left .time-select {
+  padding-right: 35px;
+}
+
 /* Kebab Menu */
 .reportsmgmt-page .row-menu {
   position: relative;
@@ -599,6 +619,29 @@
   }
 }
 
+@media (max-height: 980px){
+  .map-container{
+    height: 78.8%;
+  }
+
+  .map-stats-wrapper {
+    width: 50%;
+  }
+
+  .mini-table th,
+  .mini-table td{
+    padding:5px 4px;
+    font-size: 11.5px;
+  }
+
+}
+
+@media (max-height: 900px){
+  .map-container{
+    height: 82.3%;
+  }
+}
+
 @media (max-height: 800px){
   .map-view-wrapper{
     height: 65vh;
@@ -606,5 +649,9 @@
 
   .map-container{
     height: 79.8%;
+  }
+
+  .map-stats-wrapper {
+    width: 45%;
   }
 }

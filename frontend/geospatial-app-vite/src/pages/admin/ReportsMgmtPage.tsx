@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { X, MapPin, Users, CheckCircle2, Archive, Eye, TriangleAlert } from "lucide-react";
-import { FiUser, FiCheckCircle, FiSearch } from "react-icons/fi";
+import { FiCheckCircle, FiSearch } from "react-icons/fi";
 import { HiChevronUpDown, HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { HiOutlineTable, HiOutlineMap } from "react-icons/hi";
+import { BiTimeFive } from "react-icons/bi";
+import { TbCategory } from "react-icons/tb";
 import { toast } from "sonner";
 import "./ReportsMgmtPage.css";
 
@@ -13,6 +15,7 @@ import Pagination from "../../components/ui/Pagination";
 import type { MapReport } from "../../components/ui/LeafletMap";
 
 import ReportPreviewMap from "../../components/ui/Modals/SpecificReportPreviewModal";
+import { GrStatusCritical } from "react-icons/gr";
 
 type CriticalLevel = "low" | "moderate" | "high" | "critical";
 
@@ -421,7 +424,8 @@ const ReportsMgmtPage: React.FC = () => {
   );
 
   const reportStats = useMemo(() => {
-    const base = filteredReports;
+    const base = filteredReports
+    //console.log("Calculating report stats with base length:", base);
 
     return {
       total: base.length,
@@ -491,8 +495,8 @@ const ReportsMgmtPage: React.FC = () => {
       <div className="filters">
         <div className="filters-left">
           <div className="select-wrapper">
-            <FiUser className="select-icon" />
-            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as IncidentCategories | "all")} className="role-select">
+            <TbCategory className="select-icon" />
+            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as IncidentCategories | "all")} className="category-select">
               <option value="all">All Categories</option>
               {categories.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -515,7 +519,7 @@ const ReportsMgmtPage: React.FC = () => {
 
           {viewMode === "map" && (
             <div className="select-wrapper">
-              <FiCheckCircle className="select-icon" />
+              <BiTimeFive className="select-icon" />
               <select value={reportTimeFilter} onChange={(e) =>
                 setReportTimeFilter(
                   e.target.value as
@@ -526,7 +530,7 @@ const ReportsMgmtPage: React.FC = () => {
                   | "all"
                 )
               }
-                className="status-select">
+                className="time-select">
 
                 <option value="all">All Time</option>
                 <option value="today">Today</option>
@@ -608,10 +612,12 @@ const ReportsMgmtPage: React.FC = () => {
           <div className="map-stats-wrapper">
             <div className="map-container">
               <LeafletMap
+                reports={reports}
                 selectedReport={selectedReportForMap ?? undefined}
                 categoryFilter={categoryFilter}
                 reportTimeFilter={reportTimeFilter}
-                activeLayers={["Queue Reports"]}
+                activeLayers={["Verified Reports"]} // "Queue Reports" kasama dati
+                showUserLocation={false}
               />
             </div>
 
@@ -658,6 +664,7 @@ const ReportsMgmtPage: React.FC = () => {
                   <th>Report ID</th>
                   <th>Reporter</th>
                   <th>Category</th>
+                  <th>Critical Level</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -666,13 +673,13 @@ const ReportsMgmtPage: React.FC = () => {
               <tbody>
                 {loadingReports ? (
                   <tr>
-                    <td colSpan={5} className="empty">
+                    <td colSpan={6} className="empty">
                       Loading Reports...
                     </td>
                   </tr>
                 ) : filteredReports.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="empty">
+                    <td colSpan={6} className="empty">
                       No Reports Found.
                     </td>
                   </tr>
@@ -686,6 +693,13 @@ const ReportsMgmtPage: React.FC = () => {
                         <td className="center">{report.user_full_name}</td>
                         <td className="muted text-wrap">{getIncidentLabel(report.category as IncidentCategories)}</td>
 
+                        <td className="center">
+                          {report.verified_critical_level ? (
+                            <span className={`severity-tag ${report.verified_critical_level}`}>
+                              {report.verified_critical_level.toUpperCase()}
+                            </span>
+                          ) : "---"}
+                        </td>
                         <td className="center">
                           <span className={badgeClass(status)}>{status}</span>
                         </td>
@@ -717,7 +731,7 @@ const ReportsMgmtPage: React.FC = () => {
                                 ><Eye size={16} /> View Full Details
                                 </button>
 
-                                {/*<button
+                                <button
                                   className="dropdown-item view-details"
                                   onClick={async () => {
                                     setOpenMapMenuId(null);
@@ -741,8 +755,8 @@ const ReportsMgmtPage: React.FC = () => {
                                     }
                                   }}
                                 >
-                                  Escalate
-                                </button>*/}
+                                  <GrStatusCritical size={16} /> Escalate
+                                </button>
 
                                 <button
                                   className="dropdown-item view-details danger"
@@ -1015,14 +1029,34 @@ const ReportsMgmtPage: React.FC = () => {
               <div className="modal-top-grid">
                 <div className="modal-info">
                   <>
-                    { viewMode === "table" && (
+                    {/* viewMode === "table" && (
                       <div className="report-map-preview">
                         <ReportPreviewMap report={selectedReport} height={300} />
                       </div>
-                    )}
+                    )*/}
                     <div className="detail-item">
                       <div className="label">Location</div>
-                      <div className="value">{selectedReport.location_display || "-"}</div>
+                      <div
+                        className="value"
+                        style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                      >
+                        {selectedReport.location_display || "-"}
+                        {selectedReport && selectedReport.status !== "rejected" as ReportStatus && (
+                          <button
+                            className="show-on-map-btn"
+                            onClick={() => {
+                              setSelectedReportMap(selectedReport);
+                              setViewMode("map");
+                              
+                              setSelectedReport(null);
+                              setSelectedOfficer("");
+                              setOpenMenuId(null);
+                            }}
+                          >
+                            Show on Map
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </>
 

@@ -404,7 +404,12 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
     
     def get_user_full_name(self, obj):
         u = obj.user
-        full_name = " ".join(filter(None, [u.first_name, u.last_name])).strip()
+
+        first = (u.first_name or "").strip().split(" ")[0]
+        last = (u.last_name or "").strip()
+
+        full_name = f"{first} {last}".strip()
+
         return full_name or u.username
 
     def get_assigned_officer_label(self, obj):

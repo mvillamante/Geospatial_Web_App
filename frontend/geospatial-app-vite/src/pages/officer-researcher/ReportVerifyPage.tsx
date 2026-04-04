@@ -101,7 +101,7 @@ const ReportVerifyPage: React.FC = () => {
   const riskOrder: Record<RiskLevel, number> = { critical: 4, high: 3, moderate: 2, low: 1 };
 
   const [reports, setReports] = useState<CitizenReport[]>([]);
-  const [selectedId, setSelectedId] = useState<number>(0);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,10 +120,10 @@ const ReportVerifyPage: React.FC = () => {
 
   const categories = useMemo(() => getIncidentCategories(), []);
 
-  const selected = useMemo(
-    () => reports.find((r) => r.id === selectedId) ?? reports[0],
-    [reports, selectedId]
-  );
+  const selected = useMemo(() => {
+    if (selectedId == null) return null;
+    return reports.find((r) => r.id === selectedId) ?? null;
+  }, [reports, selectedId]);
 
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const searchTimeout = useRef<number | null>(null);
@@ -202,10 +202,10 @@ const ReportVerifyPage: React.FC = () => {
     return filteredByStatus.filter(r => normalizeCategory(r.category) === normalizeCategory(categoryFilter));
   }, [filteredByStatus, categoryFilter]);
 
+  const [mapReports, setMapReports] = useState<any[]>([]);
   const filteredByScopeAndTime = useMemo(() => {
     const now = new Date();
-    return filteredByCategory.filter(r => {
-      // scope
+    const result = filteredByCategory.filter((r) => {
       const scope =
         scopeFilter === "all"
           ? true
@@ -213,11 +213,13 @@ const ReportVerifyPage: React.FC = () => {
           ? myOfficerId != null && r.assignedOfficerId === myOfficerId
           : r.assignedOfficerId == null;
 
-      // time
       const reportDate = new Date(r.createdAt);
       if (isNaN(reportDate.getTime())) return false;
 
-      const diffDays = Math.floor((now.getTime() - reportDate.getTime()) / (1000 * 60 * 60 * 24));
+      const diffDays = Math.floor(
+        (now.getTime() - reportDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
       let time = true;
       switch (reportTimeFilter) {
         case "today":
@@ -233,15 +235,17 @@ const ReportVerifyPage: React.FC = () => {
           time = diffDays <= 365;
           break;
         case "all":
-          time = true;
-          break;
         default:
           time = true;
       }
 
       return scope && time;
     });
-  }, [filteredByCategory, scopeFilter, myOfficerId, reportTimeFilter]);
+
+    setMapReports(result);
+
+    return result;
+  }, [filteredByCategory, scopeFilter, reportTimeFilter, myOfficerId]);
 
   const filtered = useMemo(() => {
     return [...filteredByScopeAndTime].sort((a, b) => {
@@ -341,7 +345,6 @@ const ReportVerifyPage: React.FC = () => {
 
 
         setReports(data);
-        if (data.length) setSelectedId(data[0].id);
       } catch (e: any) {
         setError(e?.message ?? "Failed to load reports");
       } finally {
@@ -351,13 +354,13 @@ const ReportVerifyPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!selected) return;
-  }, [selectedId, selected?.assignedOfficerId, currentUserId]);
-
+    setSelectedId(null);
+  }, [reportTimeFilter, statusFilter, categoryFilter, scopeFilter, query]);
 
   useEffect(() => {
     setNeedsInfoMode(false);
   }, [selectedId]);
+  
 
   const setVerifiedRisk = async (level: RiskLevel) => {
     if (!selected) return;
@@ -785,6 +788,7 @@ const ReportVerifyPage: React.FC = () => {
 
         <section className="verify-map">
           <MemoizedLeafletMap
+            reports={mapReports}  
             selectedReport={selectedReportForMap}
             activeLayers={["Queue Reports"]}
             categoryFilter={categoryFilter}

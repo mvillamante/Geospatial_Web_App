@@ -473,7 +473,6 @@ class OfficerOptionSerializer(serializers.ModelSerializer):
             return obj.username
         return f"Officer #{obj.id}"
 
-
 class IncidentReportQueueSerializer(serializers.ModelSerializer):
     reporterName = serializers.SerializerMethodField()
     title = serializers.SerializerMethodField()
@@ -529,12 +528,25 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
        instance = super().update(instance, validated_data)
        return instance
     
+    def get_signed_url_cached(self, path: str):
+        if not path:
+            return None
+
+        cache_key = f"signed_url:{path}"
+        cached = cache.get(cache_key)
+
+        if cached:
+            return cached
+
+        url = create_signed_url(path, bucket="incident-photos", expires_in_seconds=3600)
+        cache.set(cache_key, url, 50 * 60)
+        return url
+
     def get_photo_url(self, obj):
-        return create_signed_url(
-            obj.photo_path, 
-            bucket="incident-photos",  
-            expires_in_seconds=3600
-        )
+        return self.get_signed_url_cached(obj.photo_path)
+    
+    def get_reply_image_url(self, obj):
+        return self.get_signed_url_cached(obj.reply_image_url)
 
     def get_lgu_post(self, obj):
         if (obj.status or "").lower() != "resolved":
@@ -582,16 +594,6 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
 
     def get_barangay(self, obj):
         return obj.location_display
-    
-    def get_reply_image_url(self, obj):
-        if not obj.reply_image_url:
-            return None
-
-        return create_signed_url(
-            obj.reply_image_url,
-            bucket="incident-photos",
-            expires_in_seconds=3600
-        )
         
 class IncidentReportUpdateSerializer(serializers.ModelSerializer):
     verifiedRisk = serializers.CharField(source="verified_critical_level", required=False, allow_null=True)

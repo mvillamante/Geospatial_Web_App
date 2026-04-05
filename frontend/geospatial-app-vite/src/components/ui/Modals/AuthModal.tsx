@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { AiOutlineClose, AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
@@ -33,6 +33,8 @@ const AuthModal: React.FC<AuthModalProps> = ({
     const API_URL = import.meta.env.VITE_API_URL;
     const navigate = useNavigate();
     const { refreshUser } = useAuth();
+
+    const requestLock = useRef(false);
 
     const [loginLoading, setLoginLoading] = useState(false);
     const [signupLoading, setSignupLoading] = useState(false);
@@ -215,33 +217,42 @@ const AuthModal: React.FC<AuthModalProps> = ({
     /* ================= RESET FLOW ================= */
 
     const handleRequestOtp = async () => {
-        if (resetLoading) return;
-
-        if (!resetTarget.trim())
-            return toast.warning("Please enter your email or phone.");
-
-        setResetLoading(true);
-
-        const res = await fetch(`${API_URL}/api/password-reset/request/`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email_or_phone: resetTarget.trim() }),
-        });
-
-        let data;
         try {
-            data = await res.json();
-        } catch {
-            throw new Error("Server error");
+            if (requestLock.current) return;
+
+            if (!resetTarget.trim())
+                return toast.warning("Please enter your email or phone.");
+
+            requestLock.current = true;
+            setResetLoading(true);
+
+            const res = await fetch(`${API_URL}/api/password-reset/request/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email_or_phone: resetTarget.trim() }),
+            });
+
+            let data;
+            try {
+                data = await res.json();
+            } catch {
+                throw new Error("Server error");
+            }
+            setResetLoading(false);
+
+            if (!res.ok) return toast.error(data.detail);
+
+            setResendTimer(60);
+            setCanResend(false);
+            switchModal("verifyOtp");
+        } catch (err: any) {
+            toast.error(err.message);
+        } finally {
+            requestLock.current = false;
+            setResetLoading(false);
         }
-        setResetLoading(false);
+    }
 
-        if (!res.ok) return toast.error(data.detail);
-
-        setResendTimer(60);
-        setCanResend(false);
-        switchModal("verifyOtp");
-    };
 
     const handleVerifyOtp = async (otp?: string) => {
         const code = otp ?? otpValues.join("");
@@ -249,6 +260,9 @@ const AuthModal: React.FC<AuthModalProps> = ({
         if (code.length !== 6)
             return toast.info("Enter full OTP");
 
+        if (requestLock.current) return;
+
+        requestLock.current = true;
         setResetLoading(true);
 
         const res = await fetch(`${API_URL}/api/password-reset/verify/`, {
@@ -265,8 +279,10 @@ const AuthModal: React.FC<AuthModalProps> = ({
             data = await res.json();
         } catch {
             throw new Error("Server error");
+        } finally {
+            requestLock.current = false;
+            setResetLoading(false);
         }
-        setResetLoading(false);
 
         if (!res.ok) return toast.error(data.detail);
 
@@ -285,6 +301,9 @@ const AuthModal: React.FC<AuthModalProps> = ({
         if (resetNewPass !== resetConfirmPass)
             return toast.error("Passwords do not match.");
 
+        if (requestLock.current) return;
+
+        requestLock.current = true;
         setResetLoading(true);
 
         const res = await fetch(`${API_URL}/api/password-reset/confirm/`, {
@@ -302,8 +321,10 @@ const AuthModal: React.FC<AuthModalProps> = ({
             data = await res.json();
         } catch {
             throw new Error("Server error");
+        } finally {
+            requestLock.current = false;
+            setResetLoading(false);
         }
-        setResetLoading(false);
 
         if (!res.ok) {
 

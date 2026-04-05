@@ -888,7 +888,6 @@ const CmsPage: React.FC = () => {
                   });
                   setImagePreview(null);
                   setShowCreateModal(false);
-                  toast.info("Creation cancelled, changes not saved");
                 }}
               >
                 Cancel
@@ -990,7 +989,7 @@ const CmsPage: React.FC = () => {
       {showEditModal && editingGuide && (
         <div className="modal-overlay">
           <div className="modal">
-            <h2>Edit Guide</h2>
+            <h2>Edit Content</h2>
 
             <label>Title</label>
             <input
@@ -1465,7 +1464,6 @@ const CmsPage: React.FC = () => {
                 onClick={() => {
                   if (originalContact) {
                     const changed = JSON.stringify(contact) !== JSON.stringify(originalContact);
-                    if (changed) toast.info("Edits discarded");
 
                     setContact(JSON.parse(JSON.stringify(originalContact)));
                   }

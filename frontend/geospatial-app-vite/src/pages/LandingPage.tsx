@@ -65,22 +65,22 @@ const LandingPage: React.FC = () => {
   }, [navigate]);*/}
 
   useEffect(() => {
-  const fetchReports = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/incident-reports/verified/`);
+    const fetchReports = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/incident-reports/verified/`);
 
-      if (!res.ok) throw new Error("Failed to fetch reports");
+        if (!res.ok) throw new Error("Failed to fetch reports");
 
-      const data = await res.json();
+        const data = await res.json();
 
-      setReports(data.results || data);
-    } catch (err) {
-      console.error("Reports fetch error:", err);
-    }
-  };
+        setReports(data.results || data);
+      } catch (err) {
+        console.error("Reports fetch error:", err);
+      }
+    };
 
-  fetchReports();
-}, []);
+    fetchReports();
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -167,6 +167,9 @@ const LandingPage: React.FC = () => {
         if (!res.ok) throw new Error("Failed to fetch landing stats");
 
         const data = await res.json();
+        console.log("🔥 API RESPONSE:", data);
+        setStats(data);
+
         setStats(data);
       } catch (err) {
         console.error("Landing stats error:", err);
@@ -304,7 +307,7 @@ const LandingPage: React.FC = () => {
                 <div className="dashboard-map-container">
                   <LeafletMap
                     activeLayers={["Verified Reports"]}
-                    reportTimeFilter="7days"
+                    reportTimeFilter="active_only"
                     reports={reports}
                   />
                 </div>
@@ -335,7 +338,9 @@ const LandingPage: React.FC = () => {
                   <div className="stat-card">
                     <div className="stat-label">Response Time</div>
                     <div className="stat-value">
-                      {stats ? `${stats.avgResponseTimeMinutes}m` : "—"}
+                      {stats && stats.avgResponseTimeMinutes > 0
+                        ? `${stats.avgResponseTimeMinutes}m`
+                        : "No data"}
                     </div>
                   </div>
                 </div>

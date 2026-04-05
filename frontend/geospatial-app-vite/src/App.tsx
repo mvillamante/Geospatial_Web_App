@@ -11,9 +11,19 @@ import {
 } from "./pages";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { Toaster } from "sonner";
-import { syncOfflineReports } from "./libr/syncOfflineReports";
+import { syncOfflineReports } from "./services/syncFallback";
 
 const App: React.FC = () => {
+  useEffect(() => {
+    const handleOnline = () => {
+      syncOfflineReports();
+    };
+    
+    window.addEventListener("online", handleOnline);
+
+    return () => window.removeEventListener("online", handleOnline);
+  }, []);
+
   useEffect(() => {
     const handleOnline = () => {
       const token = localStorage.getItem("access_token");

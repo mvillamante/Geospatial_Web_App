@@ -459,6 +459,15 @@
   width: 100%;
 }
 
+.map-picked .label {
+  font-weight: 500;
+}
+
+.map-address {
+  margin-top: 4px;
+  color: #000;
+}
+
 .evac-side-content {
   display: grid;
   grid-template-columns: 1fr 1fr;

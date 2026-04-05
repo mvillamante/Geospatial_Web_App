@@ -221,7 +221,6 @@ function LeafletMap(props: LeafletMapProps) {
     reportClickTimestamp: _reportClickTimestamp = null, // kept for API compatibility
     locationFilter = "all",
     categoryFilter = "",
-    reportTimeFilter = "",
     reports = [],
     activeLayers = [],
     ndviOpacity = 0.8,
@@ -231,6 +230,7 @@ function LeafletMap(props: LeafletMapProps) {
     ndviToDate,
     ndviMaxCloud,
     hazardYear,
+    reportTimeFilter,
     showPopupOnMap = true,
     onSelectEvacuationCenter,
     onHazardBarangaySelect,
@@ -1650,7 +1650,7 @@ function LeafletMap(props: LeafletMapProps) {
 
     const filteredReports = reports
       .filter((r) => r.status !== "archived" && r.status !== "rejected")
-      .filter((r) => isWithinTimeFilter(r.created_at)) // CHANGE created_at if your date field is different
+      // .filter((r) => isWithinTimeFilter(r.created_at)) // CHANGE created_at if your date field is different
       .filter((r) =>
         !categoryFilter || categoryFilter === "all"
           ? true

@@ -688,13 +688,14 @@ class PublicLandingPageSerializer(serializers.Serializer):
     
 class ResearcherRequestSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField()
+    middle_name = serializers.CharField()
     last_name = serializers.CharField()
     attachment = serializers.FileField(required=False, allow_null=True)
 
     class Meta:
         model = ResearcherRequest
         fields = [
-            'id', 'first_name', 'last_name', 'email', 'orgSchool', 'purpose', 'attachment',
+            'id', 'first_name','middle_name', 'last_name', 'email', 'orgSchool', 'purpose', 'attachment',
             'status', 'rejection_reason', 'reviewed_at', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'status', 'rejection_reason', 'reviewed_at', 'created_at', 'updated_at']

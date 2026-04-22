@@ -22,8 +22,8 @@ export const getEnvironmentalRecommendation = (
   }
 
   const getTrend = (value: number) => {
-    if (value >= 0.5) return "positive";
-    if (value <= -0.5) return "negative";
+    if (value >= 0.3) return "positive";
+    if (value <= -0.3) return "negative";
     return "neutral";
   };
 
@@ -38,7 +38,7 @@ export const getEnvironmentalRecommendation = (
     };
   }
 
-  if (greenTrend === "positive" && hazardTrend === "positive") {
+  if (greenTrend === "positive" && hazardTrend === "negative") {
     return {
       title: "Positive Environmental Impact",
       text: "Environmental improvements may be contributing to reduced hazard exposure. Continue sustainability and mitigation programs.",

@@ -72,9 +72,14 @@ const AlertsMapPage: React.FC = () => {
       if (!res.ok) throw new Error("Failed to fetch reports");
 
       const data = await res.json();
-      console.log("API reports:", data);
 
-      setReports(data.results || []);
+      setReports(
+        (data.results || []).map((r: any) => ({
+          ...r,
+          lat: Number(r.lat),
+          lng: Number(r.lng),
+        }))
+      );
     } catch (err) {
       console.error("Failed to fetch reports", err);
     } finally {
@@ -188,15 +193,17 @@ const AlertsMapPage: React.FC = () => {
   )
 
   const reportsForMap = useMemo(() => {
-    return reports.map((r) => ({
-      id: r.id,
-      category: r.category,
-      other_category: r.other_category ?? undefined,
-      lat: r.latitude ?? 0,
-      lng: r.longitude ?? 0,
-      status: r.status ?? "verified",
-      verified_critical_level: r.verified_critical_level ?? "low",
-    }));
+    return reports
+      .filter((r: any) => r.lat && r.lng)
+      .map((r: any) => ({
+        id: r.id,
+        category: r.category,
+        other_category: r.other_category ?? undefined,
+        lat: r.lat,
+        lng: r.lng,
+        status: r.status ?? "verified",
+        verified_critical_level: r.verified_critical_level ?? "low",
+      }));
   }, [reports]);
 
   const selectedReportForMap = useMemo(() => {
@@ -206,8 +213,8 @@ const AlertsMapPage: React.FC = () => {
       id: selectedReport.id,
       category: selectedReport.category,
       other_category: selectedReport.other_category ?? undefined,
-      lat: selectedReport.latitude ?? 0,
-      lng: selectedReport.longitude ?? 0,
+      lat: selectedReport.lat,
+      lng: selectedReport.lng,
       status: selectedReport.status ?? "in_progress",
       verified_critical_level: selectedReport.verified_critical_level ?? "low",
     };

@@ -9,6 +9,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
   const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [institution, setInstitution] = useState("");
@@ -29,6 +30,7 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
     try {
       const formData = new FormData();
       formData.append("first_name", firstName);
+      formData.append("middle_name", middleName);
       formData.append("last_name", lastName);
       formData.append("email", email);
       formData.append("orgSchool", institution);
@@ -77,6 +79,16 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
                 placeholder="First Name"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label>Middle Name</label>
+              <input
+                type="text"
+                placeholder="Middle Name"
+                value={middleName}
+                onChange={(e) => setMiddleName(e.target.value)}
               />
             </div>
 

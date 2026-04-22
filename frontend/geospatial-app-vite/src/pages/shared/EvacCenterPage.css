@@ -459,6 +459,15 @@
   width: 100%;
 }
 
+.map-picked .label {
+  font-weight: 500;
+}
+
+.map-address {
+  margin-top: 4px;
+  color: #000;
+}
+
 .evac-side-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1315,14 +1324,16 @@
 }
 
 .evac-empty-state {
-  width: 100%;
+  width: 97.6%;
   text-align: center;
   padding: 40px 20px;
-
+  margin: 0 20px;
   color: #64748b;
   font-size: 15px;
 
   border-radius: 14px;
   background: white;
-  border: 1px dashed #e2e8f0;
+  border: 1px dashed rgba(0, 0, 0, 0.2);
+
+  grid-column: 1 / -1;
 }

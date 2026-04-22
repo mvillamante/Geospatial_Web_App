@@ -155,7 +155,7 @@ function getCalamityDataForBarangay(
 }
 
 interface LeafletMapProps {
-  showUserLocation: boolean;
+  showUserLocation?: boolean;
   selectedReport?: MapReport | null;
   categoryFilter?: IncidentCategories | "all";
   reportTimeFilter?: string;
@@ -235,7 +235,6 @@ function LeafletMap(props: LeafletMapProps) {
     reportClickTimestamp: _reportClickTimestamp = null, // kept for API compatibility
     locationFilter = "all",
     categoryFilter = "",
-    reportTimeFilter = "",
     reports = [],
     activeLayers = [],
     ndviOpacity = 0.8,
@@ -245,6 +244,7 @@ function LeafletMap(props: LeafletMapProps) {
     ndviToDate,
     ndviMaxCloud,
     hazardYear,
+    reportTimeFilter,
     showPopupOnMap = true,
     onSelectEvacuationCenter,
     onHazardBarangaySelect,
@@ -449,7 +449,6 @@ function LeafletMap(props: LeafletMapProps) {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || mapView !== "interactive") return;
-    console.log("Initializing geolocation watch");
 
     console.log("showUserLocation:", showUserLocation);
     if (!showUserLocation) {
@@ -1673,7 +1672,7 @@ function LeafletMap(props: LeafletMapProps) {
 
     const filteredReports = reports
       .filter((r) => r.status !== "archived" && r.status !== "rejected")
-      .filter((r) => isWithinTimeFilter(r.created_at)) // CHANGE created_at if your date field is different
+      // .filter((r) => isWithinTimeFilter(r.created_at)) // CHANGE created_at if your date field is different
       .filter((r) =>
         !categoryFilter || categoryFilter === "all"
           ? true
@@ -1750,7 +1749,7 @@ function LeafletMap(props: LeafletMapProps) {
   }, [reports, activeLayers, categoryFilter, reportTimeFilter]);
 
 
-  /* Selected Report (I FORGOT PARA SAN TO-----------------)*/
+  /* Selected Report (For Report-Verify Page)*/
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -1758,9 +1757,8 @@ function LeafletMap(props: LeafletMapProps) {
     const showQueueReports = activeLayers.includes("Queue Reports");
 
     if (!showQueueReports) {
-      if (queueReportsLayerRef.current) {
-        queueReportsLayerRef.current.clearLayers();
-      }
+      console.log("[Leaflet] Queue Reports layer hidden - clearing markers");
+      queueReportsLayerRef.current?.clearLayers();
       return;
     }
 
@@ -1769,78 +1767,72 @@ function LeafletMap(props: LeafletMapProps) {
     }
 
     const layerGroup = queueReportsLayerRef.current;
+    layerGroup.clearLayers();
+    reportMarkersMap.current.clear();
 
-    const token = localStorage.getItem("access_token");
+    console.log(`[Leaflet] Rendering ${reports.length} reports on map`);
 
-    fetch(`${API_URL}/api/reports/queue/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    reports.forEach((r: any) => {
+      const citizenRisk = r.citizenRisk ?? r.suggested_critical_level;
+      const verifiedRisk = r.verifiedRisk ?? r.verified_critical_level ?? r.suggested_critical_level;
 
-        const reports = data.results || data;
+      const lat = r.lat;
+      const lng = r.lng;
+      if (lat == null || lng == null) return;
 
-        layerGroup.clearLayers();
-
-        reports.forEach((r: any) => {
-
-          const citizenRisk = r.citizenRisk ?? r.suggested_critical_level;
-          const verifiedRisk = r.verifiedRisk ?? r.verified_critical_level ?? r.suggested_critical_level;
-
-          const lat = r.lat;
-          const lng = r.lng;
-
-          if (lat == null || lng == null) return;
-
-          const iconEmoji = getIncidentIcon(r.category);
-
-          const colors = getSeverityColors({
-            suggested_critical_level: citizenRisk,
-            verified_critical_level: verifiedRisk,
-          });
-
-          const reportIcon = L.divIcon({
-            html: `
-            <div class="verified-report-marker">
-              <div class="pulse" style="background:${colors.secondary}40;"></div>
-              <div class="pin"
-                style="
-                  background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
-                  border: 3px solid ${colors.border};
-                ">
-                <span class="verified-report-icon">${iconEmoji}</span>
-              </div>
-            </div>
-            `,
-            className: "",
-            iconSize: [44, 44],
-            iconAnchor: [22, 44],
-          });
-
-          const barangay = getBarangayFromCoords(lat, lng);
-
-          const marker = L.marker([lat, lng], { icon: reportIcon })
-            .addTo(layerGroup)
-            .bindPopup(`
-              <div class="verified-popup">
-                <div class="popup-icon">${iconEmoji}</div>
-                <h3>${r.category}</h3>
-                <p style="margin: 8px 0 5px 0; font-size: 12px; color: #666;">Barangay ${barangay}, Cabuyao</p>
-                <span class="popup-pill" style="background:${colors.primary}">
-                  ${colors.text} RISK
-                </span>
-              </div>
-            `)
-
-          reportMarkersMap.current.set(r.id, marker);
-        });
-      })
-      .catch((err) => {
-        console.error("Failed to load queue reports:", err);
+      const iconEmoji = getIncidentIcon(r.category);
+      const colors = getSeverityColors({
+        suggested_critical_level: citizenRisk,
+        verified_critical_level: verifiedRisk,
       });
-  }, [activeLayers, selectedReport]);
+
+      const reportIcon = L.divIcon({
+        html: `
+          <div class="verified-report-marker">
+            <div class="pulse" style="background:${colors.secondary}40;"></div>
+            <div class="pin"
+              style="
+                background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
+                border: 3px solid ${colors.border};
+              ">
+              <span class="verified-report-icon">${iconEmoji}</span>
+            </div>
+          </div>
+        `,
+        className: "",
+        iconSize: [44, 44],
+        iconAnchor: [22, 44],
+      });
+
+      const barangay = getBarangayFromCoords(lat, lng);
+
+      const marker = L.marker([lat, lng], { icon: reportIcon })
+        .addTo(layerGroup)
+        .bindPopup(`
+          <div class="verified-popup">
+            <div class="popup-icon">${iconEmoji}</div>
+            <h3>${r.category}</h3>
+            <p style="margin: 8px 0 5px 0; font-size: 12px; color: #666;">
+              Barangay ${barangay}, Cabuyao
+            </p>
+            <span class="popup-pill" style="background:${colors.primary}">
+              ${colors.text} RISK
+            </span>
+          </div>
+        `);
+
+      reportMarkersMap.current.set(r.id, marker);
+
+      // Debug each marker added
+      console.log("[Leaflet] Added marker:", {
+        id: r.id,
+        lat,
+        lng,
+        category: r.category,
+        reportDate: r.createdAt,
+      });
+    });
+  }, [activeLayers, reports]); 
 
 
   return (

@@ -13,6 +13,9 @@ export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'active' | 'in
 export interface ResearcherRequest {
   id: number;
   type: "request" | "researcher";
+  firstName: string;
+  middleName?: string;
+  lastName: string;
   fullName: string;
   email: string;
 
@@ -77,7 +80,10 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
       const mapped: ResearcherRequest[] = data.results.map((r: any) => ({
         id: r.id,
         type: r.type,
-        fullName: `${r.first_name} ${r.last_name}`,
+        firstName: r.first_name,
+        middleName: r.middle_name,
+        lastName: r.last_name,
+        fullName: `${r.first_name} ${r.middle_name ? r.middle_name + " " : ""}${r.last_name}`,
         email: r.email,
         createdAt: r.created_at
           ? format(new Date(r.created_at), "MMMM d, yyyy")
@@ -405,7 +411,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                 requests.map(req => (
                   <tr key={req.id}>
                     <td className="user-name">
-                      {req.fullName}
+                      {req.firstName} {req.lastName}
                       <br />
                       <small>{req.email}</small>
                     </td>
@@ -557,7 +563,9 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
 
               <h2>Researcher Request Details</h2>
 
-              <p><strong>Full Name:</strong> {modalResearcher.fullName}</p>
+              <p><strong>First Name:</strong> {modalResearcher.firstName}</p>
+              <p><strong>Middle Name:</strong> {modalResearcher.middleName || "—"}</p>
+              <p><strong>Last Name:</strong> {modalResearcher.lastName}</p>
               <p><strong>Email:</strong> {modalResearcher.email}</p>
               <p>  <strong>Status:</strong> {modalResearcher.status.charAt(0).toUpperCase() + modalResearcher.status.slice(1)}</p>
 

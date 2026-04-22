@@ -6,6 +6,8 @@ import PinLocationPicker from "./PinLocationPicker";
 // import { isWithinCabuyao } from '../../../../src/utils/validateCabuyao';
 import { getIncidentCategories } from "../../../constants"
 import { toast } from "sonner";
+import { saveDraft, loadDraft, clearDraft } from "./ReportDraft";
+import { addOfflineReport } from "../../../services/offlineReportsDB";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -134,8 +136,12 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
       if (!response.ok) throw new Error(data.error || "Failed to reverse geocode");
 
       const formatted = formatStreetBarangayCity(data);
-      setLocation(formatted || "Location not available");
-      setError(formatted ? null : "Unable to determine location");
+
+      if (formatted) {
+        setLocation(formatted);
+      } else {
+        setLocation(`Lat: ${lat.toFixed(5)}, Lng: ${lon.toFixed(5)}`);
+      }
     } catch (err: any) {
       if (err?.name === "AbortError") return;
       setLocation("Location not available");
@@ -145,25 +151,63 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
     }
   }
 
+  useEffect(() => {
+    const draft = {
+      category,
+      otherCategory,
+      description,
+      criticalLevel,
+      location,
+      coords,
+      locationMode,
+      pinnedCoords,
+    };
+    saveDraft(draft);
+  }, [
+    category,
+    otherCategory,
+    description,
+    criticalLevel,
+    location,
+    coords,
+    locationMode,
+    pinnedCoords
+  ])
+
   // Reset + auto-detect when opened
   useEffect(() => {
     if (!open) return;
 
-    // reset fields
-    setCategory("");
-    setOtherCategory("");
-    setDescription("");
-    setCriticalLevel("");
-    setPhotoFile(null);
-    setPhotoPreview(null);
+    const draft = loadDraft();
 
-    setLocationMode("auto");
-    setPinnedCoords(null);
+    if (draft) {
+      setCategory(draft.category || "");
+      setOtherCategory(draft.otherCategory || "");
+      setDescription(draft.description || "");
+      setCriticalLevel(draft.criticalLevel || "");
 
-    setError(null);
-    setLocation("Detecting location...");
-    setCoords(null);
+      setLocation(draft.location || "Detecting location...");
+      setCoords(draft.coords || null);
 
+      setLocationMode(draft.locationMode || "auto");
+      setPinnedCoords(draft.pinnedCoords || null);
+
+      setPhotoPreview(draft.photoPreview || null);
+    } else {
+      setCategory("");
+      setOtherCategory("");
+      setDescription("");
+      setCriticalLevel("");
+      setPhotoFile(null);
+      setPhotoPreview(null);
+
+      setLocationMode("auto");
+      setPinnedCoords(null);
+
+      setError(null);
+      setLocation("Detecting location...");
+      setCoords(null);
+    }
     // cancel previous geocode
     if (geoAbortRef.current) geoAbortRef.current.abort();
     const controller = new AbortController();
@@ -185,9 +229,9 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
         if (cancelled) return;
 
         setCoords({ lat: latitude, lon: longitude, accuracy });
+        setLocation(`Lat: ${latitude.toFixed(5)}, Lng: ${longitude.toFixed(5)}`);
 
         try {
-          setLocation("Getting location...");
           const response = await fetch(
             `${API_URL}/api/geocoding/reverse/?lat=${latitude}&lon=${longitude}`,
             { signal: controller.signal }
@@ -198,10 +242,9 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
           const formatted = formatStreetBarangayCity(data);
           if (cancelled) return;
 
-          setLocation((prev) => {
-            if (locationMode === "pin") return prev;
-            return formatted || "Location not available";
-          });
+          if (formatted && locationMode !== "pin") {
+            setLocation(formatted);
+          }
           setError((prev) => {
             if (locationMode === "pin") return prev;
             return formatted ? null : "Unable to determine location";
@@ -210,9 +253,7 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
           if (cancelled) return;
           if (err?.name === "AbortError") return;
 
-          // avoid overriding user pin
           if (locationMode !== "pin") {
-            setLocation("Location not available");
             toast.error("Unable to determine location");
           }
         }
@@ -330,22 +371,21 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
       if (photoFile) form.append("photo", photoFile);
 
       if (!navigator.onLine) {
-        const { dbPromise } = await import("../../../libr/offlineDB");
-        const db = await dbPromise;
 
-        const data: any = {
+        await addOfflineReport({
+          id: Date.now(),
+          created_at: new Date().toISOString(),
+          status: "pending",
+
           category,
-          description,
-          suggested_critical_level: criticalLevel,
+          other_category: otherCategory,
           location_display: location,
-          latitude: lat,
-          longitude: lon,
-          location_source: locationMode,
-        };
+          lat: Number(lat),
+          lng: Number(lon),
 
-        if (category === "others") data.other_category = otherCategory.trim();
-
-        await db.add("offlineReports", { data });
+          description,
+          critical_level: criticalLevel,
+        });
 
         toast.success("You are offline. Report saved and will be submitted later.");
         onClose();
@@ -362,6 +402,7 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.detail || data?.error || "Failed to submit report");
       toast.success("Report submitted successfully");
+      clearDraft();
       onClose();
     } catch (e: any) {
       toast.error(e?.message || "Failed to submit report");

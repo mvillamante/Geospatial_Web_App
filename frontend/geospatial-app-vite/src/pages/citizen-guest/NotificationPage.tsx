@@ -14,7 +14,7 @@ type IncidentEvent =
     | "resolved";
 
 
-type ReportStatus = "pending" | "in_progress" | "needs_info" | "resolved" | "rejected";
+type ReportStatus = "pending" | "in_progress" | "needs_info" | "resolved" | "rejected" | "archived";
 
 type TimeFilter = "today" | "7days" | "all";
 
@@ -658,6 +658,12 @@ function NotificationCard({ n, onOpen }: { n: NotificationItem; onOpen?: () => v
             return {
                 header: `${category}${barangay}`,
                 sub: `Resolved: ${n.resolutionSummary ?? "The incident has been resolved."}`,
+            };
+        }
+        if (n.statusTo === "archived") {
+            return {
+                header: `${category}${barangay}`,
+                sub: "The incident report has been archived.",
             };
         }
 

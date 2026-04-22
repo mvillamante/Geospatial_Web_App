@@ -999,8 +999,7 @@
 }
 
 /* Notices / empty states */
-.notice-card,
-.empty-detail {
+.notice-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
@@ -1008,6 +1007,26 @@
   box-shadow: var(--shadow-sm);
   color: var(--subtext);
   font-weight: 700;
+}
+
+.empty-detail {
+  height: 100%;
+  width: 100%;
+  padding: 40px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  font-size: 15px;
+  font-weight: 500;
+  color: #666;
+
+  background: #fafafa;
+  border: 1px dashed rgba(0, 0, 0, 0.15);
+  border-radius: 14px;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .resolution-container {

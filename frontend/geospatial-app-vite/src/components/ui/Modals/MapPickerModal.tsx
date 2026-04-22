@@ -101,7 +101,7 @@ const MapPickerModal: React.FC<MapPickerModalProps> = ({ open, initial, onClose,
         <p className='map-hint'>Click on the map to set the coordinates.</p>
 
         <div className="map-wrap">
-          <MapContainer center={center} zoom={13} 
+          <MapContainer center={center} zoom={13}
             className='leaflet-map' style={{ height: 350, width: "100%", borderRadius: 10 }}>
             <TileLayer
               attribution='&copy; OpenStreetMap contributors'
@@ -112,12 +112,13 @@ const MapPickerModal: React.FC<MapPickerModalProps> = ({ open, initial, onClose,
         </div>
 
         <div className="map-picked">
-          <strong>Selected:</strong>{" "}
+          <span className="label">Selected:</span>{" "}
           {picked ? `${picked.lat.toFixed(6)}, ${picked.lng.toFixed(6)}` : "None"}
 
           {picked && (
             <div className="map-address">
-              <strong>Address:</strong> {address || "Fetching address..."}
+              <span className="label">Address:</span>{" "}
+              {address || "Fetching address..."}
             </div>
           )}
         </div>
@@ -134,7 +135,7 @@ const MapPickerModal: React.FC<MapPickerModalProps> = ({ open, initial, onClose,
           </button>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

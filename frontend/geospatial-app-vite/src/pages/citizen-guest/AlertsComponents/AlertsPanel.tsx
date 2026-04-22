@@ -1,5 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { Search } from 'lucide-react';
+import { addOfflineReport } from "../../../services/offlineReportsDB";
+import { useofflineReports } from "../../../hooks/useOfflineReports";
 
 
 export interface Report {
@@ -15,8 +17,8 @@ export interface Report {
 
     created_at: string;
 
-    latitude: number;
-    longitude: number;
+    lat: number;
+    lng: number;
 
     status?: string;
     assigned_officer_id?: number | null;
@@ -60,6 +62,7 @@ export default function AlertsPanel({
     onRefreshReports
 }: AlertsPanelProps) {
 
+    const offlineReports = useofflineReports();
     const hasAutoOpenedRef = useRef(false);
     const [filtersOpen, setFiltersOpen] = useState(true);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -219,6 +222,16 @@ export default function AlertsPanel({
         if (hrs < 24) return `${hrs}h ago`;
         const days = Math.floor(hrs / 24);
         return `${days}d ago`;
+    }
+
+    const handleReportClick = async () => {
+        const reportPayload = {
+            id: Date.now(),
+            created_at: new Date().toISOString(),
+            status: "pending",
+
+        }
+        onReport();
     }
 
 
@@ -404,10 +417,10 @@ export default function AlertsPanel({
                 {/* CTA */}
                 <button
                     className="report-btn"
-                    onClick={onReport}
+                    onClick={handleReportClick}
                     disabled={isVerificationLoading}
                 >
-                    {isVerificationLoading ? "Checking..." : "+ Report Incident"}
+                    {isVerificationLoading ? "Checking..." : navigator.onLine ? "+ Report Incident" : "+ Save Offline"}
                 </button>
             </div>
 
@@ -417,6 +430,41 @@ export default function AlertsPanel({
                     Updating reports…
                 </div>
             )}
+
+            {/* {offlineReports.length > 0 && (
+                <div className="offline-section">
+                    <div className="offline-header">
+                        Pending Reports ({offlineReports.length})
+                    </div>
+
+                    <ul className="offline-list">
+                        {offlineReports.map((r) => (
+                            <li key={r.id} className="offline-card">
+                                <div className="offline-title">
+                                    {(r.category || "Incident").toUpperCase()}
+                                </div>
+
+                                <div className="offline-location">
+                                    {r.location_display || "Unknown location"}
+                                </div>
+
+                                <div className="offline-meta">
+                                    <span className="offline-status pending">
+                                        Pending Sync
+                                    </span>
+
+                                    <span>
+                                        {new Date(r.created_at).toLocaleTimeString([], {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })}
+                                    </span>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )} */}
 
             <div className="alerts-list-area">
                 {isLoadingReports ? (

@@ -491,6 +491,7 @@ class ResearcherRequest(models.Model):
     ]
 
     first_name = models.CharField(max_length=100)
+    middle_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField()
     orgSchool = models.CharField(max_length=255, blank=True, null=True)
@@ -507,7 +508,7 @@ class ResearcherRequest(models.Model):
 
     @property
     def full_name(self):
-        return f"{self.first_name} {self.last_name}"
+        return " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
         
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email}) - {self.status}"

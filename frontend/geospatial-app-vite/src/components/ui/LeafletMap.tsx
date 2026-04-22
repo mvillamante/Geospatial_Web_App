@@ -71,6 +71,20 @@ const tileLayerConfigs = {
   },
 };
 
+/** Dispatched when choropleth GeoJSON, styles, labels, and fitBounds have been applied (for PDF snapshots). */
+export const CHOROPLETH_LAYER_READY_EVENT = "choropleth-layer-ready";
+
+type ChoroplethLayerId = "green" | "hazard" | "calamity";
+
+function notifyChoroplethLayerReady(map: L.Map, layer: ChoroplethLayerId) {
+  map.invalidateSize(false);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      window.dispatchEvent(new CustomEvent(CHOROPLETH_LAYER_READY_EVENT, { detail: { layer } }));
+    });
+  });
+}
+
 /** Hazard index data for one barangay (from hazard_index_data.json / API) */
 export interface HazardBarangayData {
   hazard_index: number;
@@ -681,6 +695,9 @@ function LeafletMap(props: LeafletMapProps) {
               });
             });
           }
+          const hzBounds = hazardLayerRef.current.getBounds();
+          if (hzBounds.isValid()) map.fitBounds(hzBounds, { padding: [20, 20] });
+          notifyChoroplethLayerReady(map, "hazard");
           return;
         }
 
@@ -819,6 +836,7 @@ function LeafletMap(props: LeafletMapProps) {
         if (bounds.isValid()) {
           map.fitBounds(bounds, { padding: [20, 20] });
         }
+        notifyChoroplethLayerReady(map, "hazard");
       } catch (err) {
         console.error("Failed to set up hazard index choropleth:", err);
       }
@@ -930,6 +948,7 @@ function LeafletMap(props: LeafletMapProps) {
           }
           const bounds = greenLayerRef.current.getBounds();
           if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
+          notifyChoroplethLayerReady(map, "green");
           return;
         }
 
@@ -1042,6 +1061,7 @@ function LeafletMap(props: LeafletMapProps) {
 
         const bounds = greenLayerRef.current.getBounds();
         if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
+        notifyChoroplethLayerReady(map, "green");
       } catch (err) {
         console.error("Failed to set up green index choropleth:", err);
       }
@@ -1114,7 +1134,7 @@ function LeafletMap(props: LeafletMapProps) {
         if (!calamityDataRef.current) {
           const res = await fetch(`${API_URL}/api/hazard/calamity-risk/forecast/`);
           if (!res.ok) {
-            const fallbackRes = await fetch(`${API_URL}api/hazard/calamity-risk/`);
+            const fallbackRes = await fetch(`${API_URL}/api/hazard/calamity-risk/`);
             if (!fallbackRes.ok) throw new Error(`Failed to load calamity risk data`);
             const json = await fallbackRes.json();
             calamityDataRef.current = json;
@@ -1149,6 +1169,7 @@ function LeafletMap(props: LeafletMapProps) {
           }
           const bounds = calamityLayerRef.current.getBounds();
           if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
+          notifyChoroplethLayerReady(map, "calamity");
           return;
         }
 
@@ -1259,6 +1280,7 @@ function LeafletMap(props: LeafletMapProps) {
 
         const bounds = calamityLayerRef.current.getBounds();
         if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
+        notifyChoroplethLayerReady(map, "calamity");
       } catch (err) {
         console.error("Failed to set up calamity risk choropleth:", err);
       }

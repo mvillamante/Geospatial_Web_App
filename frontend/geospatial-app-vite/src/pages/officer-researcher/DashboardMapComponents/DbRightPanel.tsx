@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, type JSX } from "react";
+import { flushSync } from "react-dom";
 import L from "leaflet";
 import DbChartsSection from "./right/DbChartsSection";
 import DbAnalyticsSection from "./right/DbAnalyticsSection";
@@ -10,7 +11,10 @@ import "../DashboardMapPage.css";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { toPng } from "html-to-image";
-import EnvironmentalReportTemplate from "../../../components/reports/EnvironmentalReportTemplate";
+import EnvironmentalReportTemplate, {
+  type ReportVariant,
+} from "../../../components/reports/EnvironmentalReportTemplate";
+import { CHOROPLETH_LAYER_READY_EVENT } from "../../../components/ui/LeafletMap";
 import { useGreenIndexData } from "../../../hooks/useGreenIndexData";
 import { useHazardData } from "../../../hooks/useHazardData";
 import { useCalamityRiskData } from "../../../hooks/useCalamityRiskData";
@@ -88,6 +92,8 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
 
   reportYear,
   setReportYear,
+  reportType,
+  setReportType,
   reportFormat,
   setReportFormat,
 
@@ -134,6 +140,8 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
   });
 
   const [choroMapImage, setChoroMapImage] = useState<string | null>(null);
+  const [greenMapImage, setGreenMapImage] = useState<string | null>(null);
+  const [calamityMapImage, setCalamityMapImage] = useState<string | null>(null);
 
   const [aiInsights, setAiInsights] = useState<{
     findings: string[];
@@ -142,6 +150,11 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
     hazardInsights: string[];
     calamityInsights: string[];
   }>({ findings: [], recommendations: [], greenInsights: [], hazardInsights: [], calamityInsights: [] });
+
+  /** Drives which PDF layout is mounted before html2canvas runs. */
+  const [pdfReportVariant, setPdfReportVariant] = useState<ReportVariant>("full");
+  const [reportChoiceModalOpen, setReportChoiceModalOpen] = useState(false);
+  const [modalVariant, setModalVariant] = useState<ReportVariant>("full");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -244,11 +257,135 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
     }
   };
 
+  const fetchAiInsightsForVariant = async (
+    year: number,
+    variant: ReportVariant
+  ): Promise<{
+    findings: string[];
+    recommendations: string[];
+    greenInsights: string[];
+    hazardInsights: string[];
+    calamityInsights: string[];
+  }> => {
+    if (variant === "full") return fetchAllAiInsights(year);
+    const empty = {
+      findings: [] as string[],
+      recommendations: [] as string[],
+      greenInsights: [] as string[],
+      hazardInsights: [] as string[],
+      calamityInsights: [] as string[],
+    };
+    try {
+      if (variant === "green") {
+        const res = await fetch(`/api/hazard/green-index/ai-insight/?year=${year}`);
+        const d = await res.json();
+        const findings: string[] = [];
+        if (d?.summary) findings.push(d.summary);
+        if (d?.hotspots_insight) findings.push(d.hotspots_insight);
+        const recommendations: string[] = [];
+        if (d?.areas_for_greening_insight) recommendations.push(d.areas_for_greening_insight);
+        const greenInsights: string[] = [];
+        if (d?.summary) greenInsights.push(d.summary);
+        if (d?.hotspots_insight) greenInsights.push(d.hotspots_insight);
+        if (d?.areas_for_greening_insight) greenInsights.push(d.areas_for_greening_insight);
+        return { ...empty, findings, recommendations, greenInsights };
+      }
+      if (variant === "hazard") {
+        const res = await fetch(`/api/hazard/hazard-index/ai-insight/?year=${year}`);
+        const d = await res.json();
+        const findings: string[] = [];
+        if (d?.summary) findings.push(d.summary);
+        if (d?.hotspots_insight) findings.push(d.hotspots_insight);
+        const recommendations: string[] = [];
+        if (d?.lower_risk_insight) recommendations.push(d.lower_risk_insight);
+        if (d?.earthquake_typhoon_insight) recommendations.push(d.earthquake_typhoon_insight);
+        const hazardInsights: string[] = [];
+        if (d?.summary) hazardInsights.push(d.summary);
+        if (d?.hotspots_insight) hazardInsights.push(d.hotspots_insight);
+        if (d?.lower_risk_insight) hazardInsights.push(d.lower_risk_insight);
+        if (d?.earthquake_typhoon_insight) hazardInsights.push(d.earthquake_typhoon_insight);
+        return { ...empty, findings, recommendations, hazardInsights };
+      }
+      const res = await fetch(`/api/hazard/calamity-risk/ai-insight/?year=${year}`);
+      const d = await res.json();
+      const findings: string[] = [];
+      if (d?.summary) findings.push(d.summary);
+      if (d?.risk_peak_insight) findings.push(d.risk_peak_insight);
+      const recommendations: string[] = [];
+      if (d?.adaptation_insight) recommendations.push(d.adaptation_insight);
+      if (d?.risk_peak_insight && !recommendations.includes(d.risk_peak_insight)) {
+        recommendations.push(d.risk_peak_insight);
+      }
+      const calamityInsights: string[] = [];
+      if (d?.summary) calamityInsights.push(d.summary);
+      if (d?.risk_peak_insight) calamityInsights.push(d.risk_peak_insight);
+      if (d?.adaptation_insight) calamityInsights.push(d.adaptation_insight);
+      return { ...empty, findings, recommendations, calamityInsights };
+    } catch (e) {
+      console.error("fetchAiInsightsForVariant:", e);
+      return empty;
+    }
+  };
+
   // Cabuyao, Laguna approximate bounds so snapshot captures entire city boundaries
   const CABUYAO_BOUNDS: L.LatLngBoundsLiteral = [
     [14.18, 121.06],
     [14.30, 121.20],
   ];
+
+  type ChoroplethSnapshotLayer = "green" | "hazard" | "calamity";
+
+  /** Resolves when LeafletMap finishes loading the choropleth GeoJSON + styles for this layer. */
+  const waitForChoroplethLayerReady = (
+    expectedLayer: ChoroplethSnapshotLayer,
+    timeoutMs = 28000
+  ): Promise<void> =>
+    new Promise((resolve) => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        window.removeEventListener(CHOROPLETH_LAYER_READY_EVENT, onReady);
+        clearTimeout(timer);
+        resolve();
+      };
+      const onReady = (e: Event) => {
+        const ce = e as CustomEvent<{ layer: ChoroplethSnapshotLayer }>;
+        if (ce.detail?.layer === expectedLayer) finish();
+      };
+      window.addEventListener(CHOROPLETH_LAYER_READY_EVENT, onReady);
+      const timer = setTimeout(finish, timeoutMs);
+    });
+
+  /** After pan/zoom, wait until each tile layer has finished loading the current view. */
+  const waitForTileLayersIdle = (leafletMap: L.Map): Promise<void> =>
+    new Promise((resolve) => {
+      const tileLayers: L.TileLayer[] = [];
+      leafletMap.eachLayer((ly) => {
+        if (ly instanceof L.TileLayer) tileLayers.push(ly);
+      });
+      if (tileLayers.length === 0) {
+        setTimeout(resolve, 400);
+        return;
+      }
+      const fallback = setTimeout(() => resolve(), 12000);
+      let remaining = tileLayers.length;
+      const step = () => {
+        remaining--;
+        if (remaining <= 0) {
+          clearTimeout(fallback);
+          setTimeout(resolve, 300);
+        }
+      };
+      tileLayers.forEach((tl) => {
+        const grid = tl as L.TileLayer & { isLoading?: () => boolean };
+        if (typeof grid.isLoading === "function" && !grid.isLoading()) {
+          step();
+        } else {
+          tl.once("load", step);
+        }
+      });
+    });
 
   const captureChoroplethMap = async (): Promise<string | null> => {
     const mapContainer = document.querySelector(
@@ -265,7 +402,8 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
         prevCenter = leafletMap.getCenter();
         prevZoom = leafletMap.getZoom();
 
-        // Fit to GeoJSON/FeatureGroup bounds so the entire Cabuyao overlay is visible
+        leafletMap.invalidateSize(false);
+
         let bounds: L.LatLngBounds | null = null;
         leafletMap.eachLayer((layer: L.Layer) => {
           const l = layer as L.Layer & { getBounds?: () => L.LatLngBounds };
@@ -279,24 +417,31 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
 
         const useBounds = bounds !== null && (bounds as L.LatLngBounds).isValid();
         if (useBounds && bounds) {
-          leafletMap.fitBounds(bounds, { animate: false, padding: [20, 20] });
+          leafletMap.fitBounds(bounds, { animate: false, padding: [24, 24] });
         } else {
-          // Fallback: center on Cabuyao bounds so snapshot captures full city
-          leafletMap.fitBounds(CABUYAO_BOUNDS, { animate: false, padding: [20, 20] });
+          leafletMap.fitBounds(CABUYAO_BOUNDS, { animate: false, padding: [24, 24] });
         }
 
-        // Wait for tiles to load and the map to settle
         await new Promise<void>((resolve) => {
-          let resolved = false;
-          const done = () => { if (!resolved) { resolved = true; resolve(); } };
-          leafletMap!.once("moveend", () => setTimeout(done, 600));
-          setTimeout(done, 1500);
+          leafletMap!.once("moveend", () => resolve());
+          setTimeout(() => resolve(), 3500);
+        });
+
+        await waitForTileLayersIdle(leafletMap);
+
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
         });
       }
 
+      const w = Math.max(1, Math.round(mapContainer.offsetWidth));
+      const h = Math.max(1, Math.round(mapContainer.offsetHeight));
+
       const dataUrl = await toPng(mapContainer, {
         cacheBust: true,
-        pixelRatio: 1.5,
+        width: w,
+        height: h,
+        pixelRatio: 1.25,
         backgroundColor: "#f2f2f2",
         filter: (node: HTMLElement) => {
           if (node.classList && node.classList.contains("leaflet-control-container")) return false;
@@ -314,84 +459,85 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
     }
   };
 
-  // Reset choropleth map view to center on Cabuyao so snapshot captures full boundaries
-  const resetMapToCabuyao = (): Promise<void> => {
-    const mapContainer = document.querySelector(
-      ".choroplethview-map .leaflet-container"
-    ) as HTMLElement | null;
-    const leafletMap: L.Map | null = mapContainer ? (mapContainer as any)._leafletMapInstance ?? null : null;
-    if (!leafletMap) return Promise.resolve();
+  /**
+   * Switch the choropleth layer, wait until GeoJSON + choropleth paints (custom event),
+   * then capture the map at full Cabuyao extent with tiles settled.
+   */
+  const captureLayerSnapshot = async (
+    layer: ChoroplethSnapshotLayer
+  ): Promise<string | null> => {
+    if (setYear) setYear(reportYear);
 
-    let bounds: L.LatLngBounds | null = null;
-    leafletMap.eachLayer((layer: L.Layer) => {
-      const l = layer as L.Layer & { getBounds?: () => L.LatLngBounds };
-      if (l.getBounds && typeof l.getBounds === "function") {
-        const layerBounds: L.LatLngBounds = l.getBounds();
-        if (layerBounds.isValid()) {
-          bounds = bounds ? bounds.extend(layerBounds) : layerBounds;
-        }
-      }
-    });
-
-    const useBounds = bounds !== null && (bounds as L.LatLngBounds).isValid();
-    if (useBounds && bounds) {
-      leafletMap.fitBounds(bounds, { animate: false, padding: [20, 20] });
-    } else {
-      leafletMap.fitBounds(CABUYAO_BOUNDS, { animate: false, padding: [20, 20] });
+    /* Briefly clear the layer so React/Leaflet always rebuilds and emits
+       choropleth-layer-ready (avoids stale state when the map was already on this layer). */
+    if (setSelectedLayer) {
+      setSelectedLayer("none");
+      await new Promise((r) => setTimeout(r, 220));
+      setSelectedLayer(layer);
     }
 
-    return new Promise<void>((resolve) => {
-      const done = () => resolve();
-      leafletMap.once("moveend", () => setTimeout(done, 400));
-      setTimeout(done, 1200);
-    });
+    await waitForChoroplethLayerReady(layer);
+
+    await new Promise((r) => setTimeout(r, 160));
+
+    return captureChoroplethMap();
   };
 
-  // Generate report
-  const generateReport = async (reportYear: number) => {
+  const REPORT_FILE_LABEL: Record<ReportVariant, string> = {
+    full: "Full",
+    green: "GreenIndex",
+    hazard: "HazardIndex",
+    calamity: "CalamityRisk",
+  };
+
+  // Generate report (variant decides snapshots, charts, AI, and PDF template)
+  const generateReport = async (reportYear: number, variant: ReportVariant) => {
     try {
-      // Force Hazard Index layer and report year so snapshot always shows hazard map for chosen year
-      if (setSelectedLayer) setSelectedLayer("hazard");
-      if (setYear) setYear(reportYear);
-      await new Promise(r => setTimeout(r, 1200));
-
-      // Reset map to center on Cabuyao so snapshot captures entire boundaries
-      await resetMapToCabuyao();
-
       setIsGenerating(true);
       onGeneratingChange?.(true);
+      setReportType(variant);
 
-      await new Promise(r => setTimeout(r, 800));
+      let greenCapture: string | null = null;
+      let hazardCapture: string | null = null;
+      let calamityCapture: string | null = null;
 
-      const choroCapture = await captureChoroplethMap();
+      if (variant === "full" || variant === "green") {
+        greenCapture = await captureLayerSnapshot("green");
+      }
+      if (variant === "full" || variant === "hazard") {
+        hazardCapture = await captureLayerSnapshot("hazard");
+      }
+      if (variant === "full" || variant === "calamity") {
+        calamityCapture = await captureLayerSnapshot("calamity");
+      }
 
-      const [
-        riskChart,
-        greenChart,
-        hazardChart,
-        aiData,
-      ] = await Promise.all([
-        captureChart("chart-risk-likelihood"),
-        captureChart("chart-green-index-projection"),
-        captureChart("chart-hazard-index-trend"),
-        fetchAllAiInsights(reportYear),
+      const [[greenChart, hazardChart, riskChart], aiData] = await Promise.all([
+        Promise.all([
+          variant === "full" || variant === "green"
+            ? captureChart("chart-green-index-projection")
+            : Promise.resolve(null),
+          variant === "full" || variant === "hazard"
+            ? captureChart("chart-hazard-index-trend")
+            : Promise.resolve(null),
+          variant === "full" || variant === "calamity"
+            ? captureChart("chart-risk-likelihood")
+            : Promise.resolve(null),
+        ]),
+        fetchAiInsightsForVariant(reportYear, variant),
       ]);
 
-      setChartImages({
-        green: greenChart,
-        hazard: hazardChart,
-        risk: riskChart
+      flushSync(() => {
+        setChartImages({ green: greenChart, hazard: hazardChart, risk: riskChart });
+        setGreenMapImage(greenCapture);
+        setChoroMapImage(hazardCapture);
+        setCalamityMapImage(calamityCapture);
+        setAiInsights(aiData);
+        setPdfReportVariant(variant);
       });
 
-      setChoroMapImage(choroCapture);
-
-      setAiInsights(aiData);
-
-      // allow React to render charts, maps, and AI insights into the hidden report
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise((r) => requestAnimationFrame(r));
 
       const element = document.getElementById("environmental-report");
-
       if (!element) {
         console.error("Report element not found");
         return;
@@ -414,61 +560,83 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
       const totalImgHeight = (canvas.height * contentW) / canvas.width;
       const mmToPx = canvas.width / contentW;
 
-      // Detect hard page-break positions from newPage spacer divs
       const domToMm = totalImgHeight / element.offsetHeight;
       const elementRect = element.getBoundingClientRect();
-      const breaks: number[] = [0];
 
-      const wrapper = element.querySelector(':scope > div') as HTMLElement;
+      /** Safe horizontal slice positions (mm in raster space) — avoids cutting mid-paragraph when possible. */
+      const sliceBreaksMm: number[] = [0, totalImgHeight];
+
+      element.querySelectorAll(".pdf-slice-after").forEach((node) => {
+        const r = (node as HTMLElement).getBoundingClientRect();
+        const bottomMm = (r.bottom - elementRect.top) * domToMm;
+        if (bottomMm > 0 && bottomMm < totalImgHeight) {
+          sliceBreaksMm.push(bottomMm);
+        }
+      });
+
+      const wrapper = element.querySelector(":scope > div") as HTMLElement | null;
       if (wrapper) {
         for (const child of Array.from(wrapper.children)) {
           const el = child as HTMLElement;
-          if (el.style.pageBreakBefore === 'always' || el.style.breakBefore === 'page') {
-            breaks.push((el.getBoundingClientRect().bottom - elementRect.top) * domToMm);
+          if (el.style.pageBreakBefore === "always" || el.style.breakBefore === "page") {
+            const b = (el.getBoundingClientRect().bottom - elementRect.top) * domToMm;
+            if (b > 0 && b < totalImgHeight) sliceBreaksMm.push(b);
           }
         }
       }
-      breaks.push(totalImgHeight);
 
-      // For sections taller than a single page, add intermediate breaks
-      const finalBreaks: number[] = [];
-      for (let i = 0; i < breaks.length - 1; i++) {
-        finalBreaks.push(breaks[i]);
-        const span = breaks[i + 1] - breaks[i];
-        if (span > contentH) {
-          let pos = breaks[i] + contentH;
-          while (pos < breaks[i + 1]) {
-            finalBreaks.push(pos);
-            pos += contentH;
+      const sortedBreaks = [...new Set(sliceBreaksMm)].sort((a, b) => a - b);
+
+      const buildPdfSegments = (
+        totalH: number,
+        pageContentH: number,
+        breaks: number[]
+      ): { start: number; end: number }[] => {
+        const B = [...new Set(breaks.filter((x) => x >= 0 && x <= totalH))].sort((a, b) => a - b);
+        const segs: { start: number; end: number }[] = [];
+        let s = 0;
+        const eps = 0.08;
+        while (s < totalH - eps) {
+          const limit = s + pageContentH;
+          let e = s;
+          for (const b of B) {
+            if (b > s + eps && b <= limit + eps) e = Math.max(e, b);
           }
+          if (e <= s + eps) {
+            e = Math.min(limit, totalH);
+          }
+          if (e <= s + eps) break;
+          segs.push({ start: s, end: e });
+          s = e;
         }
-      }
-      finalBreaks.push(totalImgHeight);
-      const uniqueBreaks = [...new Set(finalBreaks)].sort((a, b) => a - b);
+        return segs;
+      };
 
-      // Generate PDF pages with margins, using JPEG compression
+      let segments = buildPdfSegments(totalImgHeight, contentH, sortedBreaks);
+      if (segments.length === 0) {
+        segments = [{ start: 0, end: totalImgHeight }];
+      }
+
       const pdf = new jsPDF("p", "mm", "a4");
-      for (let i = 0; i < uniqueBreaks.length - 1; i++) {
+      segments.forEach((seg, i) => {
         if (i > 0) pdf.addPage();
-        const startMm = uniqueBreaks[i];
-        const endMm = uniqueBreaks[i + 1];
-        const sliceH = endMm - startMm;
-        const startPx = Math.round(startMm * mmToPx);
+        const sliceH = seg.end - seg.start;
+        const startPx = Math.round(seg.start * mmToPx);
         const heightPx = Math.round(sliceH * mmToPx);
-        if (heightPx <= 0) continue;
-        const slice = document.createElement('canvas');
+        if (heightPx <= 0) return;
+        const slice = document.createElement("canvas");
         slice.width = canvas.width;
         slice.height = heightPx;
-        const ctx = slice.getContext('2d');
-        if (!ctx) continue;
+        const ctx = slice.getContext("2d");
+        if (!ctx) return;
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, slice.width, slice.height);
         ctx.drawImage(canvas, 0, startPx, canvas.width, heightPx, 0, 0, canvas.width, heightPx);
         const yPos = i === 0 ? marginTop / 2 : marginTop;
         pdf.addImage(slice.toDataURL("image/jpeg", 0.75), "JPEG", marginX, yPos, contentW, sliceH);
-      }
+      });
 
-      pdf.save(`Environmental_Report_${reportYear}.pdf`);
+      pdf.save(`Environmental_Report_${REPORT_FILE_LABEL[variant]}_${reportYear}.pdf`);
 
     } catch (error) {
       console.error("Report generation failed:", error);
@@ -583,9 +751,8 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
               <h3>Environmental Risk and Sustainability Reports</h3>
 
               <p className="report-description">
-                Generate a comprehensive environmental risk assessment report
-                for the selected year. The report includes Green Index, Hazard Index,
-                Calamity Risk analysis, and barangay-level insights.
+                Choose the report year, then open the generator to pick a <strong>full</strong>{" "}
+                three-index summary or a <strong>focused</strong> report for one index only.
               </p>
 
               {/* Year */}
@@ -600,14 +767,120 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
               </select>
 
               <button
+                type="button"
                 className="generate-report-btn"
-                onClick={() => generateReport(reportYear)}
+                onClick={() => {
+                  setModalVariant(reportType);
+                  setReportChoiceModalOpen(true);
+                }}
                 disabled={isGenerating}
               >
-                {isGenerating ? "Generating report..." : "Generate Full Report"}
+                {isGenerating ? "Generating report..." : "Generate report…"}
               </button>
 
             </div>
+
+            {reportChoiceModalOpen && (
+              <div
+                className="report-type-modal-overlay"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="report-type-modal-title"
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  zIndex: 100002,
+                  background: "rgba(15, 23, 42, 0.55)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 16,
+                }}
+                onClick={() => !isGenerating && setReportChoiceModalOpen(false)}
+              >
+                <div
+                  style={{
+                    background: "#fff",
+                    borderRadius: 14,
+                    maxWidth: 420,
+                    width: "100%",
+                    boxShadow: "0 24px 48px rgba(0,0,0,0.2)",
+                    padding: "22px 22px 18px",
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h3
+                    id="report-type-modal-title"
+                    style={{ margin: "0 0 6px", fontSize: 17, fontWeight: 700, color: "#0f172a" }}
+                  >
+                    Report type
+                  </h3>
+                  <p style={{ margin: "0 0 16px", fontSize: 13, color: "#64748b", lineHeight: 1.5 }}>
+                    Year <strong>{reportYear}</strong>. Pick one layout — each index uses its own cover and sections; full report summarizes all three.
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {(
+                      [
+                        { v: "full" as const, title: "Full assessment", sub: "Green + Hazard + Calamity — summary & all maps" },
+                        { v: "green" as const, title: "Green Index only", sub: "Vegetation & NDVI / GAR focus" },
+                        { v: "hazard" as const, title: "Hazard Index only", sub: "Exposure & environmental hazards" },
+                        { v: "calamity" as const, title: "Calamity risk only", sub: "LSTM risk likelihood & hotspots" },
+                      ] as const
+                    ).map((opt) => (
+                      <label
+                        key={opt.v}
+                        style={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: 10,
+                          padding: "10px 12px",
+                          borderRadius: 10,
+                          border: modalVariant === opt.v ? "2px solid #94a3b8" : "1px solid #e2e8f0",
+                          cursor: "pointer",
+                          background: modalVariant === opt.v ? "#f1f5f9" : "#fafafa",
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="report-variant"
+                          checked={modalVariant === opt.v}
+                          onChange={() => setModalVariant(opt.v)}
+                          style={{ marginTop: 3, accentColor: "#64748b" }}
+                        />
+                        <span>
+                          <span style={{ fontWeight: 700, fontSize: 14, color: "#0f172a", display: "block" }}>
+                            {opt.title}
+                          </span>
+                          <span style={{ fontSize: 12, color: "#64748b" }}>{opt.sub}</span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                  <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 18 }}>
+                    <button
+                      type="button"
+                      className="generate-report-btn"
+                      style={{ background: "#e2e8f0", color: "#334155", flex: "0 0 auto" }}
+                      disabled={isGenerating}
+                      onClick={() => setReportChoiceModalOpen(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="generate-report-btn"
+                      disabled={isGenerating}
+                      onClick={async () => {
+                        setReportChoiceModalOpen(false);
+                        await generateReport(reportYear, modalVariant);
+                      }}
+                    >
+                      Generate PDF
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <ChartExportPool visible={true} year={props.year} />
 
@@ -640,6 +913,7 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
       >
         <div>
           <EnvironmentalReportTemplate
+            reportVariant={pdfReportVariant}
             year={reportYear}
             greenIndexAvg={reportGreenAvg ?? 0}
             hazardIndexAvg={reportHazardAvg ?? 0}
@@ -653,7 +927,9 @@ const DbRightPanel: React.FC<RightPanelProps> = ({
             hazardChart={chartImages.hazard}
             riskChart={chartImages.risk}
 
-            choroMapImageUrl={choroMapImage ?? undefined}
+            greenMapImageUrl={greenMapImage ?? undefined}
+            hazardMapImageUrl={choroMapImage ?? undefined}
+            calamityMapImageUrl={calamityMapImage ?? undefined}
 
             greenInsights={aiInsights.greenInsights.length > 0 ? aiInsights.greenInsights : undefined}
             hazardInsights={aiInsights.hazardInsights.length > 0 ? aiInsights.hazardInsights : undefined}

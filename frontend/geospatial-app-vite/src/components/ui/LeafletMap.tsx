@@ -1822,15 +1822,6 @@ function LeafletMap(props: LeafletMapProps) {
         `);
 
       reportMarkersMap.current.set(r.id, marker);
-
-      // Debug each marker added
-      console.log("[Leaflet] Added marker:", {
-        id: r.id,
-        lat,
-        lng,
-        category: r.category,
-        reportDate: r.createdAt,
-      });
     });
   }, [activeLayers, reports]); 
 

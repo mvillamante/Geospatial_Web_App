@@ -123,6 +123,14 @@ const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
+          <Route 
+            path="officer/notifications" 
+            element={
+              <ProtectedRoute allowedRoles={["Officer"]}>
+                 <NotificationPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="officer/evac-center"
             element={

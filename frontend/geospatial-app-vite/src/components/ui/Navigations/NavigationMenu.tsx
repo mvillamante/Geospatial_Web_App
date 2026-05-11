@@ -174,6 +174,7 @@ const NavigationMenu: React.FC = () => {
       { label: "Home", path: "officer/home", icon: FaHome },
       { label: "Dashboard & Map", path: "officer/dashboard-map", icon: FaMapMarkedAlt },
       { label: "Report Verification", path: "officer/report-verify", icon: MdReport },
+      { label: "Notifications", path: "officer/notifications", icon: FaBell },
       { label: "Evacuation Center", path: "officer/evac-center", icon: FaHouseUser },
     ],
     Researcher: [

@@ -3,8 +3,12 @@ import { useMemo, useState, useEffect, useCallback } from "react";
 // import { MdReport, MdInfo } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import "./NotificationPage.css";
+import { getUserRoleAndDisplayName } from "../../libr/auth";
 
-type NotificationType = "official" | "incident" | "report" | "verification";
+type CitizenTab = "all" | "official" | "incident" | "report" | "verification";
+type OfficerTab = "all" | "assigned" | "needs_info_reply";
+
+type TabType = CitizenTab | OfficerTab;
 
 type Severity = "low" | "moderate" | "high" | "critical";
 
@@ -17,6 +21,8 @@ type IncidentEvent =
 type ReportStatus = "pending" | "in_progress" | "needs_info" | "resolved" | "rejected" | "archived";
 
 type TimeFilter = "today" | "7days" | "all";
+
+
 
 export interface NotificationItem {
     id: string;
@@ -37,6 +43,7 @@ export interface NotificationItem {
 
     // For incident
     incidentId?: number;
+    assignedOfficer?: string;
     barangay?: string;
     category?: string;
     severity?: Severity;
@@ -84,12 +91,14 @@ const NotificationPage: React.FC = () => {
     const [receiveAnnouncements, setReceiveAnnouncements] = useState(true);
     const [alertSeverity, setAlertSeverity] = useState<Severity>("low");
 
-    const [activeTab, setActiveTab] = useState<"all" | NotificationType>("all");
+    const [activeTab, setActiveTab] = useState<TabType>("all");
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [timeFilter, setTimeFilter] = useState<TimeFilter>("7days");
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const navigate = useNavigate();
+
+    const { userRole } = getUserRoleAndDisplayName();
 
 
     // Load preferences from settings
@@ -158,6 +167,7 @@ const NotificationPage: React.FC = () => {
                     cmsPostId: n.cms_post_id,
 
                     incidentId: n.incident_id,
+                    assignedOfficer: n.assigned_officer,
                     incidentEvent: n.event,
                     category: n.category,
                     severity: n.severity,
@@ -178,15 +188,17 @@ const NotificationPage: React.FC = () => {
 
     const filteredNotifications = useMemo(() => {
 
+        const role = userRole?.toLowerCase();
         return notifications.filter(n => {
 
-            if (!receiveHazardAlerts && n.type === "incident") return false;
+            if (role === "citizen") {
+                if (!receiveHazardAlerts && n.type === "incident") return false;
+                if (!receiveAnnouncements && n.type === "official") return false;
+                return true;
+            }
 
-            if (!receiveAnnouncements && n.type === "official") return false;
-
-            if (n.type === "incident") {
-                const sev = n.severityTo ?? n.severity ?? "low";
-                return severityRank[sev] >= severityRank[alertSeverity];
+            if (role === "officer") {
+                return n.type === "assigned" || n.type === "needs_info_reply";
             }
 
             return true;
@@ -201,23 +213,92 @@ const NotificationPage: React.FC = () => {
     ]);
 
     const counts = useMemo(() => {
-        const filtered = filteredNotifications;
+    const role = userRole?.toLowerCase();
 
-        const unreadAll = filtered.filter(n => n.isUnread).length;
-        const unreadOfficial = filtered.filter(n => n.type === "official" && n.isUnread).length;
-        const unreadIncident = filtered.filter(n => n.type === "incident" && n.isUnread).length;
-        const unreadReport = filtered.filter(n => n.type === "report" && n.isUnread).length;
+    console.log("📦 RAW notifications:", notifications);
+    console.log("👤 ROLE:", role);
+    console.log("⚙️ Preferences:", {
+        receiveHazardAlerts,
+        receiveAnnouncements
+    });
 
-        return { unreadAll, unreadOfficial, unreadIncident, unreadReport };
+    let base = notifications;
 
-    }, [filteredNotifications]);
+    if (role === "citizen") {
+        if (!receiveHazardAlerts) {
+            base = base.filter(n => n.type !== "incident");
+            console.log("🚫 After removing incidents:", base);
+        }
+
+        if (!receiveAnnouncements) {
+            base = base.filter(n => n.type !== "official");
+            console.log("🚫 After removing official:", base);
+        }
+    }
+
+    if (role === "officer") {
+        base = base.filter(n => n.type === "assigned" || n.type === "needs_info_reply");
+        console.log("👮 Officer base (reports only):", base);
+    }
+
+    const unread = (list: NotificationItem[]) =>
+        list.filter(n => n.isUnread).length;
+
+    if (role === "citizen") {
+        const official = base.filter(n => n.type === "official");
+        const incident = base.filter(n => n.type === "incident");
+        const report = base.filter(n => n.type === "report");
+
+        const result = {
+            unreadAll: unread(base),
+            unreadOfficial: unread(official),
+            unreadIncident: unread(incident),
+            unreadReport: unread(report),
+        };
+
+        console.log("CITIZEN COUNTS:", result);
+
+        return result;
+    }
+
+    if (role === "officer") {
+        const reports = base;
+
+        const assigned = reports.filter(n => n.type === "assigned");
+
+        const needs_info_reply = reports.filter(n => n.type === "needs_info_reply");
+
+        const result = {
+            unreadAll: unread(reports),
+            unreadAssigned: unread(assigned),
+            unreadReplies: unread(needs_info_reply),
+        };
+
+        console.log("Officer counts:", result);
+
+        return result;
+    }
+
+    const fallback = {
+        unreadAll: unread(base),
+    };
+
+    return fallback;
+}, [
+    notifications,
+    userRole,
+    receiveHazardAlerts,
+    receiveAnnouncements
+]);
 
     const listForPage = useMemo(() => {
 
-        let base =
-            activeTab === "all"
-                ? filteredNotifications
-                : filteredNotifications.filter(n => n.type === activeTab);
+        const role = userRole?.toLowerCase();
+        let base = filteredNotifications;
+
+        if (activeTab !== "all") {
+            base = base.filter(n => n.type === activeTab);
+        }
 
         const now = Date.now();
 
@@ -250,7 +331,12 @@ const NotificationPage: React.FC = () => {
 
         return base;
 
-    }, [activeTab, filteredNotifications, timeFilter]);
+    }, [activeTab, filteredNotifications, timeFilter, userRole]);
+
+    useEffect(() => {
+        console.log("Active Tab:", activeTab);
+        console.log("Notifications being shown:", listForPage);
+    }, [activeTab, listForPage]);
 
     // const grouped = useMemo(() => {
     //     const official = notifications.filter(n => n.type === "official");
@@ -266,12 +352,68 @@ const NotificationPage: React.FC = () => {
 
     // const sectionOrder: NotificationType[] = ["official", "incident", "report"];
 
-    const sectionTitle: Record<NotificationType, string> = {
+    // ROLE-BASED TABS AND TITLES ------------------------------------------
+    const citizenTabTitles: Record<Exclude<CitizenTab, "all">, string> = {
         official: "Official Announcements",
         incident: "Incident Reports",
         report: "Submitted Reports",
         verification: "Verification Updates",
     };
+
+    const officerTabTitles: Record<Exclude<OfficerTab, "all">, string> = {
+        assigned: "Assigned Reports",
+        needs_info_reply: "Needs Info Replies",
+    };
+
+    const availableTabs = useMemo(() => {
+        const role = userRole?.toLowerCase();
+
+        if (role === "officer") {
+            return [
+                { key: "all", label: "All", badgeCount: counts.unreadAll },
+                { key: "assigned", label: "Assigned Reports", badgeCount: 0 },
+                { key: "needs_info_reply", label: "Needs Info Replies", badgeCount: 0 },
+            ];
+        }
+
+        if (role === "citizen") {
+            return [
+                { key: "all", label: "All", badgeCount: counts.unreadAll },
+
+                ...(receiveAnnouncements
+                    ? [{ key: "official", label: "Official", badgeCount: counts.unreadOfficial }]
+                    : []),
+
+                { key: "incident", label: "Incidents", badgeCount: counts.unreadIncident },
+                { key: "report", label: "My Reports", badgeCount: counts.unreadReport },
+            ];
+        }
+
+        // fallback
+        return [{ key: "all", label: "All", badgeCount: counts.unreadAll }];
+    }, [
+        userRole,
+        receiveAnnouncements,
+        counts.unreadAll,
+        counts.unreadOfficial,
+        counts.unreadIncident,
+        counts.unreadReport
+    ]);
+
+    const sectionHeaderTitle = useMemo(() => {
+        if (userRole === "Officer") {
+            return officerTabTitles[activeTab as Exclude<OfficerTab, "all">];
+        }
+
+        if (activeTab === "all") return null;
+
+        return citizenTabTitles[activeTab as Exclude<CitizenTab, "all">];
+    }, [activeTab, userRole]);
+
+    useEffect(() => {
+        if (userRole === "Officer") setActiveTab("all");
+        if (userRole === "Citizen") setActiveTab("all");
+    }, [userRole]);
 
     // const incidentOnlyHighCritical = (list: NotificationItem[]) =>
     //     list.filter(n => {
@@ -373,6 +515,7 @@ const NotificationPage: React.FC = () => {
     //     incidentOnlyHighCritical(grouped.incident).length === 0 &&
     //     grouped.report.length === 0;
 
+    
     return (
         <div className="notif-page">
             <div className="notif-header">
@@ -452,45 +595,19 @@ const NotificationPage: React.FC = () => {
 
             {/* Tabs */}
             <div className="notif-tabs">
-                <button
-                    className={`tab ${activeTab === "all" ? "active" : ""}`}
-                    onClick={() => setActiveTab("all")}
-                >
-                    All
-                    {counts.unreadAll > 0 && <span className="tab-badge">{counts.unreadAll}</span>}
-                </button>
-
-                {receiveAnnouncements && (
+                {availableTabs.map(tab => (
                     <button
-                        className={`tab ${activeTab === "official" ? "active" : ""}`}
-                        onClick={() => setActiveTab("official")}
+                        key={tab.key}
+                        className={`tab ${activeTab === tab.key ? "active" : ""}`}
+                        onClick={() => setActiveTab(tab.key as TabType)}
                     >
-                        Official
-                        {counts.unreadOfficial > 0 && (
-                            <span className="tab-badge">{counts.unreadOfficial}</span>
+                        {tab.label}
+
+                        {tab.badgeCount > 0 && (
+                            <span className="tab-badge">{tab.badgeCount}</span>
                         )}
                     </button>
-                )}
-
-                <button
-                    className={`tab ${activeTab === "incident" ? "active" : ""}`}
-                    onClick={() => setActiveTab("incident")}
-                >
-                    Incidents
-                    {counts.unreadIncident > 0 && (
-                        <span className="tab-badge">{counts.unreadIncident}</span>
-                    )}
-                </button>
-
-                <button
-                    className={`tab ${activeTab === "report" ? "active" : ""}`}
-                    onClick={() => setActiveTab("report")}
-                >
-                    My Reports
-                    {counts.unreadReport > 0 && (
-                        <span className="tab-badge">{counts.unreadReport}</span>
-                    )}
-                </button>
+                ))}
             </div>
 
 
@@ -501,10 +618,10 @@ const NotificationPage: React.FC = () => {
                 ) : (
                     <div className="notif-section">
                         {activeTab !== "all" && (
-                            <div className="notif-section-header">
-                                <h2>{sectionTitle[activeTab]}</h2>
-                                <span className="muted">{listForPage.length}</span>
-                            </div>
+                        <div className="notif-section-header">
+                            <h2>{sectionHeaderTitle}</h2>
+                            <span className="muted">{listForPage.length}</span>
+                        </div>
                         )}
 
                         <div className="notif-list">
@@ -515,6 +632,7 @@ const NotificationPage: React.FC = () => {
                                     <NotificationCard
                                         key={n.id}
                                         n={n}
+                                        userRole={userRole}
                                         onOpen={() => openNotification(n)}
                                     />
                                 ))
@@ -587,7 +705,7 @@ function formatIncidentLine(n: NotificationItem) {
 }
 
 
-function NotificationCard({ n, onOpen }: { n: NotificationItem; onOpen?: () => void }) {
+function NotificationCard({ n, userRole, onOpen }: { n: NotificationItem; userRole?: string; onOpen?: () => void }) {
     const isIncident = n.type === "incident";
     const incidentUI = isIncident ? formatIncidentLine(n) : null;
 
@@ -602,6 +720,10 @@ function NotificationCard({ n, onOpen }: { n: NotificationItem; onOpen?: () => v
         }
         if (n.type === "verification")
             return <span className="pill pill-verification">Verification</span>
+        if (n.type === "assigned")
+            return <span className="pill pill-report">Assignation</span>
+        if (n.type === "needs_info_reply")
+            return <span className="pill pill-report">Need Info</span>
         return <span className="pill pill-report">Report</span>
     })();
 
@@ -626,58 +748,53 @@ function NotificationCard({ n, onOpen }: { n: NotificationItem; onOpen?: () => v
         return n.body;
     })();
 
-    function formatReportLine(n: NotificationItem) {
+    function formatReportLine(n: NotificationItem, userRole?: string) {
         const capitalize = (s?: string) =>
             s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
+
         const category = capitalize(n.reportCategory ?? "Report");
         const barangay = n.reportBarangay ? ` • ${n.reportBarangay}` : "";
-        const status = n.statusTo ?? "pending";
+        const header = `${category}${barangay}`;
 
-        if (status === "pending") {
+        const isOfficer = userRole?.toLowerCase() === "officer";
+
+
+        if (isOfficer && n.type === "assigned") {
             return {
-                header: `${category}${barangay}`,
-                sub: "Your report has been submitted and is waiting for LGU verification."
+                header,
+                sub: n.body ?? "You have been assigned a new report.",
             };
         }
 
-        if (n.statusTo === "in_progress") {
+        if (isOfficer && n.type === "needs_info_reply") {
             return {
-                header: `${category}${barangay}`,
-                sub: "An officer has started reviewing your report.",
+                header,
+                sub: "Citizen replied to your request for more information."
             };
         }
 
-        if (n.statusTo === "needs_info") {
-            return {
-                header: `${category}${barangay}`,
-                sub: `Needs info: ${n.officerMessage ?? ""}`,
-            };
-        }
+        const status = n.statusTo;
 
-        if (n.statusTo === "resolved") {
-            return {
-                header: `${category}${barangay}`,
-                sub: `Resolved: ${n.resolutionSummary ?? "The incident has been resolved."}`,
-            };
-        }
-        if (n.statusTo === "archived") {
-            return {
-                header: `${category}${barangay}`,
-                sub: "The incident report has been archived.",
-            };
-        }
-
-        if (n.statusTo === "rejected") {
-            return {
-                header: `${category}${barangay}`,
-                sub: `Rejected: ${n.rejectionReason ?? ""}`,
-            };
-        }
-
-        return {
-            header: `${category}${barangay}`,
-            sub: n.body
+        const citizenMessages: Record<string, string> = {
+            pending: "Your report has been submitted and is waiting for LGU verification.",
+            in_progress: "An officer has started reviewing your report.",
+            needs_info: `Needs info: ${n.officerMessage ?? ""}`,
+            resolved: `Resolved: ${n.resolutionSummary ?? "The incident has been resolved."}`,
+            archived: "The incident report has been archived.",
+            rejected: `Rejected: ${n.rejectionReason ?? ""}`,
         };
+
+        const message =
+            isOfficer
+                ? n.body ??
+                n.title ??
+                "Report update."
+            : citizenMessages[status] ??
+                n.body ??
+                n.title ??
+                "";
+
+        return { header, sub: message };
     }
 
     return (

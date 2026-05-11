@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import type { User } from "../../../usertype/User"; // <-- shared type
 import "./GlobalModal.css";
+import { toast } from "sonner";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -78,7 +79,7 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated, departmentRefres
     setError("");
 
     if (!firstName || !lastName || !email || !phone || !role || (role === "officer" && !departmentId)) {
-      setError("Please fill in all required fields.");
+      toast.error("Please fill in all required fields.");
       return;
     }
     if (!validateEmail(email)) { setError("Invalid email address."); return; }
@@ -267,7 +268,7 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated, departmentRefres
               onClick={() => {
                 setError("");
                 if (!firstName.trim() || !lastName.trim() || !role || (role === "officer" && !departmentId) || !email.trim() || !phone.trim() || emailError || phoneError) {
-                  setError("Please fill in all required fields.");
+                  toast.error("Please fill in all required fields.");
                   return;
                 }
                 if (!tempPasswordRef.current) generateTempPassword();

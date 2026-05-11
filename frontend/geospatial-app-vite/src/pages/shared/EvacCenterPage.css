@@ -121,6 +121,26 @@
   transition: all 0.25s ease;
 }
 
+.evac-edit-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  z-index: 10;
+}
+
+.evac-edit-text {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
 .evac-card.officer {
   min-height: 230px;
 }
@@ -575,7 +595,11 @@
 
 @media (max-height: 800px) {
   .evac-side-content-map {
-    height: 75vh;
+    height: 70vh;
+  }
+
+  .evac-side-content-map {
+    height: 100%;
   }
 }
 

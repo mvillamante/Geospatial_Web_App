@@ -66,11 +66,14 @@ const UserMgmtPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [allRequests, setAllRequests] = useState<ResearcherRequest[]>([]);
 
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(() =>
+    window.innerHeight <= 800 ? 7 : 10
+  );
 
   useEffect(() => {
     const updatePageSize = () => {
-      setPageSize(window.innerHeight <= 800 ? 7 : 10);
+      const newSize = window.innerHeight <= 800 ? 7 : 10;
+      setPageSize(prev => (prev === newSize ? prev : newSize));
     };
 
     updatePageSize();
@@ -78,6 +81,7 @@ const UserMgmtPage: React.FC = () => {
 
     return () => window.removeEventListener("resize", updatePageSize);
   }, []);
+
   const [tab, setTab] = useState<'users' | 'requests' | 'verification'>('users');
   const [openMenu, setOpenMenu] = useState<number | null>(null);
   const [roleFilter, setRoleFilter] = useState<Role | 'All'>('All');
@@ -104,7 +108,10 @@ const UserMgmtPage: React.FC = () => {
   
   /* FETCH USERS */
   const fetchUsers = useCallback(async (page = 1, showLoading = true) => {
-    if (showLoading) setLoading(true);
+    if (showLoading) {
+      setLoading(true);
+      setUsers([]);
+    }
     try {
       const token = localStorage.getItem("access_token");
       const params = new URLSearchParams();

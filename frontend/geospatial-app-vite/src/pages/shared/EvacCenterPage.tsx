@@ -405,7 +405,7 @@ function EvacCenterPage() {
             <Search className="evac-search-icon" />
             <input
               type="text"
-              placeholder="Search by name or barangay..."
+              placeholder="Search by name or barangay..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="evac-search"
@@ -448,13 +448,20 @@ function EvacCenterPage() {
             </div>
           ) : (
             filteredCenters.map(center => {
-              const isExiting = closingId === center.id;
+              const isEditing = editingCenter?.id === center.id;
               return (
                 <div
                   key={center.id}
-                  className={`evac-card ${userRole === "Officer" ? "officer" : ""} animate-card ${isExiting ? "exit" : ""
+                  className={`evac-card ${userRole === "Officer" ? "officer" : ""} animate-card ${isEditing ? "edit" : ""
                     }`}
                 >
+                  {isEditing && (
+                    <div className="evac-edit-overlay">
+                      <div className="evac-edit-text">
+                        Currently Editing
+                      </div>
+                    </div>
+                  )}
                   <h2 className="evac-card-name">
                     <span
                       ref={(el) => {

@@ -13,10 +13,20 @@ from django.db.models import Q
 def get_visible_notifications(user):
 
     qs = Notification.objects.filter(
-        Q(target_user=user) |
-        Q(type__in=["official", "incident"]),
         created_at__gte=user.date_joined
-    ).distinct()
+    )
+
+    if user.role == "Officer":
+        qs = qs.filter(
+            Q(type__in=["official", "incident"]) |
+            Q(assigned_officer=user) |
+            Q(target_user=user)
+        )
+    else:
+        qs = qs.filter(
+            Q(type__in=["official", "incident"]) |
+            Q(target_user=user)
+        )
 
     # Community announcements toggle
     if not user.receive_community_announcements:
@@ -42,6 +52,23 @@ def get_visible_notifications(user):
             Q(type="incident", severity__in=allowed) |
             ~Q(type="incident")
         )
+        
+    
+    for n in qs.filter(assigned_officer=user):
+        print(
+            f"""
+            ID: {n.id}
+            Type: {n.type}
+            Title: {n.title}
+            Body: {n.body}
+            Target User: {n.target_user}
+            Assigned Officer: {n.assigned_officer}
+            Report ID: {n.report_id}
+            Incident ID: {n.incident_id}
+            Created At: {n.created_at}
+            """
+        )
+    print(Notification.objects.filter(assigned_officer=user).count())
 
     return qs
 

@@ -407,6 +407,8 @@ class Notification(models.Model):
         ("incident", "Incident"),
         ("report", "Report"),
         ("verification", "Verification"),
+        ("assigned", "Assigned"),
+        ("needs_info_reply", "Needs Info Reply"),
     ]
     
     EVENT_CHOICES = [
@@ -431,6 +433,7 @@ class Notification(models.Model):
     severity_from = models.CharField(max_length=20, null=True, blank=True)
     severity_to = models.CharField(max_length=20, null=True, blank=True)
     barangay = models.CharField(max_length=120, null=True, blank=True)
+    assigned_officer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="assigned_notifications")
 
     cms_guide_id = models.BigIntegerField(null=True, blank=True)
     cms_post_id = models.CharField(max_length=50, null=True, blank=True)

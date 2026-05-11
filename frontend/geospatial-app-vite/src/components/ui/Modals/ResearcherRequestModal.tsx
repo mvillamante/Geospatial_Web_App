@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./ResearcherRequestModal.css";
 
 interface Props {
@@ -16,12 +16,29 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
   const [purpose, setPurpose] = useState("");
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const originalOverflow = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage("");
 
     if (!firstName || !lastName || !email || !institution || !purpose) {
-      alert("Please complete all required fields.");
+      setErrorMessage("Please complete all required fields before submitting.");
+      return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      setErrorMessage("Please enter a valid email address.");
       return;
     }
 
@@ -45,15 +62,14 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Researcher request submitted successfully.");
         onClose();
       } else {
         console.log("Backend error:", data);
-        alert("Error submitting request. Check console.");
+        setErrorMessage("Error submitting request. Please try again.");
       }
     } catch (err) {
       console.error(err);
-      alert("An unexpected error occurred.");
+      setErrorMessage("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -71,7 +87,23 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
             Please fill out the form below to request Researcher access.
           </p>
 
+          {errorMessage && (
+            <div className="researcher-error-box" role="alert">
+              {errorMessage}
+            </div>
+          )}
+
           <form className="researcher-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Last Name *</label>
+              <input
+                type="text"
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
+
             <div className="form-group">
               <label>First Name *</label>
               <input
@@ -83,22 +115,12 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
             </div>
             
             <div className="form-group">
-              <label>Middle Name</label>
+              <label>Middle Name (Optional)</label>
               <input
                 type="text"
                 placeholder="Middle Name"
                 value={middleName}
                 onChange={(e) => setMiddleName(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Last Name *</label>
-              <input
-                type="text"
-                placeholder="Last Name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
               />
             </div>
 

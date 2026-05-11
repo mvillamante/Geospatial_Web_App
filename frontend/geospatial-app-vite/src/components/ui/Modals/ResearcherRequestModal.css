@@ -33,6 +33,16 @@
     margin-bottom: 10px;
 }
 
+.researcher-error-box {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    padding: 0.9rem 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
 .researcher-modal-wrapper .info-box {
     margin-top: 1.5rem;
     padding: 1rem;

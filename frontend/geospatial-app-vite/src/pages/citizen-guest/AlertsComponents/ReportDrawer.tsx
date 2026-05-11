@@ -616,7 +616,7 @@ export default function ReportDrawer({ open, onClose }: ReportDrawerProps) {
                   }}
                   disabled={submitting}
                 >
-                  Confirm & Submit
+                  Submit
                 </button>
               </div>
             </div>

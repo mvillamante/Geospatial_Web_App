@@ -80,6 +80,7 @@ function EvacCenterPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [locationFilter, setLocationFilter] = useState<"all" | "near_me">("all");
   const [loadingCenters, setLoadingCenters] = useState(true);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const userBarangay = localStorage.getItem("user_barangay") || "";
   const normalizeBarangay = (text: string) =>
@@ -221,39 +222,15 @@ function EvacCenterPage() {
   };
 
   const handleDeleteCenter = (id: number) => {
-    toast.warning("Delete this evacuation center?", {
-      action: {
-        label: "Confirm",
-        onClick: async () => {
-          setClosingId(id);
-
-          try {
-            await deleteEvacCenter(id);
-
-            setCenters((prev) => prev.filter((c) => c.id !== id));
-
-            toast.success("Evacuation center deleted");
-
-            setMapRefreshKey(prev => prev + 1);
-          } catch (err) {
-            console.error(err);
-            toast.error("Failed to delete evacuation center");
-          } finally {
-            setClosingId(null);
-          }
-        }
-      },
-      cancel: {
-        label: "Cancel",
-        onClick: () => { }
-      }
-    });
+    setConfirmDeleteId(id);
   };
+
 
   /* Evacuation Center Map */
   const activeLayers = useMemo(() => ["Evacuation Centers",], []); /* "Barangay Boundaries" */
   // const [isClosing, setIsClosing] = useState(false);
   const [closingId, setClosingId] = useState<number | null>(null);
+
 
   const handleCloseEditor = () => {
     // setIsClosing(true);
@@ -284,11 +261,82 @@ function EvacCenterPage() {
 
   return (
     <div className="evac-page">
+      {
+        confirmDeleteId !== null && (
+          <div
+            className="modal-overlay"
+            onClick={() => setConfirmDeleteId(null)}
+          >
+            <div
+              className="confirm-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="confirm-title">
+                Delete evacuation center?
+              </div>
+
+              <div className="confirm-text">
+                This action cannot be undone.
+              </div>
+
+              <div className="confirm-actions">
+                <button
+                  className="btn secondary"
+                  type="button"
+                  onClick={() => setConfirmDeleteId(null)}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="btn danger"
+                  type="button"
+                  disabled={closingId === confirmDeleteId}
+                  onClick={async () => {
+                    const id = confirmDeleteId;
+
+                    if (id === null) return;
+
+                    setClosingId(id);
+
+                    try {
+                      await deleteEvacCenter(id);
+
+                      setCenters((prev) =>
+                        prev.filter((c) => c.id !== id)
+                      );
+
+                      toast.success(
+                        "Evacuation center deleted"
+                      );
+
+                      setMapRefreshKey((prev) => prev + 1);
+
+                      setConfirmDeleteId(null);
+                    } catch (err) {
+                      console.error(err);
+                      toast.error(
+                        "Failed to delete evacuation center"
+                      );
+                    } finally {
+                      setClosingId(null);
+                    }
+                  }}
+                >
+                  {closingId === confirmDeleteId
+                    ? "Deleting..."
+                    : "Delete"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
       <div className="evac-map-wrapper">
         <div className={`evac-side-content ${userRole === 'Officer' ? 'officer-view' : 'citizen-view'}`}>
           <div className="evac-side-content-filtermap">
             {/* Filter-Row */}
-            { (userRole === "Citizen" && isResidentVerified) && (
+            {(userRole === "Citizen" && isResidentVerified) && (
               <div className="filters">
                 <div className="select-wrapper">
                   <MdPlace className="select-icon" />
@@ -405,7 +453,7 @@ function EvacCenterPage() {
             <Search className="evac-search-icon" />
             <input
               type="text"
-              placeholder="Search by name or barangay..." 
+              placeholder="Search by name or barangay..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="evac-search"
@@ -560,7 +608,7 @@ function EvacCenterPage() {
                     >
                       <Navigation className="evac-btn-icon" />
                       Get Directions
-                    </button> 
+                    </button>
                   )}
                 </div>
               );

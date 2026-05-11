@@ -19,6 +19,7 @@ import IndentPlugin from './IndentPlugin';
 interface Props {
   initialHtml?: string;
   onChange?: (html: string) => void;
+  placeholder?: string;
 }
 
 /* -------- HTML EXPORT PLUGIN -------- */
@@ -40,6 +41,7 @@ function HtmlChangePlugin({ onChange }: { onChange?: (html: string) => void }) {
 const RichTextEditor: React.FC<Props> = ({
   initialHtml = '',
   onChange,
+  placeholder,
 }) => {
   const initialConfig = {
     namespace: 'CMS_Editor',
@@ -90,7 +92,11 @@ const RichTextEditor: React.FC<Props> = ({
         contentEditable={
           <ContentEditable className="editor-input" />
         }
-        placeholder={null}
+        placeholder={
+          <div className="editor-placeholder">
+            {placeholder}
+          </div>
+        }
         ErrorBoundary={LexicalErrorBoundary}
       />
 

@@ -24,7 +24,7 @@ import { toast } from "sonner";
 interface BarangayData {
   name: string;
   lat: number;
-  lon: number;
+  lng: number;
   risk: "High" | "Medium" | "Low";
 }
 
@@ -465,27 +465,27 @@ function LeafletMap(props: LeafletMapProps) {
     }
 
     const watcher = navigator.geolocation.watchPosition(
-    (pos) => {
-      const { latitude, longitude, accuracy } = pos.coords;
-      const latlng: [number, number] = [latitude, longitude];
+      (pos) => {
+        const { latitude, longitude, accuracy } = pos.coords;
+        const latlng: [number, number] = [latitude, longitude];
 
-      if (!markerRef.current) {
-        markerRef.current = L.marker(latlng, { title: "Your Location", zIndexOffset: 1000 }).addTo(map);
-      } else {
-        markerRef.current.setLatLng(latlng);
-      }
+        if (!markerRef.current) {
+          markerRef.current = L.marker(latlng, { title: "Your Location", zIndexOffset: 1000 }).addTo(map);
+        } else {
+          markerRef.current.setLatLng(latlng);
+        }
 
-      const circleRadius = accuracy * 0.001;
-      if (!circleRef.current) {
-        circleRef.current = L.circle(latlng, { radius: circleRadius }).addTo(map);
-      } else {
-        circleRef.current.setLatLng(latlng).setRadius(circleRadius);
+        const circleRadius = accuracy * 0.001;
+        if (!circleRef.current) {
+          circleRef.current = L.circle(latlng, { radius: circleRadius }).addTo(map);
+        } else {
+          circleRef.current.setLatLng(latlng).setRadius(circleRadius);
+        }
+      },
+      (err) => {
+        if (err.code === 1) alert("Please allow geolocation access");
+        else alert("Cannot get current location");
       }
-    },
-    (err) => {
-      if (err.code === 1) alert("Please allow geolocation access");
-      else alert("Cannot get current location");
-    }
     );
 
     return () => {
@@ -573,7 +573,6 @@ function LeafletMap(props: LeafletMapProps) {
 
     let map = previewMapRef.current;
 
-    // ✅ CREATE MAP ONLY ONCE
     if (!map) {
       map = L.map("preview-map").setView([lat, lng], 15);
 
@@ -1399,13 +1398,13 @@ function LeafletMap(props: LeafletMapProps) {
     );
 
     if (matchedBarangay) {
-      const { name, lat, lon } = matchedBarangay;
+      const { name, lat, lng } = matchedBarangay;
 
       // Use severity from reports if available, otherwise use default
       const severity = (searchedSeverity || "low") as keyof typeof severityColors;
       const colors = severityColors[severity] || severityColors.low;
 
-      const barangay = getBarangayFromCoords(lat, lon) || "Cabuyao";
+      const barangay = getBarangayFromCoords(lat, lng);
 
       // Create a highlighted search marker with severity-based colors
       const searchIcon = L.divIcon({
@@ -1421,7 +1420,7 @@ function LeafletMap(props: LeafletMapProps) {
       });
 
       // Add the search marker
-      searchMarkerRef.current = L.marker([lat, lon], { icon: searchIcon })
+      searchMarkerRef.current = L.marker([lat, lng], { icon: searchIcon })
         .addTo(map)
         .bindPopup(`
           <div style="text-align: center;">
@@ -1437,7 +1436,7 @@ function LeafletMap(props: LeafletMapProps) {
         .openPopup();
 
       // Zoom to the barangay location
-      map.setView([lat, lon], 15, { animate: true });
+      map.setView([lat, lng], 15, { animate: true });
     }
   }, [searchedBarangay, searchedSeverity]);
 
@@ -1643,7 +1642,7 @@ function LeafletMap(props: LeafletMapProps) {
       val?.toLowerCase().replace(/\s+/g, "_").replace(/[\/\-]/g, "");
 
     const now = new Date();
-    
+
 
     const isWithinTimeFilter = (dateStr: string) => {
 
@@ -1677,10 +1676,10 @@ function LeafletMap(props: LeafletMapProps) {
         !categoryFilter || categoryFilter === "all"
           ? true
           : normalizedCategory(
-              r.category === "others"
-                ? r.other_category || "others"
-                : r.category
-            ) === normalizedCategory(categoryFilter)
+            r.category === "others"
+              ? r.other_category || "others"
+              : r.category
+          ) === normalizedCategory(categoryFilter)
       );
 
     filteredReports.forEach((r) => {
@@ -1776,9 +1775,10 @@ function LeafletMap(props: LeafletMapProps) {
       const citizenRisk = r.citizenRisk ?? r.suggested_critical_level;
       const verifiedRisk = r.verifiedRisk ?? r.verified_critical_level ?? r.suggested_critical_level;
 
-      const lat = r.lat;
-      const lng = r.lng;
-      if (lat == null || lng == null) return;
+      const lat = parseFloat(r.lat as any);
+      const lng = parseFloat(r.lng as any);
+
+      if (Number.isNaN(lat) || Number.isNaN(lng)) return;
 
       const iconEmoji = getIncidentIcon(r.category);
       const colors = getSeverityColors({
@@ -1804,7 +1804,7 @@ function LeafletMap(props: LeafletMapProps) {
         iconAnchor: [22, 44],
       });
 
-      const barangay = getBarangayFromCoords(lat, lng);
+      const barangay = r.barangay;
 
       const marker = L.marker([lat, lng], { icon: reportIcon })
         .addTo(layerGroup)
@@ -1813,7 +1813,7 @@ function LeafletMap(props: LeafletMapProps) {
             <div class="popup-icon">${iconEmoji}</div>
             <h3>${r.category}</h3>
             <p style="margin: 8px 0 5px 0; font-size: 12px; color: #666;">
-              Barangay ${barangay}, Cabuyao
+              ${barangay}
             </p>
             <span class="popup-pill" style="background:${colors.primary}">
               ${colors.text} RISK
@@ -1823,7 +1823,7 @@ function LeafletMap(props: LeafletMapProps) {
 
       reportMarkersMap.current.set(r.id, marker);
     });
-  }, [activeLayers, reports]); 
+  }, [activeLayers, reports]);
 
 
   return (

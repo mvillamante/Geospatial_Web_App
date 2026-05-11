@@ -215,46 +215,46 @@ function SettingsPage() {
 
                         <div className="form-actions">
                             <button
-                            disabled={saving}
-                            onClick={async () => {
+                                disabled={saving}
+                                onClick={async () => {
 
-                                if (!isValidEmail(email)) {
-                                    toast.error("Please enter a valid email");
-                                    return;
-                                }
-
-                                if (email === originalEmail) {
-                                    toast.info("No changes detected");
-                                    return;
-                                }
-
-                                toast.warning("Save changes to your email?", {
-                                action: {
-                                    label: "Save",
-                                    onClick: async () => {
-                                    try {
-                                        await updateProfile({ email });
-
-                                        setOriginalEmail(email);
-                                        setEditSection(null);
-
-                                        toast.success("Email updated successfully");
-
-                                    } catch (err: any) {
-                                        console.error(err);
-                                        toast.error(err?.message || "Failed to update email");
+                                    if (!isValidEmail(email)) {
+                                        toast.error("Please enter a valid email");
+                                        return;
                                     }
-                                    }
-                                },
-                                cancel: {
-                                    label: "Cancel",
-                                    onClick: () => {}
-                                }
-                                });
 
-                            }}
+                                    if (email === originalEmail) {
+                                        toast.info("No changes detected");
+                                        return;
+                                    }
+
+                                    toast.warning("Save changes to your email?", {
+                                        action: {
+                                            label: "Save",
+                                            onClick: async () => {
+                                                try {
+                                                    await updateProfile({ email });
+
+                                                    setOriginalEmail(email);
+                                                    setEditSection(null);
+
+                                                    toast.success("Email updated successfully");
+
+                                                } catch (err: any) {
+                                                    console.error(err);
+                                                    toast.error(err?.message || "Failed to update email");
+                                                }
+                                            }
+                                        },
+                                        cancel: {
+                                            label: "Cancel",
+                                            onClick: () => { }
+                                        }
+                                    });
+
+                                }}
                             >
-                            {saving ? "Saving..." : "Save"}
+                                {saving ? "Saving..." : "Save"}
                             </button>
 
                             <button className="cancel" onClick={cancelEdit}>
@@ -329,9 +329,26 @@ function SettingsPage() {
                     >
                         <div className="password-input">
                             <input
+                                type="text"
+                                name="fake-username"
+                                autoComplete="username"
+                                style={{ display: "none" }}
+                            />
+
+                            <input
+                                type="password"
+                                name="fake-password"
+                                autoComplete="new-password"
+                                style={{ display: "none" }}
+                            />
+                            <input
                                 type={showCurrentPassword ? "text" : "password"}
+                                name="current-password-input"
                                 placeholder="Current Password"
                                 value={currentPassword}
+                                autoComplete="new-password"
+                                readOnly
+                                onFocus={(e) => e.target.removeAttribute("readonly")}
                                 onChange={(e) => setCurrentPassword(e.target.value)}
                             />
 
@@ -378,8 +395,8 @@ function SettingsPage() {
 
                         <div className="form-actions">
                             <button
-                            onClick={handlePasswordChange}
-                            disabled={saving}
+                                onClick={handlePasswordChange}
+                                disabled={saving}
                             >
                                 {saving ? "Updating..." : "Update Password"}
                             </button>
@@ -399,7 +416,7 @@ function SettingsPage() {
             </div>
 
             {/* NOTIFICATIONS */}
-            { (userRole === "Citizen" && isResidentVerified) && (
+            {(userRole === "Citizen" && isResidentVerified) && (
                 <div className="settings-card">
                     <h2>Notification Preferences</h2>
 
@@ -463,46 +480,11 @@ function SettingsPage() {
 
                         <div className="modal-actions">
 
-                        {!confirmStep && (
-                            <>
-                            <button
-                                className="cancel-btn"
-                                onClick={() => setShowDeleteModal(false)}
-                                disabled={deleteLoading}
-                            >
-                                Cancel
-                            </button>
-
-                            <button
-                                className="danger-confirm"
-                                onClick={() => setConfirmStep(true)}
-                                disabled={deleteLoading}
-                            >
-                                Delete Permanently
-                            </button>
-                            </>
-                        )}
-
-                        {confirmStep && (
-                            <>
-                                <span className="delete-hint">
-                                Please type <strong>{deleteConfirmText}</strong> to confirm account deletion.
-                                </span>
-
-                                <input
-                                    className="delete-input"
-                                    placeholder={`Type ${deleteConfirmText} to confirm`}
-                                    value={confirmDelete}
-                                    onChange={(e) => setConfirmDelete(e.target.value)}
-                                />
-
-                                <div className="modal-actions">
+                            {!confirmStep && (
+                                <>
                                     <button
                                         className="cancel-btn"
-                                        onClick={() => {
-                                            setShowDeleteModal(false);
-                                            setConfirmStep(false);
-                                        }}
+                                        onClick={() => setShowDeleteModal(false)}
                                         disabled={deleteLoading}
                                     >
                                         Cancel
@@ -510,14 +492,49 @@ function SettingsPage() {
 
                                     <button
                                         className="danger-confirm"
-                                        onClick={handleDeleteAccount}
-                                        disabled={deleteLoading || confirmDelete !== deleteConfirmText}
+                                        onClick={() => setConfirmStep(true)}
+                                        disabled={deleteLoading}
                                     >
-                                        {deleteLoading ? "Deleting..." : "Confirm Delete"}
+                                        Delete Permanently
                                     </button>
-                                </div>
-                            </>
-                        )}
+                                </>
+                            )}
+
+                            {confirmStep && (
+                                <>
+                                    <span className="delete-hint">
+                                        Please type <strong>{deleteConfirmText}</strong> to confirm account deletion.
+                                    </span>
+
+                                    <input
+                                        className="delete-input"
+                                        placeholder={`Type ${deleteConfirmText} to confirm`}
+                                        value={confirmDelete}
+                                        onChange={(e) => setConfirmDelete(e.target.value)}
+                                    />
+
+                                    <div className="modal-actions">
+                                        <button
+                                            className="cancel-btn"
+                                            onClick={() => {
+                                                setShowDeleteModal(false);
+                                                setConfirmStep(false);
+                                            }}
+                                            disabled={deleteLoading}
+                                        >
+                                            Cancel
+                                        </button>
+
+                                        <button
+                                            className="danger-confirm"
+                                            onClick={handleDeleteAccount}
+                                            disabled={deleteLoading || confirmDelete !== deleteConfirmText}
+                                        >
+                                            {deleteLoading ? "Deleting..." : "Confirm Delete"}
+                                        </button>
+                                    </div>
+                                </>
+                            )}
 
                         </div>
                     </div>

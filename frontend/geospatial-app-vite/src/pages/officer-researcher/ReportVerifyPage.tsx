@@ -210,8 +210,8 @@ const ReportVerifyPage: React.FC = () => {
         scopeFilter === "all"
           ? true
           : scopeFilter === "mine"
-          ? myOfficerId != null && r.assignedOfficerId === myOfficerId
-          : r.assignedOfficerId == null;
+            ? myOfficerId != null && r.assignedOfficerId === myOfficerId
+            : r.assignedOfficerId == null;
 
       const reportDate = new Date(r.createdAt);
       if (isNaN(reportDate.getTime())) return false;
@@ -308,7 +308,7 @@ const ReportVerifyPage: React.FC = () => {
         if (!token) throw new Error("No access token found. Please login again.");
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(`${API_URL}/api/reports/queue/`, {
-          method: "GET", 
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -332,8 +332,8 @@ const ReportVerifyPage: React.FC = () => {
           assignedTo: r.assignedTo ?? null,
           citizenRisk: normalizeRisk(r.citizenRisk),
           verifiedRisk: r.verifiedRisk ? normalizeRisk(r.verifiedRisk) : undefined,
-          lat: r.latitude ?? r.lat ?? 0,
-          lng: r.longitude ?? r.lng ?? 0,
+          lat: Number(r.lat ?? r.latitude ?? 0),
+          lng: Number(r.lng ?? r.longitude ?? 0),
           barangay: r.barangay ?? r.location_display ?? "",
           createdAt: r.createdAt ?? r.created_at,
           lastUpdatedAt: r.lastUpdatedAt ?? r.last_updated_at ?? r.createdAt,
@@ -360,7 +360,7 @@ const ReportVerifyPage: React.FC = () => {
   useEffect(() => {
     setNeedsInfoMode(false);
   }, [selectedId]);
-  
+
 
   const setVerifiedRisk = async (level: RiskLevel) => {
     if (!selected) return;
@@ -788,7 +788,7 @@ const ReportVerifyPage: React.FC = () => {
 
         <section className="verify-map">
           <MemoizedLeafletMap
-            reports={mapReports}  
+            reports={mapReports}
             selectedReport={selectedReportForMap}
             activeLayers={["Queue Reports"]}
             categoryFilter={categoryFilter}

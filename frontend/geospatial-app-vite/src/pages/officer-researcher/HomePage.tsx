@@ -291,6 +291,11 @@ const HomePage: React.FC = () => {
           </div>
 
           <div className="source">
+            <img src="/datasource_logos/usgs.jpeg" alt="Google Earth Engine" />
+            <span>USGS</span>
+          </div>
+
+          <div className="source">
             <img src="/datasource_logos/openstreetmap.png" alt="OpenStreetMap" />
             <span>OpenStreetMap</span>
           </div>

@@ -428,7 +428,7 @@
 /* Confirmation Modal */
 .confirm-modal {
   width: 420px;
-  max-width: calc(100% - 2rem);
+  max-width: calc(100% - 3rem);
   background: #fff;
   border-radius: 12px;
   padding: 18px;
@@ -453,20 +453,20 @@
   gap: 10px;
 }
 
-.reportsmgmt-page .btn.secondary {
+.confirm-actions .btn.secondary {
   background: #f3f4f6;
   color: #111827;
 }
 
-.reportsmgmt-page .btn.secondary:hover {
+.confirm-actions .btn.secondary:hover {
   background: #e5e7eb;
 }
 
-.reportsmgmt-page .btn.danger {
+.confirm-actions .btn.danger {
   background: #b42318;
 }
 
-.reportsmgmt-page .btn.danger:hover {
+.confirm-actions .btn.danger:hover {
   background: #991b1b;
   color: #ffffff;
 }

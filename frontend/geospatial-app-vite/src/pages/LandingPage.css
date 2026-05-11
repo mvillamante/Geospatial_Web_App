@@ -30,6 +30,10 @@
     z-index: 1;
 }
 
+body.modal-open {
+    overflow: hidden;
+}
+
 /* ===============================
    LOADING SCREEN
 ================================= */

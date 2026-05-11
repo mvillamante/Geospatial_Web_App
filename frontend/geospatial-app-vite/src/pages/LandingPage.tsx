@@ -65,6 +65,18 @@ const LandingPage: React.FC = () => {
   }, [navigate]);*/}
 
   useEffect(() => {
+    if (modalType) {
+      document.body.classList.add("modal-open");
+    } else {
+      document.body.classList.remove("modal-open");
+    }
+
+    return () => {
+      document.body.classList.remove("modal-open");
+    };
+  }, [modalType]);
+
+  useEffect(() => {
     const fetchReports = async () => {
       try {
         const res = await fetch(`${API_URL}/api/incident-reports/verified/`);

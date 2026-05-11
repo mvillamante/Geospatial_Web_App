@@ -179,7 +179,7 @@ const CmsPage: React.FC = () => {
 
 
   useEffect(() => {
-    fetch( `${API_URL}/api/cms/quick-contacts/`, {
+    fetch(`${API_URL}/api/cms/quick-contacts/`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       },
@@ -674,7 +674,6 @@ const CmsPage: React.FC = () => {
                                   <Edit size={16} style={{ marginRight: 4 }} /> Edit
                                 </button>
 
-                                { guide.status === "Published" && (
                                 <button
                                   className="dropdown-item"
                                   onClick={() => {
@@ -683,16 +682,12 @@ const CmsPage: React.FC = () => {
                                     setOpenMenuId(null);
                                   }}
                                 >
-                                  {/*guide.status === "Published" ? (
-                                    <MdUnpublished size={16} style={{ marginRight: 4 }} />
-                                  ) : (
-                                    <MdPublish size={16} style={{ marginRight: 4 }} />
-                                  )}
-                                  {guide.status === "Published" ? "Unpublish" : "Publish"*/}
                                   <MdPublish size={16} style={{ marginRight: 4 }} />
-                                  Publish 
+
+                                  {guide.status === "Published"
+                                    ? "Unpublish"
+                                    : "Publish"}
                                 </button>
-                                )}
                               </>
                             ) : (
                               <button
@@ -802,8 +797,11 @@ const CmsPage: React.FC = () => {
             <label>Body</label>
             <div className="editor-wrapper" key={editorKey}>
               <RichTextEditor
-                initialHtml={newGuide.postBody || "<p>Start typing the content here...</p>"}
-                onChange={(html) => setNewGuide({ ...newGuide, postBody: html })}
+                initialHtml=""
+                placeholder="Start typing the content here..."
+                onChange={(html) =>
+                  setNewGuide({ ...newGuide, postBody: html })
+                }
               />
             </div>
 
@@ -1299,8 +1297,8 @@ const CmsPage: React.FC = () => {
                     ? "Unpublishing..."
                     : "Publishing..."
                   : guideToPublish?.status === "Published"
-                  ? "Unpublish"
-                  : "Publish"}
+                    ? "Unpublish"
+                    : "Publish"}
               </button>
             </div>
           </div>
@@ -1425,13 +1423,13 @@ const CmsPage: React.FC = () => {
                             setContact(prev =>
                               prev
                                 ? {
-                                    ...prev,
-                                    phones: [
-                                      ...prev.phones.slice(0, idx),
-                                      removedPhone,
-                                      ...prev.phones.slice(idx),
-                                    ],
-                                  }
+                                  ...prev,
+                                  phones: [
+                                    ...prev.phones.slice(0, idx),
+                                    removedPhone,
+                                    ...prev.phones.slice(idx),
+                                  ],
+                                }
                                 : prev
                             );
                           },

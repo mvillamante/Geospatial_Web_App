@@ -36,21 +36,19 @@ class ResidentVerificationListView(APIView):
 
     def get(self, request):
         search = request.GET.get("search", "").strip()
+        status_param = request.GET.get("status", "all").lower()
 
         citizens = CustomUser.objects.filter(role="citizen")
 
+        # SEARCH
         if search:
-            search_parts = search.split()
-            if len(search_parts) == 2:
-                first, last = search_parts
-                citizens = citizens.filter(
-                    first_name__iexact=first,
-                    last_name__iexact=last
-                )
-            else:
-                citizens = citizens.none()
+            citizens = citizens.filter(
+                Q(first_name__icontains=search) |
+                Q(last_name__icontains=search) |
+                Q(email__icontains=search)
+            )
 
-        # 🔹 Get latest verification requests
+        # Latest verification requests
         requests = (
             ResidentVerificationRequest.objects
             .select_related("user")
@@ -68,19 +66,10 @@ class ResidentVerificationListView(APIView):
         for c in citizens:
             latest_request = request_map.get(c.id)
 
-            results.append({
-                "citizen_id": c.id,
-                "first_name": c.first_name,
-                "last_name": c.last_name,
-                "barangay": c.barangay,
-                "email": c.email,
+            verification_data = None
 
-                "date_joined": c.date_joined,
-                "last_login": c.last_login,
-                "is_active": c.is_active,
-                "is_resident_verified": c.is_resident_verified,
-
-                "verification": None if not latest_request else {
+            if latest_request:
+                verification_data = {
                     "id": latest_request.id,
                     "status": latest_request.status,
                     "barangay": latest_request.barangay,
@@ -94,7 +83,36 @@ class ResidentVerificationListView(APIView):
                     "created_at": latest_request.created_at,
                     "reviewed_at": latest_request.reviewed_at
                 }
-            })
+
+            item = {
+                "citizen_id": c.id,
+                "first_name": c.first_name,
+                "last_name": c.last_name,
+                "barangay": c.barangay,
+                "email": c.email,
+                "date_joined": c.date_joined,
+                "last_login": c.last_login,
+                "is_active": c.is_active,
+                "is_resident_verified": c.is_resident_verified,
+                "verification": verification_data
+            }
+
+            # FILTERING
+            status_param = request.GET.get("status", "all").strip().lower()
+
+            if status_param == "pending":
+                if not verification_data or verification_data["status"].lower() != "pending":
+                    continue
+
+            elif status_param == "verified":
+                if not c.is_resident_verified:
+                    continue
+
+            elif status_param == "not_verified":
+                if c.is_resident_verified:
+                    continue
+
+            results.append(item)
 
         return Response({
             "count": len(results),

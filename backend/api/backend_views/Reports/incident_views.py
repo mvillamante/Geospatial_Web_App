@@ -1,3 +1,5 @@
+import time
+
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
@@ -14,9 +16,11 @@ from api.serializer import *
 from api.supa_storage import create_signed_url
 from api.models import IncidentReport
 
-from django.db import transaction
+from django.db import connection, transaction
 from django.db.models import Q
 from django.db.models.functions import Lower
+
+from ..Services.pagination import AdminUserPagination
 
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
@@ -38,6 +42,21 @@ def send_report_reply(request, pk):
         serializer = IncidentReportReplySerializer(report, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        
+        # -----------------------------
+        # Needs Info Reply Notification
+        # -----------------------------
+        
+        if report.assigned_officer:
+            Notification.objects.create(
+                type="needs_info_reply",
+                title="New Reply from Citizen",
+                body="The citizen has responded to your request for more information.",
+                report_id=report.id,
+                report_category=report.get_category_display(),
+                report_barangay=report.location_display,
+                target_user=report.assigned_officer,
+            )
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
@@ -106,15 +125,26 @@ class IncidentReportListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        qs = IncidentReport.objects.all().order_by("-created_at");
-    
+        start = time.time()
+
+        qs = (
+            IncidentReport.objects
+            .select_related("assigned_officer")
+            .order_by("-created_at")
+        )
+
         if request.user.role == "citizen":
             qs = qs.filter(user=request.user)
-        
         elif request.user.role == "lgu":
             qs = qs.filter(assigned_officer=request.user)
 
         serializer = IncidentReportListSerializer(qs, many=True)
+
+        end = time.time()
+        print("Reports count:", qs.count())
+        print("Total time:", end - start)
+        print("Queries executed:", len(connection.queries))
+
         return Response(serializer.data)
     
 class MyIncidentReportsView(generics.ListAPIView):
@@ -122,7 +152,7 @@ class MyIncidentReportsView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return IncidentReport.objects.filter(user=self.request.user).order_by("-created_at")
+        return IncidentReport.objects.select_related("assigned_officer").order_by("-created_at")
 
 class PublicVerifiedReportsView(APIView):
     permission_classes = [AllowAny]
@@ -146,15 +176,30 @@ class IncidentReportPatchView(generics.UpdateAPIView):
     def patch(self, request, *args, **kwargs):
         report = self.get_object()
         data = request.data.copy()
-        user=request.user
+        user = request.user
 
+        # -----------------------------
+        # ASSIGN TO ME FLOW
+        # -----------------------------
         if data.get("assignToMe"):
             if report.assigned_officer:
-                raise ValidationError({
-                    "assigned": "Report is already assigned."
-                })
+                raise ValidationError({"assigned": "Report is already assigned."})
+
+            # assign officer
             report.assigned_officer = user
             report.save()
+
+            # notify officer
+            notif = Notification.objects.create(
+                type="assigned",
+                title="New Assigned Report",
+                body="You have been assigned a new incident report.",
+                report_id=report.id,
+                report_category=report.get_category_display(),
+                report_barangay=report.location_display,
+                target_user=user,
+                assigned_officer=user
+            )
 
             report.refresh_from_db()
 
@@ -163,6 +208,9 @@ class IncidentReportPatchView(generics.UpdateAPIView):
                 status=status.HTTP_200_OK
             )
 
+        # -----------------------------
+        # STATUS UPDATE FLOW
+        # -----------------------------
         old_status = report.status
 
         if "status" in data and isinstance(data["status"], str):
@@ -174,14 +222,17 @@ class IncidentReportPatchView(generics.UpdateAPIView):
             raise ValidationError({
                 "verifiedRisk": "Verified critical level is required before setting this status."
             })
-            
 
         serializer = self.get_serializer(report, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+    
 
         report.refresh_from_db()
 
+        # -----------------------------
+        # STATUS CHANGE NOTIFICATION
+        # -----------------------------
         if old_status != report.status:
 
             title_map = {
@@ -193,7 +244,7 @@ class IncidentReportPatchView(generics.UpdateAPIView):
 
             notif_kwargs = {
                 "type": "report",
-                "target_user": report.user,
+                "target_user": report.user,   # reporter receives update
                 "title": title_map.get(report.status, "Report status updated"),
                 "status_from": old_status,
                 "status_to": report.status,
@@ -214,13 +265,15 @@ class IncidentReportPatchView(generics.UpdateAPIView):
             elif report.status == "rejected":
                 notif_kwargs["rejection_reason"] = report.rejection_reason
 
-            Notification.objects.create(**notif_kwargs)
+            notif = Notification.objects.create(**notif_kwargs)
+
+            print("STATUS NOTIF CREATED:", notif.id)
+            print("TARGET USER:", notif.target_user)
 
         return Response(
             IncidentReportQueueSerializer(report, context={"request": request}).data,
             status=status.HTTP_200_OK
         )
-
 
 
 

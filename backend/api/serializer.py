@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.core.cache import cache
 from datetime import timedelta
 from api.models import *
 from api.supa_storage import upload_private_photo, upload_reply_photo, create_signed_url, upload_cms_photo
@@ -104,7 +105,6 @@ class MeSerializer(serializers.ModelSerializer):
             return req.rejection_reason or ""
         return ""
 
-
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -168,7 +168,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-
 class AdminUserListSerializer(serializers.ModelSerializer):
     staff_id = serializers.ReadOnlyField()
     date_joined_display = serializers.SerializerMethodField()
@@ -225,7 +224,6 @@ class AdminUserListSerializer(serializers.ModelSerializer):
             validated_data["is_flagged"] = True
 
         return super().create(validated_data)
-
 
 class AssignUserRoleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -328,12 +326,14 @@ class IncidentReportCreateSerializer(serializers.ModelSerializer):
     
 class IncidentReportListSerializer(serializers.ModelSerializer):
     user_label = serializers.SerializerMethodField()
+    user_full_name = serializers.SerializerMethodField()
     verified_critical_level  = serializers.CharField(allow_null=True)
     photo_url = serializers.SerializerMethodField()
     category_display = serializers.SerializerMethodField()
     assigned_officer_label = serializers.SerializerMethodField()
     lgu_post = serializers.SerializerMethodField()
     assigned_officer_id = serializers.IntegerField(allow_null=True, read_only=True)
+
     lat = serializers.DecimalField(
         source="latitude",
         max_digits=10,
@@ -347,6 +347,7 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
         decimal_places=7,
         allow_null=True
     )
+
     reply_image_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -354,6 +355,7 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "user_label",
+            "user_full_name",
             "category",
             "other_category",
             "category_display",
@@ -375,13 +377,7 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
             "rejection_reason",
             "assigned_officer_id",
         ]
-        
-    def get_reply_image_url(self, obj):
-        if not obj.reply_image_url:
-            return None
-        
-        return create_signed_url(obj.reply_image_url,bucket="incident-photos",expires_in_seconds=3600)
-        
+
     def get_category_display(self, obj):
         if obj.category == "others" and obj.other_category:
             return obj.other_category.strip()
@@ -401,11 +397,20 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
             "action_taken": obj.lgu_post.get("action_taken"),
             "advisory": obj.lgu_post.get("advisory"),
             "updated_at": obj.lgu_post.get("published_at"),
-    }
-
+        }
 
     def get_user_label(self, obj):
         return f"Citizen #0{obj.user_id}"
+    
+    def get_user_full_name(self, obj):
+        u = obj.user
+
+        first = (u.first_name or "").strip().split(" ")[0]
+        last = (u.last_name or "").strip()
+
+        full_name = f"{first} {last}".strip()
+
+        return full_name or u.username
 
     def get_assigned_officer_label(self, obj):
         if not obj.assigned_officer:
@@ -415,12 +420,27 @@ class IncidentReportListSerializer(serializers.ModelSerializer):
         full = f"{fn} {ln}".strip()
         return full if full else (obj.assigned_officer.username or "Officer")
 
+    def get_signed_url_cached(self, path: str):
+        if not path:
+            return None
+
+        cache_key = f"signed_url:{path}"
+        cached = cache.get(cache_key)
+
+        if cached:
+            return cached
+
+        url = create_signed_url(path, bucket="incident-photos", expires_in_seconds=3600)
+
+        cache.set(cache_key, url, 50 * 60)
+
+        return url
+
+    def get_reply_image_url(self, obj):
+        return self.get_signed_url_cached(obj.reply_image_url)
+
     def get_photo_url(self, obj):
-        return create_signed_url(
-            obj.photo_path, 
-            bucket="incident-photos",  
-            expires_in_seconds=3600
-        )
+        return self.get_signed_url_cached(obj.photo_path)
 
 class AssignOfficerSerializer(serializers.Serializer):
     officer_id = serializers.IntegerField()
@@ -452,7 +472,6 @@ class OfficerOptionSerializer(serializers.ModelSerializer):
         if obj.username:
             return obj.username
         return f"Officer #{obj.id}"
-
 
 class IncidentReportQueueSerializer(serializers.ModelSerializer):
     reporterName = serializers.SerializerMethodField()
@@ -509,12 +528,25 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
        instance = super().update(instance, validated_data)
        return instance
     
+    def get_signed_url_cached(self, path: str):
+        if not path:
+            return None
+
+        cache_key = f"signed_url:{path}"
+        cached = cache.get(cache_key)
+
+        if cached:
+            return cached
+
+        url = create_signed_url(path, bucket="incident-photos", expires_in_seconds=3600)
+        cache.set(cache_key, url, 50 * 60)
+        return url
+
     def get_photo_url(self, obj):
-        return create_signed_url(
-            obj.photo_path, 
-            bucket="incident-photos",  
-            expires_in_seconds=3600
-        )
+        return self.get_signed_url_cached(obj.photo_path)
+    
+    def get_reply_image_url(self, obj):
+        return self.get_signed_url_cached(obj.reply_image_url)
 
     def get_lgu_post(self, obj):
         if (obj.status or "").lower() != "resolved":
@@ -562,16 +594,6 @@ class IncidentReportQueueSerializer(serializers.ModelSerializer):
 
     def get_barangay(self, obj):
         return obj.location_display
-    
-    def get_reply_image_url(self, obj):
-        if not obj.reply_image_url:
-            return None
-
-        return create_signed_url(
-            obj.reply_image_url,
-            bucket="incident-photos",
-            expires_in_seconds=3600
-        )
         
 class IncidentReportUpdateSerializer(serializers.ModelSerializer):
     verifiedRisk = serializers.CharField(source="verified_critical_level", required=False, allow_null=True)
@@ -666,13 +688,14 @@ class PublicLandingPageSerializer(serializers.Serializer):
     
 class ResearcherRequestSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField()
+    middle_name = serializers.CharField()
     last_name = serializers.CharField()
     attachment = serializers.FileField(required=False, allow_null=True)
 
     class Meta:
         model = ResearcherRequest
         fields = [
-            'id', 'first_name', 'last_name', 'email', 'orgSchool', 'purpose', 'attachment',
+            'id', 'first_name','middle_name', 'last_name', 'email', 'orgSchool', 'purpose', 'attachment',
             'status', 'rejection_reason', 'reviewed_at', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'status', 'rejection_reason', 'reviewed_at', 'created_at', 'updated_at']
@@ -780,15 +803,19 @@ class CreateStaffUserSerializer(serializers.ModelSerializer):
         
         user.save()
 
-        # Role logic
-        if role == "researcher":
-            user.role = ""
-            user.extra_roles = ["Researcher"]
-            user.add_group("Researcher")
-        else:
-            user.role = role
-            user.extra_roles = []
-            user.add_group(role.capitalize())
+       # Role logic
+        #if role == "researcher":
+        #    user.role = ""
+        #    user.extra_roles = ["Researcher"]
+        #    user.add_group("Researcher")
+        #else:
+        #    user.role = role
+        #    user.extra_roles = []
+        #    user.add_group(role.capitalize())
+            
+        user.role = role
+        user.extra_roles = []
+        user.add_group(role.capitalize())
             
         user.save()
 

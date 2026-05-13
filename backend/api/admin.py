@@ -1,5 +1,5 @@
 from django.contrib import admin
-from api.models import CustomUser, IncidentReport, ResearcherRequest, CmsGuide, EvacuationCenter, CmsGuideAttachment, QuickContactPhone, QuickContact
+from api.models import CustomUser, IncidentReport, Notification, NotificationRead, ResearcherRequest, CmsGuide, EvacuationCenter, CmsGuideAttachment, QuickContactPhone, QuickContact
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ['username', 'staff_id', 'email', 'role', 'extra_roles', 'last_login', 'is_active']
@@ -76,3 +76,34 @@ class QuickContactAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description', 'email')
 
 admin.site.register(QuickContact, QuickContactAdmin)
+
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "type",
+        "title",
+        "target_user",
+        "assigned_officer",
+        "report_id",
+        "incident_id",
+        "created_at",
+    )
+
+    list_filter = (
+        "type",
+        "event",
+        "created_at",
+    )
+
+    search_fields = (
+        "title",
+        "body",
+        "report_id",
+        "incident_id",
+        "target_user__username",
+        "assigned_officer__username",
+    )
+
+    ordering = ("-created_at",)
+
+admin.site.register(Notification, NotificationAdmin)

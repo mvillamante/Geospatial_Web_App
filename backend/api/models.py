@@ -33,7 +33,7 @@ class CustomUser(AbstractUser):
     # Custom fields
     barangay = models.CharField(max_length=100, null=True, blank=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=True, null=True)
-    extra_roles = models.JSONField(default=list, blank=True)
+    extra_roles = models.JSONField(default=list, blank=True) #remove!
     phone = models.CharField(max_length=20, unique=True, null=True, blank=True)
     staff_number = models.PositiveIntegerField(null=True, blank=True, unique=True)
     is_resident_verified = models.BooleanField(default=False)
@@ -407,6 +407,8 @@ class Notification(models.Model):
         ("incident", "Incident"),
         ("report", "Report"),
         ("verification", "Verification"),
+        ("assigned", "Assigned"),
+        ("needs_info_reply", "Needs Info Reply"),
     ]
     
     EVENT_CHOICES = [
@@ -431,6 +433,7 @@ class Notification(models.Model):
     severity_from = models.CharField(max_length=20, null=True, blank=True)
     severity_to = models.CharField(max_length=20, null=True, blank=True)
     barangay = models.CharField(max_length=120, null=True, blank=True)
+    assigned_officer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="assigned_notifications")
 
     cms_guide_id = models.BigIntegerField(null=True, blank=True)
     cms_post_id = models.CharField(max_length=50, null=True, blank=True)
@@ -491,6 +494,7 @@ class ResearcherRequest(models.Model):
     ]
 
     first_name = models.CharField(max_length=100)
+    middle_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField()
     orgSchool = models.CharField(max_length=255, blank=True, null=True)
@@ -507,7 +511,7 @@ class ResearcherRequest(models.Model):
 
     @property
     def full_name(self):
-        return f"{self.first_name} {self.last_name}"
+        return " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
         
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email}) - {self.status}"

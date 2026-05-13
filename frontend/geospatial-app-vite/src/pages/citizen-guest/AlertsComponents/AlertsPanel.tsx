@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { Search } from 'lucide-react';
-import { addOfflineReport } from "../../../services/offlineReportsDB";
+// import { addOfflineReport } from "../../../services/offlineReportsDB";
 import { useofflineReports } from "../../../hooks/useOfflineReports";
 
 
@@ -62,7 +62,7 @@ export default function AlertsPanel({
     onRefreshReports
 }: AlertsPanelProps) {
 
-    const offlineReports = useofflineReports();
+    // const offlineReports = useofflineReports();
     const hasAutoOpenedRef = useRef(false);
     const [filtersOpen, setFiltersOpen] = useState(true);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -225,12 +225,12 @@ export default function AlertsPanel({
     }
 
     const handleReportClick = async () => {
-        const reportPayload = {
-            id: Date.now(),
-            created_at: new Date().toISOString(),
-            status: "pending",
+        // const reportPayload = {
+        //     id: Date.now(),
+        //     created_at: new Date().toISOString(),
+        //     status: "pending",
 
-        }
+        // }
         onReport();
     }
 

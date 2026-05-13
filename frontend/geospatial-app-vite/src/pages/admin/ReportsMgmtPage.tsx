@@ -13,8 +13,6 @@ import LeafletMap from "../../components/ui/LeafletMap";
 import { getIncidentCategories, getIncidentLabel, type IncidentCategories } from "../../constants"
 import Pagination from "../../components/ui/Pagination";
 import type { MapReport } from "../../components/ui/LeafletMap";
-
-import ReportPreviewMap from "../../components/ui/Modals/SpecificReportPreviewModal";
 import { GrStatusCritical } from "react-icons/gr";
 
 type CriticalLevel = "low" | "moderate" | "high" | "critical";

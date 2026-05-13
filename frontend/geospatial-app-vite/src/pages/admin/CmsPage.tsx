@@ -1461,8 +1461,6 @@ const CmsPage: React.FC = () => {
                 className="btn-secondary"
                 onClick={() => {
                   if (originalContact) {
-                    const changed = JSON.stringify(contact) !== JSON.stringify(originalContact);
-
                     setContact(JSON.parse(JSON.stringify(originalContact)));
                   }
 

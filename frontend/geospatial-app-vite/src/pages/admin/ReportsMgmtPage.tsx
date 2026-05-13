@@ -13,6 +13,7 @@ import LeafletMap from "../../components/ui/LeafletMap";
 import { getIncidentCategories, getIncidentLabel, type IncidentCategories } from "../../constants"
 import Pagination from "../../components/ui/Pagination";
 import type { MapReport } from "../../components/ui/LeafletMap";
+
 import { GrStatusCritical } from "react-icons/gr";
 
 type CriticalLevel = "low" | "moderate" | "high" | "critical";
@@ -144,6 +145,7 @@ const ReportsMgmtPage: React.FC = () => {
 
   const [viewArchived, setViewArchived] = useState(false);
   const [confirmArchiveId, setConfirmArchiveId] = useState<number | null>(null);
+  const [confirmEscalateId, setConfirmEscalateId] = useState<number | null>(null);
   const [officers, setOfficers] = useState<Officer[]>([]);
   const [loadingOfficers, setLoadingOfficers] = useState(false);
   const [selectedOfficer, setSelectedOfficer] = useState<string>("");
@@ -731,29 +733,12 @@ const ReportsMgmtPage: React.FC = () => {
 
                                 <button
                                   className="dropdown-item view-details"
-                                  onClick={async () => {
+                                  onClick={() => {
                                     setOpenMapMenuId(null);
-
-                                    try {
-                                      const updated = await patchReport(report.id, {
-                                        verified_critical_level: "Critical"
-                                      });
-
-                                      setReports(prev =>
-                                        prev.map(r =>
-                                          r.id === report.id ? { ...r, ...updated } : r
-                                        )
-                                      );
-
-                                      toast.success("Report escalated to Critical status");
-
-                                    } catch (err: any) {
-                                      console.error(err);
-                                      toast.error(err?.message || "Failed to escalate report");
-                                    }
+                                    setConfirmEscalateId(report.id);
                                   }}
                                 >
-                                  <GrStatusCritical size={16} /> Escalate
+                                  <TriangleAlert size={16} /> Escalate
                                 </button>
 
                                 <button
@@ -891,47 +876,12 @@ const ReportsMgmtPage: React.FC = () => {
 
                                 <button
                                   className="dropdown-item view-details"
-                                  onClick={async () => {
+                                  onClick={() => {
                                     setOpenMenuId(null);
-                                    toast.warning("Escalate this report?", {
-                                      action: {
-                                        label: "Confirm",
-                                        onClick: async () => {
-                                          try {
-                                            const updated = await patchReport(report.id, {
-                                              verifiedRisk: "critical"
-                                            });
-
-                                            setReports(prev =>
-                                              prev.map(r =>
-                                                r.id === report.id
-                                                  ? {
-                                                    ...r,
-                                                    ...updated,
-                                                    lastUpdatedAt: new Date().toISOString()
-                                                  }
-                                                  : r
-                                              )
-                                            );
-
-                                            setLoadingReports(true);
-                                            toast.success("Report escalated to Critical status");
-                                            setLoadingReports(false);
-
-                                          } catch (err: any) {
-                                            console.error(err);
-                                            toast.error(err?.message || "Failed to escalate report");
-                                          }
-                                        }
-                                      },
-                                      cancel: {
-                                        label: "Cancel",
-                                        onClick: () => { }
-                                      }
-                                    });
+                                    setConfirmEscalateId(report.id);
                                   }}
                                 >
-                                  <TriangleAlert size={16} />Escalate
+                                  <TriangleAlert size={16} /> Escalate
                                 </button>
 
                                 <button
@@ -993,6 +943,58 @@ const ReportsMgmtPage: React.FC = () => {
                 }}
               >
                 Yes, Archive
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmEscalateId !== null && (
+        <div
+          className="modal-overlay"
+          onClick={() => setConfirmEscalateId(null)}
+        >
+          <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-title">Escalate report?</div>
+            <div className="confirm-text">
+              This will escalate the report risk level to <strong>Critical</strong>.
+            </div>
+
+            <div className="confirm-actions">
+              <button
+                className="btn secondary"
+                type="button"
+                onClick={() => setConfirmEscalateId(null)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="btn danger"
+                type="button"
+                onClick={async () => {
+                  const id = confirmEscalateId;
+                  setConfirmEscalateId(null);
+
+                  try {
+                    setLoadingReports(true);
+
+                    await patchReport(id, {
+                      verifiedRisk: "critical",
+                    });
+
+                    toast.success("Report escalated to Critical status");
+
+                    await fetchReports();
+                  } catch (err: any) {
+                    console.error(err);
+                    toast.error(err?.message || "Failed to escalate report");
+                  } finally {
+                    setLoadingReports(false);
+                  }
+                }}
+              >
+                Yes, Escalate
               </button>
             </div>
           </div>

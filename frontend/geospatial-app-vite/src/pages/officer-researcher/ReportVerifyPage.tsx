@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { getUserRoleAndDisplayName } from "../../libr/auth";
 import { getIncidentCategories, type IncidentCategories } from "../../constants"
+import { useLocation } from "react-router-dom";
 
 type ReportStatus = "pending" | "in_progress" | "resolved" | "needs_info" | "rejected";
 type RiskLevel = "low" | "moderate" | "high" | "critical";
@@ -84,6 +85,9 @@ const ReportVerifyPage: React.FC = () => {
     }
     return "low";
   };
+
+  const location = useLocation();
+  const [autoOpenReportId, setAutoOpenReportId] = useState<number | null>(null);
 
   const [whatHappened, setWhatHappened] = useState("");
   const [actionTaken, setActionTaken] = useState("");
@@ -354,12 +358,34 @@ const ReportVerifyPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const openReportId = location.state?.openReportId;
+
+    if (openReportId && reports.length > 0) {
+      setAutoOpenReportId(openReportId);
+
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, reports]);
+
+  useEffect(() => {
     setSelectedId(null);
   }, [reportTimeFilter, statusFilter, categoryFilter, scopeFilter, query]);
 
   useEffect(() => {
     setNeedsInfoMode(false);
   }, [selectedId]);
+
+  useEffect(() => {
+    if (!autoOpenReportId) return;
+
+    const target = reports.find(
+      (r) => String(r.id) === String(autoOpenReportId)
+    );
+
+    if (!target) return;
+
+    setSelectedId(target.id); 
+  }, [autoOpenReportId, reports]);
 
 
   const setVerifiedRisk = async (level: RiskLevel) => {

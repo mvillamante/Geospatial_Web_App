@@ -463,6 +463,16 @@ const NotificationPage: React.FC = () => {
             });
             return;
         }
+
+        if (n.type === "assigned" || n.type === "needs_info_reply") {
+            if (n.reportId) {
+                navigate("/main/officer/report-verify", {
+                    state: { openReportId: n.reportId }
+                });
+            }
+            return;
+        }
+
         try {
             await fetch(`${API_URL}/api/notifications/read/all/`, {
                 method: "POST",

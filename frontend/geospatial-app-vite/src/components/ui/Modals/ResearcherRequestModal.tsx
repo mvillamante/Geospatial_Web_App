@@ -101,6 +101,7 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
                 placeholder="Last Name"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
+                required
               />
             </div>
 
@@ -111,16 +112,18 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
                 placeholder="First Name"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                required
               />
             </div>
             
             <div className="form-group">
-              <label>Middle Name (Optional)</label>
+              <label>Middle Name *</label>
               <input
                 type="text"
                 placeholder="Middle Name"
                 value={middleName}
                 onChange={(e) => setMiddleName(e.target.value)}
+                required
               />
             </div>
 
@@ -131,6 +134,7 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
 
@@ -141,6 +145,7 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
                 placeholder="Institution / Organization"
                 value={institution}
                 onChange={(e) => setInstitution(e.target.value)}
+                required
               />
             </div>
 
@@ -151,6 +156,7 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value)}
                 rows={3}
+                required
               />
             </div>
 

@@ -1,7 +1,7 @@
 import '../../pages/admin/UserMgmtPage.css'
 import React, { useState, useEffect } from "react"
 import { CheckCircle, XCircle, Power, PowerOff } from "lucide-react"
-import { FiEye, FiX, FiSearch } from "react-icons/fi"
+import { FiEye, FiX, FiSearch, FiCheckCircle } from "react-icons/fi"
 import { LuEllipsis } from "react-icons/lu"
 import { format, formatDistanceToNow } from "date-fns"
 import {toast} from "sonner";
@@ -41,6 +41,9 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState(searchTerm)
+  const [statusFilter, setStatusFilter] = useState<
+    "pending" | "verified" | "not_verified" | "rejected" | "all"
+  >("pending");
 
   const [modalCitizen, setModalCitizen] = useState<Citizen | null>(null)
   const [openMenu, setOpenMenu] = useState<number | null>(null)
@@ -63,7 +66,11 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
       const search = debouncedSearch.toLowerCase().trim();
       const params = new URLSearchParams()
 
-      if (debouncedSearch) params.append("search", debouncedSearch)
+      if (debouncedSearch) {
+        params.append("search", debouncedSearch)
+      }
+
+      params.append("status", statusFilter)
 
       const res = await fetch(
         `${API_URL}/api/admin/resident-verifications/?${params.toString()}`,
@@ -86,18 +93,6 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
         is_resident_verified: c.is_resident_verified,
         verification: c.verification || null,
       }));
-
-      if (!search) {
-        // Show only pending verifications if there's no search term
-        mapped = mapped.filter(
-          (c) => c.verification && c.verification.status === "pending"
-        );
-      } else {
-        mapped = mapped.filter((c) => {
-          const fullName = c.citizen_name.toLowerCase();
-          return fullName.includes(search);
-        });
-      }
 
       setCitizens(mapped);
       const pendingCount = mapped.filter(
@@ -131,7 +126,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
     fetchCitizens()
 
-  }, [debouncedSearch])
+  }, [debouncedSearch, statusFilter])
 
   /* ===============================
       APPROVE / REJECT
@@ -210,11 +205,35 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
       {/* SEARCH BAR */}
 
       <div className="filters">
+        <div className="filters-left">
+          <div className="select-wrapper">
+            <FiCheckCircle className="select-icon" />
+
+            <select
+              value={statusFilter}
+              onChange={(e) =>
+                setStatusFilter(
+                  e.target.value as
+                    | "pending"
+                    | "verified"
+                    | "not_verified"
+                    | "rejected"
+                    | "all"
+                )
+              }
+              className="status-select"
+            >
+              <option value="pending">Pending</option>
+              <option value="verified">Verified</option>
+              <option value="not_verified">Not Verified</option>
+              <option value="rejected">Rejected</option>
+              <option value="all">All</option>
+            </select>
+          </div>
+        </div>
 
         <div className="filters-right">
-
           <div className="search-wrapper">
-
             <FiSearch className="search-icon" />
 
             <input
@@ -226,15 +245,16 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
             />
 
             {searchTerm && (
-              <button className="search-clear" onClick={() => setSearchTerm("")}>
+              <button
+                className="search-clear"
+                onClick={() => setSearchTerm("")}
+                type="button"
+              >
                 <FiX />
               </button>
             )}
-
           </div>
-
         </div>
-
       </div>
 
       {/* TABLE */}
@@ -275,7 +295,32 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
             ) : (
 
-              citizens.map((c) => (
+              citizens
+              .filter((c) => {
+                if (statusFilter === "all") return true;
+
+                const v = c.verification;
+
+                if (statusFilter === "pending") {
+                  return v?.status === "pending";
+                }
+
+                if (statusFilter === "verified") {
+                  return v?.status === "approved";
+                }
+
+                if (statusFilter === "rejected") {
+                  return v?.status === "rejected";
+                }
+
+                if (statusFilter === "not_verified") {
+                  // ONLY users with NO verification record
+                  return !v;
+                }
+
+                return true;
+              })  
+              .map((c) => (
 
                 <tr key={c.citizen_id}>
 

@@ -659,7 +659,7 @@ const CmsPage: React.FC = () => {
                                 >
                                   <Eye size={16} style={{ marginRight: 4 }} /> View Full Details
                                 </button>
-                                <button
+                                {/* <button
                                   className="dropdown-item"
                                   title="Edit"
                                   onClick={() => {
@@ -672,7 +672,7 @@ const CmsPage: React.FC = () => {
                                   }}
                                 >
                                   <Edit size={16} style={{ marginRight: 4 }} /> Edit
-                                </button>
+                                </button> */}
 
                                 <button
                                   className="dropdown-item"
@@ -975,9 +975,31 @@ const CmsPage: React.FC = () => {
             )}
 
             <div className="modal-actions">
-              <button className="btn-secondary" onClick={() => setShowViewModal(false)}>
+              <button
+                className="btn-secondary"
+                onClick={() => setShowViewModal(false)}
+              >
                 Close
               </button>
+
+              {!viewArchived && (
+                <button
+                  className="btn-primary"
+                  onClick={() => {
+                    if (!editingGuide) return;
+
+                    setOriginalAttachments(editingGuide.attachments || []);
+                    setTempEditImages([]);
+                    setDeletedAttachments([]);
+
+                    setShowViewModal(false);
+                    setShowEditModal(true);
+                  }}
+                >
+                  <Edit size={16} style={{ marginRight: 6 }} />
+                  Edit Content
+                </button>
+              )}
             </div>
           </div>
         </div>

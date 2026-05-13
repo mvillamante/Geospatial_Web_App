@@ -487,21 +487,42 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                       <td className="center actions">
                         {req.status === "pending" && (
                           rejectingId !== req.id ? (
-                            <>
+                            <div className="action-menu">
                               <button
-                                className="approve-btn"
-                                onClick={() => approveRequest(req.id)}
+                                className="menu-button"
+                                onClick={() =>
+                                  setOpenMenu(openMenu === req.id ? null : req.id)
+                                }
                               >
-                                <CheckCircle size={16} /> Approve
+                                <LuEllipsis size={18} />
                               </button>
 
-                              <button
-                                className="reject-btn"
-                                onClick={() => handleRejectStart(req.id)}
-                              >
-                                <XCircle size={16} /> Reject
-                              </button>
-                            </>
+                              {openMenu === req.id && (
+                                <div className="kebab-dropdown">
+                                  <button
+                                    className="kebab-item approve-item"
+                                    onClick={() => {
+                                      approveRequest(req.id);
+                                      setOpenMenu(null);
+                                    }}
+                                  >
+                                    <CheckCircle size={14} />
+                                    Approve
+                                  </button>
+
+                                  <button
+                                    className="kebab-item reject-item"
+                                    onClick={() => {
+                                      handleRejectStart(req.id);
+                                      setOpenMenu(null);
+                                    }}
+                                  >
+                                    <XCircle size={14} />
+                                    Reject
+                                  </button>
+                                </div>
+                              )}
+                            </div>
                           ) : (
                             <div className="reject-box">
                               <textarea
@@ -511,6 +532,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                                 rows={3}
                                 autoFocus
                               />
+
                               <div className="reject-actions">
                                 <button
                                   className="cancel-btn"
@@ -518,6 +540,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                                 >
                                   Cancel
                                 </button>
+
                                 <button
                                   className="confirm-btn"
                                   disabled={!rejectReason.trim()}
@@ -529,15 +552,16 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                             </div>
                           )
                         )}
-                      {req.status === "approved" && (
-                        <button
-                          className="view-btn"
-                          onClick={() => setModalResearcher(req)}
-                          title="View Details"
-                        >
-                          <FiEye size={18} />
-                        </button>
-                      )}
+
+                        {req.status === "approved" && (
+                          <button
+                            className="view-btn"
+                            onClick={() => setModalResearcher(req)}
+                            title="View Details"
+                          >
+                            <FiEye size={18} />
+                          </button>
+                        )}
                       </td>
                     )}
                   </tr>

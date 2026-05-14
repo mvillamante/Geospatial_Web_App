@@ -38,7 +38,7 @@ export type MapReport = {
   location_display?: string;
   lat?: number;
   lng?: number;
-  verified_critical_level: "low" | "moderate" | "high" | "critical";
+  verified_critical_level?: "low" | "moderate" | "high" | "critical";
 };
 
 type MapReportView = {
@@ -1674,14 +1674,14 @@ function LeafletMap(props: LeafletMapProps) {
 
     const filteredReports = reports
       .filter((r) => r.status !== "archived" && r.status !== "rejected")
-      .filter((r) => isWithinTimeFilter(r.created_at)) // CHANGE created_at if your date field is different
+      .filter((r) => isWithinTimeFilter(r.created_at || ""))
       .filter((r) =>
         !categoryFilter || categoryFilter === "all"
           ? true
           : normalizedCategory(
-            r.category === "others"
+            (r.category || "") === "others"
               ? r.other_category || "others"
-              : r.category
+              : r.category || ""
           ) === normalizedCategory(categoryFilter)
       );
 
@@ -1700,7 +1700,9 @@ function LeafletMap(props: LeafletMapProps) {
         "Cabuyao";
 
       const iconEmoji = getIncidentIcon(
-        r.category === "others" ? r.other_category || "others" : r.category
+        (r.category || "") === "others"
+          ? r.other_category || "others"
+          : r.category || ""
       );
 
       const colors = getSeverityColors(r);

@@ -17,8 +17,8 @@ export interface Report {
   status: ReportStatus;
   photo?: string;
 
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
 
   category?: string;
   other_category?: string | null;

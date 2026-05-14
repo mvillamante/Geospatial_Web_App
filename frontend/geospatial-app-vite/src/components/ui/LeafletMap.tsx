@@ -32,7 +32,7 @@ export type MapReport = {
   id: number;
   status?: string;
   category?: string;
-  other_category?: string;
+  other_category?: string | null;
   created_at?: string;
   barangay?: string;
   location_display?: string;

@@ -194,6 +194,13 @@ td.text-wrap {
     height: 55vh;
   }
 
+  .user-page .requests-table-wrapper table tr td,
+  .user-page .requests-table-wrapper table tr th {
+    padding: 4px 8px;
+    line-height: 1.53;
+    font-size: 0.78rem;
+  }
+
   .reportsmgmt-page .reports-table-wrapper,
   .cms-page .cms-table-wrapper {
     height: 53.6vh;

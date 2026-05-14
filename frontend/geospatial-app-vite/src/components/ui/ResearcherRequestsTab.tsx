@@ -151,7 +151,9 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
 
   const isResearcherView =
     statusFilter === "active" || statusFilter === "inactive";
-  useEffect(() => { fetchRequests(1); }, [debouncedSearch, statusFilter]);
+  useEffect(() => {
+    fetchRequests(1);
+  }, [debouncedSearch, statusFilter, pageSize]);
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchTerm);

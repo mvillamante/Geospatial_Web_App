@@ -172,7 +172,7 @@ const ReportsMgmtPage: React.FC = () => {
     return {
       id: selectedReportMap.id,
       category: selectedReportMap.category,
-      other_category: selectedReportMap.other_category ?? undefined,
+      other_category: selectedReportMap.other_category,
       lat: selectedReportMap.lat,
       lng: selectedReportMap.lng,
       status: selectedReportMap.status ?? "Pending",

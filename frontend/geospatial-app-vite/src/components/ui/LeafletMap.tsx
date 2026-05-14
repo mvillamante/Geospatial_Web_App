@@ -30,9 +30,10 @@ interface BarangayData {
 
 export type MapReport = {
   id: number;
-  status: string;
-  category: string;
+  status?: string;
+  category?: string;
   other_category?: string;
+  created_at?: string;
   barangay?: string;
   location_display?: string;
   lat?: number;

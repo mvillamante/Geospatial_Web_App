@@ -41,7 +41,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
   const [citizens, setCitizens] = useState<Citizen[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm)
+  // const [debouncedSearch, setDebouncedSearch] = useState(searchTerm)
   const rejectBoxRef = useRef<HTMLDivElement | null>(null)
   const [statusFilter, setStatusFilter] = useState<
     "pending" | "verified" | "not_verified" | "rejected" | "all"
@@ -110,15 +110,15 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
       SEARCH DEBOUNCE
   =============================== */
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    const handler = setTimeout(() => {
-      setDebouncedSearch(searchTerm)
-    }, 400)
+  //   // const handler = setTimeout(() => {
+  //   //   setDebouncedSearch(searchTerm)
+  //   // }, 400)
 
-    return () => clearTimeout(handler)
+  //   return () => clearTimeout(handler)
 
-  }, [searchTerm])
+  // }, [searchTerm])
 
   useEffect(() => {
 

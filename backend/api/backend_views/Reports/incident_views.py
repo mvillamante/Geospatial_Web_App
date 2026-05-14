@@ -152,7 +152,15 @@ class MyIncidentReportsView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return IncidentReport.objects.select_related("assigned_officer").order_by("-created_at")
+        print("CURRENT USER:", self.request.user)
+        print("USER ID:", self.request.user.id) 
+
+        return (
+            IncidentReport.objects
+            .filter(user=self.request.user)
+            .select_related("assigned_officer")
+            .order_by("-created_at")
+        )
 
 class PublicVerifiedReportsView(APIView):
     permission_classes = [AllowAny]

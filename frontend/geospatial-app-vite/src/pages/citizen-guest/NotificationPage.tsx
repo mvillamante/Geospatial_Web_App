@@ -265,14 +265,7 @@ const NotificationPage: React.FC = () => {
 
             console.log("CITIZEN COUNTS:", result);
 
-            return {
-                unreadAll: unread(base),
-                unreadOfficial: unread(official),
-                unreadIncident: unread(incident),
-                unreadReport: unread(report),
-                unreadAssigned: 0,
-                unreadReplies: 0,
-            };
+            return result;
         }
 
         if (role === "officer") {
@@ -290,7 +283,16 @@ const NotificationPage: React.FC = () => {
 
             console.log("Officer counts:", result);
 
-            return result;
+            return {
+                unreadAll: unread(reports),
+
+                unreadOfficial: 0,
+                unreadIncident: 0,
+                unreadReport: 0,
+
+                unreadAssigned: unread(assigned),
+                unreadReplies: unread(needs_info_reply),
+            };
         }
 
         return {

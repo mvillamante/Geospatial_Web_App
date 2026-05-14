@@ -688,7 +688,7 @@ class PublicLandingPageSerializer(serializers.Serializer):
     
 class ResearcherRequestSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField()
-    middle_name = serializers.CharField()
+    middle_name = serializers.CharField(required=False, allow_null=True)
     last_name = serializers.CharField()
     attachment = serializers.FileField(required=False, allow_null=True)
 

@@ -39,13 +39,21 @@ class ResidentVerificationListView(APIView):
         status_param = request.GET.get("status", "all").lower()
 
         citizens = CustomUser.objects.filter(role="citizen")
+        
+        # ACTIVE / INACTIVE SEARCH
+        if search.lower() == "active":
+            citizens = citizens.filter(is_active=True)
+
+        elif search.lower() == "inactive":
+            citizens = citizens.filter(is_active=False)
 
         # SEARCH
         if search:
             citizens = citizens.filter(
                 Q(first_name__icontains=search) |
                 Q(last_name__icontains=search) |
-                Q(email__icontains=search)
+                Q(email__icontains=search) |
+                Q(barangay__icontains=search)
             )
 
         # Latest verification requests
@@ -89,6 +97,7 @@ class ResidentVerificationListView(APIView):
                 "first_name": c.first_name,
                 "last_name": c.last_name,
                 "barangay": c.barangay,
+                "phone": c.phone,
                 "email": c.email,
                 "date_joined": c.date_joined,
                 "last_login": c.last_login,

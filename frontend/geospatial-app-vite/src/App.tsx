@@ -24,18 +24,18 @@ const App: React.FC = () => {
     return () => window.removeEventListener("online", handleOnline);
   }, []);
 
-  useEffect(() => {
-    const handleOnline = () => {
-      const token = localStorage.getItem("access_token");
-      if (!token) return;
+  // useEffect(() => {
+  //   const handleOnline = () => {
+  //     const token = localStorage.getItem("access_token");
+  //     if (!token) return;
 
-      syncOfflineReports(import.meta.env.VITE_API_URL, token);
-    };
+  //     syncOfflineReports(import.meta.env.VITE_API_URL, token);
+  //   };
 
-    window.addEventListener("online", handleOnline);
+  //   window.addEventListener("online", handleOnline);
 
-    return () => window.removeEventListener("online", handleOnline);
-  }, []);
+  //   return () => window.removeEventListener("online", handleOnline);
+  // }, []);
 
   return (
     <Router>

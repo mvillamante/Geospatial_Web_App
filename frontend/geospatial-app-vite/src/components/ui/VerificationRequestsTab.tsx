@@ -1,10 +1,10 @@
 import '../../pages/admin/UserMgmtPage.css'
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { CheckCircle, XCircle, Power, PowerOff } from "lucide-react"
 import { FiEye, FiX, FiSearch, FiCheckCircle } from "react-icons/fi"
 import { LuEllipsis } from "react-icons/lu"
 import { format, formatDistanceToNow } from "date-fns"
-import {toast} from "sonner";
+import { toast } from "sonner";
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -23,6 +23,7 @@ interface Citizen {
   citizen_id: number
   citizen_name: string
   barangay: string
+  phone: string
   date_joined: string
   lastlogin?: string
   is_active: boolean
@@ -41,6 +42,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState(searchTerm)
+  const rejectBoxRef = useRef<HTMLDivElement | null>(null)
   const [statusFilter, setStatusFilter] = useState<
     "pending" | "verified" | "not_verified" | "rejected" | "all"
   >("pending");
@@ -63,12 +65,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
       setLoading(true)
 
       const token = localStorage.getItem("access_token")
-      const search = debouncedSearch.toLowerCase().trim();
       const params = new URLSearchParams()
-
-      if (debouncedSearch) {
-        params.append("search", debouncedSearch)
-      }
 
       params.append("status", statusFilter)
 
@@ -85,6 +82,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
         citizen_id: c.citizen_id,
         citizen_name: `${c.first_name} ${c.last_name}`,
         barangay: c.barangay,
+        phone: c.phone,
         date_joined: c.date_joined,
         lastlogin: c.last_login
           ? formatDistanceToNow(new Date(c.last_login), { addSuffix: true })
@@ -126,7 +124,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
     fetchCitizens()
 
-  }, [debouncedSearch, statusFilter])
+  }, [statusFilter])
 
   /* ===============================
       APPROVE / REJECT
@@ -176,7 +174,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
       const token = localStorage.getItem("access_token")
 
-      const  res = await fetch(`${API_URL}/api/admin/users/${id}/toggle-status/`, {
+      const res = await fetch(`${API_URL}/api/admin/users/${id}/toggle-status/`, {
 
         method: "PATCH",
         headers: {
@@ -214,18 +212,18 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
               onChange={(e) =>
                 setStatusFilter(
                   e.target.value as
-                    | "pending"
-                    | "verified"
-                    | "not_verified"
-                    | "rejected"
-                    | "all"
+                  | "pending"
+                  | "verified"
+                  | "not_verified"
+                  | "rejected"
+                  | "all"
                 )
               }
               className="status-select"
             >
               <option value="pending">Pending</option>
               <option value="verified">Verified</option>
-              <option value="not_verified">Not Verified</option>
+              {/* <option value="not_verified">Not Verified</option> */}
               <option value="rejected">Rejected</option>
               <option value="all">All</option>
             </select>
@@ -238,7 +236,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
             <input
               type="text"
-              placeholder="Search citizen..."
+              placeholder="Search citizen, barangay, or status..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
@@ -267,9 +265,9 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
             <tr>
               <th className="center">Citizen</th>
               <th className="center">Barangay</th>
-              <th className="center">Date Joined</th>
-              <th className="center">Last Login</th>
-              <th className="center">Verification</th>
+              {/* <th className="center">Date Joined</th>
+              <th className="center">Last Login</th> */}
+              {/* <th className="center">Verification</th> */}
               <th className="center">Status</th>
               <th className="center">Actions</th>
             </tr>
@@ -296,46 +294,56 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
             ) : (
 
               citizens
-              .filter((c) => {
-                if (statusFilter === "all") return true;
+                .filter((c) => {
+                  const search = searchTerm.toLowerCase();
 
-                const v = c.verification;
+                  const matchesSearch =
+                    c.citizen_name.toLowerCase().includes(search) ||
+                    c.barangay?.toLowerCase().includes(search) ||
+                    (c.is_active ? "active" : "inactive")
+                      .toLowerCase()
+                      .includes(search);
 
-                if (statusFilter === "pending") {
-                  return v?.status === "pending";
-                }
+                  if (!matchesSearch) return false;
 
-                if (statusFilter === "verified") {
-                  return v?.status === "approved";
-                }
+                  if (statusFilter === "all") return true;
 
-                if (statusFilter === "rejected") {
-                  return v?.status === "rejected";
-                }
+                  const v = c.verification;
 
-                if (statusFilter === "not_verified") {
-                  // ONLY users with NO verification record
-                  return !v;
-                }
+                  if (statusFilter === "pending") {
+                    return v?.status === "pending";
+                  }
 
-                return true;
-              })  
-              .map((c) => (
+                  if (statusFilter === "verified") {
+                    return v?.status === "approved";
+                  }
 
-                <tr key={c.citizen_id}>
+                  if (statusFilter === "rejected") {
+                    return v?.status === "rejected";
+                  }
 
-                  <td className="user-name">{c.citizen_name}</td>
+                  if (statusFilter === "not_verified") {
+                    return !v;
+                  }
 
-                  <td className="center muted">{c.barangay || "---"}</td>
+                  return true;
+                })
+                .map((c) => (
 
-                  <td className="center muted">
+                  <tr key={c.citizen_id}>
+
+                    <td className="user-name">{c.citizen_name}</td>
+
+                    <td className="center muted">{c.barangay || "---"}</td>
+
+                    {/* <td className="center muted">
                     {format(new Date(c.date_joined), "MMMM d, yyyy")}
-                  </td>
+                  </td> */}
 
-                  <td className="center muted">{c.lastlogin || "Never"}</td>
+                    {/* <td className="center muted">{c.lastlogin || "Never"}</td> */}
 
-                  {/* Verification */}
-                  <td className="center">
+                    {/* Verification */}
+                    {/* <td className="center">
                     {c.verification ? (
                       c.verification.status === "pending" ? (
                         <span className="badge Pending">Pending</span>
@@ -349,66 +357,68 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
                     ) : (
                       <span className="badge Pending">Not Verified</span>
                     )}
-                  </td>
+                  </td> */}
 
-                  {/* Status */}
-                  <td className="center">
-                    {c.is_active ? (
-                      <span className="badge Approved">Active</span>
-                    ) : (
-                      <span className="badge Rejected">Inactive</span>
-                    )}
-                  </td>
-
-                  {/* Actions */}
-                  <td className="center actions">
-
-                    <div className="action-menu">
-
-                      <button
-                        className="menu-button"
-                        onClick={() =>
-                          setOpenMenu(openMenu === c.citizen_id ? null : c.citizen_id)
-                        }
-                      >
-                        <LuEllipsis size={18} />
-                      </button>
-
-                      {openMenu === c.citizen_id && (
-
-                        <div className="kebab-dropdown">
-
-                          {c.verification && (
-                            <button
-                              className="kebab-item"
-                              onClick={() => {
-                                setModalCitizen(c)
-                                setOpenMenu(null)
-                              }}
-                            >
-                              <FiEye size={14} /> View
-                            </button>
-                          )}
-
-                          <button
-                            className="kebab-item"
-                            onClick={() => toggleCitizenStatus(c.citizen_id, c.is_active)}
-                          >
-                            {c.is_active ? <PowerOff size={14} /> : <Power size={14} />}
-                            {c.is_active ? "Deactivate" : "Activate"}
-                          </button>
-
-                        </div>
-
+                    {/* Status */}
+                    <td className="center">
+                      {c.is_active ? (
+                        <span className="badge Approved">Active</span>
+                      ) : (
+                        <span className="badge Rejected">Inactive</span>
                       )}
+                    </td>
 
-                    </div>
+                    {/* Actions */}
+                    <td className="center actions">
 
-                  </td>
+                      <div className="action-menu">
 
-                </tr>
+                        <button
+                          className="menu-button"
+                          onClick={() =>
+                            setOpenMenu(openMenu === c.citizen_id ? null : c.citizen_id)
+                          }
+                        >
+                          <LuEllipsis size={18} />
+                        </button>
 
-              ))
+                        {openMenu === c.citizen_id && (
+
+                          <div className="kebab-dropdown">
+
+                            {c.verification && (
+                              <button
+                                className="dropdown-item view-details"
+                                onClick={() => {
+                                  setModalCitizen(c)
+                                  setOpenMenu(null)
+                                }}
+                              >
+                                <FiEye size={14} /> View Full Details
+                              </button>
+                            )}
+
+                            {c.verification?.status !== "pending" && (
+                              <button
+                                className="dropdown-item view-details"
+                                onClick={() => toggleCitizenStatus(c.citizen_id, c.is_active)}
+                              >
+                                {c.is_active ? <PowerOff size={14} /> : <Power size={14} />}
+                                {c.is_active ? "Deactivate" : "Activate"}
+                              </button>
+                            )}
+
+                          </div>
+
+                        )}
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+
+                ))
 
             )}
 
@@ -435,14 +445,37 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
           >
 
             <h2>Verification Details</h2>
+            <div className="info-grid">
 
-            <p><strong>Name:</strong> {modalCitizen.citizen_name}</p>
+              <div className="info-row">
+                <span className="info-label">Name</span>
+                <span className="info-value">{modalCitizen.citizen_name}</span>
+              </div>
 
-            <p><strong>Status:</strong> {modalCitizen.verification.status}</p>
+              <div className="info-row">
+                <span className="info-label">Phone</span>
+                <span className="info-value">{modalCitizen.phone || "N/A"}</span>
+              </div>
 
-            <p><strong>Address:</strong> {modalCitizen.verification.address}</p>
+              <div className="info-row">
+                <span className="info-label">Barangay</span>
+                <span className="info-value">{modalCitizen.verification.barangay}</span>
+              </div>
 
-            <p><strong>Barangay:</strong> {modalCitizen.verification.barangay}</p>
+              <div className="info-row">
+                <span className="info-label">Last Login</span>
+                <span className="info-value">{modalCitizen.lastlogin || "Never"}</span>
+              </div>
+
+              <div className="info-row">
+                <span className="info-label">Date Joined</span>
+                <span className="info-value">
+                  {format(new Date(modalCitizen.date_joined), "MMMM d, yyyy")}
+                </span>
+              </div>
+
+            </div>
+
 
             {modalCitizen.verification.id_image ? (
               <div className="modal-box">
@@ -503,7 +536,16 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
                 <button
                   className="reject-btn"
-                  onClick={() => setShowRejectBox(true)}
+                  onClick={() => {
+                    setShowRejectBox(true)
+
+                    setTimeout(() => {
+                      rejectBoxRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "nearest",
+                      })
+                    }, 100)
+                  }}
                 >
                   <XCircle size={16} /> Reject
                 </button>
@@ -514,7 +556,10 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
             {/* Only show reject box when status is pending and Reject clicked */}
             {modalCitizen.verification.status === "pending" && showRejectBox && (
-              <div className="reject-box-modal">
+              <div
+                className="reject-box-modal"
+                ref={rejectBoxRef}
+              >
                 <textarea
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}

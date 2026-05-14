@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaUser, FaChartBar, FaUniversity } from "react-icons/fa";
+import { MapPin, ShieldAlert, FileText } from "lucide-react";
 import "./LandingPage.css";
 import { useAuth } from "../context/AuthContext";
 // import { getUserRoleAndDisplayName } from "../libr/auth";
@@ -326,35 +327,49 @@ const LandingPage: React.FC = () => {
 
                 {/* Stats Section */}
                 <div className="stats-grid">
-                  <div className="stat-card">
+
+                  <div className="stat-card orange">
+                    <MapPin className="stat-bg-icon" />
+
                     <div className="stat-label">Active Hazards</div>
+
                     <div className="stat-value">
                       {stats ? stats.activeHazards : "—"}
+                    </div>
+
+                    <div className="stat-description">
+                      Ongoing monitored incidents across barangays
                     </div>
                   </div>
 
                   <div className="stat-card red">
+                    <ShieldAlert className="stat-bg-icon" />
+
                     <div className="stat-label">Critical Alerts</div>
+
                     <div className="stat-value">
                       {stats ? stats.criticalAlerts : "—"}
                     </div>
+
+                    <div className="stat-description">
+                      High-priority emergency alerts requiring response
+                    </div>
                   </div>
 
-                  <div className="stat-card">
+                  <div className="stat-card green">
+                    <FileText className="stat-bg-icon" />
+
                     <div className="stat-label">Reports Today</div>
+
                     <div className="stat-value">
                       {stats ? stats.reportsToday : "—"}
                     </div>
-                  </div>
 
-                  <div className="stat-card">
-                    <div className="stat-label">Response Time</div>
-                    <div className="stat-value">
-                      {stats && stats.avgResponseTimeMinutes > 0
-                        ? `${stats.avgResponseTimeMinutes}m`
-                        : "No data"}
+                    <div className="stat-description">
+                      Citizen submissions recorded today
                     </div>
                   </div>
+
                 </div>
               </div>
 

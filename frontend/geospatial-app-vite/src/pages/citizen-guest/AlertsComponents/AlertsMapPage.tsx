@@ -199,8 +199,10 @@ const AlertsMapPage: React.FC = () => {
         id: r.id,
         category: r.category,
         other_category: r.other_category ?? undefined,
+        barangay: r.barangay,
         lat: r.lat,
         lng: r.lng,
+        created_at: r.created_at,
         status: r.status ?? "verified",
         verified_critical_level: r.verified_critical_level ?? "low",
       }));

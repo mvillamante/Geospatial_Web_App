@@ -8,6 +8,7 @@ import {
 import { getUserRoleAndDisplayName } from "../../libr/auth";
 import { getIncidentCategories, type IncidentCategories } from "../../constants"
 import { useLocation } from "react-router-dom";
+import { toast } from "sonner";
 
 type ReportStatus = "pending" | "in_progress" | "resolved" | "needs_info" | "rejected";
 type RiskLevel = "low" | "moderate" | "high" | "critical";
@@ -75,6 +76,8 @@ function statusIcon(s: ReportStatus) {
 
 type ModalType = "none" | "resolve" | "reject";
 
+const MemoizedLeafletMap = React.memo(LeafletMap);
+
 const ReportVerifyPage: React.FC = () => {
   const [reportTimeFilter, setReportTimeFilter] = useState<"today" | "7days" | "last30days" | "last12months" | "all">("all");
 
@@ -115,7 +118,7 @@ const ReportVerifyPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<IncidentCategories | "all">("all");
 
   // sorting: newest, citizenRisk, effectiveRisk
-  const [sortMode] = useState<"newest" | "citizenRisk" | "effectiveRisk">("effectiveRisk");
+  // const [sortMode] = useState<"newest" | "citizenRisk" | "effectiveRisk">("effectiveRisk");
 
   // modals
   const [modal, setModal] = useState<ModalType>("none");
@@ -131,8 +134,6 @@ const ReportVerifyPage: React.FC = () => {
 
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const searchTimeout = useRef<number | null>(null);
-
-  const MemoizedLeafletMap = React.memo(LeafletMap);
 
   const selectedReportForMap = useMemo(() => {
     if (!selected) return null;
@@ -206,10 +207,10 @@ const ReportVerifyPage: React.FC = () => {
     return filteredByStatus.filter(r => normalizeCategory(r.category) === normalizeCategory(categoryFilter));
   }, [filteredByStatus, categoryFilter]);
 
-  const [mapReports, setMapReports] = useState<any[]>([]);
-  const filteredByScopeAndTime = useMemo(() => {
+  const mapReports = useMemo(() => {
     const now = new Date();
-    const result = filteredByCategory.filter((r) => {
+
+    return filteredByCategory.filter((r) => {
       const scope =
         scopeFilter === "all"
           ? true
@@ -218,26 +219,35 @@ const ReportVerifyPage: React.FC = () => {
             : r.assignedOfficerId == null;
 
       const reportDate = new Date(r.createdAt);
+
       if (isNaN(reportDate.getTime())) return false;
 
       const diffDays = Math.floor(
-        (now.getTime() - reportDate.getTime()) / (1000 * 60 * 60 * 24)
+        (now.getTime() - reportDate.getTime()) /
+        (1000 * 60 * 60 * 24)
       );
 
       let time = true;
+
       switch (reportTimeFilter) {
         case "today":
-          time = reportDate.toISOString().slice(0, 10) === now.toISOString().slice(0, 10);
+          time =
+            reportDate.toISOString().slice(0, 10) ===
+            now.toISOString().slice(0, 10);
           break;
+
         case "7days":
           time = diffDays <= 7;
           break;
+
         case "last30days":
           time = diffDays <= 30;
           break;
+
         case "last12months":
           time = diffDays <= 365;
           break;
+
         case "all":
         default:
           time = true;
@@ -245,23 +255,27 @@ const ReportVerifyPage: React.FC = () => {
 
       return scope && time;
     });
-
-    setMapReports(result);
-
-    return result;
-  }, [filteredByCategory, scopeFilter, reportTimeFilter, myOfficerId]);
+  }, [
+    filteredByCategory,
+    scopeFilter,
+    reportTimeFilter,
+    myOfficerId
+  ]);
 
   const filtered = useMemo(() => {
-    return [...filteredByScopeAndTime].sort((a, b) => {
-      if (sortMode === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      if (sortMode === "citizenRisk") {
-        const diff = riskOrder[b.citizenRisk] - riskOrder[a.citizenRisk];
-        return diff || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      }
-      const diff = riskOrder[effectiveRisk(b)] - riskOrder[effectiveRisk(a)];
-      return diff || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    return [...mapReports].sort((a, b) => {
+      const timeDiff =
+        new Date(b.createdAt).getTime() -
+        new Date(a.createdAt).getTime();
+
+      if (timeDiff !== 0) return timeDiff;
+
+      return (
+        riskOrder[effectiveRisk(b)] -
+        riskOrder[effectiveRisk(a)]
+      );
     });
-  }, [filteredByScopeAndTime, sortMode]);
+  }, [mapReports]);
 
   const updateReport = (id: number, patch: Partial<CitizenReport>) => {
     setReports((prev) =>
@@ -384,7 +398,7 @@ const ReportVerifyPage: React.FC = () => {
 
     if (!target) return;
 
-    setSelectedId(target.id); 
+    setSelectedId(target.id);
   }, [autoOpenReportId, reports]);
 
 
@@ -524,8 +538,6 @@ const ReportVerifyPage: React.FC = () => {
           advisory: advisory.trim() || null,
         }
       });
-
-
       setReports(prev =>
         prev.map(r =>
           r.id === selected.id
@@ -539,14 +551,14 @@ const ReportVerifyPage: React.FC = () => {
             : r
         )
       );
-
+      toast.success("Report marked as resolved")
       setModal("none");
       setWhatHappened("");
       setActionTaken("");
       setAdvisory("");
 
     } catch (e: any) {
-      alert(e.message);
+      toast.error(e.message)
     } finally {
       setLoadingAction(null);
     }
@@ -593,11 +605,11 @@ const ReportVerifyPage: React.FC = () => {
             : r
         )
       );
-
+      toast.success("Report rejected successfully")
       setModal("none");
       setRejectReason("");
     } catch (e: any) {
-      alert(e.message);
+      toast.error(e.message)
     } finally {
       setLoadingAction(null);
     }
@@ -1001,13 +1013,11 @@ const ReportVerifyPage: React.FC = () => {
                     disabled={
                       !isAssignedToMe ||
                       !isVerifiedSet ||
-                      selected.status === "in_progress" ||
-                      selected.status === "resolved"
+                      selected.status === "resolved" ||
+                      selected.status === "rejected"
                     }
                   >
-                    {loadingAction === "in_progress" && selected.status !== "in_progress"
-                      ? "Updating..."
-                      : "Mark In Progress"}
+                    Mark In Progress
                   </button>
 
                   <button
@@ -1017,6 +1027,7 @@ const ReportVerifyPage: React.FC = () => {
                       !isAssignedToMe ||
                       !isVerifiedSet ||
                       selected.status === "resolved" ||
+                      selected.status === "rejected" ||
                       selected.status === "needs_info"
                     }
                   >
@@ -1031,7 +1042,8 @@ const ReportVerifyPage: React.FC = () => {
                     disabled={
                       !isAssignedToMe ||
                       !isVerifiedSet ||
-                      selected.status === "resolved"
+                      selected.status === "resolved" ||
+                      selected.status === "rejected"
                     }
                   >
                     Mark Resolved
@@ -1043,7 +1055,9 @@ const ReportVerifyPage: React.FC = () => {
                     disabled={
                       !isAssignedToMe ||
                       !isVerifiedSet ||
-                      selected.status === "resolved"
+                      selected.status === "resolved" ||
+                      selected.status === "rejected"
+
                     }
                   >
                     Reject / Fake
@@ -1196,7 +1210,7 @@ const ReportVerifyPage: React.FC = () => {
                                   : r
                               )
                             );
-
+                            toast.success("Needs info request sent")
                             setNeedsInfoMode(false);
                           } catch (e: any) {
                             alert(e.message);

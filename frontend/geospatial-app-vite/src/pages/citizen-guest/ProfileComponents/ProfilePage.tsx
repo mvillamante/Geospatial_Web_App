@@ -241,6 +241,7 @@ const ProfilePage: React.FC = () => {
         const token = localStorage.getItem("access_token");
         const API_URL = import.meta.env.VITE_API_URL;
 
+        console.log("API URL:", API_URL);
         const res = await fetch(`${API_URL}/api/reports/my/`, {
           headers: {
             Authorization: `Bearer ${token}`,

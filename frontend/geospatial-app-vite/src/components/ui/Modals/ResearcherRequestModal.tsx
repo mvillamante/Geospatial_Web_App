@@ -117,13 +117,12 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
             </div>
             
             <div className="form-group">
-              <label>Middle Name *</label>
+              <label>Middle Name (Optional)</label>
               <input
                 type="text"
                 placeholder="Middle Name"
                 value={middleName}
                 onChange={(e) => setMiddleName(e.target.value)}
-                required
               />
             </div>
 

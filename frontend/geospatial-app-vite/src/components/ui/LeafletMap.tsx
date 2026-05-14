@@ -33,6 +33,8 @@ export type MapReport = {
   status: string;
   category: string;
   other_category?: string;
+  barangay?: string;
+  location_display?: string;
   lat?: number;
   lng?: number;
   verified_critical_level: "low" | "moderate" | "high" | "critical";
@@ -1690,7 +1692,11 @@ function LeafletMap(props: LeafletMapProps) {
 
       if (reportMarkersMap.current.has(r.id)) return;
 
-      const barangay = getBarangayFromCoords(lat, lng) || "Cabuyao";
+      const barangay =
+        r.barangay ||
+        r.location_display ||
+        getBarangayFromCoords(lat, lng) ||
+        "Cabuyao";
 
       const iconEmoji = getIncidentIcon(
         r.category === "others" ? r.other_category || "others" : r.category
@@ -1724,7 +1730,7 @@ function LeafletMap(props: LeafletMapProps) {
             <div class="popup-icon">${iconEmoji}</div>
             <h3>${formatCategoryLabel(r.category)}</h3>
             <p style="margin: 8px 0 5px 0; font-size: 12px; color: #666;">
-              Barangay ${barangay}, Cabuyao
+              ${barangay}
             </p>
             <span class="popup-pill" style="background:${colors.primary}">
               ${colors.text} RISK

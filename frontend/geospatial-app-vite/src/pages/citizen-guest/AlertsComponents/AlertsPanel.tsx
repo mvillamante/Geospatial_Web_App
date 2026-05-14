@@ -144,7 +144,7 @@ export default function AlertsPanel({
                 return normalizedReport.includes(normalizedSearch)
 
             if (barangayFilter === "my" && normalizedUserBarangay)
-                return normalizedReport === normalizedUserBarangay
+                return normalizedReport.includes(normalizedUserBarangay)
 
             return true
         })

@@ -304,9 +304,9 @@
   font-size: 0.75rem;
 }
 
-.user-page .actions button:hover {
+/* .user-page .actions button:hover {
   background: var(--off-white-bg);
-}
+} */
 
 .action-menu {
   position: relative;
@@ -525,111 +525,77 @@ td.actions .reject-box .reject-actions .confirm-btn:disabled {
 
 .user-page .verification-modal {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 25px 30px;
-  max-width: 520px;
   width: 95%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 16px 36px rgba(0,0,0,0.15);
   position: relative;
   font-size: 0.95rem;
   animation: modalScaleIn 0.25s ease-in-out;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 8px;
 }
 
-/* Modal header */
-.user-page .verification-modal h2 {
-  text-align: center;
-  font-size: 1.35rem;
-  margin: 0;
-  font-weight: 900;
-  color: #1f2937;
-  padding-bottom: 10px;
+.verification-modal h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 22px;
+  color: #111827;
 }
 
-/* Modal paragraphs */
-.user-page .verification-modal p {
-  margin: 6px 0;
-  color: #4b5563;
+.verification-modal p {
+  margin-bottom: 14px;
+  font-size: 15px;
   line-height: 1.5;
+  color: #374151;
 }
 
-/* Images */
-.user-page .verification-modal img {
-  width: 100%;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  margin: 10px 0;
-  object-fit: cover;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
 }
 
-.user-page .verification-modal img.clickable {
-  width: 20%;        
-  max-width: 400px;  
-  height: auto;       
-  cursor: pointer;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.verification-modal .info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.verification-modal .info-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.verification-modal .info-value {
+  font-size: 15px;
+  color: #111827;
+  font-weight: 500;
+}
+
+.verification-modal .modal-box {
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; */
+  margin-top: 20px;
+}
+
+.verification-modal .modal-box img {
   display: block;
-  margin: 10px auto;
-}
-
-.user-page .verification-modal img.clickable:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-}
-
-/* Enlarged image modal */
-.user-page .image-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0,0,0,0.75);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 99999;
-  cursor: pointer;
-}
-
-.user-page .image-modal-backdrop img {
-  max-width: 90%;
-  max-height: 90%;
+  max-width: 100%;
+  max-height: 300px;
   object-fit: contain;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.6);
-  cursor: default;
-}
-
-.user-page .image-modal-backdrop img:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 25px rgba(0,0,0,0.7);
-}
-
-/* X Close Button for Enlarged Image */
-.user-page .image-modal-backdrop .close-image-btn {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100000;
-}
-
-.user-page .image-modal-backdrop .close-image-btn:hover {
-  background: #f1f1f1;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  margin: 0 auto;
 }
 
 /* =========================
@@ -637,44 +603,57 @@ td.actions .reject-box .reject-actions .confirm-btn:disabled {
 ========================= */
 .user-page .verification-modal-actions {
   display: flex;
-  flex-direction: row; /* keep column for textarea above buttons */
-  gap: 8px;               /* smaller gap between items */
-  margin-top: 10px;
-  align-items: center;    /* center buttons, do not stretch */
+  gap: 12px;
+  margin-top: 24px;
 }
 
-
-.user-page .verification-modal-actions button {
+.user-page .verification-modal-actions .approve-btn,
+.user-page .verification-modal-actions .reject-btn {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 6px 12px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border-radius: 6px;
+  gap: 8px;
   border: none;
+  color: white;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: 0.2s ease;
 }
 
 .user-page .verification-modal-actions .approve-btn {
-  background-color: #68d38f;
-  color: #fff;
+  flex: 1;
+  border: none;
+  background: #16a34a;
+  color: white;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
 .user-page .verification-modal-actions .approve-btn:hover {
-  background-color: #38bd69;
+  background-color: #15803d;
   transform: scale(1.05);
 }
 
 .user-page .verification-modal-actions .reject-btn {
-  background-color: #e04f4f;
-  color: #fff;
+  flex: 1;
+  border: none;
+  background: #dc2626;
+  color: white;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
 .user-page .verification-modal-actions .reject-btn:hover {
-  background-color: #d64040;
+  background-color: #b91c1c;
   transform: scale(1.05);
 }
 
@@ -691,17 +670,23 @@ td.actions .reject-box .reject-actions .confirm-btn:disabled {
 /* close button */
 .user-page .verification-modal .close-modal {
   position: absolute;
-  top: 10px;
-  right: 15px;
-  background: none;
+  top: 16px;
+  right: 17px;
   border: none;
-  font-size: 1.2rem;
+  background: #f3f4f6;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  color: #888;
+  transition: 0.2s ease;
 }
 
+
 .user-page .verification-modal .close-modal:hover {
-  color: #333;
+  background: #e5e7eb;
 }
 
 /* animation */
@@ -710,26 +695,37 @@ td.actions .reject-box .reject-actions .confirm-btn:disabled {
   to { opacity: 1; transform: scale(1); }
 }
 
+.user-page .verification-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.user-page .verification-modal::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
 
 /* Reject box in modal */
 .reject-box-modal {
-  margin-top: 1rem;
-  padding: 1rem;
+  margin-top: 16px;
+  padding: 16px;
   border: 1px solid #f0c0c0;
-  border-radius: 8px;
+  border-radius: 12px;
   background-color: #fff5f5;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 12px;
 }
 
 .reject-textarea {
   width: 100%;
-  resize: none;
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 0.95rem;
+  min-height: 90px;
+  max-height: 120px;
+  resize: vertical;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
   font-family: inherit;
 }
 

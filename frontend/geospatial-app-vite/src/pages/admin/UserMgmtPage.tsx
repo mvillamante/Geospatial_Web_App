@@ -501,9 +501,9 @@ const UserMgmtPage: React.FC = () => {
                             </button>
                             {openMenu === user.id && (
                               <div className="kebab-dropdown">
-                                {alreadyRequested && <div className="kebab-item disabled">Pending request</div>}
+                                {alreadyRequested && <div className="dropdown-item view-details disabled">Pending request</div>}
                                 <button
-                                  className="kebab-item"
+                                  className="dropdown-item view-details"
                                   onClick={() => {
                                     setUserToToggle(user);
                                     setShowToggleModal(true);
@@ -520,7 +520,7 @@ const UserMgmtPage: React.FC = () => {
                                 )} */}
                                 {(user.role === "Researcher" || user.extra_roles?.some(r => r.toLowerCase() === "researcher")) && (
                                   <button
-                                    className="kebab-item"
+                                    className="dropdown-item view-details"
                                     onClick={() => {
                                       setChangePWModal({ userId: user.id, userName: user.name });
                                       setOpenMenu(null);

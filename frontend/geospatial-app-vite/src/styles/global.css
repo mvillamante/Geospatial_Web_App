@@ -263,7 +263,8 @@ tr:nth-last-child(-n+2) .kebab-dropdown {
 }
 
 .reportsmgmt-page .dropdown-menu,
-.cms-page .dropdown-menu {
+.cms-page .dropdown-menu,
+.user-page .dropdown-menu {
   position: absolute;
   right: 0;
   top: calc(100% + 4px);
@@ -278,7 +279,8 @@ tr:nth-last-child(-n+2) .kebab-dropdown {
 }
 
 .reportsmgmt-page .dropdown-item,
-.cms-page .dropdown-item {
+.cms-page .dropdown-item,
+.user-page .dropdown-item {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -308,7 +310,7 @@ tr:nth-last-child(-n+2) .kebab-dropdown {
 
 .reportsmgmt-page .kebab-btn:hover,
 .cms-page .kebab-btn:hover,
-.verification-table-wrapper .kebab-btn:hover {
+.user-page .kebab-btn:hover {
   background: rgba(0, 0, 0, 0.04);
 }
 
@@ -317,11 +319,13 @@ tr:nth-last-child(-n+2) .kebab-dropdown {
   background: #f5f5f5;
 }
 
-.reportsmgmt-page.kebab-item:hover {
+.reportsmgmt-page .dropdown-item:hover,
+.cms-page .dropdown-item:hover,
+.user-page .dropdown-item:hover {
   background: #ebe8e8;
 }
 
-.dropdown-item.danger {
+.reportsmgmt-page .dropdown-item.danger {
   color: #b42318;
 }
 

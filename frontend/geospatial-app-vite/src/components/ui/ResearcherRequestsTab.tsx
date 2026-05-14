@@ -19,13 +19,13 @@ export interface ResearcherRequest {
   fullName: string;
   email: string;
 
-  createdAt: string;       
-  reviewedAt?: string;    
+  createdAt: string;
+  reviewedAt?: string;
   lastlogin?: string;
 
   purpose: string;
   orgSchool: string;
-  attachment?: string;    
+  attachment?: string;
   status: RequestStatus;
 }
 
@@ -40,6 +40,8 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
   const [requests, setRequests] = useState<ResearcherRequest[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  const [loading, setLoading] = useState(true);
 
   const [rejectingId, setRejectingId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -62,7 +64,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
 
       if (debouncedSearch) params.append("search", debouncedSearch);
       if (statusFilter !== "all") params.append("status", statusFilter.toLowerCase());
-      
+
       const res = await fetch(
         `${API_URL}/api/admin/researcher_overview/?${params.toString()}`,
         {
@@ -112,6 +114,8 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
 
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -344,10 +348,10 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
               className="status-select"
             >
               <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
+              {/* <option value="approved">Approved</option> */}
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
+              <option value="rejected">Rejected</option>
             </select>
           </div>
         </div>
@@ -400,174 +404,180 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
               )}
             </tr>
           </thead>
-            <tbody>
-              {requests.length === 0 ? (
-                <tr>
-                  <td colSpan={isResearcherView ? 6 : 6} className="empty">
-                    No records found.
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={6} className="empty">
+                  Loading researchers...
+                </td>
+              </tr>
+            ) : requests.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="empty">
+                  No records found.
+                </td>
+              </tr>
+            ) : (
+              requests.map(req => (
+                <tr key={req.id}>
+                  <td className="user-name">
+                    {req.firstName} {req.lastName}
+                    <br />
+                    <small>{req.email}</small>
                   </td>
-                </tr>
-              ) : (
-                requests.map(req => (
-                  <tr key={req.id}>
-                    <td className="user-name">
-                      {req.firstName} {req.lastName}
-                      <br />
-                      <small>{req.email}</small>
-                    </td>
 
-                    <td className="center muted">{req.createdAt}</td>
-                    {isResearcherView && (
+                  <td className="center muted">{req.createdAt}</td>
+                  {isResearcherView && (
+                    <td className="center muted">
+                      {req.lastlogin || "—"}
+                    </td>
+                  )}
+                  {!isResearcherView && (
+                    <>
                       <td className="center muted">
-                        {req.lastlogin || "—"}
+                        {req.purpose || "-"}
                       </td>
-                    )}
-                    {!isResearcherView && (
-                      <>
-                        <td className="center muted">
-                          {req.purpose || "-"}
-                        </td>
-                        <td className="center muted">
-                          {req.orgSchool || "-"}
-                        </td>
-                      </>
-                    )}
+                      <td className="center muted">
+                        {req.orgSchool || "-"}
+                      </td>
+                    </>
+                  )}
 
-                    <td className="center">
-                      <span className={`badge ${req.status}`}>
-                        {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
-                      </span>
-                    </td>
-                    {isResearcherView && (
-                      <td className="right actions">
-                        <div className="action-menu">
-                          <button
-                            className="menu-button"
-                            onClick={() =>
-                              setOpenMenu(openMenu === req.id ? null : req.id)
-                            }
-                          >
-                            <LuEllipsis size={18} />
-                          </button>
+                  <td className="center">
+                    <span className={`badge ${req.status}`}>
+                      {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                    </span>
+                  </td>
+                  {isResearcherView && (
+                    <td className="right actions">
+                      <div className="action-menu">
+                        <button
+                          className="menu-button"
+                          onClick={() =>
+                            setOpenMenu(openMenu === req.id ? null : req.id)
+                          }
+                        >
+                          <LuEllipsis size={18} />
+                        </button>
 
-                          {openMenu === req.id && (
-                            <div className="kebab-dropdown">
-                              <button
-                                className="kebab-item"
-                                onClick={() => {
-                                  const action =
-                                    req.status === "active" ? "deactivate" : "activate";
+                        {openMenu === req.id && (
+                          <div className="kebab-dropdown">
+                            <button
+                              className="dropdown-item view-details"
+                              onClick={() => {
+                                const action =
+                                  req.status === "active" ? "deactivate" : "activate";
 
-                                  if (
-                                    !window.confirm(
-                                      `Are you sure you want to ${action} this researcher?`
-                                    )
+                                if (
+                                  !window.confirm(
+                                    `Are you sure you want to ${action} this researcher?`
                                   )
-                                    return;
+                                )
+                                  return;
 
-                                  toggleResearcherStatus(req.id, req.status);
-                                  setOpenMenu(null);
-                                }}
-                              >
-                                {req.status === "active" ? (
-                                  <PowerOff size={14} />
-                                ) : (
-                                  <Power size={14} />
-                                )}
-                                {req.status === "active"
-                                  ? "Deactivate"
-                                  : "Activate"}
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    )}
-                    {!isResearcherView && (
-                      <td className="center actions">
-                        {req.status === "pending" && (
-                          rejectingId !== req.id ? (
-                            <div className="action-menu">
-                              <button
-                                className="menu-button"
-                                onClick={() =>
-                                  setOpenMenu(openMenu === req.id ? null : req.id)
-                                }
-                              >
-                                <LuEllipsis size={18} />
-                              </button>
-
-                              {openMenu === req.id && (
-                                <div className="kebab-dropdown">
-                                  <button
-                                    className="kebab-item approve-item"
-                                    onClick={() => {
-                                      approveRequest(req.id);
-                                      setOpenMenu(null);
-                                    }}
-                                  >
-                                    <CheckCircle size={14} />
-                                    Approve
-                                  </button>
-
-                                  <button
-                                    className="kebab-item reject-item"
-                                    onClick={() => {
-                                      handleRejectStart(req.id);
-                                      setOpenMenu(null);
-                                    }}
-                                  >
-                                    <XCircle size={14} />
-                                    Reject
-                                  </button>
-                                </div>
+                                toggleResearcherStatus(req.id, req.status);
+                                setOpenMenu(null);
+                              }}
+                            >
+                              {req.status === "active" ? (
+                                <PowerOff size={14} />
+                              ) : (
+                                <Power size={14} />
                               )}
-                            </div>
-                          ) : (
-                            <div className="reject-box">
-                              <textarea
-                                value={rejectReason}
-                                onChange={e => setRejectReason(e.target.value)}
-                                placeholder="Enter reason..."
-                                rows={3}
-                                autoFocus
-                              />
+                              {req.status === "active"
+                                ? "Deactivate"
+                                : "Activate"}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  )}
+                  {!isResearcherView && (
+                    <td className="center actions">
+                      {req.status === "pending" && (
+                        rejectingId !== req.id ? (
+                          <div className="action-menu">
+                            <button
+                              className="menu-button"
+                              onClick={() =>
+                                setOpenMenu(openMenu === req.id ? null : req.id)
+                              }
+                            >
+                              <LuEllipsis size={18} />
+                            </button>
 
-                              <div className="reject-actions">
+                            {openMenu === req.id && (
+                              <div className="kebab-dropdown">
                                 <button
-                                  className="cancel-btn"
-                                  onClick={handleRejectCancel}
+                                  className="dropdown-item view-details"
+                                  onClick={() => {
+                                    approveRequest(req.id);
+                                    setOpenMenu(null);
+                                  }}
                                 >
-                                  Cancel
+                                  <CheckCircle size={14} />
+                                  Approve
                                 </button>
 
                                 <button
-                                  className="confirm-btn"
-                                  disabled={!rejectReason.trim()}
-                                  onClick={() => handleRejectConfirm(req.id)}
+                                  className="dropdown-item view-details"
+                                  onClick={() => {
+                                    handleRejectStart(req.id);
+                                    setOpenMenu(null);
+                                  }}
                                 >
-                                  Confirm
+                                  <XCircle size={14} />
+                                  Reject
                                 </button>
                               </div>
-                            </div>
-                          )
-                        )}
+                            )}
+                          </div>
+                        ) : (
+                          <div className="reject-box">
+                            <textarea
+                              value={rejectReason}
+                              onChange={e => setRejectReason(e.target.value)}
+                              placeholder="Enter reason..."
+                              rows={3}
+                              autoFocus
+                            />
 
-                        {req.status === "approved" && (
-                          <button
-                            className="view-btn"
-                            onClick={() => setModalResearcher(req)}
-                            title="View Details"
-                          >
-                            <FiEye size={18} />
-                          </button>
-                        )}
-                      </td>
-                    )}
-                  </tr>
-                ))
-              )}
-            </tbody>
+                            <div className="reject-actions">
+                              <button
+                                className="cancel-btn"
+                                onClick={handleRejectCancel}
+                              >
+                                Cancel
+                              </button>
+
+                              <button
+                                className="confirm-btn"
+                                disabled={!rejectReason.trim()}
+                                onClick={() => handleRejectConfirm(req.id)}
+                              >
+                                Confirm
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      )}
+
+                      {req.status === "approved" && (
+                        <button
+                          className="view-btn"
+                          onClick={() => setModalResearcher(req)}
+                          title="View Details"
+                        >
+                          <FiEye size={18} />
+                        </button>
+                      )}
+                    </td>
+                  )}
+                </tr>
+              ))
+            )}
+          </tbody>
         </table>
         {modalResearcher && (
           <div
@@ -612,9 +622,9 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
               <p><strong>Attachment:</strong></p>
               <div className="modal-box">
                 {modalResearcher.attachment ? (
-                  <img 
-                    src={signedUrls[modalResearcher.id]} 
-                    alt="Attachment" 
+                  <img
+                    src={signedUrls[modalResearcher.id]}
+                    alt="Attachment"
                     style={{ maxWidth: "100%", maxHeight: "300px", objectFit: "contain", cursor: "pointer" }}
                     onClick={() => setIsImageModalOpen(true)}
                   />

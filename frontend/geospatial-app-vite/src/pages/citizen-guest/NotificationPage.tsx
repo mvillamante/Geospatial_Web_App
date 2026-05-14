@@ -22,6 +22,13 @@ type ReportStatus = "pending" | "in_progress" | "needs_info" | "resolved" | "rej
 
 type TimeFilter = "today" | "7days" | "all";
 
+type NotificationType =
+    | "official"
+    | "incident"
+    | "report"
+    | "verification"
+    | "assigned"
+    | "needs_info_reply";
 
 
 export interface NotificationItem {
@@ -77,12 +84,12 @@ const timeAgo = (iso: string) => {
     return `${days}d ago`;
 };
 
-const severityRank = {
-    low: 1,
-    moderate: 2,
-    high: 3,
-    critical: 4
-};
+// const severityRank = {
+//     low: 1,
+//     moderate: 2,
+//     high: 3,
+//     critical: 4
+// };
 
 const NotificationPage: React.FC = () => {
     const API_URL = import.meta.env.VITE_API_URL;
@@ -213,87 +220,98 @@ const NotificationPage: React.FC = () => {
     ]);
 
     const counts = useMemo(() => {
-    const role = userRole?.toLowerCase();
+        const role = userRole?.toLowerCase();
 
-    console.log("📦 RAW notifications:", notifications);
-    console.log("👤 ROLE:", role);
-    console.log("⚙️ Preferences:", {
+        console.log("📦 RAW notifications:", notifications);
+        console.log("👤 ROLE:", role);
+        console.log("⚙️ Preferences:", {
+            receiveHazardAlerts,
+            receiveAnnouncements
+        });
+
+        let base = notifications;
+
+        if (role === "citizen") {
+            if (!receiveHazardAlerts) {
+                base = base.filter(n => n.type !== "incident");
+                console.log("🚫 After removing incidents:", base);
+            }
+
+            if (!receiveAnnouncements) {
+                base = base.filter(n => n.type !== "official");
+                console.log("🚫 After removing official:", base);
+            }
+        }
+
+        if (role === "officer") {
+            base = base.filter(n => n.type === "assigned" || n.type === "needs_info_reply");
+            console.log("👮 Officer base (reports only):", base);
+        }
+
+        const unread = (list: NotificationItem[]) =>
+            list.filter(n => n.isUnread).length;
+
+        if (role === "citizen") {
+            const official = base.filter(n => n.type === "official");
+            const incident = base.filter(n => n.type === "incident");
+            const report = base.filter(n => n.type === "report");
+
+            const result = {
+                unreadAll: unread(base),
+                unreadOfficial: unread(official),
+                unreadIncident: unread(incident),
+                unreadReport: unread(report),
+            };
+
+            console.log("CITIZEN COUNTS:", result);
+
+            return {
+                unreadAll: unread(base),
+                unreadOfficial: unread(official),
+                unreadIncident: unread(incident),
+                unreadReport: unread(report),
+                unreadAssigned: 0,
+                unreadReplies: 0,
+            };
+        }
+
+        if (role === "officer") {
+            const reports = base;
+
+            const assigned = reports.filter(n => n.type === "assigned");
+
+            const needs_info_reply = reports.filter(n => n.type === "needs_info_reply");
+
+            const result = {
+                unreadAll: unread(reports),
+                unreadAssigned: unread(assigned),
+                unreadReplies: unread(needs_info_reply),
+            };
+
+            console.log("Officer counts:", result);
+
+            return result;
+        }
+
+        return {
+            unreadAll: unread(base),
+            unreadOfficial: 0,
+            unreadIncident: 0,
+            unreadReport: 0,
+            unreadAssigned: 0,
+            unreadReplies: 0,
+        };
+
+    }, [
+        notifications,
+        userRole,
         receiveHazardAlerts,
         receiveAnnouncements
-    });
-
-    let base = notifications;
-
-    if (role === "citizen") {
-        if (!receiveHazardAlerts) {
-            base = base.filter(n => n.type !== "incident");
-            console.log("🚫 After removing incidents:", base);
-        }
-
-        if (!receiveAnnouncements) {
-            base = base.filter(n => n.type !== "official");
-            console.log("🚫 After removing official:", base);
-        }
-    }
-
-    if (role === "officer") {
-        base = base.filter(n => n.type === "assigned" || n.type === "needs_info_reply");
-        console.log("👮 Officer base (reports only):", base);
-    }
-
-    const unread = (list: NotificationItem[]) =>
-        list.filter(n => n.isUnread).length;
-
-    if (role === "citizen") {
-        const official = base.filter(n => n.type === "official");
-        const incident = base.filter(n => n.type === "incident");
-        const report = base.filter(n => n.type === "report");
-
-        const result = {
-            unreadAll: unread(base),
-            unreadOfficial: unread(official),
-            unreadIncident: unread(incident),
-            unreadReport: unread(report),
-        };
-
-        console.log("CITIZEN COUNTS:", result);
-
-        return result;
-    }
-
-    if (role === "officer") {
-        const reports = base;
-
-        const assigned = reports.filter(n => n.type === "assigned");
-
-        const needs_info_reply = reports.filter(n => n.type === "needs_info_reply");
-
-        const result = {
-            unreadAll: unread(reports),
-            unreadAssigned: unread(assigned),
-            unreadReplies: unread(needs_info_reply),
-        };
-
-        console.log("Officer counts:", result);
-
-        return result;
-    }
-
-    const fallback = {
-        unreadAll: unread(base),
-    };
-
-    return fallback;
-}, [
-    notifications,
-    userRole,
-    receiveHazardAlerts,
-    receiveAnnouncements
-]);
+    ]);
 
     const listForPage = useMemo(() => {
 
-        const role = userRole?.toLowerCase();
+        // const role = userRole?.toLowerCase();
         let base = filteredNotifications;
 
         if (activeTab !== "all") {
@@ -525,7 +543,7 @@ const NotificationPage: React.FC = () => {
     //     incidentOnlyHighCritical(grouped.incident).length === 0 &&
     //     grouped.report.length === 0;
 
-    
+
     return (
         <div className="notif-page">
             <div className="notif-header">
@@ -628,10 +646,10 @@ const NotificationPage: React.FC = () => {
                 ) : (
                     <div className="notif-section">
                         {activeTab !== "all" && (
-                        <div className="notif-section-header">
-                            <h2>{sectionHeaderTitle}</h2>
-                            <span className="muted">{listForPage.length}</span>
-                        </div>
+                            <div className="notif-section-header">
+                                <h2>{sectionHeaderTitle}</h2>
+                                <span className="muted">{listForPage.length}</span>
+                            </div>
                         )}
 
                         <div className="notif-list">
@@ -720,7 +738,7 @@ function NotificationCard({ n, userRole, onOpen }: { n: NotificationItem; userRo
     const incidentUI = isIncident ? formatIncidentLine(n) : null;
 
     const isReport = n.type === "report";
-    const reportUI = isReport ? formatReportLine(n) : null;
+    const reportUI = isReport ? formatReportLine(n, userRole) : null;
 
     const pill = (() => {
         if (n.type === "official") return <span className="pill pill-official">Official</span>
@@ -799,7 +817,7 @@ function NotificationCard({ n, userRole, onOpen }: { n: NotificationItem; userRo
                 ? n.body ??
                 n.title ??
                 "Report update."
-            : citizenMessages[status] ??
+                : (status ? citizenMessages[status] : undefined) ??
                 n.body ??
                 n.title ??
                 "";

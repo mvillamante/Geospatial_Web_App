@@ -38,7 +38,7 @@ export type MapReport = {
   location_display?: string;
   lat?: number;
   lng?: number;
-  verified_critical_level?: "low" | "moderate" | "high" | "critical";
+  verified_critical_level?: "low" | "moderate" | "high" | "critical" | null;
 };
 
 type MapReportView = {

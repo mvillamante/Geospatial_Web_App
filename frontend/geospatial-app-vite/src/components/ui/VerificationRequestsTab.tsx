@@ -65,20 +65,26 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
     onConfirm: null,
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const pageSize = 10;
+
   /* ===============================
       FETCH CITIZENS
   =============================== */
 
-  const fetchCitizens = async () => {
+  const fetchCitizens = async (page = 1) => {
 
     try {
 
       setLoading(true)
 
       const token = localStorage.getItem("access_token")
-      const params = new URLSearchParams()
+      const params = new URLSearchParams();
 
-      params.append("status", statusFilter)
+      params.append("status", statusFilter);
+      params.append("page", page.toString());
+      params.append("page_size", pageSize.toString());
 
       const res = await fetch(
         `${API_URL}/api/admin/resident-verifications/?${params.toString()}`,
@@ -104,6 +110,11 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
       }));
 
       setCitizens(mapped);
+
+      setCurrentPage(page);
+      setTotalPages(Math.ceil(data.count / pageSize));
+
+
       const pendingCount = mapped.filter(
         (c) => c.verification?.status === "pending"
       ).length;
@@ -132,10 +143,8 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
   // }, [searchTerm])
 
   useEffect(() => {
-
-    fetchCitizens()
-
-  }, [statusFilter])
+    fetchCitizens(1);
+  }, [statusFilter]);
 
   const openConfirm = (title: string, message: string, onConfirm: () => void) => {
     setConfirmModal({
@@ -242,6 +251,42 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
     return true;
   });
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    fetchCitizens(page);
+  };
+
+  const renderPagination = () => (
+    <div className="pagination-wrapper">
+      <div className="pagination">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Prev
+        </button>
+
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+          <button
+            key={n}
+            className={n === currentPage ? "active" : ""}
+            onClick={() => handlePageChange(n)}
+          >
+            {n}
+          </button>
+        ))}
+
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+
   /* ===============================
       TABLE
   =============================== */
@@ -494,6 +539,8 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
       </div>
 
+      {renderPagination()}
+
       {/* ===============================
           MODAL
       =============================== */}
@@ -677,48 +724,48 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
         </div>
 
       )}
-    {confirmModal.open && (
-      <div className="verification-modal-backdrop">
-        <div className="verification-modal" style={{ maxWidth: "420px" }}>
-          <h2>{confirmModal.title}</h2>
+      {confirmModal.open && (
+        <div className="verification-modal-backdrop">
+          <div className="verification-modal" style={{ maxWidth: "420px" }}>
+            <h2>{confirmModal.title}</h2>
 
-          <p style={{ marginTop: "10px" }}>
-            {confirmModal.message}
-          </p>
+            <p style={{ marginTop: "10px" }}>
+              {confirmModal.message}
+            </p>
 
-          <div className="verification-modal-actions" style={{ marginTop: "20px" }}>
-            <button
-              className="cancel-btn"
-              onClick={() =>
-                setConfirmModal({
-                  open: false,
-                  title: "",
-                  message: "",
-                  onConfirm: null,
-                })
-              }
-            >
-              Cancel
-            </button>
+            <div className="verification-modal-actions" style={{ marginTop: "20px" }}>
+              <button
+                className="cancel-btn"
+                onClick={() =>
+                  setConfirmModal({
+                    open: false,
+                    title: "",
+                    message: "",
+                    onConfirm: null,
+                  })
+                }
+              >
+                Cancel
+              </button>
 
-            <button
-              className="confirm-btn"
-              onClick={() => {
-                confirmModal.onConfirm?.();
-                setConfirmModal({
-                  open: false,
-                  title: "",
-                  message: "",
-                  onConfirm: null,
-                });
-              }}
-            >
-              Confirm
-            </button>
+              <button
+                className="confirm-btn"
+                onClick={() => {
+                  confirmModal.onConfirm?.();
+                  setConfirmModal({
+                    open: false,
+                    title: "",
+                    message: "",
+                    onConfirm: null,
+                  });
+                }}
+              >
+                Confirm
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
     </>
   )
 

@@ -652,7 +652,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                         </button>
 
                         <button
-                          className="confirm-reject-btn"
+                          className="confirm-btn"
                           disabled={!rejectReason.trim()}
                           onClick={() => {
                             openConfirm(

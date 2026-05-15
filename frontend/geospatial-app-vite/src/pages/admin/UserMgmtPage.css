@@ -736,8 +736,7 @@ td.actions .reject-box .reject-actions .confirm-btn:disabled {
 }
 
 .cancel-btn,
-.confirm-btn,
-.confirm-reject-btn {
+.confirm-btn {
   padding: 0.5rem 1rem;
   border-radius: 6px;
   border: none;
@@ -754,32 +753,18 @@ td.actions .reject-box .reject-actions .confirm-btn:disabled {
   background-color: #b3b3b3;
 }
 
-.confirm-reject-btn {
+.confirm-btn {
   background-color: #e53e3e;
   color: #fff;
 }
 
-.confirm-reject-btn:disabled {
+.confirm-btn:disabled {
   background-color: #f5a6a6;
   cursor: not-allowed;
 }
 
-.confirm-reject-btn:hover:not(:disabled) {
-  background-color: #c53030;
-}
-
-.confirm-btn {
-  background-color: #38a169;
-  color: #fff;
-}
-
-.confirm-btn:disabled {
-  background-color: #9ae6b4;
-  cursor: not-allowed;
-}
-
 .confirm-btn:hover:not(:disabled) {
-  background-color: #2f855a;
+  background-color: #c53030;
 }
 
 .user-page .kebab-item{

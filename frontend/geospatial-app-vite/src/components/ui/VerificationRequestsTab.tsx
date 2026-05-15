@@ -44,7 +44,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
   // const [debouncedSearch, setDebouncedSearch] = useState(searchTerm)
   const rejectBoxRef = useRef<HTMLDivElement | null>(null)
   const [statusFilter, setStatusFilter] = useState<
-    "pending" | "verified" | "not_verified" | "rejected" | "all"
+    "pending" | "active" | "inactive" | "rejected"
   >("pending");
 
   const [modalCitizen, setModalCitizen] = useState<Citizen | null>(null)
@@ -53,6 +53,17 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
   const [rejectReason, setRejectReason] = useState("")
   const [showRejectBox, setShowRejectBox] = useState(false)
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    onConfirm: (() => void) | null;
+  }>({
+    open: false,
+    title: "",
+    message: "",
+    onConfirm: null,
+  });
 
   /* ===============================
       FETCH CITIZENS
@@ -125,6 +136,15 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
     fetchCitizens()
 
   }, [statusFilter])
+
+  const openConfirm = (title: string, message: string, onConfirm: () => void) => {
+    setConfirmModal({
+      open: true,
+      title,
+      message,
+      onConfirm,
+    });
+  };
 
   /* ===============================
       APPROVE / REJECT
@@ -213,19 +233,17 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
                 setStatusFilter(
                   e.target.value as
                   | "pending"
-                  | "verified"
-                  | "not_verified"
+                  | "active"
+                  | "inactive"
                   | "rejected"
-                  | "all"
                 )
               }
               className="status-select"
             >
               <option value="pending">Pending</option>
-              <option value="verified">Verified</option>
-              {/* <option value="not_verified">Not Verified</option> */}
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
               <option value="rejected">Rejected</option>
-              <option value="all">All</option>
             </select>
           </div>
         </div>
@@ -306,7 +324,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
                   if (!matchesSearch) return false;
 
-                  if (statusFilter === "all") return true;
+                  // if (statusFilter === "all") return true;
 
                   const v = c.verification;
 
@@ -314,16 +332,16 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
                     return v?.status === "pending";
                   }
 
-                  if (statusFilter === "verified") {
-                    return v?.status === "approved";
+                  if (statusFilter === "active") {
+                    return c.is_active === true;
+                  }
+
+                  if (statusFilter === "inactive") {
+                    return c.is_active === false;
                   }
 
                   if (statusFilter === "rejected") {
                     return v?.status === "rejected";
-                  }
-
-                  if (statusFilter === "not_verified") {
-                    return !v;
                   }
 
                   return true;
@@ -386,22 +404,28 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
                           <div className="kebab-dropdown">
 
-                            {c.verification && (
-                              <button
-                                className="dropdown-item view-details"
-                                onClick={() => {
-                                  setModalCitizen(c)
-                                  setOpenMenu(null)
-                                }}
-                              >
-                                <FiEye size={14} /> View Full Details
-                              </button>
-                            )}
+                            <button
+                              className="dropdown-item view-details"
+                              onClick={() => {
+                                setModalCitizen(c)
+                                setOpenMenu(null)
+                              }}
+                            >
+                              <FiEye size={14} /> View Full Details
+                            </button>
 
                             {c.verification?.status !== "pending" && (
                               <button
                                 className="dropdown-item view-details"
-                                onClick={() => toggleCitizenStatus(c.citizen_id, c.is_active)}
+                                onClick={() => {
+                                  const action = c.is_active ? "Deactivate" : "Activate";
+
+                                  openConfirm(
+                                    `${action} Citizen`,
+                                    `Are you sure you want to ${action.toLowerCase()} ${c.citizen_name}?`,
+                                    () => toggleCitizenStatus(c.citizen_id, c.is_active)
+                                  );
+                                }}
                               >
                                 {c.is_active ? <PowerOff size={14} /> : <Power size={14} />}
                                 {c.is_active ? "Deactivate" : "Activate"}
@@ -527,9 +551,13 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
                 <button
                   className="approve-btn"
-                  onClick={() =>
-                    updateStatus(modalCitizen.verification!.id, "approve")
-                  }
+                  onClick={() => {
+                    openConfirm(
+                      "Approve Verification",
+                      `Are you sure you want to approve ${modalCitizen.citizen_name}'s verification?`,
+                      () => updateStatus(modalCitizen.verification!.id, "approve")
+                    );
+                  }}
                 >
                   <CheckCircle size={16} /> Approve
                 </button>
@@ -581,9 +609,13 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
                   <button
                     className="confirm-btn"
                     disabled={!rejectReason.trim()}
-                    onClick={() =>
-                      updateStatus(modalCitizen.verification!.id, "reject")
-                    }
+                    onClick={() => {
+                      openConfirm(
+                        "Reject Verification",
+                        `Are you sure you want to reject ${modalCitizen.citizen_name}'s verification?`,
+                        () => updateStatus(modalCitizen.verification!.id, "reject")
+                      );
+                    }}
                   >
                     Confirm Reject
                   </button>
@@ -603,7 +635,48 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
         </div>
 
       )}
+    {confirmModal.open && (
+      <div className="verification-modal-backdrop">
+        <div className="verification-modal" style={{ maxWidth: "420px" }}>
+          <h2>{confirmModal.title}</h2>
 
+          <p style={{ marginTop: "10px" }}>
+            {confirmModal.message}
+          </p>
+
+          <div className="verification-modal-actions" style={{ marginTop: "20px" }}>
+            <button
+              className="cancel-btn"
+              onClick={() =>
+                setConfirmModal({
+                  open: false,
+                  title: "",
+                  message: "",
+                  onConfirm: null,
+                })
+              }
+            >
+              Cancel
+            </button>
+
+            <button
+              className="confirm-btn"
+              onClick={() => {
+                confirmModal.onConfirm?.();
+                setConfirmModal({
+                  open: false,
+                  title: "",
+                  message: "",
+                  onConfirm: null,
+                });
+              }}
+            >
+              Confirm
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </>
   )
 

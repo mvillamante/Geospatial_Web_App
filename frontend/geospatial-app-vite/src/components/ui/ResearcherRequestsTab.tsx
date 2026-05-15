@@ -1,7 +1,7 @@
 import '../../pages/admin/UserMgmtPage.css';
 import { FiCheckCircle, FiEye, FiSearch, FiX } from "react-icons/fi";
 import { LuEllipsis } from "react-icons/lu";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef} from "react";
 import { CheckCircle, XCircle, Power, PowerOff } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { toast } from "sonner";
@@ -27,6 +27,8 @@ export interface ResearcherRequest {
   orgSchool: string;
   attachment?: string;
   status: RequestStatus;
+
+  rejectionReason?: string;
 }
 
 interface Props {
@@ -53,6 +55,20 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
   const [modalResearcher, setModalResearcher] = useState<ResearcherRequest | null>(null);
   const [signedUrls, setSignedUrls] = useState<Record<number, string>>({});
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
+  const rejectBoxRef = useRef<HTMLDivElement | null>(null);
+  const [showRejectBox, setShowRejectBox] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<{
+  open: boolean;
+  title: string;
+  message: string;
+  onConfirm: (() => void) | null;
+}>({
+  open: false,
+  title: "",
+  message: "",
+  onConfirm: null,
+});
 
   // Fetch requests
   const fetchRequests = async (page = 1) => {
@@ -103,6 +119,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
         purpose: r.purpose,
         orgSchool: r.orgSchool,
         attachment: r.attachment || undefined,
+        rejectionReason: r.rejection_reason || r.reason || undefined,
       }));
 
       setRequests(mapped);
@@ -165,11 +182,6 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
   const toggleResearcherStatus = async (id: number, currentStatus: RequestStatus) => {
     const action = currentStatus === "active" ? "deactivate" : "activate";
 
-    const confirmed = window.confirm(
-      `Are you sure you want to ${action} this researcher?`
-    );
-    if (!confirmed) return;
-
     try {
       const token = localStorage.getItem("access_token");
 
@@ -188,9 +200,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
       await fetchRequests(currentPage);
 
       toast.success(`Successfully ${action}d the researcher.`);
-
       setOpenMenu(null);
-
     } catch (err) {
       console.error(err);
       toast.error("Failed to update researcher status.");
@@ -205,13 +215,19 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
   //   return password;
   // };
 
+  const openConfirm = (title: string, message: string, onConfirm: () => void) => {
+    setConfirmModal({
+      open: true,
+      title,
+      message,
+      onConfirm,
+    });
+  };
+
   // Approve a request
   const approveRequest = async (id: number) => {
     const req = requests.find(r => r.id === id);
     if (!req) return;
-
-    const confirmed = window.confirm(`Are you sure you want to approve the request from ${req.fullName}?`);
-    if (!confirmed) return;
 
     // const tempPassword = generateTempPassword();
 
@@ -467,17 +483,25 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                             <button
                               className="dropdown-item view-details"
                               onClick={() => {
-                                const action =
-                                  req.status === "active" ? "deactivate" : "activate";
+                                setModalResearcher(req);
+                                setOpenMenu(null);
+                              }}
+                            >
+                              <FiEye size={14} /> View Full Details
+                            </button>
+                            
+                            <button
+                              className="dropdown-item view-details"
+                              onClick={() => {
+                                const isActive = req.status === "active";
+                                const action = isActive ? "Deactivate" : "Activate";
 
-                                if (
-                                  !window.confirm(
-                                    `Are you sure you want to ${action} this researcher?`
-                                  )
-                                )
-                                  return;
+                                openConfirm(
+                                  `${action} Researcher`,
+                                  `Are you sure you want to ${action.toLowerCase()} ${req.fullName}?`,
+                                  () => toggleResearcherStatus(req.id, req.status)
+                                );
 
-                                toggleResearcherStatus(req.id, req.status);
                                 setOpenMenu(null);
                               }}
                             >
@@ -486,9 +510,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                               ) : (
                                 <Power size={14} />
                               )}
-                              {req.status === "active"
-                                ? "Deactivate"
-                                : "Activate"}
+                              {req.status === "active" ? "Deactivate" : "Activate"}
                             </button>
                           </div>
                         )}
@@ -497,7 +519,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                   )}
                   {!isResearcherView && (
                     <td className="center actions">
-                      {req.status === "pending" && (
+                      {(req.status === "pending" || req.status === "rejected") && (
                         rejectingId !== req.id ? (
                           <div className="action-menu">
                             <button
@@ -508,29 +530,16 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                             >
                               <LuEllipsis size={18} />
                             </button>
-
                             {openMenu === req.id && (
                               <div className="kebab-dropdown">
                                 <button
                                   className="dropdown-item view-details"
                                   onClick={() => {
-                                    approveRequest(req.id);
+                                    setModalResearcher(req);
                                     setOpenMenu(null);
                                   }}
                                 >
-                                  <CheckCircle size={14} />
-                                  Approve
-                                </button>
-
-                                <button
-                                  className="dropdown-item view-details"
-                                  onClick={() => {
-                                    handleRejectStart(req.id);
-                                    setOpenMenu(null);
-                                  }}
-                                >
-                                  <XCircle size={14} />
-                                  Reject
+                                  <FiEye size={14} /> View Full Details
                                 </button>
                               </div>
                             )}
@@ -607,53 +616,180 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
 
               <p><strong>Created At:</strong> {modalResearcher.createdAt}</p>
 
+              {modalResearcher.status === "rejected" && (
+                <div className="modal-box-grp">
+                  <p><strong>Rejection Reason:</strong></p>
+                  <div className="modal-box">
+                    {modalResearcher.rejectionReason || "No reason provided."}
+                  </div>
+                </div>
+              )}
               {modalResearcher.reviewedAt && (
                 <p><strong>Reviewed At:</strong> {modalResearcher.reviewedAt}</p>
               )}
 
-              <p><strong>Purpose:</strong></p>
-              <div className="modal-box">
-                {modalResearcher.purpose || "No purpose provided."}
+              <div className="modal-box-grp">
+                <p><strong>Purpose:</strong></p>
+                <div className="modal-box">
+                  {modalResearcher.purpose || "No purpose provided."}
+                </div>
               </div>
 
-              <p><strong>Organization / School:</strong></p>
-              <div className="modal-box">
-                {modalResearcher.orgSchool || "Not specified."}
+              <div className="modal-box-grp">
+                <p><strong>Organization / School:</strong></p>
+                <div className="modal-box">
+                  {modalResearcher.orgSchool || "Not specified."}
+                </div>
               </div>
 
-              <p><strong>Attachment:</strong></p>
-              <div className="modal-box">
-                {modalResearcher.attachment ? (
-                  <img
-                    src={signedUrls[modalResearcher.id]}
-                    alt="Attachment"
-                    style={{ maxWidth: "100%", maxHeight: "300px", objectFit: "contain", cursor: "pointer" }}
-                    onClick={() => setIsImageModalOpen(true)}
-                  />
-                ) : "No attachment uploaded."}
-              </div>
-              {isImageModalOpen && modalResearcher && (
-                <div
-                  className="image-modal-backdrop"
-                  onClick={() => setIsImageModalOpen(false)}
-                >
-                  <button
-                    className="close-image-btn"
+              <div className="modal-box-grp">
+                <p><strong>Attachment:</strong></p>
+                <div className="modal-box">
+                  {modalResearcher.attachment ? (
+                    <img
+                      src={signedUrls[modalResearcher.id]}
+                      alt="Attachment"
+                      style={{ maxWidth: "100%", maxHeight: "300px", objectFit: "contain", cursor: "pointer" }}
+                      onClick={() => setIsImageModalOpen(true)}
+                    />
+                  ) : "No attachment uploaded."}
+                </div>
+                {isImageModalOpen && modalResearcher && (
+                  <div
+                    className="image-modal-backdrop"
                     onClick={() => setIsImageModalOpen(false)}
                   >
-                    <FiX size={20} />
-                  </button>
+                    <button
+                      className="close-image-btn"
+                      onClick={() => setIsImageModalOpen(false)}
+                    >
+                      <FiX size={20} />
+                    </button>
 
-                  <img
-                    src={signedUrls[modalResearcher.id]}
-                    alt="Enlarged Attachment"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
+                    <img
+                      src={signedUrls[modalResearcher.id]}
+                      alt="Enlarged Attachment"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* APPROVE / REJECT ACTIONS */}
+              {modalResearcher.status === "pending" && (
+                <>
+                  <div className="verification-modal-actions">
+
+                    <button
+                      className="approve-btn"
+                      onClick={() => {
+                        openConfirm(
+                          "Approve Request",
+                          `Are you sure you want to approve ${modalResearcher.fullName}?`,
+                          () => approveRequest(modalResearcher.id)
+                        );
+                      }}
+                    >
+                      <CheckCircle size={16} /> Approve
+                    </button>
+
+                    <button
+                      className="reject-btn"
+                      onClick={() => {
+                        setShowRejectBox(true);
+
+                        setTimeout(() => {
+                          rejectBoxRef.current?.scrollIntoView({
+                            behavior: "smooth",
+                            block: "nearest",
+                          });
+                        }, 100);
+                      }}
+                    >
+                      <XCircle size={16} /> Reject
+                    </button>
+
+                  </div>
+
+                  {showRejectBox && (
+                    <div
+                      className="reject-box-modal"
+                      ref={rejectBoxRef}
+                    >
+                      <textarea
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        placeholder="Enter rejection reason..."
+                        className="reject-textarea"
+                        rows={3}
+                        autoFocus
+                      />
+
+                      <div className="reject-actions">
+                        <button
+                          className="cancel-btn"
+                          onClick={() => {
+                            setShowRejectBox(false);
+                            setRejectReason("");
+                          }}
+                        >
+                          Cancel
+                        </button>
+
+                        <button
+                          className="confirm-btn"
+                          disabled={!rejectReason.trim()}
+                          onClick={() => {
+                            openConfirm(
+                              "Reject Request",
+                              "Are you sure you want to reject this request?",
+                              () => rejectRequest(modalResearcher.id, rejectReason)
+                            );
+                            setShowRejectBox(false);
+                          }}
+                        >
+                          Confirm Reject
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </> 
               )}
             </div>
           </div>
         )}
+            {confirmModal.open && (
+              <div className="verification-modal-backdrop">
+                <div className="verification-modal" style={{ maxWidth: "420px" }}>
+                  <h2>{confirmModal.title}</h2>
+
+                  <p style={{ marginTop: "10px" }}>
+                    {confirmModal.message}
+                  </p>
+
+                  <div className="verification-modal-actions" style={{ marginTop: "20px" }}>
+                    <button
+                      className="cancel-btn"
+                      onClick={() =>
+                        setConfirmModal({ open: false, title: "", message: "", onConfirm: null })
+                      }
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      className="confirm-btn"
+                      onClick={() => {
+                        confirmModal.onConfirm?.();
+                        setConfirmModal({ open: false, title: "", message: "", onConfirm: null });
+                      }}
+                    >
+                      Confirm
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
       </div>
       {renderPagination()}
     </>

@@ -581,6 +581,15 @@ td.actions .reject-box .reject-actions .confirm-btn:disabled {
   font-weight: 500;
 }
 
+.verification-modal .modal-box-grp {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.verification-modal .modal-box-grp .modal-box {
+  padding-left: 20px;
+}
+
 .verification-modal .modal-box {
   display: flex;
   flex-direction: column;

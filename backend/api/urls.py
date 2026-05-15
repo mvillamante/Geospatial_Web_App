@@ -43,6 +43,7 @@ urlpatterns = [
     path('get-signed-url/', get_signed_url, name='get_signed_url'),
 
     # Auth_Views
+    path("change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("token/", MyTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("register/", RegisterView.as_view(), name="auth_register"),
     path("current_user/", get_current_user, name="get_current_user"),

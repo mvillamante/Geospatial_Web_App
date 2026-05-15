@@ -16,6 +16,10 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from api.models import CustomUser
 from api.serializer import *
 
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
 from supabase import create_client, Client
 
 # Supabase client initialization
@@ -181,3 +185,42 @@ class MeView(RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
     
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        current_password = request.data.get("current_password", "")
+        new_password = request.data.get("new_password", "")
+
+        # Validate inputs
+        if not current_password or not new_password:
+            return Response(
+                {"error": "Both current_password and new_password are required"},
+                status=400
+            )
+
+        # Check current password
+        if not user.check_password(current_password):
+            return Response(
+                {"error": "Current password is incorrect"},
+                status=400
+            )
+
+        # Validate new password
+        if len(new_password) < 8:
+            return Response(
+                {"error": "New password must be at least 8 characters"},
+                status=400
+            )
+
+        # Set new password
+        user.set_password(new_password)
+        user.save()
+
+        return Response(
+            {"message": "Password updated successfully"},
+            status=200
+        )

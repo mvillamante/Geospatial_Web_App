@@ -581,15 +581,6 @@ td.actions .reject-box .reject-actions .confirm-btn:disabled {
   font-weight: 500;
 }
 
-.verification-modal .modal-box-grp {
-  display: block;
-  margin-bottom: 10px;
-}
-
-.verification-modal .modal-box-grp .modal-box {
-  padding-left: 20px;
-}
-
 .verification-modal .modal-box {
   display: flex;
   flex-direction: column;
@@ -745,7 +736,8 @@ td.actions .reject-box .reject-actions .confirm-btn:disabled {
 }
 
 .cancel-btn,
-.confirm-btn {
+.confirm-btn,
+.confirm-reject-btn {
   padding: 0.5rem 1rem;
   border-radius: 6px;
   border: none;
@@ -762,18 +754,32 @@ td.actions .reject-box .reject-actions .confirm-btn:disabled {
   background-color: #b3b3b3;
 }
 
-.confirm-btn {
+.confirm-reject-btn {
   background-color: #e53e3e;
   color: #fff;
 }
 
-.confirm-btn:disabled {
+.confirm-reject-btn:disabled {
   background-color: #f5a6a6;
   cursor: not-allowed;
 }
 
-.confirm-btn:hover:not(:disabled) {
+.confirm-reject-btn:hover:not(:disabled) {
   background-color: #c53030;
+}
+
+.confirm-btn {
+  background-color: #38a169;
+  color: #fff;
+}
+
+.confirm-btn:disabled {
+  background-color: #9ae6b4;
+  cursor: not-allowed;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  background-color: #2f855a;
 }
 
 .user-page .kebab-item{

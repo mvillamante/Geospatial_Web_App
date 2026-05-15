@@ -105,6 +105,13 @@ const UserMgmtPage: React.FC = () => {
   const [showToggleModal, setShowToggleModal] = useState(false);
   const [userToToggle, setUserToToggle] = useState<User | null>(null);
   const [isToggling, setIsToggling] = useState(false);
+
+  const [showApproveRejectModal, setShowApproveRejectModal] = useState(false);
+  const [requestToAction, setRequestToAction] = useState<ResearcherRequest | null>(null);
+  const [actionType, setActionType] = useState<"approve" | "reject" | null>(null);
+  const [isProcessingRequest, setIsProcessingRequest] = useState(false);
+
+  const [rejectReason, setRejectReason] = useState("");
   
   /* FETCH USERS */
   const fetchUsers = useCallback(async (page = 1, showLoading = true) => {
@@ -555,6 +562,18 @@ const UserMgmtPage: React.FC = () => {
           requests={allRequests}
           pageSize={pageSize}
           onPendingCountChange={setResearchPendingCount}
+          onApproveClick={(req) => {
+            setRequestToAction(req);
+            setActionType("approve");
+            setRejectReason("");
+            setShowApproveRejectModal(true);
+          }}
+          onRejectClick={(req) => {
+            setRequestToAction(req);
+            setActionType("reject");
+            setRejectReason("");
+            setShowApproveRejectModal(true);
+          }}
         />
       )}
 
@@ -658,6 +677,118 @@ const UserMgmtPage: React.FC = () => {
                   : userToToggle.status === "Active"
                   ? "Deactivate"
                   : "Activate"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Approve/Reject Modal */}
+      {showApproveRejectModal && requestToAction && actionType && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2 className={actionType === "approve" ? "modal-title approve" : "modal-title reject"}>
+              {actionType === "approve" ? "Approve Request" : "Reject Request"}
+            </h2>
+
+            <p>
+              Are you sure you want to{" "}
+              <strong className={actionType === "approve" ? "text-green" : "text-red"}>
+                {actionType}
+              </strong>{" "}
+              the request of <strong>"{requestToAction.fullName}"</strong>?
+            </p>
+
+            {/* Reject Reason Box */}
+            {actionType === "reject" && (
+              <div style={{ marginTop: "12px" }}>
+                <label><strong>Reason:</strong></label>
+                <textarea
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Enter rejection reason..."
+                  rows={3}
+                  style={{ width: "100%", marginTop: "6px" }}
+                />
+              </div>
+            )}
+
+            <div className="modal-actions">
+              <button
+                className="btn-secondary"
+                disabled={isProcessingRequest}
+                onClick={() => {
+                  setShowApproveRejectModal(false);
+                  setRequestToAction(null);
+                  setActionType(null);
+                  setRejectReason("");
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                className={actionType === "approve" ? "btn-secondary success" : "btn-secondary danger"}
+                disabled={
+                  isProcessingRequest ||
+                  (actionType === "reject" && !rejectReason.trim())
+                }
+                onClick={async () => {
+                  setIsProcessingRequest(true);
+
+                  try {
+                    const token = localStorage.getItem("access_token");
+
+                    const res = await fetch(
+                      `${API_URL}/api/admin/researcher_requests/${requestToAction.id}/`,
+                      {
+                        method: "PATCH",
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                          action: actionType,
+                          ...(actionType === "reject" ? { reason: rejectReason } : {}),
+                        }),
+                      }
+                    );
+
+                    if (!res.ok) throw new Error("Failed");
+
+                    toast.success(
+                      `"${requestToAction.fullName}" request ${actionType}d successfully.`
+                    );
+
+                    // refresh request list
+                    setAllRequests(prev =>
+                      prev.map(r =>
+                        r.id === requestToAction.id
+                          ? {
+                              ...r,
+                              status: actionType === "approve" ? "approved" : "rejected",
+                            }
+                          : r
+                      )
+                    );
+
+                  } catch (err) {
+                    console.error(err);
+                    toast.error("Failed to process request.");
+                  } finally {
+                    setIsProcessingRequest(false);
+                    setShowApproveRejectModal(false);
+                    setRequestToAction(null);
+                    setActionType(null);
+                    setRejectReason("");
+                  }
+                }}
+              >
+                {isProcessingRequest
+                  ? "Processing..."
+                  : actionType === "approve"
+                  ? "Approve"
+                  : "Reject"}
               </button>
             </div>
           </div>

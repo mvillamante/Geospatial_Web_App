@@ -205,7 +205,11 @@ const NotificationPage: React.FC = () => {
             }
 
             if (role === "officer") {
-                return n.type === "assigned" || n.type === "needs_info_reply";
+                return (
+                    n.type === "assigned" ||
+                    n.type === "needs_info_reply" ||
+                    n.type === "report_escalated"
+                );
             }
 
             return true;

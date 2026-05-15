@@ -1,7 +1,7 @@
 import '../../pages/admin/UserMgmtPage.css';
 import { FiCheckCircle, FiEye, FiSearch, FiX } from "react-icons/fi";
 import { LuEllipsis } from "react-icons/lu";
-import React, { useState, useEffect, useRef} from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { CheckCircle, XCircle, Power, PowerOff } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { toast } from "sonner";
@@ -35,7 +35,7 @@ interface Props {
   pageSize: number;
   requests: ResearcherRequest[];
   onPendingCountChange: (count: number) => void;
-  refreshUsers?: () => void; // optional prop to refresh Users table
+  refreshUsers?: () => void;
 }
 
 const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountChange }) => {
@@ -45,34 +45,58 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
 
   const [loading, setLoading] = useState(true);
 
-  const [rejectingId, setRejectingId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
   const [statusFilter, setStatusFilter] = useState<RequestStatus | "all">("pending");
   const [openMenu, setOpenMenu] = useState<number | null>(null);
+
   const [modalResearcher, setModalResearcher] = useState<ResearcherRequest | null>(null);
   const [signedUrls, setSignedUrls] = useState<Record<number, string>>({});
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   const rejectBoxRef = useRef<HTMLDivElement | null>(null);
   const [showRejectBox, setShowRejectBox] = useState(false);
+
   const [confirmModal, setConfirmModal] = useState<{
-  open: boolean;
-  title: string;
-  message: string;
-  onConfirm: (() => void) | null;
-}>({
-  open: false,
-  title: "",
-  message: "",
-  onConfirm: null,
-});
+    open: boolean;
+    title: string;
+    message: string;
+    type: "approve" | "reject" | "activate" | "deactivate" | null;
+    onConfirm: (() => void) | null;
+  }>({
+    open: false,
+    title: "",
+    message: "",
+    type: null,
+    onConfirm: null,
+  });
+
+  const isResearcherView =
+    statusFilter === "active" || statusFilter === "inactive";
+
+  const normalizeStatus = (r: any): RequestStatus => {
+    const raw = (r.status || "").toLowerCase();
+
+    // if backend returns rejection reason, force rejected
+    if (r.rejection_reason || r.reason) return "rejected";
+
+    if (raw === "reject") return "rejected";
+    if (raw === "rejected") return "rejected";
+    if (raw === "pending") return "pending";
+    if (raw === "approved") return "approved";
+    if (raw === "active") return "active";
+    if (raw === "inactive") return "inactive";
+
+    return "pending";
+  };
 
   // Fetch requests
   const fetchRequests = async (page = 1) => {
     try {
+      setLoading(true);
+
       const token = localStorage.getItem("access_token");
       const params = new URLSearchParams();
       params.append("page", page.toString());
@@ -110,15 +134,14 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
         reviewedAt: r.reviewed_at
           ? format(new Date(r.reviewed_at), "MMMM d, yyyy hh:mm:ss a")
           : undefined,
+
         lastlogin: r.last_login
           ? formatDistanceToNow(new Date(r.last_login), { addSuffix: true })
           : r.type === "researcher"
             ? "Never"
             : undefined,
-        status:
-          r.rejection_reason || r.reason
-            ? "rejected"
-            : r.status.toLowerCase(),
+
+        status: normalizeStatus(r),
         purpose: r.purpose,
         orgSchool: r.orgSchool,
         attachment: r.attachment || undefined,
@@ -129,16 +152,29 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
       setCurrentPage(page);
       setTotalPages(Math.ceil(data.count / pageSize));
 
-      // Update parent with pending count
       onPendingCountChange?.(mapped.filter(r => r.status === "pending").length);
 
     } catch (err) {
       console.error(err);
+      toast.error("Failed to fetch requests.");
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchRequests(1);
+  }, [debouncedSearch, statusFilter, pageSize]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // Fetch signed URLs
   useEffect(() => {
     if (requests.length === 0) return;
 
@@ -150,7 +186,6 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
         if (!req.attachment) continue;
 
         try {
-          // Call the PK-based endpoint
           const res = await fetch(
             `${API_URL}/api/admin/researcher/${req.id}/attachment/`,
             { headers: { Authorization: `Bearer ${token}` } }
@@ -169,18 +204,81 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
     fetchUrls();
   }, [requests]);
 
-  const isResearcherView =
-    statusFilter === "active" || statusFilter === "inactive";
-  useEffect(() => {
-    fetchRequests(1);
-  }, [debouncedSearch, statusFilter, pageSize]);
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-    }, 400);
+  const openConfirm = (
+    title: string,
+    message: string,
+    type: "approve" | "reject" | "activate" | "deactivate",
+    onConfirm: () => void
+  ) => {
+    setConfirmModal({
+      open: true,
+      title,
+      message,
+      type,
+      onConfirm,
+    });
+  };
 
-    return () => clearTimeout(handler);
-  }, [searchTerm]);
+  const closeConfirm = () => {
+    setConfirmModal({ open: false, title: "", message: "", type: null, onConfirm: null });
+    setRejectReason("");
+  };
+
+  const approveRequest = async (id: number) => {
+    const req = requests.find(r => r.id === id);
+    if (!req) return;
+
+    try {
+      const token = localStorage.getItem("access_token");
+      const res = await fetch(`${API_URL}/api/admin/researcher_requests/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action: "approve" }),
+      });
+
+      if (!res.ok) throw new Error("Failed to approve request");
+
+      toast.success(`Request approved.\nEmail has been sent to ${req.email}.`);
+
+      await fetchRequests(currentPage);
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to approve request.");
+    }
+  };
+
+  const rejectRequest = async (id: number, reason: string) => {
+    try {
+      const token = localStorage.getItem("access_token");
+
+      const res = await fetch(`${API_URL}/api/admin/researcher_requests/${id}/`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action: "reject", reason }),
+      });
+
+      if (!res.ok) throw new Error("Failed to reject request");
+
+      toast.success(`Request rejected.\nReason: ${reason}`);
+
+      setModalResearcher(null);
+      setShowRejectBox(false);
+      setRejectReason("");
+
+      await fetchRequests(currentPage);
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to reject request.");
+    }
+  };
 
   const toggleResearcherStatus = async (id: number, currentStatus: RequestStatus) => {
     const action = currentStatus === "active" ? "deactivate" : "activate";
@@ -200,119 +298,13 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
 
       if (!res.ok) throw new Error("Failed to update status");
 
+      toast.success(`Successfully ${action}d the researcher.`);
       await fetchRequests(currentPage);
 
-      toast.success(`Successfully ${action}d the researcher.`);
-      setOpenMenu(null);
     } catch (err) {
       console.error(err);
       toast.error("Failed to update researcher status.");
     }
-  };
-  // const generateTempPassword = () => {
-  //   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
-  //   let password = "";
-  //   for (let i = 0; i < 10; i++) {
-  //     password += chars.charAt(Math.floor(Math.random() * chars.length));
-  //   }
-  //   return password;
-  // };
-
-  const openConfirm = (title: string, message: string, onConfirm: () => void) => {
-    setConfirmModal({
-      open: true,
-      title,
-      message,
-      onConfirm,
-    });
-  };
-
-  // Approve a request
-  const approveRequest = async (id: number) => {
-    const req = requests.find(r => r.id === id);
-    if (!req) return;
-
-    // const tempPassword = generateTempPassword();
-
-    try {
-      const token = localStorage.getItem("access_token");
-      const res = await fetch(`${API_URL}/api/admin/researcher_requests/${id}/`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          action: "approve"
-        }),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        console.error("Backend error:", errData);
-        throw new Error("Failed to approve request");
-      }
-
-      // const updated = await res.json();
-
-      setRequests(prev =>
-        prev.map(r => r.id === id ? { ...r, status: "approved" } : r)
-      );
-
-      toast.success(`The request from ${req.fullName} has been approved.\nAn email has been sent to ${req.email} with login credentials.`);
-
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to approve request.");
-    }
-  };
-
-  // Reject a request
-  const rejectRequest = async (id: number, reason: string) => {
-    const req = requests.find(r => r.id === id);
-    if (!req) return;
-
-    try {
-      const token = localStorage.getItem("access_token");
-      const res = await fetch(`${API_URL}/api/admin/researcher_requests/${id}/`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ action: "reject", reason }),
-      });
-
-      if (!res.ok) throw new Error("Failed to reject request");
-
-      const updated = await res.json();
-
-      setRequests(prev => prev.map(r => r.id === id ? { ...r, status: updated.status } : r));
-
-      toast.success(`Request rejected.\nReason: ${reason}`);
-
-      setRejectingId(null);
-      setRejectReason("");
-
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to reject request.");
-    }
-  };
-
-  const handleRejectStart = (id: number) => {
-    setRejectingId(id);
-    setRejectReason("");
-  };
-
-  const handleRejectCancel = () => {
-    setRejectingId(null);
-    setRejectReason("");
-  };
-
-  const handleRejectConfirm = (id: number) => {
-    if (!rejectReason.trim()) return;
-    rejectRequest(id, rejectReason);
   };
 
   const handlePageChange = (page: number) => {
@@ -332,31 +324,6 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
     </div>
   );
 
-  // const handleViewAttachment = async (id: number) => {
-  //   try {
-  //     const token = localStorage.getItem("access_token");
-
-  //     const res = await fetch(
-  //       `${API_URL}/api/admin/researcher/${id}/attachment/`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     if (!res.ok) throw new Error("Failed to get signed URL");
-
-  //     const data = await res.json();
-
-  //     window.open(data.url, "_blank");
-
-  //   } catch (err) {
-  //     console.error(err);
-  //     alert("Failed to load attachment.");
-  //   }
-  // };
-
   return (
     <>
       <div className="filters">
@@ -369,13 +336,13 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
               className="status-select"
             >
               <option value="pending">Pending</option>
-              {/* <option value="approved">Approved</option> */}
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
               <option value="rejected">Rejected</option>
             </select>
           </div>
         </div>
+
         <div className="filters-right">
           <div className="search-wrapper">
             <FiSearch className="search-icon" />
@@ -398,6 +365,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
           </div>
         </div>
       </div>
+
       <div className="requests-table-wrapper">
         <table>
           <thead>
@@ -406,9 +374,11 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
               <th className="center">
                 {isResearcherView ? "Date Joined" : "Created At"}
               </th>
+
               {isResearcherView && (
                 <th className="center">Last Login</th>
               )}
+
               {!isResearcherView && (
                 <>
                   <th className="center">Purpose</th>
@@ -417,14 +387,10 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
               )}
 
               <th className="center">Status</th>
-              {isResearcherView && (
-                <th className="center">Actions</th>
-              )}
-              {!isResearcherView && (
-                <th className="center">Actions</th>
-              )}
+              <th className="center">Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {loading ? (
               <tr>
@@ -448,19 +414,17 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                   </td>
 
                   <td className="center muted">{req.createdAt}</td>
+
                   {isResearcherView && (
                     <td className="center muted">
                       {req.lastlogin || "—"}
                     </td>
                   )}
+
                   {!isResearcherView && (
                     <>
-                      <td className="center muted">
-                        {req.purpose || "-"}
-                      </td>
-                      <td className="center muted">
-                        {req.orgSchool || "-"}
-                      </td>
+                      <td className="center muted">{req.purpose || "-"}</td>
+                      <td className="center muted">{req.orgSchool || "-"}</td>
                     </>
                   )}
 
@@ -469,30 +433,34 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                       {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
                     </span>
                   </td>
-                  {isResearcherView && (
-                    <td className="right actions">
-                      <div className="action-menu">
-                        <button
-                          className="menu-button"
-                          onClick={() =>
-                            setOpenMenu(openMenu === req.id ? null : req.id)
-                          }
-                        >
-                          <LuEllipsis size={18} />
-                        </button>
 
-                        {openMenu === req.id && (
-                          <div className="kebab-dropdown">
-                            <button
-                              className="dropdown-item view-details"
-                              onClick={() => {
-                                setModalResearcher(req);
-                                setOpenMenu(null);
-                              }}
-                            >
-                              <FiEye size={14} /> View Full Details
-                            </button>
-                            
+                  <td className="center actions">
+                    <div className="action-menu">
+                      <button
+                        className="menu-button"
+                        onClick={() =>
+                          setOpenMenu(openMenu === req.id ? null : req.id)
+                        }
+                      >
+                        <LuEllipsis size={18} />
+                      </button>
+
+                      {openMenu === req.id && (
+                        <div className="kebab-dropdown">
+
+                          <button
+                            className="dropdown-item view-details"
+                            onClick={() => {
+                              setModalResearcher(req);
+                              setOpenMenu(null);
+                              setShowRejectBox(false);
+                              setRejectReason("");
+                            }}
+                          >
+                            <FiEye size={14} /> View Full Details
+                          </button>
+
+                          {isResearcherView && (
                             <button
                               className="dropdown-item view-details"
                               onClick={() => {
@@ -502,6 +470,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                                 openConfirm(
                                   `${action} Researcher`,
                                   `Are you sure you want to ${action.toLowerCase()} ${req.fullName}?`,
+                                  isActive ? "deactivate" : "activate",
                                   () => toggleResearcherStatus(req.id, req.status)
                                 );
 
@@ -515,88 +484,25 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                               )}
                               {req.status === "active" ? "Deactivate" : "Activate"}
                             </button>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  )}
-                  {!isResearcherView && (
-                    <td className="center actions">
-                      {(req.status === "pending" || req.status === "rejected") && (
-                        rejectingId !== req.id ? (
-                          <div className="action-menu">
-                            <button
-                              className="menu-button"
-                              onClick={() =>
-                                setOpenMenu(openMenu === req.id ? null : req.id)
-                              }
-                            >
-                              <LuEllipsis size={18} />
-                            </button>
-                            {openMenu === req.id && (
-                              <div className="kebab-dropdown">
-                                <button
-                                  className="dropdown-item view-details"
-                                  onClick={() => {
-                                    setModalResearcher(req);
-                                    setOpenMenu(null);
-                                  }}
-                                >
-                                  <FiEye size={14} /> View Full Details
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="reject-box">
-                            <textarea
-                              value={rejectReason}
-                              onChange={e => setRejectReason(e.target.value)}
-                              placeholder="Enter reason..."
-                              rows={3}
-                              autoFocus
-                            />
-
-                            <div className="reject-actions">
-                              <button
-                                className="cancel-btn"
-                                onClick={handleRejectCancel}
-                              >
-                                Cancel
-                              </button>
-
-                              <button
-                                className="confirm-btn"
-                                disabled={!rejectReason.trim()}
-                                onClick={() => handleRejectConfirm(req.id)}
-                              >
-                                Confirm
-                              </button>
-                            </div>
-                          </div>
-                        )
+                          )}
+                        </div>
                       )}
-
-                      {req.status === "approved" && (
-                        <button
-                          className="view-btn"
-                          onClick={() => setModalResearcher(req)}
-                          title="View Details"
-                        >
-                          <FiEye size={18} />
-                        </button>
-                      )}
-                    </td>
-                  )}
+                    </div>
+                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
+
         {modalResearcher && (
           <div
             className="verification-modal-backdrop"
-            onClick={() => setModalResearcher(null)}
+            onClick={() => {
+              setModalResearcher(null);
+              setShowRejectBox(false);
+              setRejectReason("");
+            }}
           >
             <div
               className="verification-modal"
@@ -604,7 +510,11 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
             >
               <button
                 className="close-modal"
-                onClick={() => setModalResearcher(null)}
+                onClick={() => {
+                  setModalResearcher(null);
+                  setShowRejectBox(false);
+                  setRejectReason("");
+                }}
               >
                 <FiX size={20} />
               </button>
@@ -615,8 +525,8 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
               <p><strong>Middle Name:</strong> {modalResearcher.middleName || "—"}</p>
               <p><strong>Last Name:</strong> {modalResearcher.lastName}</p>
               <p><strong>Email:</strong> {modalResearcher.email}</p>
-              <p>  <strong>Status:</strong> {modalResearcher.status.charAt(0).toUpperCase() + modalResearcher.status.slice(1)}</p>
 
+              <p><strong>Status:</strong> {modalResearcher.status.charAt(0).toUpperCase() + modalResearcher.status.slice(1)}</p>
               <p><strong>Created At:</strong> {modalResearcher.createdAt}</p>
 
               {modalResearcher.status === "rejected" && (
@@ -627,6 +537,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                   </div>
                 </div>
               )}
+
               {modalResearcher.reviewedAt && (
                 <p><strong>Reviewed At:</strong> {modalResearcher.reviewedAt}</p>
               )}
@@ -657,7 +568,8 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                     />
                   ) : "No attachment uploaded."}
                 </div>
-                {isImageModalOpen && modalResearcher && (
+
+                {isImageModalOpen && (
                   <div
                     className="image-modal-backdrop"
                     onClick={() => setIsImageModalOpen(false)}
@@ -689,6 +601,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                         openConfirm(
                           "Approve Request",
                           `Are you sure you want to approve ${modalResearcher.fullName}?`,
+                          "approve",
                           () => approveRequest(modalResearcher.id)
                         );
                       }}
@@ -740,12 +653,13 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                         </button>
 
                         <button
-                          className="confirm-btn"
+                          className="confirm-reject-btn"
                           disabled={!rejectReason.trim()}
                           onClick={() => {
                             openConfirm(
                               "Reject Request",
-                              "Are you sure you want to reject this request?",
+                              `Are you sure you want to reject ${modalResearcher.fullName}?`,
+                              "reject",
                               () => rejectRequest(modalResearcher.id, rejectReason)
                             );
                             setShowRejectBox(false);
@@ -756,44 +670,54 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
                       </div>
                     </div>
                   )}
-                </> 
+                </>
               )}
             </div>
           </div>
         )}
-            {confirmModal.open && (
-              <div className="verification-modal-backdrop">
-                <div className="verification-modal" style={{ maxWidth: "420px" }}>
-                  <h2>{confirmModal.title}</h2>
 
-                  <p style={{ marginTop: "10px" }}>
-                    {confirmModal.message}
-                  </p>
+        {/* CONFIRMATION MODAL */}
+        {confirmModal.open && (
+          <div className="verification-modal-backdrop">
+            <div className="verification-modal" style={{ maxWidth: "420px" }}>
+              <h2
+                className={`modal-title ${confirmModal.type === "approve" || confirmModal.type === "activate"
+                  ? "approve"
+                  : "reject"
+                  }`}
+              >
+                {confirmModal.title}
+              </h2>
 
-                  <div className="verification-modal-actions" style={{ marginTop: "20px" }}>
-                    <button
-                      className="cancel-btn"
-                      onClick={() =>
-                        setConfirmModal({ open: false, title: "", message: "", onConfirm: null })
-                      }
-                    >
-                      Cancel
-                    </button>
+              <p style={{ marginTop: "10px" }}>
+                {confirmModal.message}
+              </p>
 
-                    <button
-                      className="confirm-btn"
-                      onClick={() => {
-                        confirmModal.onConfirm?.();
-                        setConfirmModal({ open: false, title: "", message: "", onConfirm: null });
-                      }}
-                    >
-                      Confirm
-                    </button>
-                  </div>
-                </div>
+              <div className="verification-modal-actions" style={{ marginTop: "20px" }}>
+                <button
+                  className="cancel-btn"
+                  onClick={closeConfirm}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="confirm-btn"
+                  onClick={() => {
+                    const action = confirmModal.onConfirm;
+                    closeConfirm();
+                    action?.();
+                  }}
+                >
+                  Confirm
+                </button>
               </div>
-            )}
+            </div>
+          </div>
+        )}
+
       </div>
+
       {renderPagination()}
     </>
   );

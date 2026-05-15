@@ -214,6 +214,34 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
   }
 
+  const getCitizenStatus = (c: Citizen) => {
+    if (c.verification?.status === "rejected") return "rejected";
+    if (c.verification?.status === "pending") return "pending";
+    if (c.is_active) return "active";
+    return "inactive";
+  };
+
+  const filteredCitizens = citizens.filter((c) => {
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch =
+      c.citizen_name.toLowerCase().includes(search) ||
+      c.barangay?.toLowerCase().includes(search) ||
+      (c.is_active ? "active" : "inactive")
+        .toLowerCase()
+        .includes(search);
+
+    if (!matchesSearch) return false;
+
+    const status = getCitizenStatus(c);
+
+    if (statusFilter === "pending") return status === "pending";
+    if (statusFilter === "rejected") return status === "rejected";
+    if (statusFilter === "active") return status === "active";
+    if (statusFilter === "inactive") return status === "inactive";
+
+    return true;
+  });
   /* ===============================
       TABLE
   =============================== */
@@ -311,7 +339,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
             ) : (
 
-              citizens
+              filteredCitizens
                 .filter((c) => {
                   const search = searchTerm.toLowerCase();
 
@@ -352,7 +380,9 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
                     <td className="user-name">{c.citizen_name}</td>
 
-                    <td className="center muted">{c.barangay || "---"}</td>
+                    <td className="center muted">
+                      {c.verification?.barangay || c.barangay || "---"}
+                    </td>
 
                     {/* <td className="center muted">
                     {format(new Date(c.date_joined), "MMMM d, yyyy")}
@@ -379,11 +409,23 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
                     {/* Status */}
                     <td className="center">
-                      {c.is_active ? (
-                        <span className="badge Approved">Active</span>
-                      ) : (
-                        <span className="badge Rejected">Inactive</span>
-                      )}
+                      {(() => {
+                        const status = getCitizenStatus(c);
+
+                        if (status === "rejected") {
+                          return <span className="badge Rejected">Rejected</span>;
+                        }
+
+                        if (status === "pending") {
+                          return <span className="badge Pending">Pending</span>;
+                        }
+
+                        if (status === "active") {
+                          return <span className="badge Approved">Active</span>;
+                        }
+
+                        return <span className="badge Rejected">Inactive</span>;
+                      })()}
                     </td>
 
                     {/* Actions */}
@@ -456,7 +498,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
           MODAL
       =============================== */}
 
-      {modalCitizen && modalCitizen.verification && (
+      {modalCitizen && (
 
         <div
           className="verification-modal-backdrop"
@@ -483,7 +525,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
               <div className="info-row">
                 <span className="info-label">Barangay</span>
-                <span className="info-value">{modalCitizen.verification.barangay}</span>
+                <span className="info-value">{modalCitizen.verification?.barangay || modalCitizen.barangay || "---"}</span>
               </div>
 
               <div className="info-row">
@@ -501,11 +543,11 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
             </div>
 
 
-            {modalCitizen.verification.id_image ? (
+            {modalCitizen.verification?.id_image ? (
               <div className="modal-box">
                 <p><strong>ID Image:</strong></p>
                 <img
-                  src={modalCitizen.verification.id_image}
+                  src={modalCitizen.verification?.id_image}
                   alt={`${modalCitizen.citizen_name} ID`}
                   style={{ maxWidth: "100%", maxHeight: "300px", objectFit: "contain", cursor: "pointer", borderRadius: "8px" }}
                   onClick={() => setIsImageModalOpen(true)}
@@ -515,7 +557,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
               <p className="muted">No ID image available.</p>
             )}
 
-            {isImageModalOpen && modalCitizen.verification.id_image && (
+            {isImageModalOpen && modalCitizen.verification?.id_image && (
               <div
                 className="image-modal-backdrop"
                 onClick={() => setIsImageModalOpen(false)}
@@ -528,7 +570,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
                 </button>
 
                 <img
-                  src={modalCitizen.verification.id_image}
+                  src={modalCitizen.verification?.id_image}
                   alt={`${modalCitizen.citizen_name} ID Enlarged`}
                   onClick={(e) => e.stopPropagation()}
                   style={{ maxWidth: "90%", maxHeight: "90%", objectFit: "contain" }}
@@ -536,7 +578,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
               </div>
             )}
 
-            {modalCitizen.verification.rejection_reason && (
+            {modalCitizen.verification?.rejection_reason && (
 
               <p>
                 <strong>Rejection Reason:</strong>
@@ -545,7 +587,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
             )}
 
-            {modalCitizen.verification.status === "pending" && (
+            {modalCitizen.verification?.status === "pending" && (
 
               <div className="verification-modal-actions">
 
@@ -583,7 +625,7 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
             )}
 
             {/* Only show reject box when status is pending and Reject clicked */}
-            {modalCitizen.verification.status === "pending" && showRejectBox && (
+            {modalCitizen.verification?.status === "pending" && showRejectBox && (
               <div
                 className="reject-box-modal"
                 ref={rejectBoxRef}

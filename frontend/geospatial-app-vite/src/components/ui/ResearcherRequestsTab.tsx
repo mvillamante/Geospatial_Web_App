@@ -115,7 +115,10 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
           : r.type === "researcher"
             ? "Never"
             : undefined,
-        status: r.status.toLowerCase(),
+        status:
+          r.rejection_reason || r.reason
+            ? "rejected"
+            : r.status.toLowerCase(),
         purpose: r.purpose,
         orgSchool: r.orgSchool,
         attachment: r.attachment || undefined,

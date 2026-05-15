@@ -127,6 +127,9 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated, departmentRefres
       };
 
       await onCreated(newUser);
+      toast.success(
+        `User ${newUser.first_name} ${newUser.last_name} created successfully!`
+      );
       onClose();
     } catch {
       setError("Something went wrong.");

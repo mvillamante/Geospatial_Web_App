@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./ResearcherRequestModal.css";
+import { toast } from "sonner";
 
 interface Props {
   onClose: () => void;
@@ -62,6 +63,7 @@ const ResearcherRequestModal: React.FC<Props> = ({ onClose }) => {
       const data = await response.json();
 
       if (response.ok) {
+        toast.success("Researcher access request submitted successfully!");
         onClose();
       } else {
         console.log("Backend error:", data);

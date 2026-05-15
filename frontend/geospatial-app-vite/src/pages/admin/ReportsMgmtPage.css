@@ -620,9 +620,7 @@
 }
 
 @media (max-height: 980px){
-  .map-container{
-    height: 78.8%;
-  }
+
 
   .map-stats-wrapper {
     width: 50%;
@@ -637,9 +635,7 @@
 }
 
 @media (max-height: 900px){
-  .map-container{
-    height: 82.3%;
-  }
+
 }
 
 @media (max-height: 800px){

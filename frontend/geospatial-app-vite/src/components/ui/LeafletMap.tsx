@@ -1694,10 +1694,12 @@ function LeafletMap(props: LeafletMapProps) {
       if (reportMarkersMap.current.has(r.id)) return;
 
       const barangay =
-        r.barangay ||
         r.location_display ||
-        getBarangayFromCoords(lat, lng) ||
-        "Cabuyao";
+        (r.barangay
+          ? `Barangay ${r.barangay}, Cabuyao`
+          : getBarangayFromCoords(lat, lng)
+            ? `Barangay ${getBarangayFromCoords(lat, lng)}, Cabuyao`
+            : "Cabuyao");
 
       const iconEmoji = getIncidentIcon(
         (r.category || "") === "others"

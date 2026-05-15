@@ -30,8 +30,7 @@ const reportStatuses: ReportStatus[] = [
   "Pending",
   "In Progress",
   "Rejected",
-  "Resolved",
-  "Archived",
+  "Resolved"
 ];
 
 type Officer = {
@@ -189,7 +188,7 @@ const ReportsMgmtPage: React.FC = () => {
     setViewArchived(tab === "archived");
 
     const status = searchParams.get("status");
-    if (status && ["Pending", "In Progress", "Rejected", "Resolved", "Archived"].includes(status)) {
+    if (status && ["Pending", "In Progress", "Rejected", "Resolved"].includes(status)) {
       setStatusFilter(status as any);
     }
   }, [searchParams]);
@@ -491,6 +490,41 @@ const ReportsMgmtPage: React.FC = () => {
         </div>
       </div>
 
+            {/* Stats */}
+      <div className="report-stat-container">
+        <div className="report-stat-card total">
+          <div className="report-stat-text">
+            <h3>Total Reports</h3>
+            <p className="report-card-value">{reportStats.total}</p>
+          </div>
+          <MapPin className="report-card-icon" />
+        </div>
+
+        <div className="report-stat-card pending">
+          <div className="report-stat-text">
+            <h3>Pending Review</h3>
+            <p className="report-card-value">{reportStats.pending}</p>
+          </div>
+          <Users className="report-card-icon" />
+        </div>
+
+        <div className="report-stat-card progress">
+          <div className="report-stat-text">
+            <h3>In Progress</h3>
+            <p className="report-card-value">{reportStats.inProgress}</p>
+          </div>
+          <Users className="report-card-icon" />
+        </div>
+
+        <div className="report-stat-card resolved">
+          <div className="report-stat-text">
+            <h3>Resolved</h3>
+            <p className="report-card-value">{reportStats.resolved}</p>
+          </div>
+          <CheckCircle2 className="report-card-icon" />
+        </div>
+      </div>
+
       {/* Filters + Search + Create User */}
       <div className="filters">
         <div className="filters-left">
@@ -621,40 +655,6 @@ const ReportsMgmtPage: React.FC = () => {
               />
             </div>
 
-            {/* Stats */}
-            <div className="report-stat-container">
-              <div className="report-stat-card total">
-                <div className="report-stat-text">
-                  <h3>Total Reports</h3>
-                  <p className="report-card-value">{reportStats.total}</p>
-                </div>
-                <MapPin className="report-card-icon" />
-              </div>
-
-              <div className="report-stat-card pending">
-                <div className="report-stat-text">
-                  <h3>Pending Review</h3>
-                  <p className="report-card-value">{reportStats.pending}</p>
-                </div>
-                <Users className="report-card-icon" />
-              </div>
-
-              <div className="report-stat-card progress">
-                <div className="report-stat-text">
-                  <h3>In Progress</h3>
-                  <p className="report-card-value">{reportStats.inProgress}</p>
-                </div>
-                <Users className="report-card-icon" />
-              </div>
-
-              <div className="report-stat-card resolved">
-                <div className="report-stat-text">
-                  <h3>Resolved</h3>
-                  <p className="report-card-value">{reportStats.resolved}</p>
-                </div>
-                <CheckCircle2 className="report-card-icon" />
-              </div>
-            </div>
           </div>
 
           <div className="mini-table-wrapper">
@@ -1047,7 +1047,7 @@ const ReportsMgmtPage: React.FC = () => {
                             onClick={() => {
                               setSelectedReportMap(selectedReport);
                               setViewMode("map");
-                              
+
                               setSelectedReport(null);
                               setSelectedOfficer("");
                               setOpenMenuId(null);

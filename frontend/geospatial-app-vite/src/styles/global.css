@@ -677,11 +677,11 @@ tr:nth-last-child(-n+2) .kebab-dropdown {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
-  margin: .5rem 0 1.5rem;
+  margin: 1rem 0 2rem;
 }
 
 .reportsmgmt-page .report-stat-container {
-  margin-bottom: 0;
+  margin-bottom: 1rem;
 }
 
 .report-stat-card {

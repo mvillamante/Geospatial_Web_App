@@ -33,7 +33,6 @@ export interface ResearcherRequest {
 
 interface Props {
   pageSize: number;
-  requests: ResearcherRequest[];
   onPendingCountChange: (count: number) => void;
   refreshUsers?: () => void;
 }

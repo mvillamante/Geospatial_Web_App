@@ -28,7 +28,8 @@ type NotificationType =
     | "report"
     | "verification"
     | "assigned"
-    | "needs_info_reply";
+    | "needs_info_reply"
+    | "report_escalated";
 
 
 export interface NotificationItem {

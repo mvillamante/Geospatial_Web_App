@@ -122,7 +122,7 @@ function SettingsPage() {
         try {
             const token = localStorage.getItem("access_token");
 
-            const res = await fetch(`${API_URL}/api/users/change-password/`, {
+            const res = await fetch(`${API_URL}/api/change-password/`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,

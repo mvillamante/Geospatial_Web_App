@@ -177,14 +177,13 @@
 .reportsmgmt-page .report-modal {
   width: 720px;
   max-width: calc(100% - 2rem);
-  height: 70vh;
+  height: 100vh;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   padding: 10px 16px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .reportsmgmt-page .show-on-map-btn {

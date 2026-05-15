@@ -559,21 +559,8 @@ const UserMgmtPage: React.FC = () => {
       {/* Requests Tab */}
       {tab === 'requests' && (
         <ResearcherRequestsTab
-          requests={allRequests}
           pageSize={pageSize}
           onPendingCountChange={setResearchPendingCount}
-          onApproveClick={(req) => {
-            setRequestToAction(req);
-            setActionType("approve");
-            setRejectReason("");
-            setShowApproveRejectModal(true);
-          }}
-          onRejectClick={(req) => {
-            setRequestToAction(req);
-            setActionType("reject");
-            setRejectReason("");
-            setShowApproveRejectModal(true);
-          }}
         />
       )}
 

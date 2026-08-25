@@ -3,7 +3,7 @@ import type { Session, AuthError } from "@supabase/supabase-js";
 import type { User } from "./fetchCurrentUser";
 import { normalizePrimaryRole } from "../utils/roles";
 
-// ===== LOGIN ======
+// User login authentication handler
 export const login = async (
   phone: string,
   password: string
@@ -17,7 +17,7 @@ export const login = async (
   return data.session;
 };
 
-// ===== SIGNUP =====
+// User registration signup handler
 export const signup = async (
   phone: string,
   password: string,
@@ -37,7 +37,7 @@ export const signup = async (
   return data.session;
 };
 
-// ===== GET CURRENT SESSION (for supabase only) =====
+// Fetch active backend authentication session
 export const getSession = async (): Promise<Session | null> => {
   const {
     data: { session },
@@ -48,7 +48,7 @@ export const getSession = async (): Promise<Session | null> => {
   return session;
 };
 
-// ===== GET CURRENT SESSION (mainly user role) =====
+// Retrieve current user role and profile details from local session
 export const getUserRoleAndDisplayName = () => {
   const storedRoles = JSON.parse(localStorage.getItem("user_roles") || "{}");
   const currentUser = JSON.parse(localStorage.getItem("current_user") || "{}");
@@ -69,7 +69,7 @@ export const getUserRoleAndDisplayName = () => {
 
   const userName = currentUser.username;
 
-  // Determine the correct role for paths
+  // Determine user role navigation paths
   const effectiveRole = userRole;
 
   const profilePath = `/main/${effectiveRole.toLowerCase()}/profile`;
@@ -89,7 +89,7 @@ export const getUserRoleAndDisplayName = () => {
 };
 
 
-// ===== LISTEN TO AUTH CHANGES =====
+// Subscribe to authentication state changes
 export const onAuthChange = (
   callback: (event: string, session: Session | null) => void
 ) => {
@@ -97,11 +97,11 @@ export const onAuthChange = (
     callback(event, session);
   });
 
-  // Return unsubscribe function
+  // Unsubscribe cleanup handler
   return () => data.subscription.unsubscribe();
 };
 
-// ===== SAVE USER SESSION =====
+// Persist user session data and access tokens locally
 export const saveUserSession = (user: User, accessToken: string) => {
   if (!user || !accessToken) return;
 
@@ -116,7 +116,7 @@ export const saveUserSession = (user: User, accessToken: string) => {
   localStorage.setItem("current_user", JSON.stringify(user));
 };
 
-// ===== CLEAR USER SESSION =====
+// Clear active user session from local storage
 export const clearUserSession = () => {
   localStorage.removeItem("access_token");
   localStorage.removeItem("user_roles");

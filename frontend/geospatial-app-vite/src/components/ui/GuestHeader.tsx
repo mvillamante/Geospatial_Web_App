@@ -1,4 +1,4 @@
-// GuestHeader.tsx
+// Top navigation header bar for guest users
 import { MdArrowBack } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 

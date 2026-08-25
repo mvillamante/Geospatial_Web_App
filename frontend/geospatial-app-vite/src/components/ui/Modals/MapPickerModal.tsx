@@ -12,7 +12,7 @@ import '../../../pages/shared/EvacCenterPage.css';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// Fix leaflet marker icons
+// Configure default Leaflet map marker assets
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -20,10 +20,10 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-// Type for coordinates
+// Coordinate pair type definition
 export type LatLng = { lat: number; lng: number };
 
-// Click-to-pick component
+// Map click event listener component to pick coordinates
 
 function ClickToPick({ value, onChange }: { value: LatLng | null; onChange: (v: LatLng) => void }) {
   useMapEvents({

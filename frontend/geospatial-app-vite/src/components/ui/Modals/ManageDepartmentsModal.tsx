@@ -22,7 +22,7 @@ const ManageDepartmentsModal: React.FC<Props> = ({ onClose, onDepartmentChanged 
   const [loading, setLoading] = useState(false);
   const [savingDeptId, setSavingDeptId] = useState<number | null>(null);
 
-  // confirmation modal state
+  // State for confirmation dialog modal
   const [confirmModal, setConfirmModal] = useState<{
     show: boolean;
     deptId: number | null;
@@ -47,7 +47,7 @@ const ManageDepartmentsModal: React.FC<Props> = ({ onClose, onDepartmentChanged 
     fetchDepartments();
   }, []);
 
-  /* Add Department */
+  // Add new department handler
   const handleAdd = () => {
     if (!newDept.trim()) return;
     setConfirmModal({
@@ -87,7 +87,7 @@ const ManageDepartmentsModal: React.FC<Props> = ({ onClose, onDepartmentChanged 
     }
   };
 
-  /* Delete Department */
+  // Delete department handler
   const handleDelete = (id: number) => {
     setConfirmModal({
       show: true,
@@ -123,7 +123,7 @@ const ManageDepartmentsModal: React.FC<Props> = ({ onClose, onDepartmentChanged 
     }
   };
 
-  /* Edit Department */
+  // Edit department name handler
   const handleEdit = (dept: Department) => {
     setEditingDeptId(dept.id);
     setEditingDeptName(dept.name);

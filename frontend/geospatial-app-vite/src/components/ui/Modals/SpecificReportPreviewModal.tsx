@@ -10,7 +10,7 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import '../../../pages/shared/EvacCenterPage.css';
 import { getIncidentIcon, severityColors } from "../../../constants";
 
-// Fix default Leaflet icons
+// Configure default Leaflet map marker assets
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -29,7 +29,7 @@ interface Report {
 
 interface Props {
   report: Report | null;
-  height?: number; // optional map height
+  height?: number; // Optional map height in pixels
 }
 
 const ReportPreviewMap: React.FC<Props> = ({ report, height = 250 }) => {
@@ -42,7 +42,7 @@ const ReportPreviewMap: React.FC<Props> = ({ report, height = 250 }) => {
 
   const position: [number, number] = [lat, lng];
 
-  // Determine severity colors
+  // Determine report severity color scheme
   const severity =
     report.verified_critical_level ||
     report.suggested_critical_level ||

@@ -78,7 +78,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
   const normalizeStatus = (r: any): RequestStatus => {
     const raw = (r.status || "").toLowerCase();
 
-    // if backend returns rejection reason, force rejected
+    // Set status to rejected if backend returns a rejection reason
     if (r.rejection_reason || r.reason) return "rejected";
 
     if (raw === "reject") return "rejected";
@@ -91,7 +91,7 @@ const ResearcherRequestsTab: React.FC<Props> = ({ pageSize = 10, onPendingCountC
     return "pending";
   };
 
-  // Fetch requests
+  // Fetch researcher access requests from API
   const fetchRequests = async (page = 1) => {
     try {
       setLoading(true);

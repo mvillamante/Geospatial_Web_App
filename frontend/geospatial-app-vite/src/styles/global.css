@@ -195,7 +195,7 @@ td.text-wrap {
   }
 
   .user-page .requests-table-wrapper table tr td,
-  .user-page .requests-table-wrapper table tr th {
+  .user-page .requests-table-wrapper table tr th{
     padding: 4px 8px;
     line-height: 1.53;
     font-size: 0.78rem;

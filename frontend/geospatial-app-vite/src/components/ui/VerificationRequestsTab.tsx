@@ -41,7 +41,10 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
   const [citizens, setCitizens] = useState<Citizen[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  // const [debouncedSearch, setDebouncedSearch] = useState(searchTerm)
+  const [pageSize] = useState(() =>
+    window.innerHeight <= 800 ? 7 : 10
+  );
+    // const [debouncedSearch, setDebouncedSearch] = useState(searchTerm)
   const rejectBoxRef = useRef<HTMLDivElement | null>(null)
   const [statusFilter, setStatusFilter] = useState<
     "pending" | "active" | "inactive" | "rejected"
@@ -67,7 +70,6 @@ const VerificationRequestsTab: React.FC<Props> = ({ onPendingCountChange }) => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const pageSize = 10;
 
   /* ===============================
       FETCH CITIZENS

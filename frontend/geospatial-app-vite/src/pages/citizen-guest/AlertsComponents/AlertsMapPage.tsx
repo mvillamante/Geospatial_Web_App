@@ -52,6 +52,9 @@ const AlertsMapPage: React.FC = () => {
 
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
 
+  const [selectedSeverity, setSelectedSeverity] = useState<"all" | "low" | "moderate" | "high" | "critical">("all");
+  const [selectedStatus, setSelectedStatus] = useState<"all" | "in_progress" | "resolved">("all");
+  const [barangayFilter, setBarangayFilter] = useState<"all" | "my">("all");
   const [reportTimeFilter, setReportTimeFilter] = useState<"all" | "today" | "7days" | "last30days" | "last12months">("7days");
 
   const [reports, setReports] = useState<Report[]>([]);
@@ -192,6 +195,12 @@ const AlertsMapPage: React.FC = () => {
     [selectedReportData]
   )
 
+  const getShortBarangay = (location: string = "") => {
+    const match = location.match(/(?:barangay|brgy\.?)\s+([^,]+)/i);
+
+    return match ? match[1].trim() : "";
+  };
+
   const reportsForMap = useMemo(() => {
     return reports
       .filter((r: any) => r.lat && r.lng)
@@ -199,7 +208,7 @@ const AlertsMapPage: React.FC = () => {
         id: r.id,
         category: r.category,
         other_category: r.other_category ?? undefined,
-        barangay: r.barangay,
+        barangay: getShortBarangay(r.location_display),
         lat: r.lat,
         lng: r.lng,
         created_at: r.created_at,
@@ -240,6 +249,10 @@ const AlertsMapPage: React.FC = () => {
             reportClickTimestamp={reportTimestamp}
             activeLayers={activeLayers}
             reportTimeFilter={reportTimeFilter}
+            selectedSeverity={selectedSeverity}
+            selectedStatus={selectedStatus}
+            barangayFilter={barangayFilter}
+            userBarangay={userBarangay}
           />
 
           {/* Floating Controls */}
@@ -337,6 +350,14 @@ const AlertsMapPage: React.FC = () => {
             initialOpenIncidentId={openIncidentId}
             isVerified={isVerified}
             userBarangay={userBarangay}
+
+            // Filters
+            selectedSeverity={selectedSeverity}
+            setSelectedSeverity={setSelectedSeverity}
+            selectedStatus={selectedStatus}
+            setSelectedStatus={setSelectedStatus}
+            barangayFilter={barangayFilter}
+            setBarangayFilter={setBarangayFilter}
             reportTimeFilter={reportTimeFilter}
             setReportTimeFilter={setReportTimeFilter}
           />

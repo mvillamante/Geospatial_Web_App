@@ -45,6 +45,12 @@ interface AlertsPanelProps {
     reports: Report[];
     isLoadingReports?: boolean;
     onRefreshReports?: () => void;
+    selectedSeverity: "all" | "low" | "moderate" | "high" | "critical";
+    setSelectedSeverity: React.Dispatch<React.SetStateAction<"all" | "low" | "moderate" | "high" | "critical">>;
+    selectedStatus: "all" | "in_progress" | "resolved";
+    setSelectedStatus: React.Dispatch<React.SetStateAction<"all" | "in_progress" | "resolved">>;
+    barangayFilter: "all" | "my";
+    setBarangayFilter: React.Dispatch<React.SetStateAction<"all" | "my">>;
 }
 
 export default function AlertsPanel({
@@ -59,7 +65,16 @@ export default function AlertsPanel({
     onCollapsePanel,
     reports,
     isLoadingReports,
-    onRefreshReports
+    onRefreshReports,
+
+    selectedSeverity,
+    setSelectedSeverity,
+
+    selectedStatus,
+    setSelectedStatus,
+
+    barangayFilter,
+    setBarangayFilter,
 }: AlertsPanelProps) {
 
     // const offlineReports = useofflineReports();
@@ -72,11 +87,11 @@ export default function AlertsPanel({
     const chipClass = (active: boolean) => `chip ${active ? "chip-active" : ""}`;
 
     const [selectedCategory, setSelectedCategory] = useState<string>("all");
-    const [selectedSeverity, setSelectedSeverity] =
-        useState<"all" | "low" | "moderate" | "high" | "critical">("all");
-    const [selectedStatus, setSelectedStatus] = useState<"all" | "in_progress" | "resolved">("all");
+    // const [selectedSeverity, setSelectedSeverity] =
+    //     useState<"all" | "low" | "moderate" | "high" | "critical">("all");
+    // const [selectedStatus, setSelectedStatus] = useState<"all" | "in_progress" | "resolved">("all");
 
-    const [barangayFilter, setBarangayFilter] = useState<"all" | "my">("all");
+    // const [barangayFilter, setBarangayFilter] = useState<"all" | "my">("all");
     const [searchBarangay, setSearchBarangay] = useState("");
     const [sortNewest, setSortNewest] = useState<boolean>(true);
 
@@ -143,8 +158,12 @@ export default function AlertsPanel({
             if (normalizedSearch !== "")
                 return normalizedReport.includes(normalizedSearch)
 
-            if (barangayFilter === "my" && normalizedUserBarangay)
-                return normalizedReport.includes(normalizedUserBarangay)
+            if (barangayFilter === "my" && normalizedUserBarangay) {
+                return (
+                    normalizedReport.includes(normalizedUserBarangay) ||
+                    normalizedUserBarangay.includes(normalizedReport)
+                );
+            }
 
             return true
         })
@@ -390,29 +409,6 @@ export default function AlertsPanel({
                     </div>
                 </div>
 
-
-                {/* FILTERS ROW */}
-                {/* <div className="filter-row">
-                <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                >
-                    <option value="" disabled>Category</option>
-                    <option value="">All</option>
-                    <option value="Fire">Fire</option>
-                    <option value="Flood">Flood</option>
-                    <option value="Landslide">Landslide</option>
-                    <option value="Accident">Accident</option>
-                </select>
-
-                <select
-                    value={sortNewest ? "newest" : "oldest"}
-                    onChange={(e) => setSortNewest(e.target.value === "newest")}
-                >
-                    <option value="newest">Newest</option>
-                    <option value="oldest">Oldest</option>
-                </select>
-            </div> */}
 
                 {/* CTA */}
                 <button

@@ -162,6 +162,10 @@ interface LeafletMapProps {
   selectedReport?: MapReport | null;
   categoryFilter?: IncidentCategories | "all";
   reportTimeFilter?: string;
+  selectedSeverity?: "all" | "low" | "moderate" | "high" | "critical";
+  selectedStatus?: "all" | "in_progress" | "resolved";
+  barangayFilter?: "all" | "my";
+  userBarangay?: string;
   activeLayers?: string[];
 
   reports?: MapReport[];
@@ -248,6 +252,10 @@ function LeafletMap(props: LeafletMapProps) {
     ndviMaxCloud,
     hazardYear,
     reportTimeFilter,
+    selectedSeverity = "all",
+    selectedStatus = "all",
+    barangayFilter = "all",
+    userBarangay = "",
     showPopupOnMap = true,
     onSelectEvacuationCenter,
     onHazardBarangaySelect,
@@ -1621,6 +1629,7 @@ function LeafletMap(props: LeafletMapProps) {
       .replace(/\b\w/g, (c) => c.toUpperCase());
   };
 
+  // Handle Filtering for Map
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -1683,7 +1692,32 @@ function LeafletMap(props: LeafletMapProps) {
               ? r.other_category || "others"
               : r.category || ""
           ) === normalizedCategory(categoryFilter)
-      );
+      )
+      .filter((r) => {
+        if (selectedSeverity === "all") return true;
+        return r.verified_critical_level === selectedSeverity;
+      })
+      .filter((r) => {
+        if (selectedStatus === "all") return true;
+        return (r.status ?? "in_progress") === selectedStatus;
+      })
+      .filter((r) => {
+        if (barangayFilter === "all") return true;
+
+        const normalizeBarangay = (value: string) =>
+          value
+              .toLowerCase()
+              .replace(/^barangay\s+/i, "")
+              .replace(/^brgy\.?\s+/i, "")
+              .replace(/[-\s]+/g, "")
+              .trim();
+
+        const reportBarangay = normalizeBarangay(r.barangay || "");
+        const myBarangay = normalizeBarangay(userBarangay || "");
+
+        const matches = reportBarangay === myBarangay;
+        return matches;
+    })
 
     filteredReports.forEach((r) => {
       const lat = parseFloat(r.lat as any);
@@ -1756,7 +1790,7 @@ function LeafletMap(props: LeafletMapProps) {
         reportMarkersMap.current.delete(id);
       }
     });
-  }, [reports, activeLayers, categoryFilter, reportTimeFilter]);
+  }, [reports, activeLayers, categoryFilter, reportTimeFilter, selectedSeverity, selectedStatus, barangayFilter, userBarangay]);
 
 
   /* Selected Report (For Report-Verify Page)*/

@@ -48,14 +48,14 @@ const DbAnalyticsSection: React.FC<Props> = ({
 }) => {
   console.log("User Role:", userRole);
 
-  // AI-generated Green Index insights (only fetched when on Green layer — saves tokens)
+  // Green Index automated insight state
   const [greenAiInsight, setGreenAiInsight] = useState<string | null>(null);
   const [greenHotspotsInsight, setGreenHotspotsInsight] = useState<string | null>(null);
   const [greenAreasForGreeningInsight, setGreenAreasForGreeningInsight] = useState<string | null>(null);
   const [greenAiInsightLoading, setGreenAiInsightLoading] = useState(false);
   const [greenAiInsightError, setGreenAiInsightError] = useState<string | null>(null);
 
-  // AI-generated Hazard Index insights (only fetched when on Hazard layer — saves tokens)
+  // Hazard Index automated insight state
   const [hazardAiSummary, setHazardAiSummary] = useState<string | null>(null);
   const [hazardHotspotsInsight, setHazardHotspotsInsight] = useState<string | null>(null);
   const [hazardLowerRiskInsight, setHazardLowerRiskInsight] = useState<string | null>(null);
@@ -63,7 +63,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
   const [hazardAiInsightLoading, setHazardAiInsightLoading] = useState(false);
   const [hazardAiInsightError, setHazardAiInsightError] = useState<string | null>(null);
 
-  // AI-generated Calamity Risk insights (only fetched when on Calamity Risk layer — saves tokens)
+  // Calamity Risk automated insight state
   const [calamityAiSummary, setCalamityAiSummary] = useState<string | null>(null);
   const [calamityRiskPeakInsight, setCalamityRiskPeakInsight] = useState<string | null>(null);
   const [calamityAdaptationInsight, setCalamityAdaptationInsight] = useState<string | null>(null);
@@ -117,10 +117,10 @@ const DbAnalyticsSection: React.FC<Props> = ({
   const isChoropleth = mapView === "choropleth";
   const isGreenLayer = isChoropleth && selected === "green";
 
-  // Data and AI insights are only available for 2020–2030
+  // Analytics datasets and insights valid for year range 2020–2030
   const yearInRange = year != null && year >= 2020 && year <= 2030;
 
-  // Fetch AI-generated Green Index insights (summary + hotspots + areas for greening) when user is on green layer and changes year
+  // Fetch Green Index insights when active layer is Green Index
   useEffect(() => {
     if (!isGreenLayer || !yearInRange) {
       setGreenAiInsight(null);
@@ -168,7 +168,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
   const isHazardLayer = isChoropleth && selected === "hazard";
   const isCalamityLayer = isChoropleth && selected === "calamity";
 
-  // Fetch Hazard Index AI insights only when on Hazard layer (green prompt is not called)
+  // Fetch Hazard Index insights when active layer is Hazard Index
   useEffect(() => {
     if (!isHazardLayer || !yearInRange) {
       setHazardAiSummary(null);
@@ -218,7 +218,7 @@ const DbAnalyticsSection: React.FC<Props> = ({
     return () => { cancelled = true; };
   }, [isHazardLayer, year, yearInRange]);
 
-  // Fetch Calamity Risk AI insights only when on Calamity Risk layer (no green/hazard prompt)
+  // Fetch Calamity Risk insights when active layer is Calamity Risk
   useEffect(() => {
     if (!isCalamityLayer || !yearInRange) {
       setCalamityAiSummary(null);

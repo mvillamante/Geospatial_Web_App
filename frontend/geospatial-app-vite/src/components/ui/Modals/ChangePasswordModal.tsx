@@ -74,7 +74,7 @@ const ChangePasswordModal: React.FC<Props> = ({ userId, userName, onClose, onPas
         </div>
 
         <div className="modal-form">
-          {/* New Password */}
+          {/* New password input field */}
           <div className="form-group">
             <label>
               New Password <span className="required-star">*</span>
@@ -93,7 +93,7 @@ const ChangePasswordModal: React.FC<Props> = ({ userId, userName, onClose, onPas
             </div>
           </div>
 
-          {/* Confirm New Password */}
+          {/* Confirm password input field */}
           <div className="form-group">
             <label>
               Confirm New Password <span className="required-star">*</span>

@@ -16,9 +16,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   const hasAccess = allowedRoles.includes(userRole);
   
-  // Check if user's role is in allowed roles
+  // Verify user role access authorization
   if (!hasAccess) {
-    // Redirect to their role's default page
+    // Redirect unauthorized user to default role route
     const redirectPath = userRole ? roleToBasePath(userRole as any) : "/";
     return <Navigate to={redirectPath} replace />;
   }

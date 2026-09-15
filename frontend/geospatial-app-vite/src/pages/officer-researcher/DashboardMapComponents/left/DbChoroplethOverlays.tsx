@@ -12,7 +12,7 @@ type Props = {
   getCalamityRiskColor: (val: number) => string;
 };
 
-// Define a reusable component for rendering hazard breakdown details
+// Hazard risk component breakdown component
 const HazardBreakdown = ({ data }: { data: HazardBarangayData }) => {
   const components = [
     { label: "Flood", value: data.flood_risk },
@@ -45,7 +45,7 @@ const HazardBreakdown = ({ data }: { data: HazardBarangayData }) => {
   );
 };
 
-// Define a reusable component for rendering calamity risk component breakdown
+// Calamity risk component breakdown component
 const CalamityRiskBreakdown = ({ data }: { data: CalamityRiskBarangayData }) => {
   const componentColor = (val: number): string => {
     const v = Math.max(0, Math.min(1, val));

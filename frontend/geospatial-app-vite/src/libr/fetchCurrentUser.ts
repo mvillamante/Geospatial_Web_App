@@ -10,7 +10,7 @@ export interface User {
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-//returns full user info.
+// Fetch authenticated user profile data from backend API
 export const fetchCurrentUser = async (token: string): Promise<User> => {
   const response = await fetch(`${API_URL}/api/current_user/`, {
     method: "GET",

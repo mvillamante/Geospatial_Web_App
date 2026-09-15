@@ -90,7 +90,7 @@ function EvacCenterPage() {
       .replace(/\s+/g, " ")
       .trim();
 
-  //get user role
+  // Retrieve current user role and verification status
   const { userRole, isResidentVerified } = getUserRoleAndDisplayName();
 
   const handleGetDirections = (coordinates: string) => {
@@ -114,7 +114,7 @@ function EvacCenterPage() {
     loadCenters();
   }, []);
 
-  // Evac Center Tag Colors
+  // Evacuation center tag color configurations
   const centerColors = {
     school: { bg: "#E8F0FE", text: "#1E40AF" },
     gymnasium: { bg: "#ECFDF5", text: "#047857" },
@@ -134,7 +134,7 @@ function EvacCenterPage() {
   const totalCenters = centers.length;
   const barangaysCovered = new Set(centers.map(c => c.barangay.trim().toLowerCase())).size;
 
-  // Filter evacuation centers based on search query
+  // Filter evacuation centers based on search query and location
   const filteredCenters = centers.filter(center => {
     const query = searchQuery.trim().toLowerCase();
 
@@ -156,7 +156,7 @@ function EvacCenterPage() {
     return matchesSearch && matchesBarangayFilter;
   });
 
-  // Manage Evacuation Center Cards ----------------------------------------
+  // Evacuation center selection and management logic
   const [mapRefreshKey, setMapRefreshKey] = useState(0);
   const handleSelectCenter = (centerData: EvacuationCenterData) => {
     const center = mapApiToCenter(centerData);

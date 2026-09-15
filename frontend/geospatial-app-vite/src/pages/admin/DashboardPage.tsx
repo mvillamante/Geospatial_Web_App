@@ -45,7 +45,7 @@ const DashboardPage: React.FC = () => {
         </div>
       </div> */}
 
-      {/* KPI Cards */}
+      {/* KPI statistics summary cards */}
       <section className="stats-grid">
         <StatsCard
           title="Active Users"
@@ -72,9 +72,9 @@ const DashboardPage: React.FC = () => {
         />
       </section>
 
-      {/* Middle */}
+      {/* Reports and action center section */}
       <section className="middle-grid">
-        {/* Reports needing action */}
+        {/* Urgent reports table */}
         <div className="span-2 panel">
           <div className="panel-head">
             <div className="panel-title">Reports Needing Action</div>

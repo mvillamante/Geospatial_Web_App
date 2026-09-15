@@ -377,7 +377,7 @@ const NotificationPage: React.FC = () => {
 
     // const sectionOrder: NotificationType[] = ["official", "incident", "report"];
 
-    // ROLE-BASED TABS AND TITLES ------------------------------------------
+    // Role-based notification tabs configuration
     const citizenTabTitles: Record<Exclude<CitizenTab, "all">, string> = {
         official: "Official Announcements",
         incident: "Incident Reports",
@@ -414,7 +414,7 @@ const NotificationPage: React.FC = () => {
             ];
         }
 
-        // fallback
+        // Default fallback tab list
         return [{ key: "all", label: "All", badgeCount: counts.unreadAll }];
     }, [
         userRole,

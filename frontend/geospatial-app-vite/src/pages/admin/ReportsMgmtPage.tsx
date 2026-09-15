@@ -434,10 +434,10 @@ const ReportsMgmtPage: React.FC = () => {
     };
   }, [filteredReports]);
 
-  /* PAGINATION */
+  // Pagination control handler
   const handlePageChange = (page: number) => { if (page < 1 || page > totalPages) return; setCurrentPage(page); };
 
-  /* Tabs */
+  // Tab indicator measurement logic
   const indicatorRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
@@ -459,7 +459,7 @@ const ReportsMgmtPage: React.FC = () => {
     }
   }, [viewArchived]);
 
-  /* Loading */
+  // Page loading and view mode state
   const [loadingReports, setLoadingReports] = useState(true);
   const [viewMode, setViewMode] = useState("table");
 
@@ -490,7 +490,7 @@ const ReportsMgmtPage: React.FC = () => {
         </div>
       </div>
 
-            {/* Stats */}
+      {/* Reports statistics summary cards */}
       <div className="report-stat-container">
         <div className="report-stat-card total">
           <div className="report-stat-text">
@@ -525,7 +525,7 @@ const ReportsMgmtPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Filters + Search + Create User */}
+      {/* Filters and search controls */}
       <div className="filters">
         <div className="filters-left">
           <div className="select-wrapper">

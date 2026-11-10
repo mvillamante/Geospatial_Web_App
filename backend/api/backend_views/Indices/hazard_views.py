@@ -360,9 +360,9 @@ def calamity_risk_ai_insight(request):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     body = {
-        "model": "llama-3.1-8b-instant",
+        "model": "openai/gpt-oss-20b",
         "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 400,
+        "max_completion_tokens": 400,
         "temperature": 0.3,
     }
     try:
@@ -606,9 +606,9 @@ def green_index_ai_insight(request):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     body = {
-        "model": "llama-3.1-8b-instant",
+        "model": "openai/gpt-oss-20b",
         "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 512,
+        "max_completion_tokens": 512,
         "temperature": 0.3,
     }
     try:
@@ -837,9 +837,9 @@ def green_index_import_ai_insight(request):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     req_body = {
-        "model": "llama-3.1-8b-instant",
+        "model": "openai/gpt-oss-20b",
         "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 180,
+        "max_completion_tokens": 180,
         "temperature": 0.3,
     }
     try:
@@ -976,6 +976,12 @@ def hazard_index_import_ai_insight(request):
     Used by the Import section. Higher hazard index = higher risk (0–100).
     """
     api_key = os.getenv("GROQ_API_KEY")
+    year = request.GET.get("year")
+    logger.warning(
+        "GROQ DEBUG | year=%s | API key loaded=%s",
+        year,
+        bool(api_key)
+    )
     if not api_key:
         return JsonResponse(
             {
@@ -1103,9 +1109,9 @@ def hazard_index_import_ai_insight(request):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     req_body = {
-        "model": "llama-3.1-8b-instant",
+        "model": "openai/gpt-oss-20b",
         "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 180,
+        "max_completion_tokens": 180,
         "temperature": 0.3,
     }
     try:
@@ -1363,9 +1369,9 @@ def calamity_risk_import_ai_insight(request):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     req_body = {
-        "model": "llama-3.1-8b-instant",
+        "model": "openai/gpt-oss-20b",
         "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 180,
+        "max_completion_tokens": 180,
         "temperature": 0.3,
     }
     try:
@@ -1640,13 +1646,16 @@ def hazard_index_ai_insight(request):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     body = {
-        "model": "llama-3.1-8b-instant",
+        "model": "openai/gpt-oss-20b",
         "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 512,
+        "max_completion_tokens": 512,
         "temperature": 0.3,
     }
     try:
         r = requests.post(url, json=body, headers=headers, timeout=15)
+        logger.warning("GROQ DEBUG | status=%s", r.status_code)
+        logger.warning("GROQ DEBUG | URL=%s", r.url)
+        logger.warning("GROQ DEBUG | response=%s", r.text[:1000])
         if r.status_code == 429:
             logger.warning("Groq rate limit (429) for hazard insight")
             fallback = _hazard_index_fallback_insights(payload)

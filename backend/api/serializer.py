@@ -785,6 +785,16 @@ class CreateStaffUserSerializer(serializers.ModelSerializer):
         if value_lower not in allowed:
             raise serializers.ValidationError("Citizen cannot be created here.")
         return value_lower
+    
+    def validate_email(self, value):
+        if CustomUser.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("Email already exists.")
+        return value
+    
+    def validate_username(self,value):
+        if CustomUser.objects.filter(username__iexact=value).exists():
+            raise serializers.ValidationError("Username already exists.")
+        return value
 
     def create(self, validated_data):
         phone = validated_data.pop("phone", "---")
